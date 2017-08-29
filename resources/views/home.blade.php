@@ -6,6 +6,6 @@
 </head>
 <body>
 <div id="app"></div>
-<script src="../../dist/build.js"></script>
+<script src="../../app/dist/build.js"></script>
 </body>
 </html>

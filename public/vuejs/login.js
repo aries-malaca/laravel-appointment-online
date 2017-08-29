@@ -20,7 +20,7 @@ var vue_login = new Vue({
                         $btn.button('reset');
                     }
                     else{
-                        window.location.href = '../../home';
+                        window.location.href = '../../';
                         $btn.dataset.loadingText = 'Redirecting...';
                     }
                 },

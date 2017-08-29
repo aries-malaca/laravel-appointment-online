@@ -36,6 +36,7 @@ class CreateUsersTable extends Migration
             $table->integer('is_active');
             $table->string('picture');
             $table->rememberToken();
+            $table->string('access_token');
             $table->timestamps();
         });
     }

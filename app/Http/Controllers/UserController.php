@@ -30,7 +30,10 @@ class UserController extends Controller
         else{
             //attempt to login the system
             if(Auth::attempt( [ 'email' => $request['email'], 'password' => $request['password'] ], $request['remember'])){
-                return response()->json(Auth::user()->email);
+                $user = Auth::user();
+                $token = JWTAuth::fromUser($user);
+                User::where('id',Auth::user()->id)->update(['access_token'=>$token]);
+                return response()->json($token);
             }
             else
                 return response()->json(["result"=>"failed"]);

@@ -28,5 +28,6 @@ new Vue({
     },
     mounted:function(){
         this.getAuthenticatedUser();
+        this.token = $.cookie("login_cookie");
     }
 });

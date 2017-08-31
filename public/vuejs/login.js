@@ -20,6 +20,7 @@ var vue_login = new Vue({
                         $btn.button('reset');
                     }
                     else{
+                        $.cookie("login_cookie", data, { path: '/' });
                         window.location.href = '../../';
                         $btn.dataset.loadingText = 'Redirecting...';
                     }

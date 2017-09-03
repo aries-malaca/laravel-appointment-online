@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller{
     public function index(){
-        $this->data['title'] = 'Dashboard';
-        return view('home', $this->data);
+        return view('home');
     }
 }

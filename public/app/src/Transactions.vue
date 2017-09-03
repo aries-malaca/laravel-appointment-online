@@ -1,5 +1,5 @@
 <template>
-    <div class="dashboard">
+    <div class="transactions">
         <div class="portlet light">
             <div class="portlet-title">
                 <div class="caption">
@@ -28,10 +28,10 @@
 
 <script>
     export default {
-        name: 'Dashboard',
+        name: 'Transactions',
         data: function(){
             return {
-                title: 'Dashboard',
+                title: 'Transactions',
             }
         },
         methods:{

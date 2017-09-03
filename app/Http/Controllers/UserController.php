@@ -4,13 +4,14 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use App\User;
+use App\UserLevel;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Validator;
 
-class UserController extends Controller
-{
+class UserController extends Controller{
     public function login(Request $request){
         header('Access-Control-Allow-Origin: *');
         if($request->input('api')){
@@ -48,22 +49,44 @@ class UserController extends Controller
     }
 
     public function getUser(){
-        try{
-            if (! $user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['user_not_found'], 404);
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            if($api['user']['is_client'] == 1){
+                $api['user']['branch'] = ["branch_id"=>1, "branch_name"=>"Orlando Suites Manila"]; 
             }
+            else{
+                $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
+            }
+            return response()->json(["user"=>$api["user"], "menus"=>$this->getUserMenus($api["user"])], $api["status_code"]);
         }
-        catch(TokenExpiredException $e){
-            return response()->json(['token_expired'], $e->getStatusCode());
-        }
-        catch(TokenInvalidException $e){
-            return response()->json(['token_invalid'], $e->getStatusCode());
-        }
-        catch(JWTException $e){
-            return response()->json(['token_absent'], $e->getStatusCode());
-        }
+           
+        return response()->json($api, $api["status_code"]);
+    }
 
-        // the token is valid and we have found the user via the sub claim
-        return response()->json(compact('user'));
+    public function updateProfile(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+            $user = User::find($api['user']['id']);
+            
+            return response()->json(["result"=>"success"]);
+        }
+           
+        return response()->json($api, $api["status_code"]);
+    }
+
+    public function resendConfirmation(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            return response()->json(["result"=>"success"]);
+        }
+           
+        return response()->json($api, $api["status_code"]);
     }
 }

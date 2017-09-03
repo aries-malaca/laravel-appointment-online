@@ -1,5 +1,5 @@
 <template>
-    <div class="dashboard">
+  <div class="appointments">
         <div class="portlet light">
             <div class="portlet-title">
                 <div class="caption">
@@ -23,24 +23,24 @@
                     non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. </p>
             </div>
         </div>
-    </div>
+  </div>
 </template>
 
 <script>
-    export default {
-        name: 'Dashboard',
-        data: function(){
-            return {
-                title: 'Dashboard',
-            }
-        },
-        methods:{
-            emit: function() {
-                this.$emit('update_title', this.title)
-            }
-        },
-        mounted:function(){
-            this.emit();
+export default {
+    name: 'Appointments',
+    data: function(){
+        return {
+            title: 'Appointments',
         }
+    },
+    methods:{
+        emit: function() {
+            this.$emit('update_title', this.title)
+        }
+    },
+    mounted:function(){
+        this.emit();
     }
+}
 </script>

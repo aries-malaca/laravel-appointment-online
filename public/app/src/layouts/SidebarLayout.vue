@@ -4,6 +4,7 @@
         <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing -->
         <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed -->
         <div class="page-sidebar navbar-collapse collapse">
+            <br/><br/>
             <!-- BEGIN SIDEBAR MENU -->
             <!-- DOC: Apply "page-sidebar-menu-light" class right after "page-sidebar-menu" to enable light sidebar menu style(without borders) -->
             <!-- DOC: Apply "page-sidebar-menu-hover-submenu" class right after "page-sidebar-menu" to enable hoverable(hover vs accordion) sub menu mode -->
@@ -12,18 +13,20 @@
             <!-- DOC: Set data-keep-expand="true" to keep the submenues expanded -->
             <!-- DOC: Set data-auto-speed="200" to adjust the sub menu slide up/down speed -->
             <ul class="page-sidebar-menu" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
-                <li class="nav-item start">
+                <li class="nav-item start" v-bind:class="{ active: (title=='Dashboard') }">
                     <router-link to="/dashboard" class="nav-link">
                         <i class="icon-home"></i>
                         <span class="title">Dashboard</span>
                     </router-link>
                 </li>
-                <li class="nav-item start">
-                    <router-link to="/about" class="nav-link">
-                        <i class="icon-home"></i>
-                        <span class="title">About</span>
+                
+                <li class="nav-item" v-for="menu in menus" v-bind:class="{ active: (title==menu.title) }">
+                    <router-link v-bind:to="'/'+ menu.url" class="nav-link">
+                        <i v-bind:class="menu.icon"></i>
+                        <span class="title">{{  menu.title }}</span>
                     </router-link>
                 </li>
+
                 <li class="nav-item">
                     <a href="/auth/logout" class="nav-link">
                         <i class="fa fa-sign-out"></i>
@@ -39,6 +42,7 @@
 
 <script>
     export default {
-        name:'SidebarComponent'
+        name:'SidebarLayout',
+        props:['menus','title']
     }
 </script>

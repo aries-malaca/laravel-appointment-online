@@ -13,4 +13,11 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/getUser' ,  'UserController@getUser');
+//token validator API
+Route::get('/user/getUser' ,  'UserController@getUser');
+
+//profile update API
+Route::patch('/user/updateProfile' ,  'UserController@updateProfile');
+
+//resend Email Confirmation API
+Route::get('/user/resendConfirmation' ,  'UserController@resendConfirmation');

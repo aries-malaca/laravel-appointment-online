@@ -32,6 +32,7 @@ class CreateUsersTable extends Migration
             $table->datetime('registered_date');
             $table->datetime('last_activity');
             $table->datetime('last_login');
+            $table->integer('is_client');
             $table->integer('is_confirmed');
             $table->integer('is_active');
             $table->string('picture');

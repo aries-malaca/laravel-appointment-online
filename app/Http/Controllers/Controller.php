@@ -41,6 +41,15 @@ class Controller extends BaseController{
     }
 
     public function getUserMenus($user){
-        return Menu::get()->toArray();
+        if($user['is_client'] === 1){
+            return Menu::whereIn('menu_group',['client','both'])
+                        ->orderBy('order')
+                        ->get()->toArray();
+        }
+        else{
+            return Menu::whereIn('menu_group',['admin','both'])
+                        ->orderBy('order')
+                        ->get()->toArray();
+        }
     }
 }

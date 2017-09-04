@@ -20,6 +20,7 @@ class CreateUserLevelsTable extends Migration
             $table->text('permission_data');
             $table->text('level_data');
             $table->integer('is_active');
+            $table->integer('is_restricted');
             $table->timestamps();
         });
     }

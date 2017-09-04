@@ -7,9 +7,8 @@ use App\User;
 use App\UserLevel;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Validator;
+use Hash;
 
 class UserController extends Controller{
     public function login(Request $request){
@@ -36,7 +35,6 @@ class UserController extends Controller{
             if(Auth::attempt( [ 'email' => $request['email'], 'password' => $request['password'] ], $request['remember'])){
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
-                User::where('id',Auth::user()->id)->update(['access_token'=>$token]);
                 return response()->json($token);
             }
             else
@@ -74,11 +72,20 @@ class UserController extends Controller{
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
             }
             $user = User::find($api['user']['id']);
-            
+            $user->first_name = $request->input('first_name');
+            $user->middle_name = $request->input('middle_name');
+            $user->last_name = $request->input('last_name');
+            $user->user_address = $request->input('user_address');
+            $user->user_mobile = $request->input('user_mobile');
+            $user->save();
             return response()->json(["result"=>"success"]);
         }
            
         return response()->json($api, $api["status_code"]);
+    }
+
+    public function getUserLevels(){
+        return response()->json(UserLevel::get()->toArray());
     }
 
     public function resendConfirmation(Request $request){
@@ -87,6 +94,23 @@ class UserController extends Controller{
             return response()->json(["result"=>"success"]);
         }
            
+        return response()->json($api, $api["status_code"]);
+    }
+
+    public function changePassword(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            if(!Hash::check($request->input('old_password'), $api['result']['user']['password'] )){
+                return response()->json(["result"=>"failed","error"=>"Old password Didn't matched"], 400);
+            }
+
+            if(!$request->input('new_password') === $request->input('verify_password')){
+                return response()->json(["error"=>"New passwords Didn't matched", "result"=>"failed"], 400);
+            }
+
+            return response()->json(["result"=>"success"]);
+        }
+
         return response()->json($api, $api["status_code"]);
     }
 }

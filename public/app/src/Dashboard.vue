@@ -1,26 +1,61 @@
 <template>
     <div class="dashboard">
-        <div class="portlet light">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="icon-puzzle font-grey-gallery"></i>
-                    <span class="caption-subject bold font-grey-gallery uppercase"> Tools </span>
-                    <span class="caption-helper">more samples...</span>
+        <div class="row widget-row">
+            <div class="col-md-3">
+                <!-- BEGIN WIDGET THUMB -->
+                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
+                    <h4 class="widget-thumb-heading">Current Balance</h4>
+                    <div class="widget-thumb-wrap">
+                        <i class="widget-thumb-icon bg-green icon-bulb"></i>
+                        <div class="widget-thumb-body">
+                            <span class="widget-thumb-subtitle">USD</span>
+                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="7,644">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="tools">
-                    <a href="" class="collapse" data-original-title="" title=""> </a>
-                    <a href="#portlet-config" data-toggle="modal" class="config" data-original-title="" title=""> </a>
-                    <a href="" class="reload" data-original-title="" title=""> </a>
-                    <a href="" class="fullscreen" data-original-title="" title=""> </a>
-                    <a href="" class="remove" data-original-title="" title=""> </a>
-                </div>
+                <!-- END WIDGET THUMB -->
             </div>
-            <div class="portlet-body">
-                <h4>Heading text goes here...</h4>
-                <p> Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget
-                    lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet
-                    fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. consectetur purus sit amet fermentum. Duis mollis, est
-                    non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. </p>
+            <div class="col-md-3">
+                <!-- BEGIN WIDGET THUMB -->
+                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
+                    <h4 class="widget-thumb-heading">Weekly Sales</h4>
+                    <div class="widget-thumb-wrap">
+                        <i class="widget-thumb-icon bg-red icon-layers"></i>
+                        <div class="widget-thumb-body">
+                            <span class="widget-thumb-subtitle">USD</span>
+                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="1,293">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- END WIDGET THUMB -->
+            </div>
+            <div class="col-md-3">
+                <!-- BEGIN WIDGET THUMB -->
+                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
+                    <h4 class="widget-thumb-heading">Biggest Purchase</h4>
+                    <div class="widget-thumb-wrap">
+                        <i class="widget-thumb-icon bg-purple icon-screen-desktop"></i>
+                        <div class="widget-thumb-body">
+                            <span class="widget-thumb-subtitle">USD</span>
+                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="815">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- END WIDGET THUMB -->
+            </div>
+            <div class="col-md-3">
+                <!-- BEGIN WIDGET THUMB -->
+                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
+                    <h4 class="widget-thumb-heading">Average Monthly</h4>
+                    <div class="widget-thumb-wrap">
+                        <i class="widget-thumb-icon bg-blue icon-bar-chart"></i>
+                        <div class="widget-thumb-body">
+                            <span class="widget-thumb-subtitle">USD</span>
+                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="5,071">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- END WIDGET THUMB -->
             </div>
         </div>
     </div>

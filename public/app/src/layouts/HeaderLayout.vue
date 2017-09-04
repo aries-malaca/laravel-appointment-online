@@ -100,7 +100,7 @@
                             <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
                                 <span class="username username-hide-on-mobile"> {{ user.username }}</span>
                                 <!-- DOC: Do not remove below empty space(&nbsp;) as its purposely used -->
-                                <img v-if="user.picture!==undefined" alt="" class="img-circle" v-bind:src="'/images/users/' + user.picture"/> </a>
+                                <img v-if="user.user_picture!==undefined" alt="" class="img-circle" v-bind:src="'/images/users/' + user.user_picture"/> </a>
                             <ul class="dropdown-menu dropdown-menu-default">
                                 <li>
                                     <router-link to="/profile">

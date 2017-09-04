@@ -21,3 +21,6 @@ Route::patch('/user/updateProfile' ,  'UserController@updateProfile');
 
 //resend Email Confirmation API
 Route::get('/user/resendConfirmation' ,  'UserController@resendConfirmation');
+
+Route::get('/user/getUserLevels' ,  'UserController@getUserLevels');
+Route::get('/branch/getBranches/{flag}' ,  'BranchController@getBranches');

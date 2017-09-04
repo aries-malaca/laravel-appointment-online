@@ -22,22 +22,19 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('middle_name');
             $table->datetime('birth_date');
-            $table->string('mobile');
+            $table->string('user_mobile');
             $table->string('gender');
             $table->integer('level');
-            $table->string('address');
-            $table->text('branch_data');
+            $table->string('user_address');
             $table->text('user_data');
             $table->text('device_data');
-            $table->datetime('registered_date');
             $table->datetime('last_activity');
             $table->datetime('last_login');
             $table->integer('is_client');
             $table->integer('is_confirmed');
             $table->integer('is_active');
-            $table->string('picture');
+            $table->string('user_picture');
             $table->rememberToken();
-            $table->string('access_token');
             $table->timestamps();
         });
     }

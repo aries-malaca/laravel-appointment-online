@@ -25,6 +25,7 @@ class CreateMenusTable extends Migration
             $table->integer('is_active');
             $table->integer('is_parent');
             $table->integer('parent_id');
+            $table->string('menu_group');
         });
     }
 

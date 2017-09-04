@@ -26,6 +26,8 @@
         <!-- END THEME LAYOUT STYLES -->
 
         <link href="../../theme/pages/css/profile.min.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
 
         <link rel="icon" type="image/png" href="favicon.png">
         <title>Laybare Online</title>
@@ -61,8 +63,12 @@
     <script src="../../theme/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
     <!-- END THEME LAYOUT SCRIPTS -->
 
+    <script src="../../theme/global/plugins/morris/morris.min.js" type="text/javascript"></script>
+
+    <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script src="../../app/dist/build.js"></script>
+
 </html>

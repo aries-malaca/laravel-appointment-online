@@ -26,6 +26,7 @@
         <!-- END THEME LAYOUT STYLES -->
 
         <link href="../../theme/pages/css/profile.min.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
 
@@ -64,6 +65,7 @@
     <!-- END THEME LAYOUT SCRIPTS -->
 
     <script src="../../theme/global/plugins/morris/morris.min.js" type="text/javascript"></script>
+    <script src="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
 
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>

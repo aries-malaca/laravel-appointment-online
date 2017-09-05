@@ -17,6 +17,8 @@ class CreateConfigsTable extends Migration
             $table->increments('id');
             $table->string('config_name');
             $table->text('config_value');
+            $table->string('config_type');
+            $table->text('config_options');
         });
     }
 

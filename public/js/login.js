@@ -1,4 +1,4 @@
-var vue_login = new Vue({
+new Vue({
     el:"#login",
     data:{
         email:'',
@@ -30,6 +30,14 @@ var vue_login = new Vue({
                     $btn.button('reset');
                 },
             });
+        },
+        listenKey:function(event){
+            if(event.keyCode == 13){
+                this.login($("#btn-login"));
+            }
         }
+    },
+    mounted:function(){
+        $("#email").focus();
     }
 });

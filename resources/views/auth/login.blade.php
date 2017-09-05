@@ -21,15 +21,15 @@
         <!-- BEGIN LOGIN -->
         <div class="content" id="login">
             <!-- BEGIN LOGIN FORM -->
-            <div>
+            <div @keypress="listenKey($event)">
                 <div class="form-group">
-                    <input class="form-control" type="email" placeholder="Email" v-model="email" /> 
+                    <input class="form-control" id="email" type="email" placeholder="Email" v-model="email" />
                 </div>
                 <div class="form-group">
                     <input class="form-control" type="password" placeholder="Password" v-model="password" /> 
                 </div>
                 <div class="form-actions">
-                    <button @click="login($event)" data-loading-text="Please wait..." class="btn green btn-block uppercase">Login</button>
+                    <button @click="login($event)" id="btn-login" data-loading-text="Please wait..." class="btn green btn-block uppercase">Login</button>
                 </div>
                 <div class="form-actions">
                     <div class="pull-right forget-password-block">

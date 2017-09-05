@@ -18,9 +18,15 @@ Route::get('/user/getUser' ,  'UserController@getUser');
 
 //profile update API
 Route::patch('/user/updateProfile' ,  'UserController@updateProfile');
+Route::patch('/user/changePassword' ,  'UserController@changePassword');
+Route::post('/user/updatePicture' ,  'UserController@updatePicture');
+
+//clients
+Route::get('/clients/searchClients' ,  'ClientController@searchClients');
 
 //resend Email Confirmation API
 Route::get('/user/resendConfirmation' ,  'UserController@resendConfirmation');
 
 Route::get('/user/getUserLevels' ,  'UserController@getUserLevels');
 Route::get('/branch/getBranches/{flag}' ,  'BranchController@getBranches');
+Route::get('test', 'ClientController@test');

@@ -1,139 +1,225 @@
 <template>
-    <div class="row" v-if="user.username !== undefined">
-        <div class="col-md-12">
-            <!-- BEGIN PROFILE SIDEBAR -->
-            <div class="profile-sidebar">
-                <!-- PORTLET MAIN -->
-                <div class="portlet light profile-sidebar-portlet bordered">
-                    <!-- SIDEBAR USERPIC -->
-                    <div class="profile-userpic">
-                        <img v-bind:src="'/images/users/' + user.user_picture" class="img-responsive" alt=""> </div>
-                    <!-- END SIDEBAR USERPIC -->
-                    <!-- SIDEBAR USER TITLE -->
-                    <div class="profile-usertitle">
-                        <div class="profile-usertitle-name"> {{ user.username }}</div>
-                        <div class="profile-usertitle-job" v-if="user.is_client == 0" style="color:#999999"> {{ user.level_name }} </div>
-                        <div class="profile-usertitle-job" v-else v-bind:style="'color:#'+ (user.gender=='male'?'5b9bd1':'ed6b75')"> {{ user.branch.branch_name }} </div>
-                    </div>
-                    <!-- END SIDEBAR USER TITLE -->
-                    <!-- SIDEBAR BUTTONS -->
-                    <div class="profile-userbuttons">
-                        <button type="button" class="btn btn-circle green btn-sm">Update Picture</button>
-                        <button type="button" class="btn btn-circle blue btn-sm">Change Password</button>
-                    </div>
-                    <!-- END SIDEBAR BUTTONS -->
-                    <span><br/></span>     
-                </div>
-                <!-- END PORTLET MAIN -->
-                <!-- PORTLET MAIN -->
-                <div class="portlet light bordered">
-                    <div>
-                        <h4 class="profile-desc-title">Address:</h4>
-                        <span class="profile-desc-text"> {{ user.user_address }} </span>
-                        <div class="margin-top-10 profile-desc-link">
-                            <i class="fa fa-gift"></i>
-                            <span>{{ user.birth_date }}</span>
+    <div class="profile">
+        <div class="row" v-if="user.username !== undefined">
+            <div class="col-md-12">
+                <!-- BEGIN PROFILE SIDEBAR -->
+                <div class="profile-sidebar">
+                    <!-- PORTLET MAIN -->
+                    <div class="portlet light profile-sidebar-portlet bordered">
+                        <!-- SIDEBAR USERPIC -->
+                        <div class="profile-userpic">
+                            <img v-bind:src="'/images/users/' + user.user_picture" class="img-responsive" alt=""> </div>
+                        <!-- END SIDEBAR USERPIC -->
+                        <!-- SIDEBAR USER TITLE -->
+                        <div class="profile-usertitle">
+                            <div class="profile-usertitle-name"> {{ user.username }}</div>
+                            <div class="profile-usertitle-job" v-if="user.is_client == 0" style="color:#999999"> {{ user.level_name }} </div>
+                            <div class="profile-usertitle-job" v-else v-bind:style="'color:#'+ (user.gender=='male'?'5b9bd1':'ed6b75')"> {{ user.branch.label }} </div>
                         </div>
-                        <div class="margin-top-10 profile-desc-link">
-                            <i class="fa fa-phone"></i>
-                            <span>{{ user.user_mobile }}</span>
+                        <!-- END SIDEBAR USER TITLE -->
+                        <!-- SIDEBAR BUTTONS -->
+                        <div class="profile-userbuttons">
+                            <button type="button" data-toggle="modal" href="#update-picture" class="btn btn-circle green btn-sm">Update Picture</button>
+                            <button type="button" data-toggle="modal" href="#change-password" class="btn btn-circle blue btn-sm">Change Password</button>
                         </div>
-                        <div class="margin-top-10 profile-desc-link">
-                            <i class="fa fa-envelope"></i>
-                            <span>{{ user.email }}</span>
-                        </div>
+                        <!-- END SIDEBAR BUTTONS -->
+                        <span><br/></span>
                     </div>
-                </div>
-                <!-- END PORTLET MAIN -->
-            </div>
-            <!-- END BEGIN PROFILE SIDEBAR -->
-            <!-- BEGIN PROFILE CONTENT -->
-            <div class="profile-content">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="portlet light bordered">
-                            <div class="portlet-title tabbable-line">
-                                <div class="caption caption-md">
-                                    <i class="icon-globe theme-font hide"></i>
-                                    <span class="caption-subject font-blue-madison bold uppercase">Profile Account</span>
-                                </div>
+                    <!-- END PORTLET MAIN -->
+                    <!-- PORTLET MAIN -->
+                    <div class="portlet light bordered">
+                        <div>
+                            <h4 class="profile-desc-title">Address:</h4>
+                            <span class="profile-desc-text"> {{ user.user_address }} </span>
+                            <div class="margin-top-10 profile-desc-link">
+                                <i class="fa fa-gift"></i>
+                                <span>{{ user.birth_date }}</span>
                             </div>
-                            <div class="portlet-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="control-label">First Name</label>
-                                            <input type="text" v-model="profile.first_name" placeholder="Ex: Diane" class="form-control" /> 
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="control-label">Middle Name</label>
-                                            <input type="text" v-model="profile.middle_name" placeholder="" class="form-control" /> 
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="control-label">Last Name</label>
-                                            <input type="text" v-model="profile.last_name" placeholder="Ex: Garcia" class="form-control" /> 
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="control-label">Mobile</label>
-                                            <input type="text" v-model="profile.user_mobile" placeholder="Ex: 0909090900" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="form-group">
-                                            <label class="control-label">Address</label>
-                                            <input type="text" v-model="profile.user_address" placeholder="Ex: Makati City" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row" v-if="profile.branch!==undefined">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="control-label">Home Branch</label>
-                                            <select v-model="profile.branch.branch_id" class="form-control">
-                                                <option v-for="branch in branches"  v-bind:value="branch.id"> {{ branch.branch_name }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                    </div>
-                                </div>
-                                <div class="margiv-top-10" v-if="profile.username !== undefined">
-                                    <button @click="updateProfile($event)" data-loading-text="Updating..." class="btn green"> Update Profile </button>
-                                </div>
+                            <div class="margin-top-10 profile-desc-link">
+                                <i class="fa fa-phone"></i>
+                                <span>{{ user.user_mobile }}</span>
+                            </div>
+                            <div class="margin-top-10 profile-desc-link">
+                                <i class="fa fa-envelope"></i>
+                                <span>{{ user.email }}</span>
                             </div>
                         </div>
                     </div>
+                    <!-- END PORTLET MAIN -->
                 </div>
+                <!-- END BEGIN PROFILE SIDEBAR -->
+                <!-- BEGIN PROFILE CONTENT -->
+                <div class="profile-content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="portlet light bordered">
+                                <div class="portlet-title tabbable-line">
+                                    <div class="caption caption-md">
+                                        <i class="icon-globe theme-font hide"></i>
+                                        <span class="caption-subject font-blue-madison bold uppercase">Profile Account</span>
+                                    </div>
+                                </div>
+                                <div class="portlet-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="control-label">First Name</label>
+                                                <input type="text" v-model="profile.first_name" placeholder="Ex: Diane" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Middle Name</label>
+                                                <input type="text" v-model="profile.middle_name" placeholder="" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Last Name</label>
+                                                <input type="text" v-model="profile.last_name" placeholder="Ex: Garcia" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="control-label">Mobile</label>
+                                                <input type="text" v-model="profile.user_mobile" placeholder="Ex: 0909090900" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label class="control-label">Address</label>
+                                                <input type="text" v-model="profile.user_address" placeholder="Ex: Makati City" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" v-if="profile.branch!==undefined">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label">Home Branch</label>
+                                                <v-select v-model="profile.branch" :options="branch_selection"></v-select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                        </div>
+                                    </div>
+                                    <div class="margin-top-10" v-if="profile.username !== undefined">
+                                        <button type="button" @click="updateProfile($event)" data-loading-text="Updating..." class="btn green"> Update Profile </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END PROFILE CONTENT -->
             </div>
-            <!-- END PROFILE CONTENT -->
         </div>
+        <div class="modal fade" id="change-password" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">Change Password</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            Note: Your password must be alphanumeric.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Old Password</label>
+                                    <input type="password" class="form-control" v-model="change_password.old_password" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">New Password</label>
+                                    <input type="password" class="form-control" v-model="change_password.new_password" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Re-enter New Password</label>
+                                    <input type="password" class="form-control" v-model="change_password.verify_password" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" @click="changePassword($event)" data-loading-text="Saving..." class="btn green">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+        <div class="modal fade" id="update-picture" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">Update Picture</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form role="form" class="form" enctype="multipart/form-data" onsubmit="return false;">
+                            <div class="form-group">
+                                <div class="fileinput fileinput-new" data-provides="fileinput">
+                                    <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
+                                        <img src="http://www.placehold.it/200x150/EFEFEF/AAAAAA&amp;text=no+image" alt="" /> </div>
+                                    <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
+                                    <div>
+                                        <span class="btn default btn-file">
+                                            <span class="fileinput-new"> Select image </span>
+                                            <span class="fileinput-exists"> Change </span>
+                                            <input type="file" name="file" id="file">
+                                        </span>
+                                        <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Remove </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button @click="updatePicture()" type="button" class="btn btn-primary">Upload</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
     </div>
 </template>
 
 <script>
+    import vSelect from "vue-select"
     export default {
         name: 'Profile',
         props: ['user'],
+        components:{ vSelect},
         data: function(){
             return {
                 title: 'Profile',
                 profile: {},
                 token:'',
                 user_levels:[],
-                branches:[]
+                branches:[],
+                change_password:{
+                    old_password:'',
+                    new_password:'',
+                    verify_password:''
+                },
             }
         },
         methods:{
             getProfile:function(){
-                var u = this;
+                let u = this;
                 axios.get('/api/user/getUser?token=' + this.token)
                 .then(function (response) {
                     u.profile = response.data.user;
@@ -143,7 +229,7 @@
                 });
             },
             getBranches:function(){
-                var u = this;
+                let u = this;
                 axios.get('/api/branch/getBranches/active')
                     .then(function (response) {
                         u.branches = response.data;
@@ -153,7 +239,7 @@
                     });
             },
             getUserLevels:function(){
-                var u = this;
+                let u = this;
                 axios.get('/api/user/getUserLevels')
                 .then(function (response) {
                     u.user_levels = response.data;
@@ -163,8 +249,8 @@
                 });
             },
             updateProfile:function(event){
-                var u = this;
-                var $btn = $(event.target);
+                let u = this;
+                let $btn = $(event.target);
                 $btn.button('loading');
 
                 axios.patch('/api/user/updateProfile?token=' + this.token, this.profile)
@@ -178,6 +264,45 @@
                     XHRCatcher(error);
                     $btn.button('reset');
                 });
+            },
+            changePassword:function (event) {
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                axios.patch('/api/user/changePassword?token=' + this.token, this.change_password)
+                .then(function (response) {
+                    u.getProfile();
+                    toastr.success("Password successfully changed.");
+                    $btn.button('reset');
+                    u.change_password = { old_password:'', new_password:'', verify_password:''};
+                    $('#change-password').modal('hide');
+                })
+                .catch(function (error) {
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            updatePicture:function(){
+                let u = this;
+                let data = new FormData();
+                data.append('file', $('#file')[0].files[0]);
+
+                $.ajax({
+                    url:'/api/user/updatePicture?token=' + this.token,
+                    type:'POST',
+                    data:data,
+                    processData: false,  // tell jQuery not to process the data
+                    contentType: false,  // tell jQuery not to set contentType
+                    success:function(){
+                        u.getProfile();
+                        u.$emit('update_user');
+                        $('#update-picture').modal('hide');
+                    },
+                    error:function (error) {
+                        toastr.error(error.responseJSON.error);
+                    }
+                });
             }
         },
         mounted:function(){
@@ -186,6 +311,15 @@
             this.getUserLevels();
             this.getBranches();
             this.$emit('update_title', this.title);
+        },
+        computed:{
+            branch_selection:function(){
+                var a = [];
+                this.branches.forEach(function(item, i){
+                    a.push({label:item.branch_name, value:item.id});
+                });
+                return a;
+            }
         }
     }
 </script>

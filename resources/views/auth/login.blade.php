@@ -11,7 +11,17 @@
         <link href="../../theme/pages/css/login-2.min.css" rel="stylesheet" type="text/css" />
     </head>
     <!-- END HEAD -->
-    <body class=" login">
+    <body class="login">
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.10&appId=1899966743571465";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    </script>
+
         <!-- BEGIN LOGO -->
         <div class="logo">
             <a href="../../home">
@@ -19,7 +29,7 @@
         </div>
         <!-- END LOGO -->
         <!-- BEGIN LOGIN -->
-        <div class="content" id="login">
+        <div class="content" id="login" v-if="token === undefined">
             <!-- BEGIN LOGIN FORM -->
             <div @keypress="listenKey($event)">
                 <div class="form-group">
@@ -36,13 +46,13 @@
                         <a href="javascript:;" id="forget-password" class="forget-password">Forgot Password?</a>
                     </div>
                 </div>
-                <div class="login-options">
-                    <h4 class="pull-left">Or login with</h4>
-                    <ul class="social-icons pull-right">
-                        <li>
-                            <a class="social-icon-color facebook" data-original-title="facebook" href="javascript:;"></a>
-                        </li>
-                    </ul>
+                <div class="login-options" style="padding-bottom: 20px; padding-left:18%">
+                    <fb:login-button
+                            scope="public_profile,email"
+                            onlogin="checkLoginState();"
+                            data-button-type="continue_with"
+                            data-size="large">
+                    </fb:login-button>
                 </div>
                 <div class="create-account">
                     <p>
@@ -58,4 +68,6 @@
     <script type="text/javascript" src="../../js/vue.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/login.js"></script>
+
+
 </html>

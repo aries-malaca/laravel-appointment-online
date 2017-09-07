@@ -21,6 +21,7 @@ class CreateProductsTable extends Migration
             $table->float('product_price');
             $table->string('product_picture');
             $table->text('product_data');
+            $table->integer('is_active');
             $table->timestamps();
         });
     }

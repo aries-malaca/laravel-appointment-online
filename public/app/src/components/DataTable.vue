@@ -89,7 +89,7 @@
     import format from 'date-fns/format';
     import compareAsc from 'date-fns/compare_asc';
     export default {
-        name: 'Table',
+        name: 'DataTable',
         props: {
             styleClass: {default: 'table table-bordered'},
             title: '',

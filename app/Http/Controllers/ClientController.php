@@ -1,12 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\User;
 
-class ClientController extends Controller
-{
+class ClientController extends Controller{
     public function searchClients(Request $request){
 
         $keyword = $request->input('keyword');
@@ -22,24 +20,10 @@ class ClientController extends Controller
                     ->orWhere('user_address', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('user_mobile', 'LIKE', '%' . $keyword . '%');
         });
-
         return response()->json($clients->get());
     }
 
-    public function  test()
-    {
-        header('Access-Control-Allow-Origin: *');
-        return response()->json(json_decode("{
-          \"actions\": [
-            {
-              \"id\": 1,
-              \"action_key\": \"admin.action.create\",
-              \"description\": \"\"
-            }
-          ],
-          \"code\": 200,
-          \"msg\": \"OK\",
-          \"total\": 9
-        }"));
+    public function getClient(Request $request){
+        return response()->json(User::where('id', $request->segment(4))->get()->first());
     }
 }

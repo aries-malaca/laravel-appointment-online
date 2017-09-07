@@ -28,7 +28,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="/auth/logout" class="nav-link">
+                    <a @click="logout" class="nav-link">
                         <i class="fa fa-sign-out"></i>
                         <span class="title">Logout</span>
                     </a>
@@ -43,6 +43,11 @@
 <script>
     export default {
         name:'SidebarLayout',
-        props:['menus','title']
+        props:['menus','title'],
+        methods:{
+            logout: function() {
+                this.$emit('logout')
+            }
+        }
     }
 </script>

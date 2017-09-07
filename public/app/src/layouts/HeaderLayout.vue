@@ -109,7 +109,7 @@
                                 </li>
                                 <li class="divider"> </li>
                                 <li>
-                                    <a href="/auth/logout">
+                                    <a @click="logout">
                                         <i class="icon-key"></i> Log Out </a>
                                 </li>
                             </ul>
@@ -134,6 +134,11 @@
 <script>
     export default {
         name:'HeaderLayout',
-        props:['user']
+        props:['user'],
+        methods:{
+            logout: function() {
+                this.$emit('logout')
+            }
+        }
     }
 </script>

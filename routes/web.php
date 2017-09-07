@@ -11,10 +11,8 @@
 |
 */
 
-
-Route::get('/', 'HomeController@index')->middleware('auth');
-Route::get('/home', 'HomeController@index')->middleware('auth');
-
-Route::get('/auth/logout' ,  'UserController@logout');
+Route::get('/', 'HomeController@index');
+Route::get('/home', 'HomeController@index');
 Route::post('/auth/login' ,  'UserController@login');
+
 Auth::routes();

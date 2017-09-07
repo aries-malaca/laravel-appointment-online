@@ -13,44 +13,42 @@
                         <div class="row">
                             <label class="control-label col-md-3">Search</label>
                             <div class="col-md-6">
-                                <input type="text" class="form-control" v-model="search.keyword" />
+                                <input type="text" class="form-control" @keypress="listenKey($event)" v-model="search.keyword" />
                             </div>
                             <div class="col-md-3">
-                                <button type="button" class="btn-success btn btn-md" @click="searchClients($event)">Search</button>
+                                <button type="button" id="btn-search" class="btn-success btn btn-md" @click="searchClients($event)">Search</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="portlet light" v-if="clients.length>0">
-            <div class="portlet-title">
-                <div class="caption">
-                    <i class="icon-puzzle font-grey-gallery"></i>
-                    <span class="caption-subject bold font-grey-gallery uppercase"> Search Results</span>
+                <div v-if="clients.length>0">
+                    <data-table
+                        :columns="clientTable.columns"
+                        :rows="clients"
+                        :paginate="true"
+                        :onClick="clientTable.rowClicked"
+                        styleClass="table table-bordered table-hover table-striped"
+                    />
+
+                    <client-modal :token="token" @refresh_client="refreshClient" :client="display_client"></client-modal>
                 </div>
-                <div class="tools">
-                    <a href="" class="collapse" data-original-title="" title=""> </a>
-                    <a href="" class="reload" data-original-title="" title=""> </a>
-                    <a href="" class="fullscreen" data-original-title="" title=""> </a>
+
+                <div class="alert alert-info" v-if="show_not_found">
+                    <strong>No Client found with your search parameters.</strong>
                 </div>
-            </div>
-            <div class="portlet-body">
-                <vue-good-table
-                    :columns="columns"
-                    :rows="clients"
-                    :paginate="true"
-                    :lineNumbers="true"/>
+
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import VueGoodTable from './components/Table.vue';
+    import DataTable from './components/DataTable.vue';
+    import ClientModal from './modals/ClientModal.vue';
     export default {
         name: 'Clients',
-        components:{ VueGoodTable},
+        components:{ DataTable, ClientModal},
+        props:['token'],
         data: function(){
             return {
                 title: 'Clients',
@@ -58,36 +56,96 @@
                     keyword:''
                 },
                 clients:[],
-                columns: [
-                    {
-                        label: 'First Name',
-                        field: 'first_name',
-                        filterable: true,
-                    },
-                    {
-                        label: 'Middle Name',
-                        field: 'middle_name',
-                        filterable: true,
-                    },
-                ],
+                clientTable:{
+                    columns: [
+                        {
+                            label: 'Name',
+                            field: 'name_html',
+                            filterable: true,
+                            html:true
+                        },
+                        {
+                            label: 'Address',
+                            field: 'user_address',
+                            filterable: true,
+                        },
+                        {
+                            label: 'Mobile',
+                            field: 'user_mobile',
+                            filterable: true,
+                        },
+                        {
+                            label: 'Email',
+                            field: 'email',
+                            filterable: true,
+                        },
+                        {
+                            label: 'Gender',
+                            field: 'gender_html',
+                            filterable: true,
+                            html:true
+                        },
+                    ],
+                    rowClicked: this.viewClient,
+                },
+                display_client:{},
+                show_not_found:false
             }
         },
         methods:{
             emit: function() {
                 this.$emit('update_title', this.title)
             },
-            searchClients:function(){
+            searchClients:function(event){
                 let u = this;
+
                 let $btn = $(event.target);
                 $btn.button('loading');
-                axios.get('/api/clients/searchClients', {params:this.search})
+
+                u.show_not_found = false;
+                u.clients = [];
+
+                axios.get('/api/client/searchClients', {params:this.search})
                 .then(function (response) {
-                    u.clients = response.data;
+                    response.data.forEach(function(item){
+                        item.name_html = '<table><tr><td><img class="img-circle" style="width:50px" src="images/users/'+ item.user_picture +'" /></td><td> &nbsp;' + item.first_name +' ' + item.last_name +'</td></tr></table>';
+                        item.gender_html = '<span class="badge badge-'+ (item.gender=='male'?'success':'warning')+'">'+item.gender.toUpperCase()+'</span>';
+                        item.user_data = JSON.parse(item.user_data);
+                        u.clients.push(item);
+                    });
+                    if(response.data.length==0){
+                        u.show_not_found = true;
+                    }
                     $btn.button('reset');
                 })
                 .catch(function (error) {
-                    XHRCatcher(error);
+                    toastr.error(error.message);
                     $btn.button('reset');
+                });
+            },
+            viewClient:function(data){
+                this.display_client = data;
+                $("#client-modal").modal("show");
+            },
+            listenKey:function(event){
+                if(event.keyCode == 13){
+                    this.searchClients($("#btn-search"));
+                }
+            },
+            refreshClient:function(client){
+                let u = this;
+                axios.get('/api/client/getClient/'+client.id)
+                .then(function (response) {
+                    u.clients.forEach(function (item, i) {
+                        if(item.id == response.data.id){
+                            u.clients[i] = response.data;
+                        }
+                    });
+
+                    u.display_client = response.data;
+                    u.display_client.name_html = '<table><tr><td><img class="img-circle" style="width:50px" src="images/users/'+ response.data.user_picture +'" /></td><td> &nbsp;' + response.data.first_name +' ' + response.data.last_name +'</td></tr></table>';
+                    u.display_client.gender_html  = '<span class="badge badge-'+ (response.data.gender=='male'?'success':'warning')+'">'+response.data.gender.toUpperCase()+'</span>';
+                    u.display_client.user_data = JSON.parse(response.data.user_data);
                 });
             }
         },

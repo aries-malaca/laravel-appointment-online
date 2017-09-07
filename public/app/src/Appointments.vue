@@ -5,7 +5,8 @@
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
-                </div>
+                </div> &nbsp;
+                <button v-if="user.is_client == 1" data-toggle="modal" href="#booking-modal" type="button" class="btn green-meadow">Book Now</button>
                 <div class="tools">
                     <a href="" class="collapse" data-original-title="" title=""> </a>
                     <a href="" class="reload" data-original-title="" title=""> </a>
@@ -16,24 +17,28 @@
 
             </div>
         </div>
+        <booking-modal></booking-modal>
     </div>
 </template>
 
 <script>
-export default {
-    name: 'Appointments',
-    data: function(){
-        return {
-            title: 'Appointments',
+    import BookingModal from "./modals/BookingModal.vue";
+    export default {
+        name: 'Appointments',
+        props: ['user'],
+        components: { BookingModal },
+        data: function(){
+            return {
+                title: 'Appointments',
+            }
+        },
+        methods:{
+            emit: function() {
+                this.$emit('update_title', this.title)
+            }
+        },
+        mounted:function(){
+            this.emit();
         }
-    },
-    methods:{
-        emit: function() {
-            this.$emit('update_title', this.title)
-        }
-    },
-    mounted:function(){
-        this.emit();
     }
-}
 </script>

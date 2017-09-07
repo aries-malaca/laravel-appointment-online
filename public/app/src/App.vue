@@ -1,7 +1,7 @@
 <template>
-    <div id="app">
+    <div id="app" v-if="token!==undefined">
         <!-- BEGIN HEADER -->
-        <header-layout :user="user"></header-layout>
+        <header-layout @logout="logout" :user="user"></header-layout>
         <!-- END HEADER -->
         <!-- BEGIN HEADER & CONTENT DIVIDER -->
         <div class="clearfix"></div>
@@ -9,7 +9,7 @@
         <!-- BEGIN CONTAINER -->
         <div class="page-container">
             <!-- BEGIN SIDEBAR -->
-            <sidebar-layout :menus="menus" :title="title"></sidebar-layout>
+            <sidebar-layout @logout="logout" :menus="menus" :title="title"></sidebar-layout>
             <!-- END SIDEBAR -->
             <!-- BEGIN CONTENT -->
             <div class="page-content-wrapper">
@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user"></router-view>
+                    <router-view @moment="moment" @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token"></router-view>
                     <!-- END PAGE BASE CONTENT -->
                 </div>
                 <!-- END CONTENT BODY -->
@@ -61,7 +61,7 @@
                 user:{},
                 menus:[],
                 title:'Dashboard',
-                token:''
+                token:undefined
             }
         },
         methods:{
@@ -97,10 +97,19 @@
                     XHRCatcher(error);
                     $btn.button('reset');
                 });    
+            },
+            logout:function(){
+                $.removeCookie('login_cookie');
+                window.location.href = '../../login';
             }
         },
         mounted:function(){
             this.token = $.cookie("login_cookie");
+
+            if(this.token === undefined){
+                this.logout();
+            }
+
             this.getAuthenticatedUser();
         }
     }

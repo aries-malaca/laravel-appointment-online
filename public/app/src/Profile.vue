@@ -1,5 +1,5 @@
 <template>
-    <div class="profile">
+    <div>
         <div class="row" v-if="user.username !== undefined">
             <div class="col-md-12">
                 <!-- BEGIN PROFILE SIDEBAR -->
@@ -19,7 +19,7 @@
                         <!-- END SIDEBAR USER TITLE -->
                         <!-- SIDEBAR BUTTONS -->
                         <div class="profile-userbuttons">
-                            <button type="button" data-toggle="modal" href="#update-picture" class="btn btn-circle green btn-sm">Update Picture</button>
+                            <button type="button" data-toggle="modal" href="#upload-picture-modal" class="btn btn-circle green btn-sm">Update Picture</button>
                             <button type="button" data-toggle="modal" href="#change-password" class="btn btn-circle blue btn-sm">Change Password</button>
                         </div>
                         <!-- END SIDEBAR BUTTONS -->
@@ -33,7 +33,7 @@
                             <span class="profile-desc-text"> {{ user.user_address }} </span>
                             <div class="margin-top-10 profile-desc-link">
                                 <i class="fa fa-gift"></i>
-                                <span>{{ user.birth_date }}</span>
+                                <span>{{ moment(user.birth_date,"MMMM D, YYYY") }}</span>
                             </div>
                             <div class="margin-top-10 profile-desc-link">
                                 <i class="fa fa-phone"></i>
@@ -98,7 +98,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="control-label">Home Branch</label>
-                                                <v-select v-model="profile.branch" :options="branch_selection"></v-select>
+                                                <vue-select v-model="profile.branch" :options="branch_selection"></vue-select>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -115,6 +115,7 @@
                 <!-- END PROFILE CONTENT -->
             </div>
         </div>
+
         <div class="modal fade" id="change-password" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -157,52 +158,18 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-
-        <div class="modal fade" id="update-picture" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                        <h4 class="modal-title">Update Picture</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form role="form" class="form" enctype="multipart/form-data" onsubmit="return false;">
-                            <div class="form-group">
-                                <div class="fileinput fileinput-new" data-provides="fileinput">
-                                    <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
-                                        <img src="http://www.placehold.it/200x150/EFEFEF/AAAAAA&amp;text=no+image" alt="" /> </div>
-                                    <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
-                                    <div>
-                                        <span class="btn default btn-file">
-                                            <span class="fileinput-new"> Select image </span>
-                                            <span class="fileinput-exists"> Change </span>
-                                            <input type="file" name="file" id="file">
-                                        </span>
-                                        <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Remove </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                        <button @click="updatePicture()" type="button" class="btn btn-primary">Upload</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-        <!-- /.modal -->
+        <upload-picture-modal :user="user" @update_user="getProfile" :token="token"></upload-picture-modal>
     </div>
 </template>
 
 <script>
-    import vSelect from "vue-select"
+    import VueSelect from "vue-select"
+    import UploadPictureModal from "./modals/UploadPictureModal.vue"
+
     export default {
         name: 'Profile',
         props: ['user'],
-        components:{ vSelect},
+        components:{ VueSelect, UploadPictureModal },
         data: function(){
             return {
                 title: 'Profile',
@@ -223,6 +190,7 @@
                 axios.get('/api/user/getUser?token=' + this.token)
                 .then(function (response) {
                     u.profile = response.data.user;
+                    u.$emit('update_user');
                 })
                 .catch(function (error) {
                     XHRCatcher(error);
@@ -256,7 +224,6 @@
                 axios.patch('/api/user/updateProfile?token=' + this.token, this.profile)
                 .then(function (response) {
                     u.getProfile();
-                    u.$emit('update_user');
                     toastr.success("Profile successfully updated.");
                     $btn.button('reset');
                 })
@@ -283,26 +250,8 @@
                     $btn.button('reset');
                 });
             },
-            updatePicture:function(){
-                let u = this;
-                let data = new FormData();
-                data.append('file', $('#file')[0].files[0]);
-
-                $.ajax({
-                    url:'/api/user/updatePicture?token=' + this.token,
-                    type:'POST',
-                    data:data,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
-                    success:function(){
-                        u.getProfile();
-                        u.$emit('update_user');
-                        $('#update-picture').modal('hide');
-                    },
-                    error:function (error) {
-                        toastr.error(error.responseJSON.error);
-                    }
-                });
+            moment:function (string, format) {
+                return moment(string).format(format);
             }
         },
         mounted:function(){

@@ -2,32 +2,49 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
-use Illuminate\Support\Facades\Auth;
 use App\User;
+use App\Client;
 use App\UserLevel;
 use App\Branch;
 use JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Validator;
 use Hash;
 use ImageOptimizer;
+use Facebook\Facebook;
 
 class UserController extends Controller{
-
     public function login(Request $request){
         //attempt to login the system
-        if(Auth::attempt( [ 'email' => $request['email'], 'password' => $request['password'] ], $request['remember'])){
-            $user = Auth::user();
-            $token = JWTAuth::fromUser($user);
+        $u = User::where('email', $request['email'])->get()->first();
+        if(isset($u['id'])){
+            if(Hash::check($request['password'], $u['password'])){
+                $token = JWTAuth::fromUser(User::find($u['id']));
+                return response()->json($token);
+            }
+            return response()->json(["result"=>"failed"]);
+        }
+
+        if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
             return response()->json($token);
         }
-        else
-            return response()->json(["result"=>"failed"]);
 
-   }
-    public function logout(){
-        Auth::logout();
-        return redirect('login');
+        return response()->json(["result"=>"failed"]);
+    }
+
+    public function selfMigrateClient($email, $password){
+        $client = Client::where('cusemail', $email)
+                            ->where('password', md5($password))
+                            ->get()->first();
+        if(isset($client['cusid'])){
+            //start self migration
+
+
+
+            //end self migration
+            return JWTAuth::fromUser(User::find(5));
+        }
+
+        return false;
     }
 
     public function getUser(){
@@ -114,7 +131,7 @@ class UserController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function updatePicture(Request $request){
+    public function uploadPicture(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             //valid extensions
@@ -126,11 +143,11 @@ class UserController extends Controller{
 
                 //check if extension is valid
                 if (in_array($ext, $valid_ext)) {
-                    $file->move('images/users', $api['user']['id'] . '_' . $file->getClientOriginalName());
-                    $user = User::find($api['user']['id']);
-                    $user->user_picture = $api['user']['id'] . '_' . $file->getClientOriginalName();
+                    $file->move('images/users/', $request->input('user_id') . '_' . $file->getClientOriginalName());
+                    $user = User::find($request->input('user_id'));
+                    $user->user_picture = $request->input('user_id') . '_' . $file->getClientOriginalName();
                     $user->save();
-                    return response()->json(["result"=>"success"], $api["status_code"]);
+                    return response()->json(["result"=>"success"],200);
                 }
                 return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
             }
@@ -138,5 +155,26 @@ class UserController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
+    }
+
+    public function fbLogin(Facebook $fb, Request $request){
+        // call api to retrieve person's public_profile details
+        $fields = "id,name,email,first_name,last_name,middle_name,gender,locale,picture,verified";
+        $fb->setDefaultAccessToken($request->input('accessToken'));
+        $fb_user = $fb->get('/me?fields='.$fields)->getGraphUser()->asArray();
+
+        $user = User::where('user_data','LIKE', '%"facebook_id":"'.$request->input('userID').'"%')->get()->first();
+        if(isset($user['id'])){
+            $token = JWTAuth::fromUser($user);
+            return response()->json($token);
+        }
+
+        $user = User::where('email', $fb_user['email'])->get()->first();
+        if(isset($user['id'])){
+            $token = JWTAuth::fromUser($user);
+            return response()->json($token);
+        }
+
+        return response()->json(['result'=>'failed', "user"=>$fb_user],300);
     }
 }

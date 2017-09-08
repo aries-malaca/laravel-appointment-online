@@ -22,6 +22,7 @@ class CreateServicesTable extends Migration
             $table->integer('service_type_id');
             $table->text('service_data');
             $table->integer('is_active');
+            $table->integer('is_package');
             $table->timestamps();
         });
     }

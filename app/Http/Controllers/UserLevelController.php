@@ -57,5 +57,4 @@ class UserLevelController extends Controller{
 
         return response()->json($api, $api["status_code"]);
     }
-
 }

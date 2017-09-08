@@ -31,7 +31,7 @@
                                                 <ul class="list-unstyled profile-nav">
                                                     <li>
                                                         <img v-bind:src="'images/users/'+client.user_picture" class="img-responsive pic-bordered" alt="" />
-                                                        <a data-toggle="modal" href="#upload-picture-modal" class="profile-edit"> Change </a>
+                                                        <a data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -178,6 +178,10 @@
             },
             moment:function (string, format) {
                 return moment(string).format(format);
+            },
+            showUploadModal:function () {
+                $("#upload-picture-modal").modal("show");
+                $("form")[0].reset();
             }
         }
     }

@@ -119,7 +119,7 @@
                     $btn.button('reset');
                 })
                 .catch(function (error) {
-                    toastr.error(error.message);
+                    XHRCatcher(error);
                     $btn.button('reset');
                 });
             },

@@ -1,7 +1,5 @@
 <?php
-
 use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -12,7 +10,6 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 //token validator API
 Route::get('/user/getUser', 'UserController@getUser');
 Route::get('/user/getUsers', 'UserController@getUsers');
@@ -50,4 +47,24 @@ Route::get('/city/getCities', 'CityController@getCities');
 Route::post('/city/addCity', 'CityController@addCity');
 Route::patch('/city/updateCity', 'CityController@updateCity');
 
+Route::get('/product/getProducts/{flag}', 'ProductController@getProducts');
+Route::get('/product/getProducts', 'ProductController@getProducts');
+Route::post('/product/addProduct', 'ProductController@addProduct');
+Route::patch('/product/updateProduct', 'ProductController@updateProduct');
+Route::post('/product/uploadPicture', 'ProductController@uploadPicture');
 
+Route::get('/service/getServices/{flag}', 'ServiceController@getServices');
+Route::get('/service/getServices', 'ServiceController@getServices');
+Route::post('/service/addService', 'ServiceController@addService');
+Route::patch('/service/updateService', 'ServiceController@updateService');
+Route::post('/service/uploadServicePicture', 'ServiceController@uploadServicePicture');
+
+Route::get('/service/getServiceTypes/{flag}', 'ServiceController@getServiceTypes');
+Route::get('/service/getServiceTypes', 'ServiceController@getServiceTypes');
+Route::post('/service/addServiceType', 'ServiceController@addServiceType');
+Route::patch('/service/updateServiceType', 'ServiceController@updateServiceType');
+
+Route::get('/service/getServicePackages/{flag}', 'ServiceController@getServicePackages');
+Route::get('/service/getServicePackages', 'ServiceController@getServicePackages');
+Route::post('/service/addServicePackage', 'ServiceController@addServicePackage');
+Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');

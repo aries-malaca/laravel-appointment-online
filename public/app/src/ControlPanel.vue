@@ -79,7 +79,7 @@
                                     :paginate="true"
                                     :onClick="cityTable.rowClicked"
                                     styleClass="table table-bordered table-hover table-striped"
-                            />
+                                />
                             </div>
                         </div>
                     </div>
@@ -484,7 +484,6 @@
                     $btn.button('reset');
                 });
             },
-
             updateUser:function(){
                 let u = this;
                 let $btn = $(event.target);

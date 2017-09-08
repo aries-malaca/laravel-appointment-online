@@ -19,6 +19,7 @@ class CreateRegionsTable extends Migration
             $table->string('region_name');
             $table->string('region_picture');
             $table->integer('region_order');
+            $table->timestamps();
         });
     }
 

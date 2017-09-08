@@ -18,6 +18,7 @@ class CreateCitiesTable extends Migration
             $table->integer('region_id');
             $table->string('city_name');
             $table->string('city_order');
+            $table->timestamps();
         });
     }
 

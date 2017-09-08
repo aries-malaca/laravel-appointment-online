@@ -13,9 +13,6 @@
                     <li>
                         <a href="#clusters" data-toggle="tab">Clusters</a>
                     </li>
-                    <li>
-                        <a href="#schedules" data-toggle="tab">Branch Schedules</a>
-                    </li>
                 </ul>
             </div>
             <div class="portlet-body">
@@ -34,19 +31,36 @@
                     <div class="tab-pane" id="clusters">
 
                     </div>
-                    <div class="tab-pane" id="schedules">
-
-                    </div>
                 </div>
             </div>
         </div>
 
         <div class="modal fade" id="add-branch-modal" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog large">
+            <div class="modal-dialog modal-full">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                         <h4 class="modal-title">Add Branch</h4>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+        <div class="modal fade" id="add-cluster-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-full">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">Add Cluster</h4>
                     </div>
                     <div class="modal-body">
 
@@ -72,29 +86,52 @@
             return {
                 title: 'Branches',
                 branches:[],
+                newBranch:{
+                    id:0,
+                    branch_name:'',
+                    branch_code:'',
+                    region_id:0,
+                    city_id:0,
+                    branch_address:'',
+                    branch_main_email:'',
+                    branch_main_contact:'',
+                    branch_main_contact_person:'',
+                    opening_date:moment().format("YYYY-MM-DD"),
+                    rooms_count:1,
+                    social_media_accounts:[],
+                    directions:'',
+                    map_coordinates:[14,14],
+                    map_picture: 'default_map.jpg',
+                    operating_schedules:[],
+                    branch_classification:'franchised',
+                    payment_methods:[],
+                    welcome_message:'',
+                    branch_pictures:[],
+                    cluster_id:0,
+                },
+                newCluster:{
+                    id:0,
+                    cluster_name:'',
+                    cluster_owner:'',
+                    cluster_email:'',
+                    services:[],
+                    products:[]
+                },
                 branchTable:{
                     columns: [
                         {
                             label: 'Branch Name',
                             field: 'branch_name',
                             filterable: true,
-                            html:true
                         },
                         {
                             label: 'Contact No.',
                             field: 'branch_default_contact',
                             filterable: true,
-                            html:true
                         },
                         {
                             label: 'Classification',
                             field: 'branch_classification',
-                            filterable: true,
-                            html:true
-                        },
-                        {
-                            label: 'Region',
-                            field: 'region_name',
                             filterable: true,
                             html:true
                         },
@@ -116,10 +153,18 @@
             },
             showAddBranchModal:function(){
                 $("#add-branch-modal").modal("show");
-            }
+            },
+            getBranches:function(){
+                let u = this;
+                axios.get('/api/branch/getBranches')
+                .then(function (response) {
+                    u.branches = response.data;
+                });
+            },
         },
         mounted:function(){
             this.emit();
+            this.getBranches();
         }
     }
 </script>

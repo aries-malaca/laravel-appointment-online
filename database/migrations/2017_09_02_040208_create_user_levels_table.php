@@ -17,7 +17,6 @@ class CreateUserLevelsTable extends Migration
             $table->increments('id');
             $table->string('level_name');
             $table->string('description');
-            $table->text('permission_data');
             $table->text('level_data');
             $table->integer('is_active');
             $table->integer('is_restricted');

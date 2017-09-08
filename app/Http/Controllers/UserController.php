@@ -63,6 +63,13 @@ class UserController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
+    public function getUsers(){
+        return response()->json(User::leftJoin('user_levels','user_levels.id','=','users.level')
+                                ->where('is_client', 0)
+                                ->select('users.*', 'level_name')
+                                ->get());
+    }
+
     public function updateProfile(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
@@ -94,10 +101,6 @@ class UserController extends Controller{
         }
            
         return response()->json($api, $api["status_code"]);
-    }
-
-    public function getUserLevels(){
-        return response()->json(UserLevel::get()->toArray());
     }
 
     public function resendConfirmation(Request $request){
@@ -176,5 +179,100 @@ class UserController extends Controller{
         }
 
         return response()->json(['result'=>'failed', "user"=>$fb_user],300);
+    }
+
+    public function addUser(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+                'user_mobile' => 'required|max:255',
+                'user_address' => 'required|max:255',
+                'email' => 'required|email|unique:users,email',
+                'gender' => 'required|in:male,female',
+                'level' => 'required|not_in:0'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            if(sizeof($request->input('user_data')['branches']) == 0){
+                return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
+            }
+
+            $branches = array();
+            foreach($request->input('user_data')['branches'] as $value){
+                $branches[] = $value['value'];
+            }
+
+            $user = new User;
+            $user->first_name = $request->input('first_name');
+            $user->middle_name = $request->input('middle_name');
+            $user->last_name = $request->input('last_name');
+            $user->user_mobile = $request->input('user_mobile');
+            $user->email = $request->input('email');
+            $user->password = bcrypt(12345);
+            $user->gender = $request->input('gender');
+            $user->user_address = $request->input('user_address');
+            $user->is_confirmed = 0;
+            $user->is_active = 1;
+            $user->device_data = '{}';
+            $user->birth_date = '2000-01-01';
+            $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
+            $user->level = $request->input('level');
+            $user->is_client = 0;
+            $user->user_data = json_encode(array("branches"=>$branches));
+            $user->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    public function updateUser(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+                'user_mobile' => 'required|max:255',
+                'user_address' => 'required|max:255',
+                'email' => 'required|email|unique:users,email,'.$request->input('id'),
+                'gender' => 'required|in:male,female',
+                'level' => 'required|not_in:0'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            if(sizeof($request->input('user_data')['branches']) == 0){
+                return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
+            }
+
+            $branches = array();
+            foreach($request->input('user_data')['branches'] as $value){
+                $branches[] = $value['value'];
+            }
+
+            $user = User::find($request->input('id'));
+            $user->first_name = $request->input('first_name');
+            $user->middle_name = $request->input('middle_name');
+            $user->last_name = $request->input('last_name');
+            $user->user_mobile = $request->input('user_mobile');
+            $user->email = $request->input('email');
+            $user->gender = $request->input('gender');
+            $user->user_address = $request->input('user_address');
+            $user->level = $request->input('level');
+            $user->user_data = json_encode(array("branches"=>$branches));
+            $user->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json($api, $api["status_code"]);
     }
 }

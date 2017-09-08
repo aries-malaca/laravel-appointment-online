@@ -20,11 +20,12 @@ class CreateBranchesTable extends Migration
             $table->integer('region_id');
             $table->integer('city_id');
             $table->text('branch_address');
-            $table->text('branch_emails');
-            $table->text('branch_contacts');
+            $table->string('branch_main_email');
+            $table->string('branch_main_contact');
+            $table->string('branch_main_contact_person');
             $table->datetime('opening_date');
             $table->integer('rooms_count');
-            $table->string('social_media_accounts');
+            $table->text('social_media_accounts');
             $table->text('directions');
             $table->string('map_coordinates');
             $table->string('map_picture');

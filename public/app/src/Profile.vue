@@ -168,13 +168,12 @@
 
     export default {
         name: 'Profile',
-        props: ['user'],
+        props: ['user','token'],
         components:{ VueSelect, UploadPictureModal },
         data: function(){
             return {
                 title: 'Profile',
                 profile: {},
-                token:'',
                 user_levels:[],
                 branches:[],
                 change_password:{
@@ -255,7 +254,6 @@
             }
         },
         mounted:function(){
-            this.token = $.cookie("login_cookie");
             this.getProfile();
             this.getUserLevels();
             this.getBranches();

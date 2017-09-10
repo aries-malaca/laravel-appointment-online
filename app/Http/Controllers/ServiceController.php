@@ -77,7 +77,7 @@ class ServiceController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function uploadServicePicture(Request $request){
+    public function uploadPicture(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             //valid extensions

@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" id="upload-picture-modal" tabindex="1">
+    <div class="modal fade" :id="modal_id" tabindex="1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
@@ -7,27 +7,18 @@
                     <h4 class="modal-title">Update Picture</h4>
                 </div>
                 <div class="modal-body">
-                    <form role="form" class="form" enctype="multipart/form-data" onsubmit="return false;">
-                        <div class="form-group">
-                            <div class="fileinput fileinput-new" data-provides="fileinput">
-                                <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
-                                    <img v-bind:src="'images/users/' + user.user_picture" alt="" /> </div>
-                                <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
-                                <div>
-                                        <span class="btn default btn-file">
-                                            <span class="fileinput-new"> Select image </span>
-                                            <span class="fileinput-exists"> Change </span>
-                                            <input type="file" name="file" id="file">
-                                        </span>
-                                    <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Remove </a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    <upload-form 
+                        :token="token"
+                        :input_id="input_id"
+                        :form_id="form_id"
+                        :category="category"
+                        :param_url="param_url"
+                        :placeholder_image="placeholder_image"
+                        @emit_host="refreshHost">
+                    </upload-form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                    <button @click="uploadPicture" type="button" class="btn btn-primary">Upload</button>
                 </div>
             </div>
             <!-- /.modal-content -->
@@ -37,31 +28,16 @@
 </template>
 
 <script>
+    import UploadForm from '../components/UploadForm.vue';
     export default {
         name: 'UploadPictureModal',
-        props:['user','token'],
+        props:['token','category','param_url','placeholder_image','modal_id','form_id','input_id'],
+        components: { UploadForm },
         methods:{
-            uploadPicture:function(){
-                let u = this;
-                let data = new FormData();
-                data.append('file', $('#file')[0].files[0]);
-
-                $.ajax({
-                    url:'/api/user/uploadPicture?token='+this.token+'&user_id=' + this.user.id,
-                    type:'POST',
-                    data:data,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
-                    success:function(){
-                        u.$emit('get_profile');
-                        u.$emit('update_user');
-                        $('#upload-picture-modal').modal('hide');
-                    },
-                    error:function (error) {
-                        XHRCatcher(error);
-                    }
-                });
-            },
+            refreshHost:function(){
+                this.$emit('refresh_host');
+                $("#"+this.modal_id).modal("hide");
+            }
         }
     }
 </script>

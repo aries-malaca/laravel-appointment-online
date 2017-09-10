@@ -157,7 +157,16 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-        <upload-picture-modal :user="client" @update_user="refreshClient" :token="token"></upload-picture-modal>
+        <upload-picture-modal 
+            @refresh_host="refreshClient" 
+            :token="token"
+            category="user"
+            :param_url="'user_id='+client.id"
+            :placeholder_image="'images/users/'+client.user_picture"
+            modal_id="upload-picture-modal"
+            form_id="upload-user-picture-form"
+            input_id="file">
+        </upload-picture-modal>
     </div>
 </template>
 
@@ -181,7 +190,10 @@
             },
             showUploadModal:function () {
                 $("#upload-picture-modal").modal("show");
-                $("form")[0].reset();
+                try{
+                    $("form")[0].reset();
+                }
+                catch(error){}
             }
         }
     }

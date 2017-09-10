@@ -82,24 +82,15 @@
                         </div>
                         <div class="row" v-if="newServiceType.id != 0">
                             <div class="col-md-12">
-                                <form role="form" class="form" enctype="multipart/form-data" onsubmit="return false;">
-                                    <div class="form-group">
-                                        <div class="fileinput fileinput-new" data-provides="fileinput">
-                                            <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
-                                                <img v-bind:src="'images/services/' + this.newServiceType.service_picture" alt="" /> </div>
-                                            <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
-                                            <div>
-                                                <span class="btn default btn-file">
-                                                    <span class="fileinput-new"> Select image </span>
-                                                    <span class="fileinput-exists"> Change </span>
-                                                    <input type="file" name="file" id="file2">
-                                                </span>
-                                                <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Remove </a>
-                                                <button @click="uploadServicePicture" type="button" class="btn btn-primary">Upload</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                                <upload-form 
+                                    :token="token"
+                                    input_id="service_file"
+                                    form_id="service_form"
+                                    category="service"
+                                    :param_url="'service_id='+newServiceType.id"
+                                    :placeholder_image="'images/services/'+newServiceType.service_picture"
+                                    @emit_host="getServiceTypes">
+                                </upload-form>
                             </div>
                         </div>
                     </div>
@@ -154,24 +145,15 @@
                         </div>
                         <div class="row" v-if="newProduct.id != 0">
                             <div class="col-md-12">
-                                <form role="form" class="form" enctype="multipart/form-data" onsubmit="return false;">
-                                    <div class="form-group">
-                                        <div class="fileinput fileinput-new" data-provides="fileinput">
-                                            <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
-                                                <img v-bind:src="'images/products/' + this.newProduct.product_picture" alt="" /> </div>
-                                            <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
-                                            <div>
-                                                <span class="btn default btn-file">
-                                                    <span class="fileinput-new"> Select image </span>
-                                                    <span class="fileinput-exists"> Change </span>
-                                                    <input type="file" name="file" id="file">
-                                                </span>
-                                                <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Remove </a>
-                                                <button @click="uploadPicture" type="button" class="btn btn-primary">Upload</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                                <upload-form 
+                                    :token="token"
+                                    input_id="product_file"
+                                    form_id="product_form"
+                                    category="product"
+                                    :param_url="'product_id='+newProduct.id"
+                                    :placeholder_image="'images/products/'+newProduct.product_picture"
+                                    @emit_host="getProducts">
+                                </upload-form>
                             </div>
                         </div>
                     </div>
@@ -191,10 +173,10 @@
 
 <script>
     import DataTable from './components/DataTable.vue';
-
+    import UploadForm from './components/UploadForm.vue';
     export default {
         name: 'Services',
-        components:{ DataTable },
+        components:{ DataTable, UploadForm },
         props: ['token'],
         data: function(){
             return {
@@ -205,57 +187,31 @@
                 servicePackages:[],
                 productTable:{
                     columns: [
-                        {
-                            label: 'Photo', field: 'product_picture_html', html:true
-                        },
-                        {
-                            label: 'Product Code', field: 'product_code', filterable: true
-                        },
-                        {
-                            label: 'Product Name',  field: 'product_name', filterable: true,
-                        },
-                        {
-                            label: 'Description', field: 'product_description', filterable: true,
-                        },
-                        {
-                            label: 'Price', field: 'product_price', filterable: true,
-                        },
+                        { label: 'Photo', field: 'product_picture_html', html:true },
+                        { label: 'Product Code', field: 'product_code', filterable: true },
+                        { label: 'Product Name',  field: 'product_name', filterable: true },
+                        { label: 'Description', field: 'product_description', filterable: true },
+                        { label: 'Price', field: 'product_price', filterable: true }
                     ],
-                    rowClicked: this.viewProduct,
+                    rowClicked: this.viewProduct
                 },
                 serviceTypeTable:{
                     columns: [
-                        {
-                            label: 'Photo', field: 'service_picture_html', html:true
-                        },
-                        {
-                            label: 'Service Name', field: 'service_name', filterable: true
-                        },
-                        {
-                            label: 'Service Description',  field: 'service_description', filterable: true,
-                        }
+                        { label: 'Photo', field: 'service_picture_html', html:true },
+                        { label: 'Service Name', field: 'service_name', filterable: true },
+                        { label: 'Service Description',  field: 'service_description', filterable: true }
                     ],
-                    rowClicked: this.viewServiceType,
+                    rowClicked: this.viewServiceType
                 },
                 serviceTable:{
                     columns: [
-                        {
-                            label: 'Photo', field: 'service_picture_html', html:true
-                        },
-                        {
-                            label: 'Service Code', field: 'service_code', filterable: true
-                        },
-                        {
-                            label: 'Service Name', field: 'service_name', filterable: true
-                        },
-                        {
-                            label: 'Gender', field: 'service_gender_html', filterable: true, html:true
-                        },
-                        {
-                            label: 'Price', field: 'service_price', filterable: true
-                        }
+                        { label: 'Photo', field: 'service_picture_html', html:true },
+                        { label: 'Service Code', field: 'service_code', filterable: true },
+                        { label: 'Service Name', field: 'service_name', filterable: true },
+                        { label: 'Gender', field: 'service_gender_html', filterable: true, html:true },
+                        { label: 'Price', field: 'service_price', filterable: true }
                     ],
-                    rowClicked: this.viewServiceType,
+                    rowClicked: this.viewServiceType
                 },
                 newProduct:{
                     id:0,
@@ -269,7 +225,7 @@
                     id:0,
                     service_name:'',
                     service_description:'',
-                    service_picture:'',
+                    service_picture:''
                 }
             }
         },
@@ -293,6 +249,7 @@
                         item.product_picture_html = '<img src="images/products/'+item.product_picture+'" style="height:40px"/>';
                         u.products.push(item);
                     });
+                    $("#add-product-modal").modal("hide");
                 });
             },
             getServiceTypes:function(){
@@ -304,6 +261,7 @@
                         item.service_picture_html = '<img src="images/services/'+item.service_picture+'" style="height:40px"/>';
                         u.serviceTypes.push(item);
                     });
+                    $("#add-service-type-modal").modal("hide");
                 });
             },
             showAddProductModal:function(){
@@ -317,7 +275,6 @@
                 };
                 $("#add-product-modal").modal("show");
                 try{
-                    $("form")[0].reset();
                     $("form")[1].reset();
                 }
                 catch(error){}
@@ -372,30 +329,9 @@
                 };
                 $("#add-product-modal").modal("show");
                 try{
-                    $("form")[0].reset();
-                    $("form")[1].reset();
+                     $("form")[1].reset();
                 }
                 catch(error){}
-            },
-            uploadPicture:function(){
-                let u = this;
-                let data = new FormData();
-                data.append('file', $('#file')[0].files[0]);
-
-                $.ajax({
-                    url:'/api/product/uploadPicture?token='+this.token+'&product_id=' + this.newProduct.id,
-                    type:'POST',
-                    data:data,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
-                    success:function(){
-                        u.getProducts();
-                        $("#add-product-modal").modal("hide");
-                    },
-                    error:function (error) {
-                        XHRCatcher(error);
-                    }
-                });
             },
             showAddServiceTypeModal:function(){
                 this.newServiceType = {
@@ -407,7 +343,6 @@
                 $("#add-service-type-modal").modal("show");
                 try{
                     $("form")[0].reset();
-                    $("form")[1].reset();
                 }
                 catch(error){}
             },
@@ -451,30 +386,9 @@
                 $("#add-service-type-modal").modal("show");
                 try{
                     $("form")[0].reset();
-                    $("form")[1].reset();
                 }
                 catch(error){}
-            },
-            uploadServicePicture:function(){
-                let u = this;
-                let data = new FormData();
-                data.append('file', $('#file2')[0].files[0]);
-
-                $.ajax({
-                    url:'/api/service/uploadServicePicture?token='+this.token+'&service_id=' + this.newServiceType.id,
-                    type:'POST',
-                    data:data,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
-                    success:function(){
-                        u.getServiceTypes();
-                        $("#add-service-type-modal").modal("hide");
-                    },
-                    error:function (error) {
-                        XHRCatcher(error);
-                    }
-                });
-            },
+            }
         },
         mounted:function(){
             this.emit();

@@ -14,7 +14,8 @@
     "vue-form-wizard": "^0.6.5",
     "vue-good-table": "^1.10.1",
     "vue-good-wizard": "^1.1.2",
-    "vue-router": "2.5.3"
+    "vue-router": "2.5.3",
+    "vue-select": "^2.2.0"
   },
   "devDependencies": {
     "babel-core": "^6.0.0",

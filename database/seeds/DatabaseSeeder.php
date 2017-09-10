@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $faker = Factory::create();
-        foreach (range(1,200000) as $i){
+        foreach (range(1,100) as $i){
             User::create([
                 'birth_date'=>date('Y-m-d'),
                 'last_activity'=>date('Y-m-d'),
@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
                 'is_confirmed'=>1,
                 'user_data'=>'{"home_branch":"1","premiere_status","0"}',
                 'device_data'=>'{}',
-                'user_picture'=>'Registration.png',
+                'user_picture'=>'no photo female.jpg',
                 'is_active'=>1,
                 'user_address'=>'Manila',
                 'email'=> $faker->unique()->safeEmail,

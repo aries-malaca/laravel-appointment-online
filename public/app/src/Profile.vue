@@ -19,7 +19,7 @@
                         <!-- END SIDEBAR USER TITLE -->
                         <!-- SIDEBAR BUTTONS -->
                         <div class="profile-userbuttons">
-                            <button type="button" data-toggle="modal" href="#upload-picture-modal" class="btn btn-circle green btn-sm">Update Picture</button>
+                            <button type="button" @click="showUploadModal" class="btn btn-circle green btn-sm">Update Picture</button>
                             <button type="button" data-toggle="modal" href="#change-password" class="btn btn-circle blue btn-sm">Change Password</button>
                         </div>
                         <!-- END SIDEBAR BUTTONS -->
@@ -158,7 +158,16 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-        <upload-picture-modal :user="user" @update_user="getProfile" :token="token"></upload-picture-modal>
+        <upload-picture-modal v-if="user.username !== undefined"
+            @refresh_host="getProfile" 
+            :token="token"
+            category="user"
+            :param_url="'user_id='+user.id"
+            :placeholder_image="'images/users/'+user.user_picture"
+            modal_id="upload-picture-modal"
+            form_id="upload-user-picture-form"
+            input_id="file">
+        </upload-picture-modal>
     </div>
 </template>
 
@@ -248,6 +257,13 @@
                     XHRCatcher(error);
                     $btn.button('reset');
                 });
+            },
+            showUploadModal:function () {
+                $("#upload-picture-modal").modal("show");
+                try{
+                    $("form")[0].reset();
+                }
+                catch(error){}
             },
             moment:function (string, format) {
                 return moment(string).format(format);

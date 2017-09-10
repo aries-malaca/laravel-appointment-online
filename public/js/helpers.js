@@ -1,6 +1,11 @@
 var XHRCatcher = function(error){
     if(error.status === 500){
-        toastr.error(error.response.statusText);
+        if(error.response !== undefined){
+            toastr.error(error.response.statusText);
+            return false;
+        }
+
+        toastr.error("Internal Server Error: 500");
         return false;
     }
 

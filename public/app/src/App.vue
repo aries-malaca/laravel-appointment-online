@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @moment="moment" @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token"></router-view>
+                    <router-view @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token"></router-view>
                     <!-- END PAGE BASE CONTENT -->
                 </div>
                 <!-- END CONTENT BODY -->
@@ -51,11 +51,7 @@
 
     export default {
         name: 'app',
-        components: {
-            HeaderLayout: HeaderLayout,
-            SidebarLayout: SidebarLayout,
-            ChatLayout: ChatLayout
-        },
+        components: { HeaderLayout, SidebarLayout, ChatLayout },
         data:function(){
             return {
                 user:{},
@@ -67,7 +63,6 @@
         methods:{
             getAuthenticatedUser:function(){
                 var u = this;
-                
                 axios.get('/api/user/getUser?token=' + this.token)
                 .then(function (response) {
                     u.user = response.data.user;
@@ -76,9 +71,6 @@
                 .catch(function (error) {
                     XHRCatcher(error);
                 });
-            },
-            updateTitle: function(title) {
-                this.title = title;
             },
             resendConfirmation:function(event){
                 var $btn = $(event.target);
@@ -101,14 +93,16 @@
             logout:function(){
                 $.removeCookie('login_cookie');
                 window.location.href = '../../login';
+            },
+            updateTitle: function(title) {
+                this.title = title;
+                document.title = 'LAY-BARE Online | '+ title;
             }
         },
         mounted:function(){
             this.token = $.cookie("login_cookie");
-
-            if(this.token === undefined){
+            if(this.token === undefined)
                 this.logout();
-            }
 
             this.getAuthenticatedUser();
         }

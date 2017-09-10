@@ -37,8 +37,7 @@
                             :rows="users"
                             :paginate="true"
                             :onClick="userTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                            styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="user-levels">
                         <button type="button" @click="showAddUserLevelModal" class="btn green-meadow">New User Level</button>
@@ -48,10 +47,8 @@
                             :rows="userLevels"
                             :paginate="true"
                             :onClick="userLevelTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                            styleClass="table table-bordered table-hover table-striped"  />
                     </div>
-
                     <div class="tab-pane" id="permissions">
 
                     </div>
@@ -66,8 +63,7 @@
                                     :rows="regions"
                                     :paginate="true"
                                     :onClick="regionTable.rowClicked"
-                                    styleClass="table table-bordered table-hover table-striped"
-                                />
+                                    styleClass="table table-bordered table-hover table-striped" />
                             </div>
                             <div class="col-md-6">
                                 <button type="button" @click="showAddCityModal" class="btn green-meadow">New City</button>
@@ -78,8 +74,7 @@
                                     :rows="cities"
                                     :paginate="true"
                                     :onClick="cityTable.rowClicked"
-                                    styleClass="table table-bordered table-hover table-striped"
-                                />
+                                    styleClass="table table-bordered table-hover table-striped" />
                             </div>
                         </div>
                     </div>
@@ -308,7 +303,7 @@
                     user_data:{
                         branches:[]
                     },
-                    email:'',
+                    email:''
                 },
                 newUserLevel:{
                     id:0, level_name:'', description:''
@@ -321,51 +316,33 @@
                 },
                 userTable:{
                     columns: [
-                        {
-                            label: 'Name', field: 'name_html', filterable: true, html:true
-                        },
-                        {
-                            label: 'User Level',  field: 'level_name', filterable: true,
-                        },
-                        {
-                            label: 'Mobile', field: 'user_mobile', filterable: true,
-                        },
-                        {
-                            label: 'Email', field: 'email', filterable: true,
-                        },
+                        { label: 'Name', field: 'name_html', filterable: true, html:true},
+                        { label: 'User Level',  field: 'level_name', filterable: true },
+                        { label: 'Mobile', field: 'user_mobile', filterable: true },
+                        { label: 'Email', field: 'email', filterable: true } 
                     ],
-                    rowClicked: this.viewUser,
+                    rowClicked: this.viewUser
                 },
                 userLevelTable:{
                     columns: [
-                        {
-                            label: 'Level', field: 'level_name', filterable: true,
-                        },
-                        {
-                            label: 'Description', field: 'description', filterable: true,
-                        },
+                        { label: 'Level', field: 'level_name', filterable: true },
+                        { label: 'Description', field: 'description', filterable: true }
                     ],
-                    rowClicked: this.viewUserLevel,
+                    rowClicked: this.viewUserLevel
                 },
                 cityTable:{
                     columns: [
-                        {
-                            label: 'City', field: 'city_name', filterable: true,
-                        },
-                        {
-                            label: 'Region', field: 'region_name', filterable: true,
-                        },
+                        { label: 'City', field: 'city_name', filterable: true },
+                        { label: 'Region', field: 'region_name', filterable: true }
                     ],
-                    rowClicked: this.viewCity,
+                    rowClicked: this.viewCity
                 },
                 regionTable:{
                     columns: [
-                        {
-                            label: 'Region', field: 'region_name', filterable: true,
-                        },
+                        { label: 'Region', field: 'region_name', filterable: true }
                     ],
-                    rowClicked: this.viewRegion,
-                },
+                    rowClicked: this.viewRegion
+                }
             }
         },
         methods:{
@@ -412,7 +389,7 @@
                     user_data:{
                         branches:[]
                     },
-                    email:'',
+                    email:''
                 };
                 $("#add-user-modal").modal("show");
             },

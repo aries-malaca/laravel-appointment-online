@@ -57,7 +57,7 @@ Route::get('/service/getServices/{flag}', 'ServiceController@getServices');
 Route::get('/service/getServices', 'ServiceController@getServices');
 Route::post('/service/addService', 'ServiceController@addService');
 Route::patch('/service/updateService', 'ServiceController@updateService');
-Route::post('/service/uploadServicePicture', 'ServiceController@uploadServicePicture');
+Route::post('/service/uploadPicture', 'ServiceController@uploadPicture');
 
 Route::get('/service/getServiceTypes/{flag}', 'ServiceController@getServiceTypes');
 Route::get('/service/getServiceTypes', 'ServiceController@getServiceTypes');

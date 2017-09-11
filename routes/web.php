@@ -13,6 +13,10 @@
 
 Route::get('/', 'HomeController@index');
 Route::get('/home', 'HomeController@index');
+Route::get('/forgot', 'PasswordController@index');
+Route::post('/forgot/requestPassword', 'PasswordController@requestPassword');
+Route::get('/forgot/verify', 'PasswordController@verifyPassword');
+
 Route::post('/auth/login' ,  'UserController@login');
 
 Auth::routes();

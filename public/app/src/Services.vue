@@ -19,27 +19,47 @@
                     <li>
                         <a href="#products" data-toggle="tab">Products</a>
                     </li>
+                    <li>
+                        <a href="#product-groups" data-toggle="tab">Product Groups</a>
+                    </li>
                 </ul>
             </div>
             <div class="portlet-body">
                 <div class="tab-content">
                     <div class="tab-pane active" id="services">
-
+                        <button type="button" @click="showAddServiceModal" class="btn green-meadow">New Service</button>
+                        <br/><br/>
+                        <data-table
+                            title="Services"
+                            :columns="serviceTable.columns"
+                            :rows="services"
+                            :paginate="true"
+                            :onClick="serviceTable.rowClicked"
+                            styleClass="table table-bordered table-hover table-striped"
+                        />
                     </div>
                     <div class="tab-pane" id="service-types">
                         <button type="button" @click="showAddServiceTypeModal" class="btn green-meadow">New Service Type</button>
                         <br/><br/>
                         <data-table
-                                title="Service Types"
-                                :columns="serviceTypeTable.columns"
-                                :rows="serviceTypes"
-                                :paginate="true"
-                                :onClick="serviceTypeTable.rowClicked"
-                                styleClass="table table-bordered table-hover table-striped"
+                            title="Service Types"
+                            :columns="serviceTypeTable.columns"
+                            :rows="serviceTypes"
+                            :paginate="true"
+                            :onClick="serviceTypeTable.rowClicked"
+                            styleClass="table table-bordered table-hover table-striped"
                         />
                     </div>
                     <div class="tab-pane" id="service-packages">
-
+                        <button type="button" @click="showAddServicePackageModal" class="btn green-meadow">New Package</button>
+                        <br/><br/>
+                        <data-table
+                            title="Packages"
+                            :columns="servicePackageTable.columns"
+                            :rows="servicePackages"
+                            :onClick="servicePackageTable.rowClicked"
+                            styleClass="table table-bordered table-hover table-striped"
+                        />
                     </div>
                     <div class="tab-pane" id="products">
                         <button type="button" @click="showAddProductModal" class="btn green-meadow">New Product</button>
@@ -53,9 +73,135 @@
                             styleClass="table table-bordered table-hover table-striped"
                         />
                     </div>
+                    <div class="tab-pane" id="product-groups">
+                        <button type="button" @click="showAddProductGroupModal" class="btn green-meadow">New Product Group</button>
+                        <br/><br/>
+                        <data-table
+                            title="Product Groups"
+                            :columns="productGroupTable.columns"
+                            :rows="productGroups"
+                            :paginate="true"
+                            :onClick="productGroupTable.rowClicked"
+                            styleClass="table table-bordered table-hover table-striped"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="add-service-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title" v-if="newService.id==0">Add Service</h4>
+                        <h4 class="modal-title" v-else>Edit Service</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">ID</label>
+                                    <input type="number" @change="searchItem(newService.search_id,'service')" v-model="newService.search_id" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Code</label>
+                                    <input type="text" v-model="newService.service_code" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Service Gender</label>
+                                    <select v-model="newService.service_gender" class="form-control">
+                                        <option value="female">Female</option>
+                                        <option value="male">Male</option>
+                                        <option value="both">Unisex</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Service Price</label>
+                                    <input type="text" class="form-control" v-model="newService.service_price"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Service Type</label>
+                                    <select v-model="newService.service_type_id" class="form-control">
+                                        <option v-for="type in serviceTypes" v-bind:value="type.id">{{ type.service_name }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Package</label>
+                                    <select v-model="newService.service_package_id" class="form-control">
+                                        <option v-for="package in servicePackages" v-bind:value="package.id">{{ package.package_name }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Service Minutes</label>
+                                    <input type="number" class="form-control" v-model="newService.service_minutes" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" v-if="newService.id==0" @click="addService($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                        <button type="button" v-else @click="updateService($event)" data-loading-text="Updating..." class="btn green">Save</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+        <div class="modal fade" id="add-service-package-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title" v-if="newServicePackage.id==0">Add Package</h4>
+                        <h4 class="modal-title" v-else>Edit Package</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Package Name</label>
+                                    <input type="text" v-model="newServicePackage.package_name" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">Services</label>
+                                <vue-select multiple v-model="newServicePackage.package_services" :options="service_selection">
+                                </vue-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" v-if="newServicePackage.id==0" @click="addServicePackage($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                        <button type="button" v-else @click="updateServicePackage($event)" data-loading-text="Updating..." class="btn green">Save</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
 
         <div class="modal fade" id="add-service-type-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
@@ -116,13 +262,19 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <div class="form-group">
-                                    <label class="control-label">Product Code</label>
+                                    <label class="control-label">ID</label>
+                                    <input type="number" @change="searchItem(newProduct.search_id,'product')" v-model="newProduct.search_id" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Code</label>
                                     <input type="text" v-model="newProduct.product_code" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-7">
                                 <div class="form-group">
                                     <label class="control-label">Product Name</label>
                                     <input type="text" v-model="newProduct.product_name" class="form-control" />
@@ -138,22 +290,11 @@
                             </div>
                             <div class="col-md-8">
                                 <div class="form-group">
-                                    <label class="control-label">Description</label>
-                                    <textarea v-model="newProduct.product_description" class="form-control"></textarea>
+                                    <label class="control-label">Product Group</label>
+                                    <select class="form-control" v-model="newProduct.product_group_id">
+                                        <option v-bind:value="group.id" v-for="group in productGroups">{{ group.product_group_name }}</option>
+                                    </select>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row" v-if="newProduct.id != 0">
-                            <div class="col-md-12">
-                                <upload-form 
-                                    :token="token"
-                                    input_id="product_file"
-                                    form_id="product_form"
-                                    category="product"
-                                    :param_url="'product_id='+newProduct.id"
-                                    :placeholder_image="'images/products/'+newProduct.product_picture"
-                                    @emit_host="getProducts">
-                                </upload-form>
                             </div>
                         </div>
                     </div>
@@ -168,32 +309,101 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
+
+        <div class="modal fade" id="add-product-group-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title" v-if="newProductGroup.id==0">Add Product Group</h4>
+                        <h4 class="modal-title" v-else>Edit Product Group</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label class="control-label">Product Group Name</label>
+                                    <input type="text" v-model="newProductGroup.product_group_name" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label class="control-label">Product Description</label>
+                                    <textarea v-model="newProductGroup.product_description" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" v-if="newProductGroup.id !=0">
+                            <div class="col-md-12">
+                                <upload-form
+                                        :token="token"
+                                        input_id="product_file"
+                                        form_id="product_form"
+                                        category="product"
+                                        :param_url="'product_id='+newProductGroup.id"
+                                        :placeholder_image="'images/products/'+newProductGroup.product_picture"
+                                        @emit_host="getProductGroups">
+                                </upload-form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" v-if="newProductGroup.id==0" @click="addProductGroup($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                        <button type="button" v-else @click="updateProductGroup($event)" data-loading-text="Updating..." class="btn green">Save</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
     </div>
 </template>
 
 <script>
     import DataTable from './components/DataTable.vue';
     import UploadForm from './components/UploadForm.vue';
+    import VueSelect from "vue-select"
+
     export default {
         name: 'Services',
-        components:{ DataTable, UploadForm },
+        components:{ DataTable, UploadForm, VueSelect },
         props: ['token'],
         data: function(){
             return {
                 title: 'Services',
                 products:[],
+                productGroups:[],
                 services:[],
-                serviceTypes:[],
                 servicePackages:[],
+                serviceTypes:[],
                 productTable:{
                     columns: [
-                        { label: 'Photo', field: 'product_picture_html', html:true },
+                        { label: 'ID', field: 'id', filterable:true, type:'number'},
                         { label: 'Product Code', field: 'product_code', filterable: true },
                         { label: 'Product Name',  field: 'product_name', filterable: true },
-                        { label: 'Description', field: 'product_description', filterable: true },
-                        { label: 'Price', field: 'product_price', filterable: true }
+                        { label: 'Price', field: 'product_price', filterable: true, type:'number' }
                     ],
                     rowClicked: this.viewProduct
+                },
+                productGroupTable:{
+                    columns: [
+                        { label: 'Photo', field: 'product_picture_html', html:true, filterable: true },
+                        { label: 'Product Group Name', field: 'product_group_name', filterable: true },
+                        { label: 'Description', field: 'product_description', filterable: true },
+                    ],
+                    rowClicked: this.viewProductGroup
+                },
+                serviceTable:{
+                    columns: [
+                        { label: 'ID', field: 'id', filterable: true, type:'number' },
+                        { label: 'Service Name', field: 'service_name', filterable: true },
+                        { label: 'Gender',  field: 'service_gender_html', filterable: true, html: true },
+                        { label: 'Price',  field: 'service_price', filterable: true, type:'number'},
+                        { label: 'Service Time',  field: 'service_minutes', filterable: true}
+                    ],
+                    rowClicked: this.viewService
                 },
                 serviceTypeTable:{
                     columns: [
@@ -203,29 +413,47 @@
                     ],
                     rowClicked: this.viewServiceType
                 },
-                serviceTable:{
+                servicePackageTable:{
                     columns: [
-                        { label: 'Photo', field: 'service_picture_html', html:true },
-                        { label: 'Service Code', field: 'service_code', filterable: true },
-                        { label: 'Service Name', field: 'service_name', filterable: true },
-                        { label: 'Gender', field: 'service_gender_html', filterable: true, html:true },
-                        { label: 'Price', field: 'service_price', filterable: true }
+                        { label: 'Package Name', field: 'package_name', filterable: true },
+                        { label: 'Services',  field: 'package_services_list', filterable: true }
                     ],
-                    rowClicked: this.viewServiceType
+                    rowClicked: this.viewServicePackage
                 },
                 newProduct:{
                     id:0,
+                    search_id:0,
                     product_code:'',
                     product_name:'',
-                    product_description:'',
                     product_price:0,
-                    product_picture:''
+                    product_group_id:0,
+                },
+                newProductGroup:{
+                    id:0,
+                    product_group_name:'',
+                    product_picture:0,
+                    product_description:'',
                 },
                 newServiceType:{
                     id:0,
                     service_name:'',
                     service_description:'',
                     service_picture:''
+                },
+                newServicePackage:{
+                    id:0,
+                    package_name:'',
+                    package_services:[],
+                },
+                newService:{
+                    id:0,
+                    search_id:0,
+                    service_code:'',
+                    service_gender:'female',
+                    service_minutes:20,
+                    service_price:100,
+                    service_type_id:0,
+                    service_package_id:0
                 }
             }
         },
@@ -240,6 +468,25 @@
                         u[field] = response.data;
                     });
             },
+            getServices:function(){
+                let u = this;
+                axios.get('/api/service/getServices')
+                .then(function (response) {
+                    u.services = [];
+                    response.data.forEach(function(item){
+                        var color = 'info';
+                        if(item.service_gender=='male'){
+                            color = 'success';
+                        }
+                        else if(item.service_gender == 'female'){
+                            color = 'warning';
+                        }
+
+                        item.service_gender_html = '<span class="badge badge-'+ color +'">'+item.service_gender.toUpperCase()+'</span>';
+                        u.services.push(item);
+                    });
+                });
+            },
             getProducts:function(){
                 let u = this;
                 axios.get('/api/product/getProducts')
@@ -249,8 +496,33 @@
                         item.product_picture_html = '<img src="images/products/'+item.product_picture+'" style="height:40px"/>';
                         u.products.push(item);
                     });
-                    $("#add-product-modal").modal("hide");
                 });
+            },
+            getProductGroups:function(){
+                let u = this;
+                axios.get('/api/product/getProductGroups')
+                    .then(function (response) {
+                        u.productGroups = [];
+                        response.data.forEach(function(item){
+                            item.product_picture_html = '<img src="images/products/'+item.product_picture+'" style="height:40px"/>';
+                            u.productGroups.push(item);
+                        });
+                        $("#add-product-group-modal").modal("hide");
+                    });
+            },
+            getServicePackages:function(){
+                let u = this;
+                axios.get('/api/service/getServicePackages')
+                    .then(function (response) {
+                        u.servicePackages = [];
+                        response.data.forEach(function(item){
+                            item.service_picture_html = '<img src="images/services/'+item.service_picture+'" style="height:40px"/>';
+                            item.package_services = JSON.parse(item.package_services);
+                            item.package_services_list = u.getServiceList(item.package_services);
+                            u.servicePackages.push(item);
+                        });
+                        $("#add-service-package-modal").modal("hide");
+                    });
             },
             getServiceTypes:function(){
                 let u = this;
@@ -264,16 +536,47 @@
                     $("#add-service-type-modal").modal("hide");
                 });
             },
+            searchItem:function(id, type){
+                let u = this;
+                axios.get('http://boss.lay-bare.com/laybare-online/API/search_item.php?id='+id+'&type='+type)
+                .then(function (response) {
+                    if(response.data.item_id !== undefined) {
+                        if (type == 'product' && response.data.gender == null) {
+                            if(!confirm("Product has found in BOSS Server. Do you want to auto-ill fields?"))
+                                return false;
+
+                            u.newProduct.product_code = response.data.item_code;
+                            u.newProduct.product_name = response.data.item_name;
+                            u.newProduct.product_description = response.data.description;
+                            u.newProduct.product_price = response.data.price;
+                            return false;
+                        }
+
+                        if (type == 'service' && response.data.gender != null) {
+                            if(!confirm("Service has found in BOSS Server. Do you want to auto-ill fields?"))
+                                return false;
+                        }
+                    }
+                });
+            },
             showAddProductModal:function(){
                 this.newProduct = {
                     id:0,
+                    search_id:0,
                     product_code:'',
                     product_name:'',
-                    product_description:'',
                     product_price:0,
-                    product_picture:''
                 };
                 $("#add-product-modal").modal("show");
+            },
+            showAddProductGroupModal:function(){
+                this.newProductGroup = {
+                    id:0,
+                    product_group_name:'',
+                    product_description:'',
+                    product_picture:''
+                };
+                $("#add-product-group-modal").modal("show");
                 try{
                     $("form")[1].reset();
                 }
@@ -318,18 +621,57 @@
                     $btn.button('reset');
                 });
             },
+            addProductGroup:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/product/addProductGroup?token=' + this.token, 'post', this.newProductGroup, function(){
+                    u.getProductGroups();
+                    toastr.success("Product Group added successfully.");
+                    $btn.button('reset');
+                    $("#add-product-group-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            updateProductGroup:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/product/updateProductGroup?token=' + this.token, 'patch', this.newProductGroup, function(){
+                    u.getProductGroups();
+                    toastr.success("Product Group updated successfully.");
+                    $btn.button('reset');
+                    $("#add-product-group-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
             viewProduct:function(product){
                 this.newProduct = {
                     id:product.id,
+                    search_id:product.id,
                     product_code:product.product_code,
                     product_name:product.product_name,
-                    product_description:product.product_description,
                     product_price:product.product_price,
-                    product_picture:product.product_picture
+                    product_group_id:product.product_group_id
                 };
                 $("#add-product-modal").modal("show");
+            },
+            viewProductGroup:function(product){
+                this.newProductGroup = {
+                    id:product.id,
+                    product_group_name:product.product_group_name,
+                    product_description:product.product_description,
+                    product_picture:product.product_picture,
+                };
+                $("#add-product-group-modal").modal("show");
                 try{
-                     $("form")[1].reset();
+                    $("form")[1].reset();
                 }
                 catch(error){}
             },
@@ -388,12 +730,148 @@
                     $("form")[0].reset();
                 }
                 catch(error){}
+            },
+            showAddServicePackageModal:function(){
+                this.newServicePackage = {
+                    id:0,
+                    package_name:'',
+                    package_services:[],
+                };
+                $("#add-service-package-modal").modal("show");
+            },
+            viewServicePackage:function(service_package){
+                this.newServicePackage = {
+                    id:service_package.id,
+                    package_name:service_package.package_name,
+                    package_services:[]
+                };
+
+                for(var x=0;x<service_package.package_services.length;x++){
+                    this.newServicePackage.package_services.push({
+                        value:service_package.package_services[x],
+                        label: this.getServiceName(service_package.package_services[x])
+                    });
+                }
+                $("#add-service-package-modal").modal("show");
+            },
+            addServicePackage:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/service/addServicePackage?token=' + this.token, 'post', this.newServicePackage, function(){
+                    u.getServicePackages();
+                    toastr.success("Service Package added successfully.");
+                    $btn.button('reset');
+                    $("#add-service-package-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            updateServicePackage:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/service/updateServicePackage?token=' + this.token, 'patch', this.newServicePackage, function(){
+                    u.getServicePackages();
+                    toastr.success("Service Package updated successfully.");
+                    $btn.button('reset');
+                    $("#add-service-package-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            showAddServiceModal:function(){
+                this.newService = {
+                    id:0,
+                    search_id:0,
+                    service_code:'',
+                    service_gender:'female',
+                    service_minutes:20,
+                    service_price:100,
+                    service_type_id:0,
+                    service_package_id:0
+                };
+                $("#add-service-modal").modal("show");
+            },
+            viewService:function(service){
+                this.newService = {
+                    id:service.id,
+                    search_id:0,
+                    service_code:service.service_code,
+                    service_gender:service.service_gender,
+                    service_minutes:service.service_minutes,
+                    service_price:service.service_price,
+                    service_type_id:service.service_type_id,
+                    service_package_id:service.service_package_id
+                };
+                $("#add-service-modal").modal("show");
+            },
+            addService:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+                this.makeRequest('/api/service/addService?token=' + this.token, 'post', this.newService, function(){
+                    u.getServices();
+                    toastr.success("Service added successfully.");
+                    $btn.button('reset');
+                    $("#add-service-modal").modal("hide");
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            updateService:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/service/updateService?token=' + this.token, 'patch', this.newService, function(){
+                    u.getServices();
+                    toastr.success("Service updated successfully.");
+                    $btn.button('reset');
+                    $("#add-service-modal").modal("hide");
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            getServiceName:function(id){
+                for(var x=0;x<this.serviceTypes.length;x++){
+                    if(id == this.serviceTypes[x].id){
+                        return this.serviceTypes[x].service_name;
+                    }
+                }
+                return 'Unknown';
+            },
+            getServiceList:function(l){
+                var list = [];
+                let u = this;
+                l.forEach(function (item) {
+                    list.push(u.getServiceName(item));
+                });
+                return list.toString();
             }
         },
         mounted:function(){
             this.emit();
             this.getProducts();
+            this.getServices();
+            this.getProductGroups();
             this.getServiceTypes();
+            this.getServicePackages();
+        },
+        computed:{
+            service_selection:function(){
+                var a = [];
+                this.serviceTypes.forEach(function(item){
+                    a.push({label:item.service_name, value:item.id});
+                });
+                return a;
+            }
         }
     }
 </script>

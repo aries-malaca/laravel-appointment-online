@@ -51,6 +51,11 @@ Route::get('/product/getProducts/{flag}', 'ProductController@getProducts');
 Route::get('/product/getProducts', 'ProductController@getProducts');
 Route::post('/product/addProduct', 'ProductController@addProduct');
 Route::patch('/product/updateProduct', 'ProductController@updateProduct');
+
+Route::get('/product/getProductGroups/{flag}', 'ProductController@getProductGroups');
+Route::get('/product/getProductGroups', 'ProductController@getProductGroups');
+Route::post('/product/addProductGroup', 'ProductController@addProductGroup');
+Route::patch('/product/updateProductGroup', 'ProductController@updateProductGroup');
 Route::post('/product/uploadPicture', 'ProductController@uploadPicture');
 
 Route::get('/service/getServices/{flag}', 'ServiceController@getServices');

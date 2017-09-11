@@ -60,8 +60,10 @@ function checkLoginState(){
                     $.cookie("login_cookie", data, { path: '/' });
                     window.location.href = '../../';
                 },
-                error:function(error, status, message){
-                    console.log(error);
+                error:function(error){
+                    if(error.status === 300){
+                        toastr.info("It seems your Facebook Account not linked yet to LBO. You may register instead.");
+                    }
                 },
             });
         }

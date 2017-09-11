@@ -17,8 +17,6 @@ class CreateServicePackagesTable extends Migration
             $table->increments('id');
             $table->string('package_name');
             $table->text('package_services');
-            $table->text('package_pricing');
-            $table->string('package_picture');
             $table->integer('is_active');
             $table->timestamps();
         });

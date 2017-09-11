@@ -43,7 +43,7 @@
                 </div>
                 <div class="form-actions">
                     <div class="pull-right forget-password-block">
-                        <a href="javascript:;" id="forget-password" class="forget-password">Forgot Password?</a>
+                        <a href="../../forgot" id="forget-password" class="forget-password">Forgot Password?</a>
                     </div>
                 </div>
                 <div class="login-options" style="padding-bottom: 20px; padding-left:18%">

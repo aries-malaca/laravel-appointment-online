@@ -778,7 +778,16 @@
                         return this.serviceTypes[x].service_name;
                 }
                 return 'Unknown';
-            }
+            },
+            makeRequest:function(url, method, data, success_callback, error_callback){
+                axios({url:url, method:method, data:data})
+                    .then(function () {
+                        success_callback();
+                    })
+                    .catch(function (error) {
+                        error_callback(error);
+                    });
+            },
         },
         mounted:function(){
             this.emit();

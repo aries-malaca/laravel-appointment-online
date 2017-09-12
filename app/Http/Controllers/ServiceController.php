@@ -14,7 +14,7 @@ class ServiceController extends Controller{
             return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                                             ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
                                             ->select('services.*','service_name','package_name','service_description')
-                                            ->where('is_active', 1)->get());
+                                            ->where('services.is_active', 1)->get());
 
         return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                                             ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')

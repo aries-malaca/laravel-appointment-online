@@ -39,6 +39,10 @@ Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 
+Route::get('/branch/getClusters', 'BranchController@getClusters');
+Route::post('/branch/addCluster', 'BranchController@addCluster');
+Route::patch('/branch/updateCluster', 'BranchController@updateCluster');
+
 Route::get('/region/getRegions', 'RegionController@getRegions');
 Route::post('/region/addRegion', 'RegionController@addRegion');
 Route::patch('/region/updateRegion', 'RegionController@updateRegion');

@@ -32,11 +32,9 @@
 
                     <client-modal :token="token" @refresh_client="refreshClient" :client="display_client"></client-modal>
                 </div>
-
                 <div class="alert alert-info" v-if="show_not_found">
                     <strong>No Client found with your search parameters.</strong>
                 </div>
-
             </div>
         </div>
     </div>
@@ -58,33 +56,12 @@
                 clients:[],
                 clientTable:{
                     columns: [
-                        {
-                            label: 'Name',
-                            field: 'name_html',
-                            filterable: true,
-                            html:true
-                        },
-                        {
-                            label: 'Address',
-                            field: 'user_address',
-                            filterable: true,
-                        },
-                        {
-                            label: 'Mobile',
-                            field: 'user_mobile',
-                            filterable: true,
-                        },
-                        {
-                            label: 'Email',
-                            field: 'email',
-                            filterable: true,
-                        },
-                        {
-                            label: 'Gender',
-                            field: 'gender_html',
-                            filterable: true,
-                            html:true
-                        },
+                        { label: 'Photo', field: 'picture_html', html:true },
+                        { label: 'Name', field: 'name', filterable: true, html:true },
+                        { label: 'Address', field: 'user_address', filterable: true },
+                        { label: 'Mobile', field: 'user_mobile', filterable: true },
+                        { label: 'Email', field: 'email', filterable: true },
+                        { label: 'Gender', field: 'gender_html', filterable: true, html:true },
                     ],
                     rowClicked: this.viewClient,
                 },
@@ -108,7 +85,8 @@
                 axios.get('/api/client/searchClients', {params:this.search})
                 .then(function (response) {
                     response.data.forEach(function(item){
-                        item.name_html = '<table><tr><td><img class="img-circle" style="height:35px" src="images/users/'+ item.user_picture +'" /></td><td> &nbsp;' + item.first_name +' ' + item.last_name +'</td></tr></table>';
+                        item.name = item.first_name +' ' + item.last_name;
+                        item.picture_html = '<img class="img-circle" style="height:35px" src="images/users/'+ item.user_picture +'" />';
                         item.gender_html = '<span class="badge badge-'+ (item.gender=='male'?'success':'warning')+'">'+item.gender.toUpperCase()+'</span>';
                         item.user_data = JSON.parse(item.user_data);
                         u.clients.push(item);
@@ -122,10 +100,6 @@
                     XHRCatcher(error);
                     $btn.button('reset');
                 });
-            },
-            viewClient:function(data){
-                this.display_client = data;
-                $("#client-modal").modal("show");
             },
             listenKey:function(event){
                 if(event.keyCode == 13){
@@ -147,6 +121,10 @@
                     u.display_client.gender_html  = '<span class="badge badge-'+ (response.data.gender=='male'?'success':'warning')+'">'+response.data.gender.toUpperCase()+'</span>';
                     u.display_client.user_data = JSON.parse(response.data.user_data);
                 });
+            },
+            viewClient:function(client){
+                this.display_client = client;
+                $("#client-modal").modal("show");
             }
         },
         mounted:function(){

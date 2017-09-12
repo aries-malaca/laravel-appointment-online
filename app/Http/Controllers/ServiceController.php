@@ -13,12 +13,12 @@ class ServiceController extends Controller{
         if($request->segment(4)=='active')
             return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                                             ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                            ->select('services.*','service_name','service_description')
+                                            ->select('services.*','service_name','package_name','service_description')
                                             ->where('is_active', 1)->get());
 
         return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                                             ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                            ->select('services.*','service_name','service_description')
+                                            ->select('services.*','service_name','package_name','service_description')
                                             ->get());
     }
 
@@ -26,7 +26,8 @@ class ServiceController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
-                'service_code' => 'required|max:255|unique:services,service_code',
+                'search_id' => 'required|unique:services,id',
+                'service_code' => 'required|max:255',
                 'service_gender' => 'required|in:male,female,both',
                 'service_price' => 'required|numeric',
                 'service_minutes' => 'required|numeric'
@@ -39,11 +40,16 @@ class ServiceController extends Controller{
                 return response()->json(['result'=>'failed','error'=>"Type and package should not be empty at the same time"], 400);
             }
 
-            if($request->input('service_type_id') == 1 && $request->input('service_package_id') == 1){
+            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0){
                 return response()->json(['result'=>'failed','error'=>"Cannot set package if the service type is selected."], 400);
             }
 
+            if ($request->input('search_id') < 1) {
+                return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
+            }
+
             $service = new Service;
+            $service->id = $request->input('search_id');
             $service->service_code = $request->input('service_code');
             $service->service_price = $request->input('service_price');
             $service->service_gender = $request->input('service_gender');
@@ -63,7 +69,8 @@ class ServiceController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
-                'service_code' => 'required|max:255|unique:services,service_code,'.$request->input('id'),
+                'search_id' => 'required|unique:services,id,'. $request->input('id'),
+                'service_code' => 'required|max:255',
                 'service_gender' => 'required|in:male,female,both',
                 'service_price' => 'required|numeric',
                 'service_minutes' => 'required|numeric'
@@ -76,12 +83,17 @@ class ServiceController extends Controller{
                 return response()->json(['result'=>'failed','error'=>"Type and package should not be empty at the same time"], 400);
             }
 
-            if($request->input('service_type_id') == 1 && $request->input('service_package_id') == 1){
+            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0){
                 return response()->json(['result'=>'failed','error'=>"Cannot set package if the service type is selected."], 400);
+            }
+
+            if ($request->input('search_id') < 1) {
+                return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
             }
 
             $service = Service::find($request->input('id'));
             $service->service_code = $request->input('service_code');
+            $service->id = $request->input('search_id');
             $service->service_price = $request->input('service_price');
             $service->service_gender = $request->input('service_gender');
             $service->service_minutes = $request->input('service_minutes');
@@ -174,9 +186,16 @@ class ServiceController extends Controller{
 
     public function getServicePackages(Request $request){
         if($request->segment(4)=='active')
-            return response()->json(ServicePackage::where('is_active', 1)->get());
+            $data = ServicePackage::where('is_active', 1)->get()->toArray();
+        else{
+            $data = ServicePackage::get()->toArray();
+        }
 
-        return response()->json(ServicePackage::get());
+        foreach ($data as $key=>$value){
+            $data[$key]['service_list'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
+        }
+
+        return response()->json($data);
     }
 
     public function addServicePackage(Request $request){

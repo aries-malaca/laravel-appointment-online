@@ -25,8 +25,9 @@ class ProductController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
-                'product_code' => 'required|max:255|unique:products,product_code',
-                'product_name' => 'required|max:255|unique:products,product_name',
+                'search_id' => 'required|unique:products,id',
+                'product_name' => 'required|max:255',
+                'product_code' => 'required|max:255',
                 'product_group_id' => 'required|not_in:0',
                 'product_price' => 'required|numeric'
 
@@ -35,7 +36,12 @@ class ProductController extends Controller{
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
             }
 
+            if ($request->input('search_id') < 1) {
+                return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
+            }
+
             $product = new Product;
+            $product->id = $request->input('search_id');
             $product->product_code = $request->input('product_code');
             $product->product_name = $request->input('product_name');
             $product->product_price = $request->input('product_price');
@@ -53,8 +59,9 @@ class ProductController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
-                'product_code' => 'required|max:255|unique:products,product_code,'.$request->input('id'),
-                'product_name' => 'required|max:255|unique:products,product_name,'.$request->input('id'),
+                'search_id' => 'required|unique:products,id,'. $request->input('id'),
+                'product_name' => 'required|max:255',
+                'product_code' => 'required|max:255',
                 'product_price' => 'required|numeric',
                 'product_group_id' => 'required|not_in:0'
 
@@ -63,7 +70,12 @@ class ProductController extends Controller{
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
             }
 
+            if ($request->input('search_id') < 1) {
+                return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
+            }
+
             $product = Product::find($request->input('id'));
+            $product->id = $request->input('search_id');
             $product->product_code = $request->input('product_code');
             $product->product_name = $request->input('product_name');
             $product->product_price = $request->input('product_price');

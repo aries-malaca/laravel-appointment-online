@@ -21,6 +21,7 @@ class CreateBranchClustersTable extends Migration
             $table->text('services');
             $table->text('products');
             $table->integer('is_active');
+            $table->text('cluster_data');
             $table->timestamps();
         });
     }

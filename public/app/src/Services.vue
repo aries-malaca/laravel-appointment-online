@@ -29,61 +29,32 @@
                     <div class="tab-pane active" id="services">
                         <button type="button" @click="showAddServiceModal" class="btn green-meadow">New Service</button>
                         <br/><br/>
-                        <data-table
-                            title="Services"
-                            :columns="serviceTable.columns"
-                            :rows="services"
-                            :paginate="true"
-                            :onClick="serviceTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table title="Services" :columns="serviceTable.columns" :rows="services" :onClick="serviceTable.rowClicked"
+                                    :paginate="true" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="service-types">
                         <button type="button" @click="showAddServiceTypeModal" class="btn green-meadow">New Service Type</button>
                         <br/><br/>
-                        <data-table
-                            title="Service Types"
-                            :columns="serviceTypeTable.columns"
-                            :rows="serviceTypes"
-                            :paginate="true"
-                            :onClick="serviceTypeTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table title="Service Types" :columns="serviceTypeTable.columns" :rows="serviceTypes" :paginate="true"
+                                    :onClick="serviceTypeTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="service-packages">
                         <button type="button" @click="showAddServicePackageModal" class="btn green-meadow">New Package</button>
                         <br/><br/>
-                        <data-table
-                            title="Packages"
-                            :columns="servicePackageTable.columns"
-                            :rows="servicePackages"
-                            :onClick="servicePackageTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table title="Packages" :columns="servicePackageTable.columns" :onClick="servicePackageTable.rowClicked"
+                                    :rows="servicePackages"  styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="products">
                         <button type="button" @click="showAddProductModal" class="btn green-meadow">New Product</button>
                         <br/><br/>
-                        <data-table
-                            title="Products"
-                            :columns="productTable.columns"
-                            :rows="products"
-                            :paginate="true"
-                            :onClick="productTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table title="Products" :columns="productTable.columns" :rows="products" :paginate="true"
+                                    :onClick="productTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="product-groups">
                         <button type="button" @click="showAddProductGroupModal" class="btn green-meadow">New Product Group</button>
                         <br/><br/>
-                        <data-table
-                            title="Product Groups"
-                            :columns="productGroupTable.columns"
-                            :rows="productGroups"
-                            :paginate="true"
-                            :onClick="productGroupTable.rowClicked"
-                            styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table title="Product Groups" :columns="productGroupTable.columns" :rows="productGroups" :paginate="true"
+                                    :onClick="productGroupTable.rowClicked" styleClass="table table-bordered table-hover table-striped"/>
                     </div>
                 </div>
             </div>
@@ -124,7 +95,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Service Price</label>
-                                    <input type="text" class="form-control" v-model="newService.service_price"/>
+                                    <input type="number" class="form-control" v-model="newService.service_price"/>
                                 </div>
                             </div>
                         </div>
@@ -133,6 +104,7 @@
                                 <div class="form-group">
                                     <label class="control-label">Service Type</label>
                                     <select v-model="newService.service_type_id" class="form-control">
+                                        <option value="0">N/A</option>
                                         <option v-for="type in serviceTypes" v-bind:value="type.id">{{ type.service_name }}</option>
                                     </select>
                                 </div>
@@ -141,6 +113,7 @@
                                 <div class="form-group">
                                     <label class="control-label">Package</label>
                                     <select v-model="newService.service_package_id" class="form-control">
+                                        <option value="0">N/A</option>
                                         <option v-for="package in servicePackages" v-bind:value="package.id">{{ package.package_name }}</option>
                                     </select>
                                 </div>
@@ -167,7 +140,6 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-
         <div class="modal fade" id="add-service-package-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -202,7 +174,6 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-
         <div class="modal fade" id="add-service-type-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -228,15 +199,8 @@
                         </div>
                         <div class="row" v-if="newServiceType.id != 0">
                             <div class="col-md-12">
-                                <upload-form 
-                                    :token="token"
-                                    input_id="service_file"
-                                    form_id="service_form"
-                                    category="service"
-                                    :param_url="'service_id='+newServiceType.id"
-                                    :placeholder_image="'images/services/'+newServiceType.service_picture"
-                                    @emit_host="getServiceTypes">
-                                </upload-form>
+                                <upload-form :token="token"  input_id="service_file" form_id="service_form" category="service" :param_url="'service_id='+newServiceType.id"
+                                    :placeholder_image="'images/services/'+newServiceType.service_picture" @emit_host="getServiceTypes" />
                             </div>
                         </div>
                     </div>
@@ -335,15 +299,9 @@
                         </div>
                         <div class="row" v-if="newProductGroup.id !=0">
                             <div class="col-md-12">
-                                <upload-form
-                                        :token="token"
-                                        input_id="product_file"
-                                        form_id="product_form"
-                                        category="product"
-                                        :param_url="'product_id='+newProductGroup.id"
-                                        :placeholder_image="'images/products/'+newProductGroup.product_picture"
-                                        @emit_host="getProductGroups">
-                                </upload-form>
+                                <upload-form :token="token" input_id="product_file" form_id="product_form" category="product"
+                                         :placeholder_image="'images/products/'+newProductGroup.product_picture"
+                                         :param_url="'product_id='+newProductGroup.id" @emit_host="getProductGroups" />
                             </div>
                         </div>
                     </div>
@@ -383,7 +341,7 @@
                         { label: 'ID', field: 'id', filterable:true, type:'number'},
                         { label: 'Product Code', field: 'product_code', filterable: true },
                         { label: 'Product Name',  field: 'product_name', filterable: true },
-                        { label: 'Price', field: 'product_price', filterable: true, type:'number' }
+                        { label: 'Price', field: 'product_price', filterable: true, type:'decimal' }
                     ],
                     rowClicked: this.viewProduct
                 },
@@ -398,9 +356,10 @@
                 serviceTable:{
                     columns: [
                         { label: 'ID', field: 'id', filterable: true, type:'number' },
-                        { label: 'Service Name', field: 'service_name', filterable: true },
+                        { label: 'Code', field: 'service_code', filterable: true },
+                        { label: 'Service Name', field: 's_name', filterable: true },
                         { label: 'Gender',  field: 'service_gender_html', filterable: true, html: true },
-                        { label: 'Price',  field: 'service_price', filterable: true, type:'number'},
+                        { label: 'Price',  field: 'service_price', filterable: true, type:'decimal'},
                         { label: 'Service Time',  field: 'service_minutes', filterable: true}
                     ],
                     rowClicked: this.viewService
@@ -416,45 +375,15 @@
                 servicePackageTable:{
                     columns: [
                         { label: 'Package Name', field: 'package_name', filterable: true },
-                        { label: 'Services',  field: 'package_services_list', filterable: true }
+                        { label: 'Services',  field: 'service_list', filterable: true }
                     ],
                     rowClicked: this.viewServicePackage
                 },
-                newProduct:{
-                    id:0,
-                    search_id:0,
-                    product_code:'',
-                    product_name:'',
-                    product_price:0,
-                    product_group_id:0,
-                },
-                newProductGroup:{
-                    id:0,
-                    product_group_name:'',
-                    product_picture:0,
-                    product_description:'',
-                },
-                newServiceType:{
-                    id:0,
-                    service_name:'',
-                    service_description:'',
-                    service_picture:''
-                },
-                newServicePackage:{
-                    id:0,
-                    package_name:'',
-                    package_services:[],
-                },
-                newService:{
-                    id:0,
-                    search_id:0,
-                    service_code:'',
-                    service_gender:'female',
-                    service_minutes:20,
-                    service_price:100,
-                    service_type_id:0,
-                    service_package_id:0
-                }
+                newProduct:{},
+                newProductGroup:{},
+                newServiceType:{},
+                newServicePackage:{ },
+                newService:{ }
             }
         },
         methods:{
@@ -482,6 +411,7 @@
                             color = 'warning';
                         }
 
+                        item.s_name = item.service_name===null?item.package_name:item.service_name;
                         item.service_gender_html = '<span class="badge badge-'+ color +'">'+item.service_gender.toUpperCase()+'</span>';
                         u.services.push(item);
                     });
@@ -518,7 +448,6 @@
                         response.data.forEach(function(item){
                             item.service_picture_html = '<img src="images/services/'+item.service_picture+'" style="height:40px"/>';
                             item.package_services = JSON.parse(item.package_services);
-                            item.package_services_list = u.getServiceList(item.package_services);
                             u.servicePackages.push(item);
                         });
                         $("#add-service-package-modal").modal("hide");
@@ -555,6 +484,10 @@
                         if (type == 'service' && response.data.gender != null) {
                             if(!confirm("Service has found in BOSS Server. Do you want to auto-ill fields?"))
                                 return false;
+
+                            u.newService.service_code = response.data.item_code;
+                            u.newService.service_gender = response.data.gender;
+                            u.newService.service_price = response.data.price;
                         }
                     }
                 });
@@ -800,7 +733,7 @@
             viewService:function(service){
                 this.newService = {
                     id:service.id,
-                    search_id:0,
+                    search_id:service.id,
                     service_code:service.service_code,
                     service_gender:service.service_gender,
                     service_minutes:service.service_minutes,
@@ -841,19 +774,10 @@
             },
             getServiceName:function(id){
                 for(var x=0;x<this.serviceTypes.length;x++){
-                    if(id == this.serviceTypes[x].id){
+                    if(id == this.serviceTypes[x].id)
                         return this.serviceTypes[x].service_name;
-                    }
                 }
                 return 'Unknown';
-            },
-            getServiceList:function(l){
-                var list = [];
-                let u = this;
-                l.forEach(function (item) {
-                    list.push(u.getServiceName(item));
-                });
-                return list.toString();
             }
         },
         mounted:function(){

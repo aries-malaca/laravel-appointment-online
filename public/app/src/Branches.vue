@@ -20,16 +20,14 @@
                     <div class="tab-pane active" id="branches">
                         <button type="button" @click="showAddBranchModal" class="btn green-meadow">New Branch</button>
                         <br/><br/>
-                        <data-table
-                                :columns="branchTable.columns"
-                                :rows="branches"
-                                :paginate="true"
-                                :onClick="branchTable.rowClicked"
-                                styleClass="table table-bordered table-hover table-striped"
-                        />
+                        <data-table :columns="branchTable.columns" :rows="branches" :paginate="true"
+                                :onClick="branchTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="clusters">
-
+                        <button type="button" @click="showAddClusterModal" class="btn green-meadow">New Cluster</button>
+                        <br/><br/>
+                        <data-table :columns="clusterTable.columns" :rows="clusterss" :paginate="true"
+                                    :onClick="clusterTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                 </div>
             </div>
@@ -86,6 +84,7 @@
             return {
                 title: 'Branches',
                 branches:[],
+                clusters:[],
                 newBranch:{
                     id:0,
                     branch_name:'',
@@ -117,32 +116,13 @@
                     services:[],
                     products:[]
                 },
-                branchTable:{
+                clusterTable:{
                     columns: [
-                        {
-                            label: 'Branch Name',
-                            field: 'branch_name',
-                            filterable: true,
-                        },
-                        {
-                            label: 'Contact No.',
-                            field: 'branch_default_contact',
-                            filterable: true,
-                        },
-                        {
-                            label: 'Classification',
-                            field: 'branch_classification',
-                            filterable: true,
-                            html:true
-                        },
-                        {
-                            label: 'Status',
-                            field: 'active_status',
-                            filterable: true,
-                            html:true
-                        },
+                        { label: 'Cluster Name', field: 'cluster_name', filterable: true },
+                        { label: 'Cluster Owner', field: 'cluster_owner', filterable: true },
+                        { label: 'Email', field: 'cluster_email', filterable: true }
                     ],
-                    rowClicked: this.viewBranch,
+                    rowClicked: this.viewCluster,
                 },
                 display_branch:{},
             }
@@ -161,6 +141,12 @@
                     u.branches = response.data;
                 });
             },
+            viewBranch:function(){
+
+            },
+            viewCluster:function(){
+
+            }
         },
         mounted:function(){
             this.emit();

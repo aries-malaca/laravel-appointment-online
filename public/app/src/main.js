@@ -5,7 +5,8 @@ import router from './router';
 Vue.config.productionTip = false;
 Vue.config.debug = true;
 Vue.config.devtools = true;
-var main = new Vue({
+
+new Vue({
     el: '#app',
     router,
     template: '<App/>',

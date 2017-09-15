@@ -145,9 +145,10 @@ class ProductController extends Controller{
 
                 //check if extension is valid
                 if (in_array($ext, $valid_ext)) {
-                    $file->move('images/products/', $request->input('product_id') . '_' . $file->getClientOriginalName());
+                    $timestamp = time().'.'.$ext ;
+                    $file->move('images/products/', $request->input('product_id') . '_' . $timestamp);
                     $product = ProductGroup::find($request->input('product_id'));
-                    $product->product_picture = $request->input('product_id') . '_' . $file->getClientOriginalName();
+                    $product->product_picture = $request->input('product_id') . '_' . $timestamp;
                     $product->save();
                     return response()->json(["result"=>"success"],200);
                 }

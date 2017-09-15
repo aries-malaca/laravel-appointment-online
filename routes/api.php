@@ -38,6 +38,9 @@ Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
 
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
+Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
+Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
+Route::patch('/branch/removePicture', 'BranchController@removePicture');
 
 Route::get('/branch/getClusters', 'BranchController@getClusters');
 Route::post('/branch/addCluster', 'BranchController@addCluster');

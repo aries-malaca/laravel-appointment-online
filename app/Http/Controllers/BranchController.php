@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Branch;
 use App\BranchCluster;
 use Validator;
+use Storage;
 
 class BranchController extends Controller{
     public function getBranches(Request $request){
@@ -12,12 +13,15 @@ class BranchController extends Controller{
             return response()->json(Branch::where('is_active', 1)
                                             ->select('id','branch_name')
                                             ->get());
-
         return response()->json(Branch::get());
     }
 
     public function getClusters(){
         return response()->json(BranchCluster::get());
+    }
+
+    public function getBranch(Request $request){
+        return response()->json(Branch::find($request->segment(4)));
     }
 
     public function addCluster(Request $request){
@@ -89,6 +93,53 @@ class BranchController extends Controller{
             $cluster->save();
 
             return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    public function uploadPicture(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            //valid extensions
+            $valid_ext = array('jpeg', 'gif', 'png', 'jpg');
+            //check if the file is submitted
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $ext = $file->getClientOriginalExtension();
+
+                //check if extension is valid
+                if (in_array($ext, $valid_ext)) {
+                    $timestamp = time().'.'.$ext ;
+                    $file->move('images/branches/', $request->input('branch_id') . '_' . $timestamp);
+                    $branch = Branch::find($request->input('branch_id'));
+                    $pics = json_decode($branch->branch_pictures,true);
+                    $pics[$request->input('key')] = $request->input('branch_id') . '_' . $timestamp;
+                    $branch->branch_pictures = json_encode($pics);
+                    $branch->save();
+
+                    return response()->json(["result"=>"success"],200);
+                }
+                return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
+            }
+            return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function removePicture(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+
+            $branch = Branch::find($request->input('branch_id'));
+            $pics = json_decode($branch->branch_pictures,true);
+            $file_name = $pics[$request->input('key')];
+            unset($pics[$request->input('key')]);
+            $branch->branch_pictures = json_encode($pics);
+            Storage::disk('public')->delete('images/branches/'.$file_name);
+
+            $branch->save();
+            return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
     }

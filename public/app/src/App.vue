@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token"></router-view>
+                    <router-view @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token" :configs="configs"></router-view>
                     <!-- END PAGE BASE CONTENT -->
                 </div>
                 <!-- END CONTENT BODY -->
@@ -56,6 +56,7 @@
             return {
                 user:{},
                 menus:[],
+                configs:[],
                 title:'Dashboard',
                 token:undefined
             }
@@ -67,6 +68,7 @@
                 .then(function (response) {
                     u.user = response.data.user;
                     u.menus = response.data.menus;
+                    u.configs = response.data.configs;
                 })
                 .catch(function (error) {
                     XHRCatcher(error);
@@ -103,8 +105,6 @@
             this.token = $.cookie("login_cookie");
             if(this.token === undefined)
                 this.logout();
-
-            this.getAuthenticatedUser();
         }
     }
 </script>

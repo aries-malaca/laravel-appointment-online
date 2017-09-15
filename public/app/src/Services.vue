@@ -327,7 +327,7 @@
     export default {
         name: 'Services',
         components:{ DataTable, UploadForm, VueSelect },
-        props: ['token'],
+        props: ['token','configs'],
         data: function(){
             return {
                 title: 'Services',
@@ -387,16 +387,6 @@
             }
         },
         methods:{
-            emit: function() {
-                this.$emit('update_title', this.title)
-            },
-            getData:function(url, field){
-                let u = this;
-                axios.get(url)
-                    .then(function (response) {
-                        u[field] = response.data;
-                    });
-            },
             getServices:function(){
                 let u = this;
                 axios.get('/api/service/getServices')
@@ -404,12 +394,10 @@
                     u.services = [];
                     response.data.forEach(function(item){
                         var color = 'info';
-                        if(item.service_gender=='male'){
+                        if(item.service_gender=='male')
                             color = 'success';
-                        }
-                        else if(item.service_gender == 'female'){
+                        else if(item.service_gender == 'female')
                             color = 'warning';
-                        }
 
                         item.s_name = item.service_name===null?item.package_name:item.service_name;
                         item.service_gender_html = '<span class="badge badge-'+ color +'">'+item.service_gender.toUpperCase()+'</span>';
@@ -467,7 +455,7 @@
             },
             searchItem:function(id, type){
                 let u = this;
-                axios.get('http://boss.lay-bare.com/laybare-online/API/search_item.php?id='+id+'&type='+type)
+                axios.get( this.getConfig('Search Item API') +id+'&type='+type)
                 .then(function (response) {
                     if(response.data.item_id !== undefined) {
                         if (type == 'product' && response.data.gender == null) {
@@ -788,9 +776,17 @@
                         error_callback(error);
                     });
             },
+            getConfig:function(config_name){
+                for(var x=0;x<this.configs.length;x++){
+                    if(config_name == this.configs[x].config_name)
+                        return this.configs[x].config_value;
+                }
+                toastr.error("Invalid configuration for " + config_name);
+            }
         },
         mounted:function(){
-            this.emit();
+            this.$emit('update_title', this.title);
+            this.$emit('update_user');
             this.getProducts();
             this.getServices();
             this.getProductGroups();

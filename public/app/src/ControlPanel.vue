@@ -149,7 +149,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" v-if="newUser.user_data!==undefined">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">Branch Assignment</label>
@@ -290,30 +290,10 @@
                 userLevels:[],
                 cities:[],
                 regions:[],
-                newUser:{
-                    id:0,
-                    first_name:'',
-                    middle_name:'',
-                    last_name:'',
-                    user_address:'',
-                    birth_date: moment().format("YYYY-MM-DD"),
-                    user_mobile:'',
-                    gender:'female',
-                    level:0,
-                    user_data:{
-                        branches:[]
-                    },
-                    email:''
-                },
-                newUserLevel:{
-                    id:0, level_name:'', description:''
-                },
-                newRegion:{
-                    id:0, region_name:''
-                },
-                newCity:{
-                    id:0, region_id:0, city_name:''
-                },
+                newUser:{},
+                newUserLevel:{},
+                newRegion:{},
+                newCity:{},
                 userTable:{
                     columns: [
                         { label: 'Name', field: 'name_html', filterable: true, html:true},
@@ -338,17 +318,12 @@
                     rowClicked: this.viewCity
                 },
                 regionTable:{
-                    columns: [
-                        { label: 'Region', field: 'region_name', filterable: true }
-                    ],
+                    columns: [ { label: 'Region', field: 'region_name', filterable: true } ],
                     rowClicked: this.viewRegion
                 }
             }
         },
         methods:{
-            emit: function() {
-                this.$emit('update_title', this.title)
-            },
             getData:function(url, field){
                 let u = this;
                 axios.get(url)
@@ -368,7 +343,6 @@
             getUserLevels:function(){
                 this.getData('/api/user/getUserLevels', 'userLevels');
             },
-
             getBranchName:function(id){
                 for(var x=0;x<this.branches.length;x++){
                     if(id == this.branches[x].id)
@@ -607,7 +581,8 @@
             }
         },
         mounted:function(){
-            this.emit();
+            this.$emit('update_title', this.title);
+            this.$emit('update_user');
             this.getUsers();
             this.getUserLevels();
             this.getBranches();

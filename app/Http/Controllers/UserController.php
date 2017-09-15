@@ -6,6 +6,7 @@ use App\User;
 use App\Client;
 use App\UserLevel;
 use App\Branch;
+use App\Config;
 use JWTAuth;
 use Validator;
 use Hash;
@@ -38,8 +39,6 @@ class UserController extends Controller{
         if(isset($client['cusid'])){
             //start self migration
 
-
-
             //end self migration
             return JWTAuth::fromUser(User::find(5));
         }
@@ -57,7 +56,11 @@ class UserController extends Controller{
             else{
                 $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
             }
-            return response()->json(["user"=>$api["user"], "menus"=>$this->getUserMenus($api["user"])], $api["status_code"]);
+            return response()->json(["user"=>$api["user"],
+                                     "menus"=>$this->getUserMenus($api["user"]),
+                                     "configs"=> Config::get()->toArray()
+                                    ],
+                            $api["status_code"]);
         }
            
         return response()->json($api, $api["status_code"]);
@@ -146,9 +149,10 @@ class UserController extends Controller{
 
                 //check if extension is valid
                 if (in_array($ext, $valid_ext)) {
-                    $file->move('images/users/', $request->input('user_id') . '_' . $file->getClientOriginalName());
+                    $timestamp = time().'.'.$ext ;
+                    $file->move('images/users/', $request->input('user_id') . '_' . $timestamp);
                     $user = User::find($request->input('user_id'));
-                    $user->user_picture = $request->input('user_id') . '_' . $file->getClientOriginalName();
+                    $user->user_picture = $request->input('user_id') . '_' . $timestamp;
                     $user->save();
                     return response()->json(["result"=>"success"],200);
                 }

@@ -6,6 +6,7 @@ use App\Service;
 use App\ServiceType;
 use App\ServicePackage;
 use Validator;
+use Storage;
 
 class ServiceController extends Controller{
 
@@ -169,9 +170,10 @@ class ServiceController extends Controller{
 
                 //check if extension is valid
                 if (in_array($ext, $valid_ext)) {
-                    $file->move('images/services/', $request->input('service_id') . '_' . $file->getClientOriginalName());
+                    $timestamp = time().'.'.$ext ;
+                    $file->move('images/services/', $request->input('service_id') . '_' . $timestamp);
                     $service = ServiceType::find($request->input('service_id'));
-                    $service->service_picture = $request->input('service_id') . '_' . $file->getClientOriginalName();
+                    $service->service_picture = $request->input('service_id') . '_' . $timestamp;
                     $service->save();
                     return response()->json(["result"=>"success"],200);
                 }

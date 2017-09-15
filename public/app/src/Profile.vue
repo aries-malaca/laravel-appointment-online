@@ -270,10 +270,10 @@
             }
         },
         mounted:function(){
+            this.$emit('update_title', this.title);
             this.getProfile();
             this.getUserLevels();
             this.getBranches();
-            this.$emit('update_title', this.title);
         },
         computed:{
             branch_selection:function(){

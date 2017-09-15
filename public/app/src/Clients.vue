@@ -1,6 +1,6 @@
 <template>
     <div class="clients">
-        <div class="portlet light">
+        <div class="portlet light" v-show="view=='list'">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -37,19 +37,25 @@
                 </div>
             </div>
         </div>
+
+        <client-profile @back="view='list',view_id=0" :show="view=='single'" :with_back="true"
+                        :token="token" @refresh_client="refreshClient" :configs="configs" :id="view_id" />
     </div>
 </template>
 
 <script>
     import DataTable from './components/DataTable.vue';
-    import ClientModal from './modals/ClientModal.vue';
+    import ClientProfile from './profiles/ClientProfile.vue';
+
     export default {
         name: 'Clients',
-        components:{ DataTable, ClientModal},
+        components:{ DataTable, ClientProfile},
         props:['token'],
         data: function(){
             return {
                 title: 'Clients',
+                view:'list',
+                view_id:0,
                 search:{
                     keyword:''
                 },
@@ -65,23 +71,17 @@
                     ],
                     rowClicked: this.viewClient,
                 },
-                display_client:{},
                 show_not_found:false
             }
         },
         methods:{
-            emit: function() {
-                this.$emit('update_title', this.title)
-            },
             searchClients:function(event){
                 let u = this;
-
                 let $btn = $(event.target);
                 $btn.button('loading');
 
                 u.show_not_found = false;
                 u.clients = [];
-
                 axios.get('/api/client/searchClients', {params:this.search})
                 .then(function (response) {
                     response.data.forEach(function(item){
@@ -106,29 +106,15 @@
                     this.searchClients($("#btn-search"));
                 }
             },
-            refreshClient:function(client){
-                let u = this;
-                axios.get('/api/client/getClient/'+client.id)
-                .then(function (response) {
-                    u.clients.forEach(function (item, i) {
-                        if(item.id == response.data.id){
-                            u.clients[i] = response.data;
-                        }
-                    });
-
-                    u.display_client = response.data;
-                    u.display_client.name_html = '<table><tr><td><img class="img-circle" style="width:50px" src="images/users/'+ response.data.user_picture +'" /></td><td> &nbsp;' + response.data.first_name +' ' + response.data.last_name +'</td></tr></table>';
-                    u.display_client.gender_html  = '<span class="badge badge-'+ (response.data.gender=='male'?'success':'warning')+'">'+response.data.gender.toUpperCase()+'</span>';
-                    u.display_client.user_data = JSON.parse(response.data.user_data);
-                });
-            },
+            refreshClient:function(){},
             viewClient:function(client){
-                this.display_client = client;
-                $("#client-modal").modal("show");
+                this.view_id = client.id;
+                this.view ='single';
             }
         },
         mounted:function(){
-            this.emit();
+            this.$emit('update_title', this.title);
+            this.$emit('update_user');
         }
     }
 </script>

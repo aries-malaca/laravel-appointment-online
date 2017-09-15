@@ -25,7 +25,7 @@
         <link href="../../theme/layouts/layout4/css/custom.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
 
-
+        <link href="../../theme/global/plugins/socicon/socicon.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
@@ -37,9 +37,9 @@
     </head>
     <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo page-md page-footer-fixed page-sidebar-fixed">
         <div id="app">
-
         </div>
     </body>
+
     <!--[if lt IE 9]>
     <script src="../../theme/global/plugins/respond.min.js"></script>
     <script src="../../theme/global/plugins/excanvas.min.js"></script>
@@ -69,11 +69,11 @@
     <script src="../../theme/global/plugins/morris/morris.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-tabdrop/js/bootstrap-tabdrop.js" type="text/javascript"></script>
-
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script src="../../app/dist/build.js"></script>
-
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script type="text/javascript" src="../../js/map.js"></script>
 </html>

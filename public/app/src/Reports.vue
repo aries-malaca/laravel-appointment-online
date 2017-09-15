@@ -27,12 +27,11 @@
             }
         },
         methods:{
-            emit: function() {
-                this.$emit('update_title', this.title)
-            }
+
         },
         mounted:function(){
-            this.emit();
+            this.$emit('update_title', this.title);
+            this.$emit('update_user');
         }
     }
 </script>

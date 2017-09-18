@@ -61,6 +61,7 @@
                             </table>
                             <!--end row-->
                             <button class="btn btn-info" v-if="with_back" @click="editBranch(branch)">Edit Branch</button>
+                            <button class="btn btn-success" @click="addPicture">Add Photo</button>
                         </div>
                         <div class="col-md-4">
                             <div class="portlet sale-summary">
@@ -100,7 +101,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <button class="btn btn-success" @click="addPicture">Add</button>
                     </div>
                 </div>
                 <!--tab_1_2-->

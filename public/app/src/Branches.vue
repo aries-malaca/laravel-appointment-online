@@ -185,6 +185,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" v-if="newBranch.id==0" @click="addBranch($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                        <button type="button" v-else @click="updateBranch($event)" data-loading-text="Updating..." class="btn green">Save</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -323,7 +325,10 @@
                     rooms_count:1,
                     social_media_accounts:['',''],
                     directions:'',
-                    map_coordinates:[14.5698,121.0167],
+                    map_coordinates:{
+                        lat:14.5698,
+                        long:121.0167
+                    },
                     branch_classification:'company-owned',
                     payment_methods:'',
                     welcome_message:'',
@@ -333,7 +338,7 @@
                 $("#add-branch-modal").modal("show");
                 let u = this;
                 setTimeout(function(){
-                    initMap(u.newBranch.map_coordinates[0],u.newBranch.map_coordinates[1]);
+                    initMap(Number(u.newBranch.map_coordinates.lat),Number(u.newBranch.map_coordinates.long));
                 },500);
             },
             showAddClusterModal:function(){
@@ -476,37 +481,66 @@
             },
             confirmMap:function(){
                 let position = document.getElementById("position").value;
-                this.newBranch.map_coordinates[0] = Number(position.split(',')[0]);
-                this.newBranch.map_coordinates[1] = Number(position.split(',')[1]);
+                if(position != ''){
+                    this.newBranch.map_coordinates.lat = Number(position.split(',')[0]);
+                    this.newBranch.map_coordinates.long = Number(position.split(',')[1]);
+                }
             },
             editBranch:function(branch) {
-                this.newBranch = {
-                    id:branch.id,
-                    search_id:branch.id,
-                    branch_name:branch.branch_name,
-                    branch_code:branch.branch_code,
-                    region_id:branch.region_id,
-                    city_id:branch.city_id,
-                    branch_address:branch.branch_address,
-                    branch_email:branch.branch_email,
-                    branch_contact:branch.branch_contact,
-                    branch_contact_person:branch.branch_contact_person,
-                    opening_date:moment(branch.opening_date).format("YYYY-MM-DD"),
-                    rooms_count:branch.rooms_count,
-                    social_media_accounts:branch.social_media_accounts,
-                    directions:branch.directions,
-                    map_coordinates:branch.map_coordinates,
-                    branch_classification:branch.branch_classification,
-                    payment_methods:branch.payment_methods,
-                    welcome_message:branch.welcome_message,
-                    branch_pictures:branch.branch_pictures,
-                    cluster_id:branch.cluster_id,
-                };
-                $("#add-branch-modal").modal("show");
                 let u = this;
-                setTimeout(function(){
-                    initMap(u.newBranch.map_coordinates[0],u.newBranch.map_coordinates[1]);
-                },500);
+                axios.get('/api/branch/getBranch/' + branch.id)
+                .then(function (response) {
+                    if(response.data.id !== undefined){
+                        u.newBranch = response.data;
+                        u.newBranch.search_id = response.data.id;
+                        u.newBranch.opening_date = moment(response.data.opening_date).format("YYYY-MM-DD");
+                        u.newBranch.branch_pictures = JSON.parse(u.newBranch.branch_pictures);
+                        u.newBranch.branch_data = JSON.parse(u.newBranch.branch_data);
+                        u.pictures = u.newBranch.branch_pictures;
+                        u.newBranch.map_coordinates = JSON.parse(u.newBranch.map_coordinates);
+                        u.newBranch.social_media_accounts = JSON.parse(u.newBranch.social_media_accounts);
+                    }
+
+                    setTimeout(function(){
+                        initMap(u.newBranch.map_coordinates.lat, u.newBranch.map_coordinates.long);
+                    },1000)
+                });
+
+                $("#add-branch-modal").modal("show");
+            },
+            addBranch:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/branch/addBranch?token=' + this.token, 'post', this.newBranch, function(){
+                    u.getClusters();
+                    toastr.success("Branch added successfully.");
+                    $btn.button('reset');
+                    $("#add-branch-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+            updateBranch:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/branch/updateBranch?token=' + this.token, 'patch', this.newBranch, function(){
+                    u.getBranches();
+                    u.view_id = 0;
+                    setTimeout(function(){
+                        u.view_id = u.newBranch.id;
+                    },500);
+                    toastr.success("Branch updated successfully.");
+                    $btn.button('reset');
+                    $("#add-branch-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
             }
         },
         mounted:function(){

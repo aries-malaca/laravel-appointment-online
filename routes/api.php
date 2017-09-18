@@ -41,6 +41,8 @@ Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::patch('/branch/removePicture', 'BranchController@removePicture');
+Route::post('/branch/addBranch', 'BranchController@addBranch');
+Route::patch('/branch/updateBranch', 'BranchController@updateBranch');
 
 Route::get('/branch/getClusters', 'BranchController@getClusters');
 Route::post('/branch/addCluster', 'BranchController@addCluster');

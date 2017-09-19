@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Menu;
 use JWTAuth;
@@ -14,10 +11,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
-
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
     //returns true if authenticated,
     //returns error message response if not authenticated
     public function authenticateAPI(){
@@ -34,10 +29,23 @@ class Controller extends BaseController{
         catch(JWTException $e){
             return ["result"=>"failed","error"=>"token_absent","status_code"=>$e->getStatusCode()];
         }
-        
-        // token is valid and update the last activity
-        User::where('id', $user['id'])->update(['last_activity'=>date('Y-m-d H:i')]);
-        return ["result"=>"success", "user"=>$user, "status_code"=>200];
+
+        $parsed = JWTAuth::getToken();
+        $tokens = json_decode($user['device_data'],true);
+        if(sizeof($tokens) == 0){
+            return ["result"=>"failed","error"=>"no_token_registered","status_code"=>300];
+        }
+        else{
+            foreach($tokens as $key=>$value){
+                if($parsed == $value['token']){
+                    // token is valid and update the last activity
+                    User::where('id', $user['id'])->update(['last_activity'=>date('Y-m-d H:i')]);
+                    return ["result"=>"success", "user"=>$user, "status_code"=>200];
+                }
+            }
+        }
+
+        return ["result"=>"failed","error"=>"token_not_found" . $parsed,"status_code"=>300];
     }
 
     public function getUserMenus($user){
@@ -65,8 +73,7 @@ class Controller extends BaseController{
             $sets[] = '!@#$%&*?';
         $all = '';
         $password = '';
-        foreach($sets as $set)
-        {
+        foreach($sets as $set) {
             $password .= $set[array_rand(str_split($set))];
             $all .= $set;
         }
@@ -78,12 +85,30 @@ class Controller extends BaseController{
             return $password;
         $dash_len = floor(sqrt($length));
         $dash_str = '';
-        while(strlen($password) > $dash_len)
-        {
+        while(strlen($password) > $dash_len) {
             $dash_str .= substr($password, 0, $dash_len) . '-';
             $password = substr($password, $dash_len);
         }
         $dash_str .= $password;
         return $dash_str;
+    }
+
+    public function registerToken($user_id, $token, $type='WEB', $device_info=null){
+        if($type == 'WEB'){
+            $device_info = $_SERVER['HTTP_USER_AGENT'];
+        }
+
+        $user = User::find($user_id);
+        $tokens = json_decode($user->device_data, true);
+        $data = array("token" => $token,
+                      "type" => $type,
+                      "device_info" => $device_info,
+                      "registered" => date('Y-m-d H:i'),
+                      "last_activity" => date('Y-m-d H:i')
+                    );
+        $tokens[] = $data;
+        $user->last_login = date('Y-m-d H:i');
+        $user->device_data = json_encode($tokens);
+        $user->save();
     }
 }

@@ -76,4 +76,5 @@
     <script src="../../app/dist/build.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
+    <script type="text/javascript" src="../../js/croppie.js"></script>
 </html>

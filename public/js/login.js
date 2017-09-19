@@ -21,7 +21,7 @@ new Vue({
                         $btn.button('reset');
                     }
                     else{
-                        $.cookie("login_cookie", data, { path: '/' });
+                        $.cookie("login_cookie", data, { path: '/', expires: 100000 });
                         window.location.href = '../../';
                         $btn.dataset.loadingText = 'Redirecting...';
                     }

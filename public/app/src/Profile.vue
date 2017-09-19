@@ -8,7 +8,7 @@
                     <div class="portlet light profile-sidebar-portlet bordered">
                         <!-- SIDEBAR USERPIC -->
                         <div class="profile-userpic">
-                            <img v-bind:src="'/images/users/' + user.user_picture" class="img-responsive" alt=""> </div>
+                            <img v-bind:src="'/images/users/' + user.user_picture" style="border-radius:10px !important" class="img-responsive" alt=""> </div>
                         <!-- END SIDEBAR USERPIC -->
                         <!-- SIDEBAR USER TITLE -->
                         <div class="profile-usertitle">
@@ -33,7 +33,7 @@
                             <span class="profile-desc-text"> {{ user.user_address }} </span>
                             <div class="margin-top-10 profile-desc-link">
                                 <i class="fa fa-gift"></i>
-                                <span>{{ moment(user.birth_date,"MMMM D, YYYY") }}</span>
+                                <span>{{ moment(user.birth_date).format("MMMM D, YYYY") }}</span>
                             </div>
                             <div class="margin-top-10 profile-desc-link">
                                 <i class="fa fa-phone"></i>
@@ -102,6 +102,32 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6">
+                                        </div>
+                                    </div>
+                                    <h3>Device Management</h3>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <table class="table-responsive table table-hover table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Platform</th>
+                                                        <th>Last Activity</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="device in profile.device_data">
+                                                        <td>{{ device.type }}</td>
+                                                        <td>
+                                                            <span v-if="device.token != token">{{ moment(device.last_activity).fromNow() }}</span>
+                                                            <span v-else>Currently In-use</span>
+                                                        </td>
+                                                        <td>
+                                                            <button v-if="device.token != token" class="btn btn-xs btn-danger" @click="destroyToken(device.token)">Logout</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                     <div class="margin-top-10" v-if="profile.username !== undefined">
@@ -174,7 +200,6 @@
 <script>
     import VueSelect from "vue-select"
     import UploadPictureModal from "./modals/UploadPictureModal.vue"
-
     export default {
         name: 'Profile',
         props: ['user','token'],
@@ -198,6 +223,8 @@
                 axios.get('/api/user/getUser?token=' + this.token)
                 .then(function (response) {
                     u.profile = response.data.user;
+                    u.profile.device_data = JSON.parse(u.profile.device_data);
+                    u.profile.user_data = JSON.parse(u.profile.user_data);
                     u.$emit('update_user');
                 })
                 .catch(function (error) {
@@ -265,9 +292,7 @@
                 }
                 catch(error){}
             },
-            moment:function (string, format) {
-                return moment(string).format(format);
-            }
+            moment:moment
         },
         mounted:function(){
             this.$emit('update_title', this.title);

@@ -16,6 +16,7 @@ Route::get('/user/getUsers', 'UserController@getUsers');
 
 Route::post('/user/addUser', 'UserController@addUser');
 Route::patch('/user/updateUser', 'UserController@updateUser');
+Route::patch('/user/destroyToken', 'UserController@destroyToken');
 
 //profile update API
 Route::patch('/user/updateProfile', 'UserController@updateProfile');

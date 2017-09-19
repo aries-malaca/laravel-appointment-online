@@ -12,6 +12,7 @@ use Validator;
 use Hash;
 use ImageOptimizer;
 use Facebook\Facebook;
+use Storage;
 
 class UserController extends Controller{
     public function login(Request $request){
@@ -20,6 +21,12 @@ class UserController extends Controller{
         if(isset($u['id'])){
             if(Hash::check($request['password'], $u['password'])){
                 $token = JWTAuth::fromUser(User::find($u['id']));
+
+                if($request->input('device') === null)
+                    $this->registerToken($u['id'], $token);
+                else
+                    $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
+
                 return response()->json($token);
             }
             return response()->json(["result"=>"failed"]);
@@ -33,16 +40,46 @@ class UserController extends Controller{
     }
 
     public function selfMigrateClient($email, $password){
+
         $client = Client::where('cusemail', $email)
-                            ->where('password', md5($password))
-                            ->get()->first();
+                        ->where('password', '827ccb0eea8a706c4c34a16891f84e7b')
+                        ->get()->first();
+
         if(isset($client['cusid'])){
+
+            $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
+
+            if($boss_data === false){
+                return false;
+            }
             //start self migration
 
-            //end self migration
-            return JWTAuth::fromUser(User::find(5));
-        }
+            $boss_data = json_decode($boss_data,true);
 
+            $user = new User;
+            $user->email = $email;
+            $user->password = bcrypt($password);
+            $user->username = '';
+            $user->first_name = ($client['cusfname'] != '') ? $client['cusfname'] : $boss_data['firstname'];
+            $user->middle_name = ($client['cusmname'] != '') ? $client['cusmname'] : $boss_data['middlename'];
+            $user->last_name = ($client['cuslname'] != '') ? $client['cuslname'] : $boss_data['lastname'];
+            $user->birth_date = date('Y-m-d',strtotime($client['cusbday']));
+            $user->user_mobile = $client['cusmob'];
+            $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
+            $user->level = 0;
+            $user->user_data = json_encode(array("premier_status"=>$boss_data['premier'],
+                                                 "premier_branch"=>$boss_data['premier_branch'],
+                                                 "home_branch"=>$boss_data['branch_id']));
+            $user->device_data = '{}';
+            $user->last_activity = date('Y-m-d H:i');
+            $user->last_login = date('Y-m-d H:i');
+            $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
+            $user->is_active = 1;
+            $user->is_client = 1;
+            $user->save();
+            //end self migration
+            return JWTAuth::fromUser(User::find($user->id));
+        }
         return false;
     }
 
@@ -51,7 +88,14 @@ class UserController extends Controller{
         if($api['result'] === 'success'){
             $user_data = json_decode($api['user']['user_data'],true);
             if($api['user']['is_client'] == 1){
-                $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> Branch::find($user_data['home_branch'])->branch_name];
+                $branch = Branch::find($user_data['home_branch']);
+                if(isset($branch->id)){
+                    $branch = $branch->branch_name;
+                }
+                else{
+                    $branch = 'N/A';
+                }
+                $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
             }
             else{
                 $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
@@ -124,7 +168,8 @@ class UserController extends Controller{
 
             $validator = Validator::make($request->all(),[
                 'new_password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
-                'verify_password' => 'required|same:new_password'           // required and has to match the password field
+                'verify_password' => 'required|same:new_password'
+                // required and has to match the password field
             ]);
             if ($validator->fails()) {
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
@@ -140,25 +185,30 @@ class UserController extends Controller{
     public function uploadPicture(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
-            //valid extensions
-            $valid_ext = array('jpeg', 'gif', 'png', 'jpg');
-            //check if the file is submitted
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $ext = $file->getClientOriginalExtension();
-
-                //check if extension is valid
-                if (in_array($ext, $valid_ext)) {
-                    $timestamp = time().'.'.$ext ;
-                    $file->move('images/users/', $request->input('user_id') . '_' . $timestamp);
-                    $user = User::find($request->input('user_id'));
-                    $user->user_picture = $request->input('user_id') . '_' . $timestamp;
-                    $user->save();
-                    return response()->json(["result"=>"success"],200);
-                }
-                return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
+            if($request->input('image') === null){
+                return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
             }
-            return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
+
+            $data = $request->input('image');
+            list($type, $data) = explode(';',$data);
+            list(,$data) = explode(',', $data);
+
+            if($type == 'data:image/jpeg')
+               $ext = 'jpg';
+            elseif($type == 'data:image/png')
+                $ext = 'png';
+            else
+                return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
+
+            $filename = $request->input('user_id') . '_' . time().'.'.$ext ;
+            $data = base64_decode($data);
+            file_put_contents(public_path('images/users/'). $filename, $data );
+            $user = User::find($request->input('user_id'));
+
+            $user->user_picture = $filename;
+            $user->save();
+
+            return response()->json(["result"=>"success"],200);
         }
 
         return response()->json($api, $api["status_code"]);
@@ -171,14 +221,14 @@ class UserController extends Controller{
         $fb_user = $fb->get('/me?fields='.$fields)->getGraphUser()->asArray();
 
         $user = User::where('user_data','LIKE', '%"facebook_id":"'.$request->input('userID').'"%')->get()->first();
-        if(isset($user['id'])){
-            $token = JWTAuth::fromUser($user);
-            return response()->json($token);
+        if(!isset($user['id'])){
+            $user = User::where('email', $fb_user['email'])->get()->first();
         }
 
-        $user = User::where('email', $fb_user['email'])->get()->first();
         if(isset($user['id'])){
             $token = JWTAuth::fromUser($user);
+
+            User::where($user['id'])->update(['is_confirmed'=>1]);
             return response()->json($token);
         }
 
@@ -278,5 +328,25 @@ class UserController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
+    }
+
+    public function destroyToken(Request $request){
+        $user = User::find($request->input('user_id'));
+        $tokens = json_decode($user->device_data, true);
+
+        if(sizeof($tokens) == 0){
+            $user->device_data = json_encode(array());
+        }
+        else{
+            foreach ($tokens as $t=>$v){
+                if($v['token'] == $request->input('token')){
+                    unset($tokens[$t]);
+                }
+            }
+            $user->device_data = json_encode($tokens);
+        }
+        $user->save();
+
+        return response()->json(["result"=>"success"]);
     }
 }

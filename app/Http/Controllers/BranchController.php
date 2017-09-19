@@ -21,7 +21,11 @@ class BranchController extends Controller{
     }
 
     public function getBranch(Request $request){
-        return response()->json(Branch::find($request->segment(4)));
+        return response()->json(Branch::leftJoin('regions','branches.region_id','=','regions.id')
+                        ->leftJoin('cities','branches.city_id','=','cities.id')
+                        ->select('branches.*','region_name','city_name')
+                        ->where('branches.id',$request->segment(4))
+                        ->get()->first());
     }
 
     public function addBranch(Request $request){

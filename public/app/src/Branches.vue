@@ -281,6 +281,8 @@
                     columns: [
                         { label: 'Branch Name', field: 'branch_name', filterable: true },
                         { label: 'Branch Code', field: 'branch_code', filterable: true },
+                        { label: 'Contact No.', field: 'branch_contact', filterable: true },
+                        { label: 'Classification', field: 'branch_classification_html',html:true, filterable: true },
                     ],
                     rowClicked: this.viewBranch,
                 },
@@ -304,6 +306,12 @@
                         if(field == 'clusters'){
                             item.services = JSON.parse(item.services);
                             item.products = JSON.parse(item.products);
+                        }
+                        if(field == 'branches'){
+                            if(item.branch_classification == 'company-owned')
+                                item.branch_classification_html = '<span class="badge badge-success">Co-owned</span>';
+                            else
+                                item.branch_classification_html = '<span class="badge badge-warning">Franchised</span>';
                         }
                         u[field].push(item);
                     });

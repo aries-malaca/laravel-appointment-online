@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "0.16.2",
+    "croppie": "^2.5.0",
     "vue": "^2.3.3",
     "vue-form-wizard": "^0.6.5",
     "vue-good-table": "^1.10.1",

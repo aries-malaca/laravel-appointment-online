@@ -26,7 +26,7 @@
                 </li>
             </ul>
         </div>
-        <div class="portlet-body profile">
+        <div class="portlet-body profile" v-if="branch.branch_name !== undefined">
             <div class="tab-content">
                 <div class="tab-pane active" id="info">
                     <div class="row">
@@ -42,6 +42,10 @@
                                         <td> {{ branch.branch_address }} </td>
                                     </tr>
                                     <tr>
+                                        <td> City/ Region: </td>
+                                        <td> {{ branch.city_name }} / {{ branch.region_name }} </td>
+                                    </tr>
+                                    <tr>
                                         <td> Classification: </td>
                                         <td> {{ branch.branch_classification }} </td>
                                     </tr>
@@ -51,17 +55,46 @@
                                     </tr>
                                     <tr>
                                         <td> Contact Person: </td>
-                                        <td> {{ branch.branch_contact_person}} </td>
+                                        <td> {{ branch.branch_contact_person }} </td>
                                     </tr>
                                     <tr>
                                         <td> Email: </td>
-                                        <td> {{ branch.branch_email}} </td>
+                                        <td> {{ branch.branch_email }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td> Facebook: </td>
+                                        <td><a target="_blank" v-bind:href="'http://facebook.com/'+ branch.social_media_accounts[0]"> {{ branch.social_media_accounts[0] }}</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td> Twitter: </td>
+                                        <td><a target="_blank" v-bind:href="'http://twitter.com/'+ branch.social_media_accounts[1]"> {{ branch.social_media_accounts[1] }}</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td> Rooms: </td>
+                                        <td> {{ branch.rooms_count }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td> Welcome Message: </td>
+                                        <td> {{ branch.welcome_message }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                             <!--end row-->
                             <button class="btn btn-info" v-if="with_back" @click="editBranch(branch)">Edit Branch</button>
                             <button class="btn btn-success" @click="addPicture">Add Photo</button>
+
+                            <div class="row">
+                                <div class="col-md-4" v-for="(pic,key) in pictures">
+                                    <ul class="list-unstyled profile-nav" style="margin-top:5px">
+                                        <li>
+                                            <img v-bind:src="'images/branches/'+ pic" class="img-responsive pic-bordered" alt="" />
+                                            <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
+                                            <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="col-md-4">
                             <div class="portlet sale-summary">
@@ -86,21 +119,18 @@
                                             <span class="sale-num"> 2377 </span>
                                         </li>
                                     </ul>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="map-single">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info">Directions: {{ branch.directions}} </div>
                                 </div>
                             </div>
                         </div>
                         <!--end col-md-4-->
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2" v-for="(pic,key) in pictures">
-                            <ul class="list-unstyled profile-nav" style="margin-top:5px">
-                                <li>
-                                    <img v-bind:src="'images/branches/'+ pic" class="img-responsive pic-bordered" alt="" />
-                                    <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
-                                    <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
                 <!--tab_1_2-->
@@ -135,7 +165,8 @@
 </template>
 
 <script>
-    import UploadPictureModal from "../modals/UploadPictureModal.vue";
+    import UploadPictureModal from "../modals/UploadPictureModalSmall.vue";
+
     export default {
         name: 'BranchProfile',
         props: ['token','configs','id','with_back','id','show'],
@@ -143,7 +174,11 @@
         data: function(){
            return {
                branch:{},
-               pictures:[]
+               pictures:[],
+               slickOptions: {
+                   slidesToShow: 3,
+                   // Any other options that can be got from plugin documentation
+               },
            }
         },
         methods:{
@@ -161,6 +196,22 @@
                         u.pictures = u.branch.branch_pictures;
                         u.branch.map_coordinates = JSON.parse(u.branch.map_coordinates);
                         u.branch.social_media_accounts = JSON.parse(u.branch.social_media_accounts);
+
+
+                        setTimeout(function(){
+                            let latlng = new google.maps.LatLng(u.branch.map_coordinates.lat,u.branch.map_coordinates.long);
+                            let map = new google.maps.Map(document.getElementById("map-single"), {
+                                center: latlng,
+                                zoom: 16,
+                                mapTypeId: google.maps.MapTypeId.ROADMAP
+                            });
+                            let marker = new google.maps.Marker({
+                                position: latlng,
+                                draggable: false,
+                            });
+                            marker.setMap(map);
+                        },1000);
+
                     }
                 });
             },
@@ -199,6 +250,14 @@
             id:function(){
                 this.getBranch();
             }
-        }
+        },
     }
 </script>
+
+<style>
+    #map-single{
+        margin:5px;
+        height:250px;
+        width:100%;
+    }
+</style>

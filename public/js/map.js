@@ -1,6 +1,4 @@
 function initMap(lat,long){
-    var markers = [];
-
     var latlng = new google.maps.LatLng(lat, long);
 
     var map = new google.maps.Map(document.getElementById("map-canvas"), {

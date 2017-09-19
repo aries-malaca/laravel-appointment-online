@@ -81,9 +81,10 @@
                 $btn.button('loading');
 
                 u.show_not_found = false;
-                u.clients = [];
+
                 axios.get('/api/client/searchClients', {params:this.search})
                 .then(function (response) {
+                    u.clients = [];
                     response.data.forEach(function(item){
                         item.name = item.first_name +' ' + item.last_name;
                         item.picture_html = '<img class="img-circle" style="height:35px" src="images/users/'+ item.user_picture +'" />';

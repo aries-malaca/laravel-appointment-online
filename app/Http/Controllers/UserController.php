@@ -12,7 +12,7 @@ use Validator;
 use Hash;
 use ImageOptimizer;
 use Facebook\Facebook;
-use Storage;
+
 
 class UserController extends Controller{
     public function login(Request $request){
@@ -204,6 +204,10 @@ class UserController extends Controller{
             $data = base64_decode($data);
             file_put_contents(public_path('images/users/'). $filename, $data );
             $user = User::find($request->input('user_id'));
+
+            if($user->user_picture != 'no photo ' . $user->gender .'.jpg')
+                if(file_exists(public_path('/images/users/'.$user->user_picture)))
+                    unlink(public_path('/images/users/'.$user->user_picture));
 
             $user->user_picture = $filename;
             $user->save();

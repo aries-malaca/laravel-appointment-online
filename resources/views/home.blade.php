@@ -31,6 +31,7 @@
         <link href="../../theme/global/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile-2.min.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.css" rel="stylesheet" type="text/css" />
 
         <link rel="icon" type="image/png" href="favicon.png">
         <title>Laybare Online</title>
@@ -77,4 +78,5 @@
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
+    <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
 </html>

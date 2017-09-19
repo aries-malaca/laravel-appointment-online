@@ -1,4 +1,5 @@
 var XHRCatcher = function(error){
+    console.log(error);
     if(error.status === 500){
         if(error.response !== undefined){
             toastr.error(error.response.statusText);
@@ -11,7 +12,7 @@ var XHRCatcher = function(error){
 
     var response_data;
     if(error.responseJSON === undefined){
-        response_data = error.response.data.error;
+        response_data = error.response.data;
     }
     else{
         response_data = error.responseJSON.error;

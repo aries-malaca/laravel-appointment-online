@@ -245,8 +245,8 @@ class BranchController extends Controller{
             $file_name = $pics[$request->input('key')];
             unset($pics[$request->input('key')]);
             $branch->branch_pictures = json_encode($pics);
-            Storage::disk('public')->delete('images/branches/'.$file_name);
-
+            if(file_exists(public_path('/images/branches/'.$file_name)))
+                unlink(public_path('/images/branches/'.$file_name));
             $branch->save();
             return response()->json(["result"=>"success"],200);
         }

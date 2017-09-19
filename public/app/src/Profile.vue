@@ -8,7 +8,7 @@
                     <div class="portlet light profile-sidebar-portlet bordered">
                         <!-- SIDEBAR USERPIC -->
                         <div class="profile-userpic">
-                            <img v-bind:src="'/images/users/' + user.user_picture" style="border-radius:10px !important" class="img-responsive" alt=""> </div>
+                            <img v-bind:src="'/images/users/' + user.user_picture" style="border-radius:10px !important;width:150px" class="img-responsive" alt=""> </div>
                         <!-- END SIDEBAR USERPIC -->
                         <!-- SIDEBAR USER TITLE -->
                         <div class="profile-usertitle">
@@ -254,18 +254,28 @@
             updateProfile:function(event){
                 let u = this;
                 let $btn = $(event.target);
-                $btn.button('loading');
 
-                axios.patch('/api/user/updateProfile?token=' + this.token, this.profile)
-                .then(function (response) {
-                    u.getProfile();
-                    toastr.success("Profile successfully updated.");
-                    $btn.button('reset');
-                })
-                .catch(function (error) {
-                    XHRCatcher(error);
-                    $btn.button('reset');
-                });
+                swal({
+                        title: "Are you sure?",
+                        showCancelButton:true,
+                        closeOnCancel: true,
+                        cancelButtonClass:'red'},
+                    function(t){
+                        if(t){
+                            $btn.button('loading');
+                            axios.patch('/api/user/updateProfile?token=' + u.token, u.profile)
+                                .then(function (response) {
+                                    u.getProfile();
+                                    toastr.success("Profile successfully updated.");
+                                    $btn.button('reset');
+                                })
+                                .catch(function (error) {
+                                    XHRCatcher(error);
+                                    $btn.button('reset');
+                                });
+                        }
+
+                    });
             },
             changePassword:function (event) {
                 let u = this;
@@ -292,7 +302,18 @@
                 }
                 catch(error){}
             },
-            moment:moment
+            moment:moment,
+            destroyToken:function(token){
+                let u = this;
+                axios.patch('/api/user/destroyToken', { token : token, user_id : this.user.id})
+                    .then(function () {
+                        toastr.success("Device has been logged out.");
+                        u.getProfile()
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            }
         },
         mounted:function(){
             this.$emit('update_title', this.title);

@@ -173,6 +173,11 @@ class ServiceController extends Controller{
                     $timestamp = time().'.'.$ext ;
                     $file->move('images/services/', $request->input('service_id') . '_' . $timestamp);
                     $service = ServiceType::find($request->input('service_id'));
+
+                    if($service->service_picture != 'no photo.jpg')
+                        if(file_exists(public_path('/images/services/'.$service->service_picture)))
+                            unlink(public_path('/images/services/'.$service->service_picture));
+
                     $service->service_picture = $request->input('service_id') . '_' . $timestamp;
                     $service->save();
                     return response()->json(["result"=>"success"],200);

@@ -31,7 +31,7 @@
                             <div class="col-md-3">
                                 <ul class="list-unstyled profile-nav">
                                     <li>
-                                        <img v-bind:src="'images/users/'+client.user_picture" class="img-responsive pic-bordered" alt="" />
+                                        <img v-bind:src="'images/users/'+client.user_picture" style="border-radius:10px !important;width:150px" class="img-responsive pic-bordered" alt="" />
                                         <a data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
                                     </li>
                                 </ul>

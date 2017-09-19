@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 'level'=>0,
                 'is_client'=>1,
                 'is_confirmed'=>1,
-                'user_data'=>'{"home_branch":"1","premier_status","0"}',
+                'user_data'=>'{"home_branch":"1","premier_status":"0"}',
                 'device_data'=>'[]',
                 'user_picture'=>'no photo female.jpg',
                 'is_active'=>1,

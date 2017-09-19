@@ -45,7 +45,7 @@ class Controller extends BaseController{
             }
         }
 
-        return ["result"=>"failed","error"=>"token_not_found" . $parsed,"status_code"=>300];
+        return ["result"=>"failed","error"=>"token_not_found" ,"status_code"=>300];
     }
 
     public function getUserMenus($user){
@@ -106,7 +106,7 @@ class Controller extends BaseController{
                       "registered" => date('Y-m-d H:i'),
                       "last_activity" => date('Y-m-d H:i')
                     );
-        $tokens[] = $data;
+        array_unshift($tokens, $data);
         $user->last_login = date('Y-m-d H:i');
         $user->device_data = json_encode($tokens);
         $user->save();

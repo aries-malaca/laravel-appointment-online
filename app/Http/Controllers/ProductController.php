@@ -148,6 +148,11 @@ class ProductController extends Controller{
                     $timestamp = time().'.'.$ext ;
                     $file->move('images/products/', $request->input('product_id') . '_' . $timestamp);
                     $product = ProductGroup::find($request->input('product_id'));
+
+                    if($product->product_picture != 'no photo.jpg')
+                        if(file_exists(public_path('/images/products/'.$product->product_picture)))
+                            unlink(public_path('/images/products/'.$product->product_picture));
+
                     $product->product_picture = $request->input('product_id') . '_' . $timestamp;
                     $product->save();
                     return response()->json(["result"=>"success"],200);

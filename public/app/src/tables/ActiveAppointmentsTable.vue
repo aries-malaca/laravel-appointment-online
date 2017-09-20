@@ -14,7 +14,7 @@
     import DataTable from '../components/DataTable.vue';
 
     export default {
-        name: 'Clients',
+        name: 'ActiveAppointments',
         components:{ DataTable },
         props:['token', 'active_appointments' ,'user_id', 'configs'],
         data: function(){

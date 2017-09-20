@@ -104,32 +104,8 @@
                                         <div class="col-md-6">
                                         </div>
                                     </div>
-                                    <h3>Device Management</h3>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <table class="table-responsive table table-hover table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Platform</th>
-                                                        <th>Last Activity</th>
-                                                        <th></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr v-for="device in profile.device_data">
-                                                        <td>{{ device.type }}</td>
-                                                        <td>
-                                                            <span v-if="device.token != token">{{ moment(device.last_activity).fromNow() }}</span>
-                                                            <span v-else>Currently In-use</span>
-                                                        </td>
-                                                        <td>
-                                                            <button v-if="device.token != token" class="btn btn-xs btn-danger" @click="destroyToken(device.token)">Logout</button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                    <my-devices-table @emit_host="getProfile" :user_id="user.id"
+                                                    :devices="profile.device_data" :token="token"/>
                                     <div class="margin-top-10" v-if="profile.username !== undefined">
                                         <button type="button" @click="updateProfile($event)" data-loading-text="Updating..." class="btn green"> Update Profile </button>
                                     </div>
@@ -200,10 +176,12 @@
 <script>
     import VueSelect from "vue-select"
     import UploadPictureModal from "./modals/UploadPictureModal.vue"
+    import MyDevicesTable from "./tables/MyDevicesTable.vue"
+
     export default {
         name: 'Profile',
         props: ['user','token'],
-        components:{ VueSelect, UploadPictureModal },
+        components:{ VueSelect, UploadPictureModal, MyDevicesTable },
         data: function(){
             return {
                 title: 'Profile',
@@ -255,30 +233,20 @@
                 let u = this;
                 let $btn = $(event.target);
 
-                swal({
-                    title:"Confirmation",
-                    text: "Are you sure you want to update?",
-                    showCancelButton:true,
-                    closeOnCancel: true,
-                    cancelButtonClass:'btn-sm btn-default',
-                    confirmButtonClass:'btn-sm btn-success'
-                    },
-                    function(t){
-                        if(t){
-                            $btn.button('loading');
-                            axios.patch('/api/user/updateProfile?token=' + u.token, u.profile)
-                                .then(function () {
-                                    u.getProfile();
-                                    toastr.success("Profile successfully updated.");
-                                    $btn.button('reset');
-                                })
-                                .catch(function (error) {
-                                    XHRCatcher(error);
-                                    $btn.button('reset');
-                                });
-                        }
+                SweetConfirmation("Are you sure you want to update?", function(){
+                    $btn.button('loading');
+                    axios.patch('/api/user/updateProfile?token=' + u.token, u.profile)
+                        .then(function () {
+                            u.getProfile();
+                            toastr.success("Profile successfully updated.");
+                            $btn.button('reset');
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                            $btn.button('reset');
+                        });
+                });
 
-                    });
             },
             changePassword:function (event) {
                 let u = this;
@@ -306,17 +274,6 @@
                 catch(error){}
             },
             moment:moment,
-            destroyToken:function(token){
-                let u = this;
-                axios.patch('/api/user/destroyToken', { token : token, user_id : this.user.id})
-                    .then(function () {
-                        toastr.success("Device has been logged out.");
-                        u.getProfile()
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
-                    });
-            }
         },
         mounted:function(){
             this.$emit('update_title', this.title);

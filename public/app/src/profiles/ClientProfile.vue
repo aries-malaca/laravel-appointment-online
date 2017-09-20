@@ -31,8 +31,7 @@
                             <div class="col-md-3">
                                 <ul class="list-unstyled profile-nav">
                                     <li>
-                                        <img v-bind:src="'images/users/'+client.user_picture" style="border-radius:10px !important;width:150px" class="img-responsive pic-bordered" alt="" />
-                                        <a data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
+                                        <img v-bind:src="'images/users/'+client.user_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
                                     </li>
                                 </ul>
                             </div>
@@ -72,7 +71,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td> Is Premier: </td>
-                                                    <td>
+                                                    <td v-if="client.user_data !== undefined ">
                                                         <span class="badge badge-success" v-if="client.user_data.premier_status == 1">Yes</span>
                                                         <span class="badge badge-warning" v-else>No</span>
                                                     </td>
@@ -124,15 +123,17 @@
                     <div class="tab-pane" id="account">
                         <div class="row profile-account">
                             <div class="col-md-3">
+                                <ul class="list-unstyled profile-nav">
+                                    <li>
+                                        <img v-bind:src="'images/users/'+client.user_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
+                                        <a data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
+                                    </li>
+                                </ul>
                                 <ul class="ver-inline-menu tabbable margin-bottom-10">
                                     <li class="active">
                                         <a data-toggle="tab" href="#personal-info">
                                             <i class="fa fa-cog"></i> Personal Info </a>
                                         <span class="after"> </span>
-                                    </li>
-                                    <li>
-                                        <a data-toggle="tab" href="#change-password">
-                                            <i class="fa fa-lock"></i> Change Password </a>
                                     </li>
                                     <li>
                                         <a data-toggle="tab" href="#account-settings">
@@ -143,29 +144,68 @@
                             <div class="col-md-9">
                                 <div class="tab-content">
                                     <div id="personal-info" class="tab-pane active">
-                                        <div class="form-group">
-                                            <label class="control-label">First Name</label>
-                                            <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">First Name</label>
+                                                    <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">Middle Name</label>
+                                                    <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">Last Name</label>
+                                                    <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Middle Name</label>
-                                            <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="control-label">Birth Date</label>
+                                                    <input type="date" class="form-control" v-model="newClient.birth_date"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="form-group">
+                                                    <label class="control-label">Address</label>
+                                                    <textarea class="form-control" v-model="newClient.user_address"></textarea>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Last Name</label>
-                                            <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">Mobile</label>
+                                                    <input type="text" class="form-control" v-model="newClient.user_mobile">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5" v-if="newClient.home_branch !== undefined ">
+                                                <div class="form-group">
+                                                    <label class="control-label">Home Branch</label>
+                                                    <vue-select v-model="newClient.home_branch" :options="branch_selection"></vue-select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Address</label>
-                                            <textarea class="form-control" v-model="newClient.user_address"></textarea>
-                                        </div>
-                                        <button type="button" @click="updatePersonalInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
-                                    </div>
-                                    <div id="change-password" class="tab-pane">
-
+                                        <button type="button" @click="updateInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
                                     </div>
                                     <div id="account-settings" class="tab-pane">
-
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h3>Change Password</h3>
+                                                <div class="form-group">
+                                                    <label class="control-label">New Password</label>
+                                                    <input type="password" class="form-control" v-model="newClient.password" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <my-devices-table @emit_host="getClient" :user_id="newClient.id"
+                                                          :devices="newClient.device_data" :token="token"/>
                                     </div>
                                 </div>
                             </div>
@@ -203,21 +243,33 @@
 <script>
     import UploadPictureModal from "../modals/UploadPictureModal.vue";
     import ActiveAppointmentsTable from "../tables/ActiveAppointmentsTable.vue";
+    import MyDevicesTable from "../tables/MyDevicesTable.vue";
+    import VueSelect from "vue-select"
 
     export default {
         name: 'ClientProfile',
         props: ['token','configs','with_back','id','show'],
-        components:{ UploadPictureModal, ActiveAppointmentsTable },
+        components:{ UploadPictureModal, ActiveAppointmentsTable, VueSelect, MyDevicesTable},
         data: function(){
             return {
                 client:{},
                 newClient:{},
-
+                branches:[]
             }
         },
         methods:{
             back:function(){
                 this.$emit('back');
+            },
+            getData:function(url, field){
+                let u = this;
+                axios.get(url)
+                    .then(function (response) {
+                        u[field] = response.data;
+                    });
+            },
+            getBranches:function(){
+                this.getData('/api/branch/getBranches/active', 'branches');
             },
             getClient:function(){
                 let u = this;
@@ -225,13 +277,17 @@
                     .then(function (response) {
                         u.client = response.data;
                         u.newClient = {
+                            id:response.data.id,
                             first_name:response.data.first_name,
-                            middle_name:response.data.first_name,
-                            last_name:response.data.first_name,
-                            user_address:response.data.first_name,
-                            user_mobile:response.data.first_name,
-                            user_mobile:response.data.first_name,
-                        }
+                            middle_name:response.data.middle_name,
+                            last_name:response.data.last_name,
+                            birth_date:u.moment(response.data.birth_date, "YYYY-MM-DD"),
+                            user_address: response.data.user_address,
+                            user_mobile: response.data.user_mobile,
+                            home_branch:response.data.home_branch,
+                            password:'',
+                            device_data:response.data.device_data
+                        };
                     });
             },
             refreshClient:function(){
@@ -247,11 +303,61 @@
                     $("form")[0].reset();
                 }
                 catch(error){}
+            },
+            updateInfo:function(event){
+                let u = this;
+                let $btn = $(event.target);
+
+                SweetConfirmation("Are you sure you want to update?", function(){
+                    $btn.button('loading');
+                    axios.patch('/api/client/updateInfo?token=' + u.token, u.newClient)
+                        .then(function () {
+                            u.getClient();
+                            u.$emit('refresh_client', u.newClient.id);
+                            toastr.success("Client Info successfully updated.");
+                            $btn.button('reset');
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                            $btn.button('reset');
+                        });
+                });
+            },
+            changePassword:function(){
+                let u = this;
+                let $btn = $(event.target);
+
+                SweetConfirmation("Are you sure you want to change client's password?", function(){
+                    $btn.button('loading');
+                    axios.patch('/api/client/changePassword?token=' + u.token, u.newClient)
+                        .then(function () {
+                            u.getClient();
+                            u.$emit('refresh_client', u.newClient.id);
+                            toastr.success("Client's password successfully updated.");
+                            $btn.button('reset');
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                            $btn.button('reset');
+                        });
+                });
             }
         },
         watch:{
             id:function(){
                 this.getClient();
+            }
+        },
+        mounted:function(){
+            this.getBranches();
+        },
+        computed:{
+            branch_selection:function(){
+                var a = [];
+                this.branches.forEach(function(item){
+                    a.push({label:item.branch_name, value:item.id});
+                });
+                return a;
             }
         }
     }

@@ -29,14 +29,14 @@ class UserController extends Controller{
                 else
                     $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
 
-                return response()->json($token);
+                return response()->json(["token"=>$token, "result"=>'success']);
             }
-            return response()->json(["result"=>"failed"]);
+            return response()->json(["result"=>"failed",300]);
         }
         if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
-            return response()->json($token);
+            return response()->json(["token"=>$token, "result"=>'success']);
         }
-        return response()->json(["result"=>"failed"]);
+        return response()->json(["result"=>"failed"],300);
     }
 
     public function selfMigrateClient($email, $password){

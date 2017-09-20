@@ -257,7 +257,7 @@
 
                 swal({
                     title:"Confirmation",
-                    message: "Are you sure you want to update?",
+                    text: "Are you sure you want to update?",
                     showCancelButton:true,
                     closeOnCancel: true,
                     cancelButtonClass:'btn-sm btn-default',

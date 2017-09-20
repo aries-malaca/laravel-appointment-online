@@ -27,9 +27,9 @@ class UserController extends Controller{
                 else
                     $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
 
-                return response()->json($token);
+                return response()->json(["token"=>$token,"result"=>"success"]);
             }
-            return response()->json(["result"=>"failed"]);
+            return response()->json(["result"=>"failed"], 300);
         }
 
         if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
@@ -40,9 +40,8 @@ class UserController extends Controller{
     }
 
     public function selfMigrateClient($email, $password){
-
         $client = Client::where('cusemail', $email)
-                        ->where('password', '827ccb0eea8a706c4c34a16891f84e7b')
+                        ->where('password', md5($password))
                         ->get()->first();
 
         if(isset($client['cusid'])){

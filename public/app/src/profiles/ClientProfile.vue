@@ -96,6 +96,12 @@
                                 <!--end row-->
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <active-appointments-table :active_appointments="[]" :token="token" :user_id="id"
+                                                           :configs="configs" />
+                            </div>
+                        </div>
                     </div>
                     <!--tab_1_2-->
                     <div class="tab-pane" id="account">
@@ -164,10 +170,12 @@
 
 <script>
     import UploadPictureModal from "../modals/UploadPictureModal.vue";
+    import ActiveAppointmentsTable from "../tables/ActiveAppointmentsTable.vue";
+
     export default {
         name: 'ClientProfile',
-        props: ['token','configs','id','with_back','id','show'],
-        components:{ UploadPictureModal },
+        props: ['token','configs','with_back','id','show'],
+        components:{ UploadPictureModal, ActiveAppointmentsTable },
         data: function(){
             return {
                 client:{},

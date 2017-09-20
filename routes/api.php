@@ -33,6 +33,10 @@ Route::post('/user/fbLogin', 'UserController@fbLogin');
 //clients
 Route::get('/client/searchClients', 'ClientController@searchClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
+Route::patch('/client/updateInfo', 'ClientController@updateInfo');
+Route::patch('/client/changePassword', 'ClientController@changePassword');
+Route::patch('/client/updateSettings', 'ClientController@updateSettings');
+
 
 //resend Email Confirmation API
 Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
@@ -83,6 +87,8 @@ Route::get('/service/getServicePackages/{flag}', 'ServiceController@getServicePa
 Route::get('/service/getServicePackages', 'ServiceController@getServicePackages');
 Route::post('/service/addServicePackage', 'ServiceController@addServicePackage');
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
+
+
 
 
 

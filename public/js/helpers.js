@@ -25,3 +25,22 @@ var XHRCatcher = function(error){
         }
     }
 };
+
+
+var SweetConfirmation = function(text, confirm_callback){
+    swal({
+            title:"Confirmation",
+            text: text,
+            showCancelButton:true,
+            closeOnCancel: true,
+            cancelButtonClass:'btn-sm btn-default',
+            confirmButtonClass:'btn-sm btn-success',
+            confirmButtonText:'YES',
+            cancelButtonText:'NO',
+        },
+        function(t){
+            if(t){
+                confirm_callback();
+            }
+        });
+}

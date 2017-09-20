@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\Branch;
+use Validator;
 
 class ClientController extends Controller{
     public function searchClients(Request $request){
@@ -32,19 +33,49 @@ class ClientController extends Controller{
             $client['home_branch_id'] = $client['user_data']->home_branch;
             $find = Branch::find($client['home_branch_id']);
             $client['home_branch_name'] = isset($find->id)? $find->branch_name:'N/A';
+            $client['home_branch'] = array("label"=>$client['home_branch_name'], "value"=> $client['home_branch_id']);
         }
         return response()->json($client);
     }
 
     public function updateInfo(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|max:255',
+                'middle_name' => 'max:255',
+                'last_name' => 'required|max:255',
+                'user_address' => 'required|max:255',
+                'user_mobile' => 'required|max:255',
+                'home_branch' => 'required'
+            ]);
 
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            $client = User::find($request->input('id'));
+            $client->first_name = $request->input('first_name');
+            $client->middle_name = $request->input('middle_name');
+            $client->last_name = $request->input('last_name');
+            $client->user_address = $request->input('user_address');
+            $client->user_mobile = $request->input('user_mobile');
+            $client->birth_date = $request->input('birth_date');
+            $data = json_decode($client->user_data);
+            $data->home_branch = $request->input('home_branch')['value'];
+            $client->user_data = json_encode($data);
+            $client->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
     }
 
     public function updatePassword(){
 
     }
 
-    public function updateAccountSettings(){
+    public function updateSettings(){
 
     }
 }

@@ -72,7 +72,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td> Is Premier: </td>
-                                                    <td>
+                                                    <td v-if="client.user_data !== undefined ">
                                                         <span class="badge badge-success" v-if="client.user_data.premier_status == 1">Yes</span>
                                                         <span class="badge badge-warning" v-else>No</span>
                                                     </td>
@@ -131,10 +131,6 @@
                                         <span class="after"> </span>
                                     </li>
                                     <li>
-                                        <a data-toggle="tab" href="#change-password">
-                                            <i class="fa fa-lock"></i> Change Password </a>
-                                    </li>
-                                    <li>
                                         <a data-toggle="tab" href="#account-settings">
                                             <i class="fa fa-eye"></i> Account Settings </a>
                                     </li>
@@ -143,28 +139,62 @@
                             <div class="col-md-9">
                                 <div class="tab-content">
                                     <div id="personal-info" class="tab-pane active">
-                                        <div class="form-group">
-                                            <label class="control-label">First Name</label>
-                                            <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">First Name</label>
+                                                    <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">Middle Name</label>
+                                                    <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="control-label">Last Name</label>
+                                                    <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Middle Name</label>
-                                            <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="control-label">Birth Date</label>
+                                                    <input type="date" class="form-control" v-model="newClient.birth_date"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="form-group">
+                                                    <label class="control-label">Address</label>
+                                                    <textarea class="form-control" v-model="newClient.user_address"></textarea>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Last Name</label>
-                                            <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="control-label">Mobile</label>
+                                                    <input type="text" class="form-control" v-model="newClient.user_mobile">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6" v-if="newClient.home_branch !== undefined ">
+                                                <div class="form-group">
+                                                    <label class="control-label">Home Branch</label>
+                                                    <vue-select v-model="newClient.home_branch" :options="branch_selection"></vue-select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label">Address</label>
-                                            <textarea class="form-control" v-model="newClient.user_address"></textarea>
-                                        </div>
-                                        <button type="button" @click="updatePersonalInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
-                                    </div>
-                                    <div id="change-password" class="tab-pane">
-
+                                        <button type="button" @click="updateInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
                                     </div>
                                     <div id="account-settings" class="tab-pane">
+                                        <h3>Change Password</h3>
+                                        <div class="form-group">
+                                            <label class="control-label">New Password</label>
+                                            <input type="password" class="form-control" v-model="newClient.password" />
+                                        </div>
 
                                     </div>
                                 </div>
@@ -203,21 +233,32 @@
 <script>
     import UploadPictureModal from "../modals/UploadPictureModal.vue";
     import ActiveAppointmentsTable from "../tables/ActiveAppointmentsTable.vue";
+    import VueSelect from "vue-select"
 
     export default {
         name: 'ClientProfile',
         props: ['token','configs','with_back','id','show'],
-        components:{ UploadPictureModal, ActiveAppointmentsTable },
+        components:{ UploadPictureModal, ActiveAppointmentsTable, VueSelect },
         data: function(){
             return {
                 client:{},
                 newClient:{},
-
+                branches:[]
             }
         },
         methods:{
             back:function(){
                 this.$emit('back');
+            },
+            getData:function(url, field){
+                let u = this;
+                axios.get(url)
+                    .then(function (response) {
+                        u[field] = response.data;
+                    });
+            },
+            getBranches:function(){
+                this.getData('/api/branch/getBranches/active', 'branches');
             },
             getClient:function(){
                 let u = this;
@@ -225,13 +266,16 @@
                     .then(function (response) {
                         u.client = response.data;
                         u.newClient = {
+                            id:response.data.id,
                             first_name:response.data.first_name,
-                            middle_name:response.data.first_name,
-                            last_name:response.data.first_name,
-                            user_address:response.data.first_name,
-                            user_mobile:response.data.first_name,
-                            user_mobile:response.data.first_name,
-                        }
+                            middle_name:response.data.middle_name,
+                            last_name:response.data.last_name,
+                            birth_date:u.moment(response.data.birth_date, "YYYY-MM-DD"),
+                            user_address: response.data.user_address,
+                            user_mobile: response.data.user_mobile,
+                            home_branch:response.data.home_branch,
+                            password:''
+                        };
                     });
             },
             refreshClient:function(){
@@ -247,11 +291,44 @@
                     $("form")[0].reset();
                 }
                 catch(error){}
+            },
+            updateInfo:function(event){
+                let u = this;
+                let $btn = $(event.target);
+
+                SweetConfirmation("Are you sure you want to update?", function(){
+                    $btn.button('loading');
+                    axios.patch('/api/client/updateInfo?token=' + u.token, u.newClient)
+                        .then(function () {
+                            u.getClient();
+                            toastr.success("Client Info successfully updated.");
+                            $btn.button('reset');
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                            $btn.button('reset');
+                        });
+                });
+            },
+            changePassword:function(){
+
             }
         },
         watch:{
             id:function(){
                 this.getClient();
+            }
+        },
+        mounted:function(){
+            this.getBranches();
+        },
+        computed:{
+            branch_selection:function(){
+                var a = [];
+                this.branches.forEach(function(item){
+                    a.push({label:item.branch_name, value:item.id});
+                });
+                return a;
             }
         }
     }

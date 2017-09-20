@@ -522,7 +522,7 @@
                 $btn.button('loading');
 
                 this.makeRequest('/api/branch/addBranch?token=' + this.token, 'post', this.newBranch, function(){
-                    u.getClusters();
+                    u.getBranches();
                     toastr.success("Branch added successfully.");
                     $btn.button('reset');
                     $("#add-branch-modal").modal('hide');

@@ -73,7 +73,9 @@ class BranchController extends Controller{
             $branch->branch_pictures = json_encode(array("no photo.jpg"));
             $branch->directions = $request->input('directions');
             $branch->welcome_message = $request->input('welcome_message');
+            $branch->branch_data = '{}';
             $branch->opening_date = date('Y-m-d',strtotime($request->input('opening_date')));
+            $branch->is_active = 1;
             $branch->save();
 
             return response()->json(["result"=>"success"]);

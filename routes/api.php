@@ -83,3 +83,12 @@ Route::get('/service/getServicePackages/{flag}', 'ServiceController@getServicePa
 Route::get('/service/getServicePackages', 'ServiceController@getServicePackages');
 Route::post('/service/addServicePackage', 'ServiceController@addServicePackage');
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
+
+
+
+
+//mobile
+//flag = active:string
+// 192.168.1.225/api/user/getUsers?token=token_value
+// String url = 192.168.1.225/api/user/getUsers?token=token_value
+Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');

@@ -91,4 +91,7 @@ Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePa
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
+
 Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
+
+Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');

@@ -15,6 +15,8 @@ use Facebook\Facebook;
 
 
 class UserController extends Controller{
+
+    //1st
     public function login(Request $request){
         //attempt to login the system
         $u = User::where('email', $request['email'])->get()->first();
@@ -27,21 +29,20 @@ class UserController extends Controller{
                 else
                     $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
 
-                return response()->json(["token"=>$token,"result"=>"success"]);
+                return response()->json($token);
             }
-            return response()->json(["result"=>"failed"], 300);
+            return response()->json(["result"=>"failed"]);
         }
-
         if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
             return response()->json($token);
         }
-
         return response()->json(["result"=>"failed"]);
     }
 
     public function selfMigrateClient($email, $password){
+
         $client = Client::where('cusemail', $email)
-                        ->where('password', md5($password))
+                        ->where('password', '827ccb0eea8a706c4c34a16891f84e7b')
                         ->get()->first();
 
         if(isset($client['cusid'])){

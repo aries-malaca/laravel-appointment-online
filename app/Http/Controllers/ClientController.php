@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
+use App\Branch;
 
 class ClientController extends Controller{
     public function searchClients(Request $request){
@@ -24,6 +25,26 @@ class ClientController extends Controller{
     }
 
     public function getClient(Request $request){
-        return response()->json(User::where('id', $request->segment(4))->get()->first());
+        $client = User::where('is_client', 1)
+                        ->where('id', $request->segment(4))->get()->first();
+        if(isset($client['id'])){
+            $client['user_data']= json_decode($client['user_data']);
+            $client['home_branch_id'] = $client['user_data']->home_branch;
+            $find = Branch::find($client['home_branch_id']);
+            $client['home_branch_name'] = isset($find->id)? $find->branch_name:'N/A';
+        }
+        return response()->json($client);
+    }
+
+    public function updateInfo(Request $request){
+
+    }
+
+    public function updatePassword(){
+
+    }
+
+    public function updateAccountSettings(){
+
     }
 }

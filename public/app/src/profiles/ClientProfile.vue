@@ -63,6 +63,23 @@
                                                 <i class="fa fa-credit-card"></i> Premiere Client
                                             </li>
                                         </ul>
+
+                                        <table class="table table-hover table-light">
+                                            <tbody>
+                                                <tr>
+                                                    <td> Home Branch: </td>
+                                                    <td> {{ client.home_branch_name }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> Is Premier: </td>
+                                                    <td>
+                                                        <span class="badge badge-success" v-if="client.user_data.premier_status == 1">Yes</span>
+                                                        <span class="badge badge-warning" v-else>No</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
                                     </div>
                                     <!--end col-md-8-->
                                     <div class="col-md-4">
@@ -126,8 +143,23 @@
                             <div class="col-md-9">
                                 <div class="tab-content">
                                     <div id="personal-info" class="tab-pane active">
-
-
+                                        <div class="form-group">
+                                            <label class="control-label">First Name</label>
+                                            <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">Middle Name</label>
+                                            <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">Last Name</label>
+                                            <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">Address</label>
+                                            <textarea class="form-control" v-model="newClient.user_address"></textarea>
+                                        </div>
+                                        <button type="button" @click="updatePersonalInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
                                     </div>
                                     <div id="change-password" class="tab-pane">
 
@@ -179,6 +211,8 @@
         data: function(){
             return {
                 client:{},
+                newClient:{},
+
             }
         },
         methods:{
@@ -190,6 +224,14 @@
                 axios.get('/api/client/getClient/' + this.id)
                     .then(function (response) {
                         u.client = response.data;
+                        u.newClient = {
+                            first_name:response.data.first_name,
+                            middle_name:response.data.first_name,
+                            last_name:response.data.first_name,
+                            user_address:response.data.first_name,
+                            user_mobile:response.data.first_name,
+                            user_mobile:response.data.first_name,
+                        }
                     });
             },
             refreshClient:function(){

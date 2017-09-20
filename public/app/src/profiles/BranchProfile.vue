@@ -166,7 +166,6 @@
 
 <script>
     import UploadPictureModal from "../modals/UploadPictureModalSmall.vue";
-
     export default {
         name: 'BranchProfile',
         props: ['token','configs','id','with_back','id','show'],

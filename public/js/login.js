@@ -16,15 +16,9 @@ new Vue({
                 method: 'POST',
                 data: {email:this.email, password:this.password, remember:this.remember},
                 success: function (data) {
-                    if (data.result == 'failed'){
-                        toastr.error("Incorrect Email or Password.");
-                        $btn.button('reset');
-                    }
-                    else{
-                        $.cookie("login_cookie", data, { path: '/', expires: 100000 });
-                        window.location.href = '../../';
-                        $btn.dataset.loadingText = 'Redirecting...';
-                    }
+                    $.cookie("login_cookie", data.token, { path: '/', expires: 100000 });
+                    window.location.href = '../../';
+                    $btn.dataset.loadingText = 'Redirecting...';
                 },
                 error:function(error, status, message){
                     toastr.error("An error occurs, " + message);

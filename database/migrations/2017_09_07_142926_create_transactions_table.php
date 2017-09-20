@@ -1,11 +1,8 @@
 <?php
-
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-
-class CreateTransactionsTable extends Migration
-{
+class CreateTransactionsTable extends Migration{
     /**
      * Run the migrations.
      *
@@ -26,17 +23,16 @@ class CreateTransactionsTable extends Migration
             $table->string('booked_by_type');
             $table->text('waiver_data');
             $table->text('transaction_data');
+            $table->integer('technician_id');
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
      * @return void
      */
-    public function down()
-    {
+    public function down(){
         Schema::dropIfExists('transactions');
     }
 }

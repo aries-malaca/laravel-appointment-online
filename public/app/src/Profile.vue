@@ -260,7 +260,8 @@
                     message: "Are you sure you want to update?",
                     showCancelButton:true,
                     closeOnCancel: true,
-                    cancelButtonClass:'default'
+                    cancelButtonClass:'btn-sm btn-default',
+                    confirmButtonClass:'btn-sm btn-success'
                     },
                     function(t){
                         if(t){

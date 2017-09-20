@@ -30,6 +30,7 @@ class ClientController extends Controller{
                         ->where('id', $request->segment(4))->get()->first();
         if(isset($client['id'])){
             $client['user_data']= json_decode($client['user_data']);
+            $client['device_data']= json_decode($client['device_data']);
             $client['home_branch_id'] = $client['user_data']->home_branch;
             $find = Branch::find($client['home_branch_id']);
             $client['home_branch_name'] = isset($find->id)? $find->branch_name:'N/A';
@@ -71,8 +72,24 @@ class ClientController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function updatePassword(){
+    public function updatePassword(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'password'=>'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'
+            ]);
 
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            $client = User::find($request->input('id'));
+            $client->password = bcrypt($request->input('password'));
+            $client->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
     }
 
     public function updateSettings(){

@@ -107,7 +107,9 @@
                     this.searchClients($("#btn-search"));
                 }
             },
-            refreshClient:function(){},
+            refreshClient:function(){
+
+            },
             viewClient:function(client){
                 this.view_id = client.id;
                 this.view ='single';

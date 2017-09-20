@@ -40,7 +40,7 @@
                 let u = this;
 
                 SweetConfirmation('Are you sure you want to logout from this session?', function(){
-                    axios.patch('/api/user/destroyToken', { token : token, user_id : this.user_id})
+                    axios.patch('/api/user/destroyToken', { token : token, user_id : u.user_id})
                         .then(function () {
                             toastr.success("Device has been logged out.");
                             u.$emit('emit_host');

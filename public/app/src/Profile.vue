@@ -256,15 +256,17 @@
                 let $btn = $(event.target);
 
                 swal({
-                        title: "Are you sure?",
-                        showCancelButton:true,
-                        closeOnCancel: true,
-                        cancelButtonClass:'red'},
+                    title:"Confirmation",
+                    message: "Are you sure you want to update?",
+                    showCancelButton:true,
+                    closeOnCancel: true,
+                    cancelButtonClass:'default'
+                    },
                     function(t){
                         if(t){
                             $btn.button('loading');
                             axios.patch('/api/user/updateProfile?token=' + u.token, u.profile)
-                                .then(function (response) {
+                                .then(function () {
                                     u.getProfile();
                                     toastr.success("Profile successfully updated.");
                                     $btn.button('reset');
@@ -283,7 +285,7 @@
                 $btn.button('loading');
 
                 axios.patch('/api/user/changePassword?token=' + this.token, this.change_password)
-                .then(function (response) {
+                .then(function () {
                     u.getProfile();
                     toastr.success("Password successfully changed.");
                     $btn.button('reset');

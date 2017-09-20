@@ -63,6 +63,10 @@ function checkLoginState(){
                 error:function(error){
                     if(error.status === 300){
                         toastr.info("It seems your Facebook Account not linked yet to LBO. You may register instead.");
+                        setTimeout(function(){
+                            window.location.href = '../../register';
+                        },2000);
+
                     }
                 },
             });

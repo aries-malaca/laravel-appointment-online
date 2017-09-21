@@ -20,8 +20,12 @@ new Vue({
                     window.location.href = '../../';
                     $btn.dataset.loadingText = 'Redirecting...';
                 },
-                error:function(error, status, message){
-                    toastr.error("An error occurs, " + message);
+                error:function(error){
+                    console.log(error);
+                    if(error.status === 400){
+                        toastr.error("An error occurs, " + error.responseJSON.error);
+                    }
+
                     $btn.button('reset');
                 },
             });
@@ -57,10 +61,10 @@ function checkLoginState(){
                 error:function(error){
                     if(error.status === 300){
                         toastr.info("It seems your Facebook Account not linked yet to LBO. You may register instead.");
+                        let user = error.responseJSON.user;
                         setTimeout(function(){
-                            window.location.href = '../../register';
+                            window.location.href = '../../register?email='+user.email+'&first_name='+user.first_name+'&middle_name='+user.middle_name+'&last_name='+user.last_name;
                         },2000);
-
                     }
                 },
             });

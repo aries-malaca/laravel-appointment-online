@@ -9,9 +9,13 @@ use Validator;
 class ProductController extends Controller{
     public function getProducts(Request $request){
         if($request->segment(4)=='active')
-            return response()->json(Product::where('is_active', 1)->get());
+            return response()->json(Product::leftJoin('product_groups','products.product_group_id','=','product_groups.id')
+                                    ->select('products.*','product_group_name','product_picture', 'product_description')
+                                    ->where('is_active', 1)->get());
 
-        return response()->json(Product::get());
+        return response()->json(Product::leftJoin('product_groups','products.product_group_id','=','product_groups.id')
+                                        ->select('products.*','product_group_name','product_picture', 'product_description')
+                                        ->get());
     }
 
     public function getProductGroups(Request $request){
@@ -26,8 +30,9 @@ class ProductController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'search_id' => 'required|unique:products,id',
-                'product_name' => 'required|max:255',
                 'product_code' => 'required|max:255',
+                'product_size' => 'required|max:255',
+                'product_variant' => 'required|max:255',
                 'product_group_id' => 'required|not_in:0',
                 'product_price' => 'required|numeric'
 
@@ -43,8 +48,9 @@ class ProductController extends Controller{
             $product = new Product;
             $product->id = $request->input('search_id');
             $product->product_code = $request->input('product_code');
-            $product->product_name = $request->input('product_name');
             $product->product_price = $request->input('product_price');
+            $product->product_variant = $request->input('product_variant');
+            $product->product_size = $request->input('product_size');
             $product->product_group_id = $request->input('product_group_id');
             $product->is_active = 1;
             $product->product_data = '{}';
@@ -60,8 +66,9 @@ class ProductController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'search_id' => 'required|unique:products,id,'. $request->input('id'),
-                'product_name' => 'required|max:255',
                 'product_code' => 'required|max:255',
+                'product_size' => 'required|max:255',
+                'product_variant' => 'required|max:255',
                 'product_price' => 'required|numeric',
                 'product_group_id' => 'required|not_in:0'
 
@@ -77,7 +84,8 @@ class ProductController extends Controller{
             $product = Product::find($request->input('id'));
             $product->id = $request->input('search_id');
             $product->product_code = $request->input('product_code');
-            $product->product_name = $request->input('product_name');
+            $product->product_variant = $request->input('product_variant');
+            $product->product_size = $request->input('product_size');
             $product->product_price = $request->input('product_price');
             $product->product_group_id = $request->input('product_group_id');
             $product->save();

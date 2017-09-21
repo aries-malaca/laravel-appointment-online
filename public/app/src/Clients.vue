@@ -50,7 +50,7 @@
     export default {
         name: 'Clients',
         components:{ DataTable, ClientProfile},
-        props:['token'],
+        props:['token','configs'],
         data: function(){
             return {
                 title: 'Clients',

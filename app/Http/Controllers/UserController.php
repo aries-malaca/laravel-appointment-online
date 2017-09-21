@@ -31,12 +31,12 @@ class UserController extends Controller{
 
                 return response()->json(["token"=>$token, "result"=>'success']);
             }
-            return response()->json(["result"=>"failed",300]);
+            return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
         }
         if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
             return response()->json(["token"=>$token, "result"=>'success']);
         }
-        return response()->json(["result"=>"failed"],300);
+        return response()->json(["result"=>"failed","error"=>"User not found."],400);
     }
 
     public function selfMigrateClient($email, $password){
@@ -220,7 +220,7 @@ class UserController extends Controller{
 
     public function fbLogin(Facebook $fb, Request $request){
         // call api to retrieve person's public_profile details
-        $fields = "id,name,email,first_name,last_name,middle_name,gender,locale,picture,verified";
+        $fields = "id,name,email,birthday,first_name,last_name,middle_name,gender,locale,picture,verified";
         $fb->setDefaultAccessToken($request->input('accessToken'));
         $fb_user = $fb->get('/me?fields='.$fields)->getGraphUser()->asArray();
 

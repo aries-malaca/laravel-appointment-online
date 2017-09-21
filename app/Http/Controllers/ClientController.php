@@ -72,7 +72,7 @@ class ClientController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function updatePassword(Request $request){
+    public function changePassword(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [

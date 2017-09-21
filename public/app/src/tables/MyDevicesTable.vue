@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3>Device Management</h3>
+        <h4>Device Management</h4>
         <table class="table-responsive table table-hover table-bordered">
             <thead>
             <tr>

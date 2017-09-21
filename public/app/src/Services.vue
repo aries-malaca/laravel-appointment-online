@@ -241,7 +241,9 @@
                             <div class="col-md-7">
                                 <div class="form-group">
                                     <label class="control-label">Product Name</label>
-                                    <input type="text" v-model="newProduct.product_name" class="form-control" />
+                                    <select class="form-control" v-model="newProduct.product_group_id">
+                                        <option v-bind:value="group.id" v-for="group in productGroups">{{ group.product_group_name }}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -252,12 +254,16 @@
                                     <input type="number" v-model="newProduct.product_price" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="control-label">Product Group</label>
-                                    <select class="form-control" v-model="newProduct.product_group_id">
-                                        <option v-bind:value="group.id" v-for="group in productGroups">{{ group.product_group_name }}</option>
-                                    </select>
+                                    <label class="control-label">Size</label>
+                                    <input type="text" v-model="newProduct.product_size" placeholder="Ex: 30ml" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Variant</label>
+                                    <input type="text" v-model="newProduct.product_variant" class="form-control" />
                                 </div>
                             </div>
                         </div>
@@ -340,7 +346,9 @@
                     columns: [
                         { label: 'ID', field: 'id', filterable:true, type:'number'},
                         { label: 'Product Code', field: 'product_code', filterable: true },
-                        { label: 'Product Name',  field: 'product_name', filterable: true },
+                        { label: 'Product Name', field: 'product_group_name', filterable: true },
+                        { label: 'Size',  field: 'product_size', filterable: true },
+                        { label: 'Variant',  field: 'product_variant', filterable: true },
                         { label: 'Price', field: 'product_price', filterable: true, type:'decimal' }
                     ],
                     rowClicked: this.viewProduct
@@ -577,7 +585,8 @@
                     id:product.id,
                     search_id:product.id,
                     product_code:product.product_code,
-                    product_name:product.product_name,
+                    product_size:product.product_size,
+                    product_variant:product.product_variant,
                     product_price:product.product_price,
                     product_group_id:product.product_group_id
                 };

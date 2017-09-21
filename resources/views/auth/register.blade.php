@@ -12,16 +12,6 @@
 </head>
 <!-- END HEAD -->
 <body class="login">
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.10&appId=1899966743571465";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-</script>
-
 <!-- BEGIN LOGO -->
 <div class="logo">
     <a href="../../home">
@@ -29,27 +19,88 @@
 </div>
 <!-- END LOGO -->
 <!-- BEGIN LOGIN -->
-<div class="content" id="login" v-if="token === undefined">
+<div class="content" id="register" v-if="token === undefined">
+    <input type="hidden" value="{{ (isset($_GET['email'])?$_GET['email']:'') }}" id="email" />
+    <input type="hidden" value="{{ (isset($_GET['first_name'])?$_GET['first_name']:'') }}" id="first_name" />
+    <input type="hidden" value="{{ (isset($_GET['middle_name'])?$_GET['middle_name']:'') }}" id="middle_name" />
+    <input type="hidden" value="{{ (isset($_GET['last_name'])?$_GET['last_name']:'') }}" id="last_name" />
     <!-- BEGIN LOGIN FORM -->
     <div @keypress="listenKey($event)">
-        <div class="form-group">
-            <input class="form-control" id="email" type="email" placeholder="Email" v-model="email" />
-        </div>
-        <div class="form-group">
-            <input class="form-control" type="password" placeholder="Password" v-model="password" />
-        </div>
-        <div class="form-actions">
-            <button @click="login($event)" id="btn-login" data-loading-text="Please wait..." class="btn green btn-block uppercase">Register</button>
+        <div>
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">First Name</label>
+                <div class="input-icon">
+                    <i class="fa fa-font"></i>
+                    <input v-model="newUser.first_name" class="form-control placeholder-no-fix" type="text" placeholder="First Name"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">Middle Name</label>
+                <div class="input-icon">
+                    <i class="fa fa-font"></i>
+                    <input v-model="newUser.middle_name" class="form-control placeholder-no-fix" type="text" placeholder="Middle Name"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">Last Name</label>
+                <div class="input-icon">
+                    <i class="fa fa-font"></i>
+                    <input v-model="newUser.last_name" class="form-control placeholder-no-fix" type="text" placeholder="Last Name"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">Address</label>
+                <div class="input-icon">
+                    <i class="fa fa-check"></i>
+                    <input class="form-control placeholder-no-fix" type="text" placeholder="Address" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">
+
+                </div>
+                <div class="col-xs-6">
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                <label class="control-label visible-ie8 visible-ie9">Email</label>
+                <div class="input-icon">
+                    <i class="fa fa-envelope"></i>
+                    <input class="form-control placeholder-no-fix" type="text" placeholder="Email" v-model="newUser.email"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">Password</label>
+                <div class="input-icon">
+                    <i class="fa fa-lock"></i>
+                    <input class="form-control placeholder-no-fix" type="password" placeholder="Password" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label visible-ie8 visible-ie9">Re-type Your Password</label>
+                <div class="controls">
+                    <div class="input-icon">
+                        <i class="fa fa-check"></i>
+                        <input class="form-control placeholder-no-fix" type="password" placeholder="Re-type Your Password" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="mt-checkbox mt-checkbox-outline">
+                    <input type="checkbox" v-model="newUser.agree"> I agree to the
+                    <a href="javascript:;">Terms & Conditions </a>
+                    <span></span>
+                </label>
+            </div>
+            <div class="form-actions">
+                <button @click="register($event)" v-bind:disabled="!newUser.agree" id="btn-register" data-loading-text="Please wait..." class="btn green btn-block uppercase">Register</button>
+            </div>
         </div>
 
-        <div class="login-options" style="padding-bottom: 20px; padding-left:18%">
-            <fb:login-button
-                    scope="public_profile,email"
-                    onlogin="checkLoginState();"
-                    data-button-type="continue_with"
-                    data-size="large">
-            </fb:login-button>
-        </div>
         <div class="create-account">
             <p>
                 <a href="../../login" class="btn-primary btn" id="register-btn">I have an account</a>

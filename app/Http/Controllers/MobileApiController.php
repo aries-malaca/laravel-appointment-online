@@ -85,6 +85,7 @@ class MobileApiController extends Controller
 			}
 				
 			$service_array[] 	= array(
+							'id'    		  => $rowService->id,
 							'service_name'    => $rowService->service_name,
 							'desc'            => $rowService->service_description,
 							'image' 	   	  => $rowService->service_picture,
@@ -93,6 +94,7 @@ class MobileApiController extends Controller
 							'price_female' 	  => $option['price_male'],
 							'duration_male'   => $option['duration_female'],
 							'duration_female' => $option['duration_male'],
+							'updated_at' 	  => $rowService->updated_at,
 								);
 		}		
 
@@ -111,30 +113,16 @@ class MobileApiController extends Controller
 		// }
         
         $response['carousel']   = $advertisement_query;
-		$response['service']    = $service_array;
-		$response['product']    = $product_array;
+		$response['services']    = $service_array;
+		$response['products']    = $product_array;
 		$response['date_today'] = $today;
-
-
-  	   // ("id");
-      //  ("service_name");
-      //  ("desc");
-      //  ("image");
-      //  ("price_male");
-      //  ("price_female");
-      //  ("updated_at");
-
-
-
-
+		
 		return response()->json($response);
-
-
-
-
-
 	}
 
+	public function getToken(Request $request){
+
+	}
 
 
 

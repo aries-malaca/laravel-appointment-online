@@ -101,3 +101,4 @@ Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePa
 Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
 
 Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
+Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');

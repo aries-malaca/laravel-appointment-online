@@ -9,6 +9,8 @@ use App\ServiceType;
 use App\Service;
 use App\Product;
 use App\ProductGroup;
+use App\Branch;
+use App\Config;
 use DB;
 class MobileApiController extends Controller
 {
@@ -98,6 +100,7 @@ class MobileApiController extends Controller
 								);
 		}		
 
+
 		//papalitan mamaya
 		// $product_query = DB::table('products as a')
 		// 				->join('product_groups as b','a.product_group_id','=','b.id')
@@ -124,6 +127,37 @@ class MobileApiController extends Controller
 
 	}
 
+
+	public function getUser(){
+        $api = $this->authenticateAPI();
+        $response = array();
+        if($api['result'] === 'success'){
+            $user_data = json_decode($api['user']['user_data'],true);
+            if($api['user']['is_client'] == 1){
+                $branch = Branch::find($user_data['home_branch']);
+                if(isset($branch->id)){
+                    $branch = $branch->branch_name;
+                }
+                else{
+                    $branch = 'N/A';
+                }
+                $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
+            }
+            else{
+                $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
+            }
+            //return success
+            
+
+            return response()->json(["user"=>$api["user"],
+                                     "menus"=>$this->getUserMenus($api["user"]),
+                                     "configs"=> Config::get()->toArray()
+                                    ],
+                            $api["status_code"]);
+        }
+           
+        return response()->json($api, $api["status_code"]);
+    }
 
 
 }

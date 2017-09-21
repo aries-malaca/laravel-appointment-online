@@ -58,9 +58,6 @@
                                             <li v-else>
                                                 <i class="fa fa-male"></i> Male
                                             </li>
-                                            <li v-if="client.is_premiere == 1">
-                                                <i class="fa fa-credit-card"></i> Premiere Client
-                                            </li>
                                         </ul>
 
                                         <table class="table table-hover table-light">
@@ -70,7 +67,7 @@
                                                     <td> {{ client.home_branch_name }} </td>
                                                 </tr>
                                                 <tr>
-                                                    <td> Is Premier: </td>
+                                                    <td> Premier Client: </td>
                                                     <td v-if="client.user_data !== undefined ">
                                                         <span class="badge badge-success" v-if="client.user_data.premier_status == 1">Yes</span>
                                                         <span class="badge badge-warning" v-else>No</span>
@@ -85,23 +82,20 @@
                                         <div class="portlet sale-summary">
                                             <div class="portlet-title">
                                                 <div class="caption font-red sbold"> Transaction Summary </div>
-                                                <div class="tools">
-                                                    <a class="reload" href="javascript:;"> </a>
-                                                </div>
                                             </div>
                                             <div class="portlet-body">
                                                 <ul class="list-unstyled">
                                                     <li>
                                                         <span class="sale-info"> PRODUCTS AVAILED </span>
-                                                        <span class="sale-num"> 2377 </span>
+                                                        <span class="sale-num"> {{ products_availed_total }} </span>
                                                     </li>
                                                     <li>
                                                         <span class="sale-info"> SERVICES AVAILED </span>
-                                                        <span class="sale-num"> 2377 </span>
+                                                        <span class="sale-num"> {{ services_availed_total }} </span>
                                                     </li>
                                                     <li>
                                                         <span class="sale-info"> TOTAL SALES </span>
-                                                        <span class="sale-num"> 2377 </span>
+                                                        <span class="sale-num"> {{ products_availed_total+services_availed_total }} </span>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -114,7 +108,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <active-appointments-table :active_appointments="[]" :token="token" :user_id="id"
+                                <appointments-table :hide_client="true" title="Active Appointments" :active_appointments="active_appointments" :token="token"
                                                            :configs="configs" />
                             </div>
                         </div>
@@ -196,12 +190,18 @@
                                     </div>
                                     <div id="account-settings" class="tab-pane">
                                         <div class="row">
-                                            <div class="col-md-4">
-                                                <h3>Change Password</h3>
-                                                <div class="form-group">
-                                                    <label class="control-label">New Password</label>
-                                                    <input type="password" class="form-control" v-model="newClient.password" />
+                                            <div class="col-md-6">
+                                                <h4>Change Password</h4>
+                                                <div class="input-group">
+                                                    <div class="input-icon">
+                                                        <i class="fa fa-lock fa-fw"></i>
+                                                        <input class="form-control" type="password" v-model="newClient.password" placeholder="password" />
+                                                    </div>
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-success" @click="changePassword($event)" data-loading-text="Updating..." type="button">Save Changes</button>
+                                                    </span>
                                                 </div>
+
                                             </div>
                                         </div>
                                         <my-devices-table @emit_host="getClient" :user_id="newClient.id"
@@ -214,7 +214,8 @@
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="appointments">
-
+                        <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments" :token="token"
+                                                   :configs="configs" />
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions">
@@ -242,19 +243,20 @@
 
 <script>
     import UploadPictureModal from "../modals/UploadPictureModal.vue";
-    import ActiveAppointmentsTable from "../tables/ActiveAppointmentsTable.vue";
+    import AppointmentsTable from "../tables/AppointmentsTable.vue";
     import MyDevicesTable from "../tables/MyDevicesTable.vue";
     import VueSelect from "vue-select"
 
     export default {
         name: 'ClientProfile',
         props: ['token','configs','with_back','id','show'],
-        components:{ UploadPictureModal, ActiveAppointmentsTable, VueSelect, MyDevicesTable},
+        components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable},
         data: function(){
             return {
                 client:{},
                 newClient:{},
-                branches:[]
+                branches:[],
+                active_appointments:[]
             }
         },
         methods:{
@@ -358,6 +360,12 @@
                     a.push({label:item.branch_name, value:item.id});
                 });
                 return a;
+            },
+            services_availed_total:function(){
+                return 500;
+            },
+            products_availed_total:function(){
+                return 500;
             }
         }
     }

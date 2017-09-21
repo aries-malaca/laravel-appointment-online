@@ -14,7 +14,8 @@
                 </div>
             </div>
             <div class="portlet-body">
-
+                <appointments-table title="Active Appointments" :hide_client="false" :appointments="active_appointments" :token="token"
+                                    :configs="configs" />
             </div>
         </div>
         <booking-modal></booking-modal>
@@ -23,13 +24,16 @@
 
 <script>
     import BookingModal from "./modals/BookingModal.vue";
+    import AppointmentsTable from "./tables/AppointmentsTable.vue";
+
     export default {
         name: 'Appointments',
-        props: ['user'],
-        components: { BookingModal },
+        props: ['user','token','configs'],
+        components: { BookingModal, AppointmentsTable },
         data: function(){
             return {
                 title: 'Appointments',
+                active_appointments:[],
             }
         },
         methods:{

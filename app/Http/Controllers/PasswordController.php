@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use Mail;
+use Validator;
 
 class PasswordController extends Controller{
     function index(){
@@ -10,12 +11,26 @@ class PasswordController extends Controller{
     }
 
     function requestPassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|max:255',
+            'birth_date' => 'required|max:255',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        }
+
         $user = User::where('email', $request->input('email'))
                             ->where('birth_date', 'LIKE', $request->input('birth_date').'%')
                             ->get()->first();
 
 
-        if(isset($user['id'])){
+        if(!isset($user['id'])) {
+            if($result = $this->selfMigrateClient($request->input('email'),null, $request->input('birth_date')) ){
+                $user = User::where('id', $result['id'])->get()->first();
+            }
+        }
+
+        if(isset($user['id'])) {
             $generated = md5(rand(1,600));
             $user_data = json_decode($user['user_data'],true);
             $user_data['reset_password_key'] = $generated;
@@ -31,6 +46,8 @@ class PasswordController extends Controller{
 
             return response()->json(["result"=>"success"]);
         }
+
+        return response()->json(["result"=>"failed"]);
     }
 
     function verifyPassword(Request $request){

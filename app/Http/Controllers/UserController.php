@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\User;
-use App\Client;
 use App\UserLevel;
 use App\Branch;
 use App\Config;
@@ -18,9 +17,22 @@ class UserController extends Controller{
 
     //1st
     public function login(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|max:255',
+            'password' => 'required|max:255',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        }
+
         //attempt to login the system
         $u = User::where('email', $request['email'])->get()->first();
         if(isset($u['id'])){
+            if($u['is_active'] == 0){
+                return response()->json(["result"=>"failed","error"=>"User is inactive."],400);
+            }
+
+
             if(Hash::check($request['password'], $u['password'])){
                 $token = JWTAuth::fromUser(User::find($u['id']));
 
@@ -43,51 +55,6 @@ class UserController extends Controller{
             return response()->json(["token"=>$result['token'], "result"=>'success']);
         }
         return response()->json(["result"=>"failed","error"=>"User not found."],400);
-    }
-
-    public function selfMigrateClient($email, $password){
-
-        $client = Client::where('cusemail', $email)
-                        ->where('password', '827ccb0eea8a706c4c34a16891f84e7b')
-                        ->get()->first();
-
-        if(isset($client['cusid'])){
-
-            $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
-
-            if($boss_data === false){
-                return false;
-            }
-            //start self migration
-
-            $boss_data = json_decode($boss_data,true);
-
-            $user = new User;
-            $user->email = $email;
-            $user->password = bcrypt($password);
-            $user->first_name = ($client['cusfname'] != '') ? $client['cusfname'] : $boss_data['firstname'];
-            $user->middle_name = ($client['cusmname'] != '') ? $client['cusmname'] : $boss_data['middlename'];
-            $user->last_name = ($client['cuslname'] != '') ? $client['cuslname'] : $boss_data['lastname'];
-            $user->username = $user->first_name .' ' . $user->last_name;
-            $user->birth_date = date('Y-m-d',strtotime($client['cusbday']));
-            $user->user_mobile = $client['cusmob'];
-            $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
-            $user->level = 0;
-            $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
-                                                 "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
-                                                 "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:0 ) ));
-            $user->device_data = '[]';
-            $user->last_activity = date('Y-m-d H:i');
-            $user->last_login = date('Y-m-d H:i');
-            $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
-            $user->is_active = 1;
-            $user->is_client = 1;
-            $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
-            $user->save();
-            //end self migration
-            return ['token'=>JWTAuth::fromUser(User::find($user->id)), 'id'=> $user->id];
-        }
-        return false;
     }
 
     public function getUser(){

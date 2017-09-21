@@ -32,6 +32,7 @@ class CreateUsersTable extends Migration
             $table->datetime('last_login')->nullable();
             $table->integer('is_client');
             $table->integer('is_confirmed');
+            $table->integer('is_agreed');
             $table->integer('is_active');
             $table->string('user_picture')->nullable();
             $table->rememberToken();

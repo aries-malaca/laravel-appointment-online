@@ -27,7 +27,7 @@ new Vue({
                     $btn.button('reset');
                 },
                 error:function(error, status, message){
-                    toastr.error("An error occurs, " + message);
+                    toastr.error("An error occurs, " + error.responseJSON.error);
                     $btn.button('reset');
                 },
             });

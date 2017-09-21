@@ -7,6 +7,8 @@ use App\User;
 use App\Advertisment;
 use App\ServiceType;
 use App\Service;
+use App\Product;
+use App\ProductGroup;
 use DB;
 class MobileApiController extends Controller
 {
@@ -30,55 +32,89 @@ class MobileApiController extends Controller
 							  ->orderBy('created_at')
 							  ->get();
 
-
-		$service_array 		  = array();
-		// $service_price_array  = array();
-		// $service_single_query  = ServiceType::where("is_active","=","1")
-		// 						// ->select("service_name,service_description,service_picture")
-		// 						->get();
-		
-
-		// foreach($service_single_query as $rowService){
-		// 	$service_array[] = array(
-		// 					'service_name' => $rowService->service_name,
-		// 					'desc'         => $rowService->service_description,
-		// 					'image' 	   => $rowService->service_picture,
-		// 						);
-		// }		
-
-		$service_price_query = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
-                                    ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                    ->select('services.*','service_name','package_name','service_description')
-                                    ->where('services.is_active', 1)->get();  
-
-       foreach($service_price_query as $rowServicePrice){
-       		if($rowServicePrice->service_gender == "female"){
-       			$price_female = $rowServicePrice->service_price;
-       			$price_male   = "";
-       		}
-       		else{
-       			$price_male   = $rowServicePrice->service_price;
-       			$price_female = "";
-       		}
-			$service_array[] = array(
-							'name' 	   		=> $rowServicePrice->service_name == "" ? $rowServicePrice->package_name : $rowServicePrice->service_name,
-							'desc' 	   		=> $rowServicePrice->service_description,
-							'duration' 	    => $rowServicePrice->service_minutes,
-							'price_female'  => $price_female,
-							'price_male'    => $price_male,
-							'image' 	    => $rowServicePrice->service_picture,
+		$duration_male 		= "";
+		$duration_female 	= "";
+		$price_male 		= "";
+		$price_female 		= "";
+		$gender             = "";	
+		$serv = 1;		  
+		$service_array 		= array();
+		$product_array   	= array();
+		$option = array();
+		$service_single_query  = ServiceType::where("is_active","=","1")
+								->get();
+		foreach($service_single_query as $rowService){
+			$service_type_id 	 = $rowService->id;
+			$serv_count 		 = DB::table('services')
+								 ->where("is_active","=","1")
+								 ->where("service_type_id","=",$service_type_id)
+								 ->count();
+			if($serv_count <= 0){
+				$option['price_female']		="";
+				$option['price_male']		="";
+				$option['duration_female']	="";
+				$option['duration_male']	="";
+			}
+			else{
+				$service_price_query = DB::table('services')
+									 ->where("is_active","=","1")
+									 ->where("service_type_id","=",$service_type_id)
+									 ->get();
+				foreach($service_price_query as $rowServicePrice){	
+					$gender 	= $rowServicePrice->service_gender;
+					// echo $gender;
+					if($gender == "male"){
+						$option['price_male']        = number_format($rowServicePrice->service_price,2);
+						$option['duration_male']	 = $rowServicePrice->service_minutes;
+						// $option['duration_female']	 = "";
+						// $option['price_female']		 = "";
+					}
+					else if($gender == "female"){
+						$option['price_female']      = number_format($rowServicePrice->service_price,2);
+						$option['duration_female']	 = $rowServicePrice->service_minutes;
+						// $option['duration_male']	="";
+						// $option['price_male']		="";
+					}
+					else{
+						$option['price_female']		="";
+						$option['price_male']		="";
+						$option['duration_female']	="";
+						$option['duration_male']	="";
+					}
+				}	
+			}
+				
+			$service_array[] 	= array(
+							'service_name'    => $rowService->service_name,
+							'desc'            => $rowService->service_description,
+							'image' 	   	  => $rowService->service_picture,
+							'service_type' 	  => $service_type_id,
+							'price_male' 	  => $option['price_female'],
+							'price_female' 	  => $option['price_male'],
+							'duration_male'   => $option['duration_female'],
+							'duration_female' => $option['duration_male'],
 								);
 		}		
 
-                  
-
-
-
-
-		$response['carousel']   = $advertisement_query;
+		//papalitan mamaya
+		// $product_query = DB::table('products as a')
+		// 				->join('product_groups as b','a.product_group_id','=','b.id')
+		// 				->where("a.is_active","=","1")
+		// 				->select("a.id as product_id","a.product_name","a.product_desc","a.product_price","a.product_price")
+		// 				->get();
+		// foreach ($product_query as $rowProduct) {
+		// 	$product_array[] = array(
+		// 					'id' => $rowProduct->product_id,
+		// 					'id' => $rowProduct->product_id,
+		// 					'id' => $rowProduct->product_id,
+		// 						);
+		// }
+        
+        $response['carousel']   = $advertisement_query;
 		$response['service']    = $service_array;
+		$response['product']    = $product_array;
+		$response['date_today'] = $today;
 
-		$response['date_today'] = $today ;
 
   	   // ("id");
       //  ("service_name");

@@ -33,8 +33,14 @@ class UserController extends Controller{
             }
             return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
         }
-        if($token = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
-            return response()->json(["token"=>$token, "result"=>'success']);
+        if($result = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
+
+            if($request->input('device') === null)
+                $this->registerToken($result['id'], $result['token']);
+            else
+                $this->registerToken($result['id'], $result['token'], $request->input('device'), $request->input('device_info'));
+
+            return response()->json(["token"=>$result['token'], "result"=>'success']);
         }
         return response()->json(["result"=>"failed","error"=>"User not found."],400);
     }
@@ -59,26 +65,27 @@ class UserController extends Controller{
             $user = new User;
             $user->email = $email;
             $user->password = bcrypt($password);
-            $user->username = '';
             $user->first_name = ($client['cusfname'] != '') ? $client['cusfname'] : $boss_data['firstname'];
             $user->middle_name = ($client['cusmname'] != '') ? $client['cusmname'] : $boss_data['middlename'];
             $user->last_name = ($client['cuslname'] != '') ? $client['cuslname'] : $boss_data['lastname'];
+            $user->username = $user->first_name .' ' . $user->last_name;
             $user->birth_date = date('Y-m-d',strtotime($client['cusbday']));
             $user->user_mobile = $client['cusmob'];
             $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
             $user->level = 0;
-            $user->user_data = json_encode(array("premier_status"=>$boss_data['premier'],
-                                                 "premier_branch"=>$boss_data['premier_branch'],
-                                                 "home_branch"=>$boss_data['branch_id']));
-            $user->device_data = '{}';
+            $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
+                                                 "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
+                                                 "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:0 ) ));
+            $user->device_data = '[]';
             $user->last_activity = date('Y-m-d H:i');
             $user->last_login = date('Y-m-d H:i');
             $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
             $user->is_active = 1;
             $user->is_client = 1;
+            $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
             $user->save();
             //end self migration
-            return JWTAuth::fromUser(User::find($user->id));
+            return ['token'=>JWTAuth::fromUser(User::find($user->id)), 'id'=> $user->id];
         }
         return false;
     }
@@ -142,6 +149,7 @@ class UserController extends Controller{
                             'last_name'=>$request->input('last_name'),
                             'user_address'=>$request->input('user_address'),
                             'user_mobile'=>$request->input('user_mobile'),
+                            'username'=>$request->input('first_name') .' ' .$request->input('last_name')  ,
                             'user_data'=>json_encode($user_data)
                 ]);
             return response()->json(["result"=>"success"]);
@@ -269,6 +277,7 @@ class UserController extends Controller{
             $user->first_name = $request->input('first_name');
             $user->middle_name = $request->input('middle_name');
             $user->last_name = $request->input('last_name');
+            $user->username = $user->first_name .' ' . $user->last_name;
             $user->user_mobile = $request->input('user_mobile');
             $user->email = $request->input('email');
             $user->password = bcrypt(12345);
@@ -321,6 +330,7 @@ class UserController extends Controller{
             $user->middle_name = $request->input('middle_name');
             $user->last_name = $request->input('last_name');
             $user->user_mobile = $request->input('user_mobile');
+            $user->username = $user->first_name .' ' . $user->last_name;
             $user->email = $request->input('email');
             $user->gender = $request->input('gender');
             $user->user_address = $request->input('user_address');

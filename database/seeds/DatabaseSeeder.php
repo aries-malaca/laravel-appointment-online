@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
                 'device_data'=>'[]',
                 'user_picture'=>'no photo female.jpg',
                 'is_active'=>1,
+                'is_agreed'=>0,
                 'user_address'=>'Manila',
                 'email'=> $faker->unique()->safeEmail,
                 'password'=>bcrypt('12345')

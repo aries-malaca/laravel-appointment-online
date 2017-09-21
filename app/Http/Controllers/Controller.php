@@ -5,6 +5,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
+use App\Client;
 use App\Menu;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -110,5 +111,57 @@ class Controller extends BaseController{
         $user->last_login = date('Y-m-d H:i');
         $user->device_data = json_encode($tokens);
         $user->save();
+    }
+
+    public function selfMigrateClient($email, $password=null, $birth_date=null){
+
+        if($password !== null){
+            $client = Client::where('cusemail', $email)
+                ->where('password', $password)
+                ->get()->first();
+        }
+        else{
+            $client = Client::where('cusemail', $email)
+                ->where('cusbday', 'LIKE', $birth_date.'%')
+                ->get()->first();
+        }
+
+        if(isset($client['cusid'])){
+
+            $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
+
+            if($boss_data === false){
+                return false;
+            }
+            //start self migration
+
+            $boss_data = json_decode($boss_data,true);
+
+            $user = new User;
+            $user->email = $email;
+            $user->password = bcrypt($password);
+            $user->first_name = ($client['cusfname'] != '') ? $client['cusfname'] : $boss_data['firstname'];
+            $user->middle_name = ($client['cusmname'] != '') ? $client['cusmname'] : $boss_data['middlename'];
+            $user->last_name = ($client['cuslname'] != '') ? $client['cuslname'] : $boss_data['lastname'];
+            $user->username = $user->first_name .' ' . $user->last_name;
+            $user->birth_date = date('Y-m-d',strtotime($client['cusbday']));
+            $user->user_mobile = $client['cusmob'];
+            $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
+            $user->level = 0;
+            $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
+                "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
+                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:0 ) ));
+            $user->device_data = '[]';
+            $user->last_activity = date('Y-m-d H:i');
+            $user->last_login = date('Y-m-d H:i');
+            $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
+            $user->is_active = 1;
+            $user->is_client = 1;
+            $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
+            $user->save();
+            //end self migration
+            return ['token'=>JWTAuth::fromUser(User::find($user->id)), 'id'=> $user->id];
+        }
+        return false;
     }
 }

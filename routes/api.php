@@ -88,8 +88,6 @@ Route::get('/service/getServicePackages', 'ServiceController@getServicePackages'
 Route::post('/service/addServicePackage', 'ServiceController@addServicePackage');
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
 
-Route::get('/config/getTerms', 'ConfigController@getTerms');
-
 
 
 
@@ -100,9 +98,13 @@ Route::get('/config/getTerms', 'ConfigController@getTerms');
 
 // Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
 
+
 Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
 
-Route::post('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
+
+Route::patch('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
 Route::patch('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');
 Route::patch('/mobile/updateAccount', 'MobileApiController@updateAccount');
+Route::patch('/mobile/uploadUserImage', 'MobileApiController@uploadUserImage');
+

@@ -11,19 +11,13 @@ use App\Product;
 use App\ProductGroup;
 use App\Branch;
 use App\Config;
+use DateTime;
+use Validator;
 use DB;
 class MobileApiController extends Controller
 {
 
-    //with data
-	public function SapnuPuas(Request $request){
-		return response()->json();
-	}
-
-	//get only
-	public function SapnuPuas1(){
-		return response()->json($user = User::take(100)->get());
-	}
+    
 
 	public function LoadData(){
 
@@ -123,14 +117,13 @@ class MobileApiController extends Controller
 		return response()->json($response);
 	}
 
-	public function getToken(Request $request){
-
-	}
+	
 
 
 	public function getUser(){
         $api = $this->authenticateAPI();
         $response = array();
+
         if($api['result'] === 'success'){
             $user_data = json_decode($api['user']['user_data'],true);
             if($api['user']['is_client'] == 1){
@@ -144,20 +137,151 @@ class MobileApiController extends Controller
                 $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
             }
             else{
-                $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
+            	//respond a non client 
+            	return response()->json(["result"=>"failed","error"=>"You are not allowed to use the Mobile app"],400); 
             }
-            //return success
-            
-
-            return response()->json(["user"=>$api["user"],
-                                     "menus"=>$this->getUserMenus($api["user"]),
-                                     "configs"=> Config::get()->toArray()
-                                    ],
-                            $api["status_code"]);
-        }
            
+          	$rowUsers = $api['user'];
+          	$bday     = new DateTime($rowUsers->birth_date);
+            $email 	  = $rowUsers->email;
+       		
+   //     		$total_discount  	= file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
+			// $total_transaction 	= file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
+			$total_discount		= "190";
+			$total_transaction  = "5520";
+        	$response[] = array(
+        					"id" 				=> $rowUsers->id,
+        					"fname" 			=> $rowUsers->first_name,
+        					"mname" 			=> $rowUsers->middle_name,
+        					"lname" 			=> $rowUsers->last_name,
+        					"address" 			=> $rowUsers->user_address,
+        					"bday" 				=> $bday->format("m/d/Y"),
+        					"mobile" 			=> $rowUsers->user_mobile,
+        					"email" 			=> $email,
+        					"cusgender" 		=> $rowUsers->gender,
+        					"branch" 			=> $rowUsers->branch,
+        					"image" 			=> $rowUsers->user_picture,
+        					"terms" 			=> $rowUsers->is_agreed,
+        					"total_transaction" => number_format($total_transaction,2),
+        					"total_discount" 	=> number_format($total_discount,2),
+        						);
+
+            return response()->json($response,$api["status_code"]);
+        }
+        // return response()->json($api, $api["status_code"]);
+    }
+
+
+    public function updateHomeBranch(Request $request){
+    	$api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+           $validator = Validator::make($request->all(), [
+                'branch' => 'required_if:is_client,1',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            $clientID  = $request->input('edit_client_id');
+            $branch_id = $request->input('edit_home_branch_id');	
+
+            $client 				= User::find($clientID);
+            $data 					= json_decode($client->user_data);
+            $data->home_branch 		= $branch_id;
+            $client->user_data 		= json_encode($data);
+            $client->save();
+            return response()->json(["result"=>"success"]);
+        }
         return response()->json($api, $api["status_code"]);
     }
+
+
+    public function updatePersonalInfo(Request $request){
+    	$api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+           $validator = Validator::make($request->all(), [
+                'edit_fname'    => 'required|max:255',
+                'edit_mname'    => 'required|max:255',
+                'edit_lname'    => 'required|max:255',
+                'edit_contact'  => 'required|max:255',
+                'edit_address'  => 'required|max:255',
+                'edit_bday'     => 'required|date',
+                'edit_gender'   => 'required|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+            
+			$clientID     = $request->input('edit_client_id');
+            $first_name   = $request->input('edit_fname');
+            $middle_name  = $request->input('edit_mname');
+            $last_name    = $request->input('edit_lname');
+            $address   	  = $request->input('edit_address');
+            $mobile       = $request->input('edit_contact');
+            $bday   	  = new DateTime($request->input('edit_bday'));
+            $birth_date   = $bday->format("Y-m-d H:i:s");
+            $gender       = $request->input('edit_gender');
+
+            $client 				= User::find($clientID);
+            $client->first_name 	= $first_name;
+            $client->middle_name 	= $middle_name;
+            $client->last_name 		= $last_name;
+            $client->user_address 	= $address;
+            $client->user_mobile 	= $mobile;
+            $client->birth_date 	= $birth_date;
+            $client->gender 	    = $gender;
+            $client->save();	
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+ 	public function updateAccount(Request $request){
+    	$api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+           $validator = Validator::make($request->all(), [
+                'email'    		=> 'required|max:255',
+                'password'		=>'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'
+                
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
+            $clientID     = $request->input('edit_client_id');
+            $first_name   = $request->input('edit_fname');
+            $middle_name  = $request->input('edit_mname');
+            $last_name    = $request->input('edit_lname');
+            $address   	  = $request->input('edit_address');
+            $mobile       = $request->input('edit_contact');
+            $bday   	  = new DateTime($request->input('edit_bday'));
+            $birth_date   = $bday->format("Y-m-d H:i:s");
+            $gender       = $request->input('edit_gender');
+
+            $client 				= User::find($clientID);
+            $client->first_name 	= $first_name;
+            $client->middle_name 	= $middle_name;
+            $client->last_name 		= $last_name;
+            $client->user_address 	= $address;
+            $client->user_mobile 	= $mobile;
+            $client->birth_date 	= $birth_date;
+            $client->gender 	    = $gender;
+            $client->save();	
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+
+
+
+
+
 
 
 }

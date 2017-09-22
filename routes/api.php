@@ -98,7 +98,11 @@ Route::get('/config/getTerms', 'ConfigController@getTerms');
 // 192.168.1.225/api/user/getUsers?token=token_value
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
 
-Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
+// Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
 
 Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
+
+Route::post('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
+Route::patch('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');
+Route::patch('/mobile/updateAccount', 'MobileApiController@updateAccount');

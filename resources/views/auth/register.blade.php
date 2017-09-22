@@ -54,7 +54,7 @@
     <input type="hidden" value="{{ (isset($_GET['middle_name'])?$_GET['middle_name']:'') }}" id="middle_name" />
     <input type="hidden" value="{{ (isset($_GET['last_name'])?$_GET['last_name']:'') }}" id="last_name" />
     <!-- BEGIN LOGIN FORM -->
-    <div @keypress="listenKey($event)">
+    <div @change="listenKey($event)">
         <div>
             <div class="form-group">
                 <label class="control-label visible-ie8 visible-ie9">First Name</label>

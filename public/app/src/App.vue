@@ -79,7 +79,7 @@
                 $btn.button('loading');
                 var u = this;
 
-                axios.get('/api/user/resendConfirmation?token=' + this.token)
+                axios.get('/api/user/sendConfirmation?token=' + this.token)
                 .then(function (response) {
                     if(response.data.result == 'success'){
                         toastr.success("Email sent! check your email to verify your account.");

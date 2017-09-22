@@ -44,7 +44,7 @@
                                                 <i class="fa fa-map-marker"></i> {{ client.user_address }}
                                             </li>
                                             <li>
-                                                <i class="fa fa-gift"></i> {{ moment(client.birth_date,"MMMM D, YYYY") }}
+                                                <i class="fa fa-gift"></i> {{ moment(client.birth_date).format("MMMM D, YYYY") }}
                                             </li>
                                             <li>
                                                 <i class="fa fa-phone"></i> {{ client.user_mobile }}
@@ -62,6 +62,14 @@
 
                                         <table class="table table-hover table-light">
                                             <tbody>
+                                                <tr>
+                                                    <td> Last Login: </td>
+                                                    <td> {{ moment(client.last_login).fromNow() }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> Last Activity: </td>
+                                                    <td> {{ moment(client.last_activity).fromNow() }} </td>
+                                                </tr>
                                                 <tr>
                                                     <td> Home Branch: </td>
                                                     <td> {{ client.home_branch_name }} </td>
@@ -277,28 +285,28 @@
                 let u = this;
                 axios.get('/api/client/getClient/' + this.id)
                     .then(function (response) {
-                        u.client = response.data;
-                        u.newClient = {
-                            id:response.data.id,
-                            first_name:response.data.first_name,
-                            middle_name:response.data.middle_name,
-                            last_name:response.data.last_name,
-                            birth_date:u.moment(response.data.birth_date, "YYYY-MM-DD"),
-                            user_address: response.data.user_address,
-                            user_mobile: response.data.user_mobile,
-                            home_branch:response.data.home_branch,
-                            password:'',
-                            device_data:response.data.device_data
-                        };
+                        if(response.data.id !== undefined){
+                            u.client = response.data;
+                            u.newClient = {
+                                id:response.data.id,
+                                first_name:response.data.first_name,
+                                middle_name:response.data.middle_name,
+                                last_name:response.data.last_name,
+                                birth_date:moment(response.data.birth_date).format("YYYY-MM-DD"),
+                                user_address: response.data.user_address,
+                                user_mobile: response.data.user_mobile,
+                                home_branch:response.data.home_branch,
+                                password:'',
+                                device_data:response.data.device_data
+                            };
+                        }
                     });
             },
             refreshClient:function(){
                 this.$emit('refresh_client');
                 this.getClient();
             },
-            moment:function (string, format) {
-                return moment(string).format(format);
-            },
+            moment:moment,
             showUploadModal:function () {
                 $("#upload-picture-modal").modal("show");
                 try{

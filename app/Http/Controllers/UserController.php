@@ -11,6 +11,7 @@ use Validator;
 use Hash;
 use ImageOptimizer;
 use Facebook\Facebook;
+use Mail;
 
 class UserController extends Controller{
     public function login(Request $request){
@@ -122,13 +123,74 @@ class UserController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function resendConfirmation(Request $request){
+    public function sendConfirmation(Request $request){
         $api = $this->authenticateAPI();
+        $u = false;
+
         if($api['result'] === 'success'){
+            //this block for resend purposes
+            $u = $this->dispatchConfirmation($api['user']['email']);
+        }
+
+        if($request->input('email') !== null){
+            //this block will be used by newly registered users
+            $u = $this->dispatchConfirmation($request->input('email'));
+        }
+
+        //default return if not authenticated
+        if($u){
             return response()->json(["result"=>"success"]);
         }
-           
-        return response()->json($api, $api["status_code"]);
+
+        return response()->json(["result"=>"failed"]);
+    }
+
+    public function dispatchConfirmation($email){
+        $user = User::where('email', $email)->get()->first();
+        if(isset($user['id'])){
+            $generated = md5(rand(1,600));
+            $user_data = json_decode($user['user_data'],true);
+            $user_data['verify_key'] = $generated;
+            $user_data['verify_expiration'] = time() + 300;
+            User::where('id', $user['id'])
+                ->update(['user_data'=> json_encode($user_data)]);
+
+            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+                $message->from('notification@system.lay-bare.com', 'LBO');
+                $message->subject('Email Verification');
+                $message->to($user['email'], $user['first_name']);
+            });
+            return true;
+        }
+        return false;
+    }
+
+    public function registerVerify(Request $request){
+        $user = User::where('email', $request->input('email'))
+            ->get()->first();
+
+        if(isset($user['id'])){
+            $user_data = json_decode($user['user_data'], true);
+            if($user_data['verify_key'] == $request->input('key')){
+                $diff = time() - $user_data['verify_expiration'];
+                if($diff < 300){
+                    unset($user_data['verify_key']);
+                    unset($user_data['verify_expiration']);
+
+                    User::where('id', $user['id'])
+                        ->update(['is_confirmed'=>1 , 'user_data'=> json_encode($user_data)]);
+                    $data = array("result"=>"success");
+                }
+                else
+                    $data = array("result"=>"failed", "error"=>"Link Expired.");
+            }
+            else
+                $data = array("result"=>"failed", "error"=>"Link Mismatch.");
+        }
+        else
+            $data = array("result"=>"failed", "error"=>"Invalid Link.");
+
+        return view('auth.register_verify', $data);
     }
 
     public function changePassword(Request $request){

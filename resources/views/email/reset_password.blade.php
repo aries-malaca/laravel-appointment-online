@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Simple Transactional Email</title>
+    <title>Reset Password</title>
     <style>
         /* -------------------------------------
             GLOBAL RESETS
@@ -249,11 +249,9 @@
         <td>&nbsp;</td>
         <td class="container">
             <div class="content">
-
                 <!-- START CENTERED WHITE CONTAINER -->
                 <span class="preheader">Reset Password</span>
                 <table class="main">
-
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
                         <td class="wrapper">
@@ -284,17 +282,14 @@
                             </table>
                         </td>
                     </tr>
-
                     <!-- END MAIN CONTENT AREA -->
                 </table>
-
                 <!-- START FOOTER -->
                 <div class="footer">
                     <table border="0" cellpadding="0" cellspacing="0">
                         <tr>
                             <td class="content-block">
                                 <span class="apple-link">
-
                                 </span>
                             </td>
                         </tr>

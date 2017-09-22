@@ -117,7 +117,7 @@ class Controller extends BaseController{
 
         if($password !== null){
             $client = Client::where('cusemail', $email)
-                ->where('password', $password)
+                ->where('password', md5($password))
                 ->get()->first();
         }
         else{
@@ -127,15 +127,7 @@ class Controller extends BaseController{
         }
 
         if(isset($client['cusid'])){
-
-            $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
-
-            if($boss_data === false){
-                return false;
-            }
-            //start self migration
-
-            $boss_data = json_decode($boss_data,true);
+            $boss_data = $this->getBossClient($email);
 
             $user = new User;
             $user->email = $email;
@@ -157,11 +149,23 @@ class Controller extends BaseController{
             $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
             $user->is_active = 1;
             $user->is_client = 1;
+            $user->is_agreed = ($client['confirmed']=='Confirmed'?1:0);
             $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
             $user->save();
             //end self migration
             return ['token'=>JWTAuth::fromUser(User::find($user->id)), 'id'=> $user->id];
         }
         return false;
+    }
+
+    public function getBossClient($email){
+        $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
+
+        if($boss_data === false){
+            return false;
+        }
+        //start self migration
+
+        return json_decode($boss_data,true);
     }
 }

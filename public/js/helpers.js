@@ -33,8 +33,8 @@ var SweetConfirmation = function(text, confirm_callback){
             text: text,
             showCancelButton:true,
             closeOnCancel: true,
-            cancelButtonClass:'btn-sm btn-default',
-            confirmButtonClass:'btn-sm btn-success',
+            cancelButtonClass:'btn-sm red',
+            confirmButtonClass:'btn-sm blue',
             confirmButtonText:'YES',
             cancelButtonText:'NO',
         },
@@ -43,4 +43,4 @@ var SweetConfirmation = function(text, confirm_callback){
                 confirm_callback();
             }
         });
-}
+};

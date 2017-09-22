@@ -12,26 +12,22 @@ use Hash;
 use ImageOptimizer;
 use Facebook\Facebook;
 
-
 class UserController extends Controller{
-
-    //1st
     public function login(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|max:255',
             'password' => 'required|max:255',
         ]);
-        if ($validator->fails()) {
+
+        if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-        }
 
         //attempt to login the system
         $u = User::where('email', $request['email'])->get()->first();
-        if(isset($u['id'])){
-            if($u['is_active'] == 0){
-                return response()->json(["result"=>"failed","error"=>"User is inactive."],400);
-            }
 
+        if(isset($u['id'])){
+            if($u['is_active'] == 0)
+                return response()->json(["result"=>"failed","error"=>"User is inactive."],400);
 
             if(Hash::check($request['password'], $u['password'])){
                 $token = JWTAuth::fromUser(User::find($u['id']));
@@ -45,6 +41,7 @@ class UserController extends Controller{
             }
             return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
         }
+
         if($result = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
 
             if($request->input('device') === null)
@@ -59,21 +56,21 @@ class UserController extends Controller{
 
     public function getUser(){
         $api = $this->authenticateAPI();
+
         if($api['result'] === 'success'){
             $user_data = json_decode($api['user']['user_data'],true);
             if($api['user']['is_client'] == 1){
                 $branch = Branch::find($user_data['home_branch']);
-                if(isset($branch->id)){
+                if(isset($branch->id))
                     $branch = $branch->branch_name;
-                }
-                else{
+                else
                     $branch = 'N/A';
-                }
+
                 $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
             }
-            else{
-                $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name; 
-            }
+            else
+                $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name;
+
             return response()->json(["user"=>$api["user"],
                                      "menus"=>$this->getUserMenus($api["user"]),
                                      "configs"=> Config::get()->toArray()
@@ -136,19 +133,20 @@ class UserController extends Controller{
 
     public function changePassword(Request $request){
         $api = $this->authenticateAPI();
+
         if($api['result'] === 'success'){
-            if(!Hash::check($request->input('old_password'), $api['user']['password'] )){
+
+            if(!Hash::check($request->input('old_password'), $api['user']['password'] ))
                 return response()->json(["result"=>"failed","error"=>"Old password incorrect"], 400);
-            }
 
             $validator = Validator::make($request->all(),[
-                'new_password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
+                'new_password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/|min:10',
                 'verify_password' => 'required|same:new_password'
                 // required and has to match the password field
             ]);
-            if ($validator->fails()) {
+
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
             User::where('id', $api['user']['id'])->update(['password'=>bcrypt($request->input('new_password'))]);
             return response()->json(["result"=>"success"]);
@@ -160,9 +158,9 @@ class UserController extends Controller{
     public function uploadPicture(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
-            if($request->input('image') === null){
+
+            if($request->input('image') === null)
                 return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
-            }
 
             $data = $request->input('image');
             list($type, $data) = explode(';',$data);
@@ -200,9 +198,9 @@ class UserController extends Controller{
         $fb_user = $fb->get('/me?fields='.$fields)->getGraphUser()->asArray();
 
         $user = User::where('user_data','LIKE', '%"facebook_id":"'.$request->input('userID').'"%')->get()->first();
-        if(!isset($user['id'])){
+
+        if(!isset($user['id']))
             $user = User::where('email', $fb_user['email'])->get()->first();
-        }
 
         if(isset($user['id'])){
             $token = JWTAuth::fromUser($user);
@@ -227,18 +225,15 @@ class UserController extends Controller{
                 'level' => 'required|not_in:0'
             ]);
 
-            if ($validator->fails()) {
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if(sizeof($request->input('user_data')['branches']) == 0){
+            if(sizeof($request->input('user_data')['branches']) == 0)
                 return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
-            }
 
             $branches = array();
-            foreach($request->input('user_data')['branches'] as $value){
+            foreach($request->input('user_data')['branches'] as $value)
                 $branches[] = $value['value'];
-            }
 
             $user = new User;
             $user->first_name = $request->input('first_name');
@@ -279,18 +274,15 @@ class UserController extends Controller{
                 'level' => 'required|not_in:0'
             ]);
 
-            if ($validator->fails()) {
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if(sizeof($request->input('user_data')['branches']) == 0){
+            if(sizeof($request->input('user_data')['branches']) == 0)
                 return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
-            }
 
             $branches = array();
-            foreach($request->input('user_data')['branches'] as $value){
+            foreach($request->input('user_data')['branches'] as $value)
                 $branches[] = $value['value'];
-            }
 
             $user = User::find($request->input('id'));
             $user->first_name = $request->input('first_name');
@@ -315,17 +307,57 @@ class UserController extends Controller{
         $user = User::find($request->input('user_id'));
         $tokens = json_decode($user->device_data, true);
 
-        if(sizeof($tokens) == 0){
+        if(sizeof($tokens) == 0)
             $user->device_data = json_encode(array());
-        }
         else{
             foreach ($tokens as $t=>$v){
-                if($v['token'] == $request->input('token')){
+                if($v['token'] == $request->input('token'))
                     unset($tokens[$t]);
-                }
             }
             $user->device_data = json_encode($tokens);
         }
+        $user->save();
+
+        return response()->json(["result"=>"success"]);
+    }
+
+    public function register(Request $request){
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'user_mobile' => 'required|max:255',
+            'user_address' => 'required|max:255',
+            'email' => 'required|email|unique:users,email',
+            'gender' => 'required|in:male,female',
+            'home_branch' => 'required|not_in:0',
+            'password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
+            'verify_password' => 'required|same:password',
+            'birth_date' => 'required'
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        $user = new User;
+        $user->first_name = $request->input('first_name');
+        $user->middle_name = $request->input('middle_name');
+        $user->last_name = $request->input('last_name');
+        $user->user_mobile = $request->input('user_mobile');
+        $user->username = $user->first_name .' ' . $user->last_name;
+        $user->email = $request->input('email');
+        $user->password = bcrypt($request->input('password'));
+        $user->gender = $request->input('gender');
+        $user->birth_date = $request->input('birth_date');
+        $user->user_address = $request->input('user_address');
+        $user->level = 0;
+        $user->is_client = 1;
+        $user->is_active = 1;
+        $user->is_confirmed = 0;
+        $user->is_agreed = 1;
+        $user->user_data = json_encode(array("home_branch"=>$request->input('home_branch'),
+                                             "premier_status"=>0));
+        $user->device_data = '[]';
+        $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
         $user->save();
 
         return response()->json(["result"=>"success"]);

@@ -30,6 +30,12 @@
         <!-- END LOGO -->
         <!-- BEGIN LOGIN -->
         <div class="content" id="login" v-if="token === undefined">
+            @if(isset($_GET['message']))
+            <div class="alert alert-success">
+                Successfully registered, Please login.
+            </div>
+            @endif
+            <input type="hidden" value="{{ (isset($_GET['email'])?$_GET['email']:'') }}" id="email" />
             <!-- BEGIN LOGIN FORM -->
             <div @keypress="listenKey($event)">
                 <div class="form-group">

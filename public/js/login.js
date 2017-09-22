@@ -44,6 +44,8 @@ new Vue({
         if(this.token !== undefined){
            window.location.href = '../../';
         }
+
+        this.email = $("#email").val();
     }
 });
 

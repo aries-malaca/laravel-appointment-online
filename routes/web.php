@@ -18,6 +18,6 @@ Route::post('/forgot/requestPassword', 'PasswordController@requestPassword');
 Route::get('/forgot/verify', 'PasswordController@verifyPassword');
 
 Route::post('/auth/login' ,  'UserController@login');
-Route::post('/test' ,  'UserController@test');
+Route::post('/auth/register' ,  'UserController@register');
 
 Auth::routes();

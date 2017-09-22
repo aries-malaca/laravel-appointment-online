@@ -44,7 +44,7 @@ class ClientController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|max:255',
-                'middle_name' => 'max:255',
+                'middle_name' => 'required|max:255',
                 'last_name' => 'required|max:255',
                 'user_address' => 'required|max:255',
                 'user_mobile' => 'required|max:255',

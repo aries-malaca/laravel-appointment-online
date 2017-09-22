@@ -176,7 +176,8 @@
                                             <div class="col-md-9">
                                                 <div class="form-group">
                                                     <label class="control-label">Address</label>
-                                                    <textarea class="form-control" v-model="newClient.user_address"></textarea>
+                                                    <input type="text" v-model="newClient.user_address" id="autocomplete2" placeholder="Enter your address"
+                                                           @focus="locate" class="form-control" />
                                                 </div>
                                             </div>
                                         </div>
@@ -222,8 +223,8 @@
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="appointments">
-                        <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments" :token="token"
-                                                   :configs="configs" />
+                        <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
+                                            :token="token" :configs="configs" />
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions">
@@ -351,6 +352,17 @@
                             $btn.button('reset');
                         });
                 });
+            },
+            locate:function(){
+                let u = this;
+                geolocate();
+                initAutocomplete();
+                $("#autocomplete2").change(function(event){
+                    setTimeout(function(){
+                        console.log(event);
+                        u.newClient.user_address = event.target.value;
+                    },100);
+                })
             }
         },
         watch:{

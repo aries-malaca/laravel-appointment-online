@@ -90,7 +90,7 @@
                                         <div class="col-md-8">
                                             <div class="form-group">
                                                 <label class="control-label">Address</label>
-                                                <input type="text" v-model="profile.user_address" id="autocomplete"  placeholder="Enter your address"
+                                                <input type="text" v-model="profile.user_address" id="autocomplete" placeholder="Enter your address"
                                                        onFocus="geolocate()" class="form-control" />
                                             </div>
                                         </div>
@@ -281,6 +281,16 @@
             this.getProfile();
             this.getUserLevels();
             this.getBranches();
+
+            let u = this;
+            $("#autocomplete").change(function(event){
+                setTimeout(function(){
+                    console.log(event);
+                    u.profile.user_address = event.target.value;
+                },100);
+            });
+
+            initAutocomplete();
         },
         computed:{
             branch_selection:function(){

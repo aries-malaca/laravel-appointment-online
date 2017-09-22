@@ -261,14 +261,15 @@ class UserController extends Controller{
 
         $user = User::where('user_data','LIKE', '%"facebook_id":"'.$request->input('userID').'"%')->get()->first();
 
-        if(!isset($user['id']))
+        if(!isset($user['id']) && isset($fb_user['email']))
             $user = User::where('email', $fb_user['email'])->get()->first();
 
         if(isset($user['id'])){
             $token = JWTAuth::fromUser($user);
 
-            User::where($user['id'])->update(['is_confirmed'=>1]);
-            return response()->json($token);
+            $this->registerToken($user['id'], $token);
+            User::where('id',$user['id'])->update(['is_confirmed'=>1]);
+            return response()->json(["result"=>"success","token"=>$token]);
         }
 
         return response()->json(['result'=>'failed', "user"=>$fb_user],300);
@@ -279,6 +280,7 @@ class UserController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|max:255',
+                'middle_name' => 'required|max:255',
                 'last_name' => 'required|max:255',
                 'user_mobile' => 'required|max:255',
                 'user_address' => 'required|max:255',
@@ -328,6 +330,7 @@ class UserController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|max:255',
+                'middle_name' => 'required|max:255',
                 'last_name' => 'required|max:255',
                 'user_mobile' => 'required|max:255',
                 'user_address' => 'required|max:255',
@@ -387,6 +390,7 @@ class UserController extends Controller{
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:255',
             'last_name' => 'required|max:255',
+            'middle_name' => 'required|max:255',
             'user_mobile' => 'required|max:255',
             'user_address' => 'required|max:255',
             'email' => 'required|email|unique:users,email',
@@ -414,13 +418,23 @@ class UserController extends Controller{
         $user->level = 0;
         $user->is_client = 1;
         $user->is_active = 1;
-        $user->is_confirmed = 0;
+        $user->is_confirmed = $request->input('from_facebook')==1?1:0;
         $user->is_agreed = 1;
         $user->user_data = json_encode(array("home_branch"=>$request->input('home_branch'),
                                              "premier_status"=>0));
         $user->device_data = '[]';
         $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
+
         $user->save();
+
+        if($request->input('fbid') !== null ){
+            $filename = $user->id.'_'.time().'.jpg';
+            $data = file_get_contents('https://graph.facebook.com/'.$request->input('fbid').'/picture?type=large');
+            file_put_contents(public_path('images/users/'). $filename, $data );
+            User::where('id', $user->id)
+                    ->update(['user_picture' => $filename]);
+        }
+
 
         return response()->json(["result"=>"success"]);
     }

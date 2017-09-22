@@ -42,11 +42,15 @@ function initMap(lat,long){
 
 var placeSearch, autocomplete;
 
-function initAutocomplete() {
+var initAutocomplete = function() {
     // Create the autocomplete object, restricting the search to geographical
     // location types.
     autocomplete = new google.maps.places.Autocomplete(
         /** @type {!HTMLInputElement} */(document.getElementById('autocomplete')),
+        {types: ['geocode']});
+
+    autocomplete2 = new google.maps.places.Autocomplete(
+        /** @type {!HTMLInputElement} */(document.getElementById('autocomplete2')),
         {types: ['geocode']});
 }
 

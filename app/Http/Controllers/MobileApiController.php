@@ -13,6 +13,7 @@ use App\Branch;
 use App\Config;
 use DateTime;
 use Validator;
+use Hash;
 use DB;
 class MobileApiController extends Controller
 {
@@ -151,10 +152,10 @@ class MobileApiController extends Controller
 			$total_transaction  = "5520";
         	$response[] = array(
         					"id" 				=> $rowUsers->id,
-        					"fname" 			=> $rowUsers->first_name,
-        					"mname" 			=> $rowUsers->middle_name,
-        					"lname" 			=> $rowUsers->last_name,
-        					"address" 			=> $rowUsers->user_address,
+        					"fname" 			=> ucfirst($rowUsers->first_name),
+        					"mname" 			=> ucfirst($rowUsers->middle_name),
+        					"lname" 			=> ucfirst($rowUsers->last_name),
+        					"address" 			=> ucwords($rowUsers->user_address),
         					"bday" 				=> $bday->format("m/d/Y"),
         					"mobile" 			=> $rowUsers->user_mobile,
         					"email" 			=> $email,
@@ -241,43 +242,81 @@ class MobileApiController extends Controller
 
  	public function updateAccount(Request $request){
     	$api = $this->authenticateAPI();
-        if($api['result'] === 'success'){
-           $validator = Validator::make($request->all(), [
-                'email'    		=> 'required|max:255',
-                'password'		=>'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'
-                
-            ]);
 
+        if($api['result'] === 'success'){
+        	
+        	$clientID     		= $request->input('edit_client_id');
+           	$email        		= $request->input('edit_email');
+           	$old_password 		= $request->input('edit_old_password');
+           	$new_password 		= $request->input('edit_new_password');
+           	$confirm_password 	= $request->input('edit_confirm_password');
+           	
+        	if(!Hash::check($old_password, $api['user']['password'] ))
+                return response()->json(["result"=>"failed","error"=>"Your old password is incorrect."], 400);
+
+            $rule 	= [
+	            		// required and has to match the password field
+		            	'edit_email'    		 => 'required|max:255',
+		                'edit_new_password'      => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/|min:10',
+            		];
+            $message = [
+            			'edit_email.required'	 		=> 'Please provide your Email address', 
+            			'edit_new_password.required'	=> 'Please provide your new password', 
+            			'edit_new_password.regex'		=> 'Your password must be atleast 10 alphanumeric.',
+            		];
+
+            $validator = Validator::make($request->all(),$rule,$message);
             if ($validator->fails()) {
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
             }
 
-            $clientID     = $request->input('edit_client_id');
-            $first_name   = $request->input('edit_fname');
-            $middle_name  = $request->input('edit_mname');
-            $last_name    = $request->input('edit_lname');
-            $address   	  = $request->input('edit_address');
-            $mobile       = $request->input('edit_contact');
-            $bday   	  = new DateTime($request->input('edit_bday'));
-            $birth_date   = $bday->format("Y-m-d H:i:s");
-            $gender       = $request->input('edit_gender');
-
             $client 				= User::find($clientID);
-            $client->first_name 	= $first_name;
-            $client->middle_name 	= $middle_name;
-            $client->last_name 		= $last_name;
-            $client->user_address 	= $address;
-            $client->user_mobile 	= $mobile;
-            $client->birth_date 	= $birth_date;
-            $client->gender 	    = $gender;
+            $client->password       = bcrypt($new_password);
             $client->save();	
-
+        
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
     }
 
+    public function uploadUserImage(Request $request){
+    	$api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
 
+            if($request->input('upload_image') === null)
+                return response()->json(["result"=>"failed","error"=>"Warning! No File to be uploaded."], 400);
+
+            $clientID   		= $request->input('upload_client_id');
+            $image 				= $request->input('upload_image');
+
+            // list($type, $image)  = explode(';',$image);
+            // list(,$image) 		 = explode(',', $image);
+
+
+            // if($type == 'data:image/jpeg')
+            //    $ext  = 'jpg';
+            // elseif($type == 'data:image/png')
+            //     $ext = 'png';
+            // else
+            //     return response()->json(["result"=>"failed","error"=>"Warning! Invalid File Format."],400);
+
+
+
+            $filename = $clientID . '_' . time().'.jpg';
+            $image = base64_decode($image);
+            file_put_contents(public_path('images/users/'). $filename, $image );
+           
+            $user = User::find($clientID);
+            if($user->user_picture != 'no photo ' . $user->gender .'.jpg')
+                if(file_exists(public_path('/images/users/'.$user->user_picture)))
+                    unlink(public_path('/images/users/'.$user->user_picture));
+
+            $user->user_picture = $filename;
+            $user->save();
+
+            return response()->json(["result"=>"success"],200);
+    	}
+	}
 
 
 

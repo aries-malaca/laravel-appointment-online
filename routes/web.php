@@ -19,5 +19,6 @@ Route::get('/forgot/verify', 'PasswordController@verifyPassword');
 
 Route::post('/auth/login' ,  'UserController@login');
 Route::post('/auth/register' ,  'UserController@register');
+Route::get('/register/verify', 'UserController@registerVerify');
 
 Auth::routes();

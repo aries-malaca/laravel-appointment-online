@@ -1,4 +1,4 @@
-new Vue({
+var reg = new Vue({
     el:"#register",
     data:{
         token:undefined,
@@ -13,16 +13,44 @@ new Vue({
             birth_date:'',
             gender:'female',
             home_branch:0,
-            mobile:'',
+            user_mobile:'',
         },
         branches:[],
         agree:false,
-        terms:''
+        terms:'',
+        clicked_yes:false
     },
     methods:{
-        listenKey:function(){
+        listenKey:function(event){
+            return false;
+            let u = this;
+            if(event.target.placeholder == 'First Name' || event.target.placeholder == 'Last Name' || event.target.type == 'date'){
+             this.clicked_yes = false;
+            }
+            if( (this.newUser.first_name !== '' || this.newUser.last_name !== '' || this.newUser.birth_date !== '') && !this.clicked_yes){
+                $.get('http://boss.lay-bare.com/laybare-online/API/get_last_transaction.php?birth_date='+u.newUser.birth_date+'&first_name='+u.newUser.first_name+'&last_name='+u.newUser.last_name,function(response){
+                    if(response.length>0){
+                        $.ajax({
+                            url: '/api/client/searchClients?search=' + response[0].email_address,
+                            method: 'GET',
+                            data: this.newUser,
+                            error: function (response1){
+                                if(response1.responseJSON.result == 'failed'){
+                                    let branch = Number(response.branch_id);
+                                    u.clicked_yes = true;
+                                    SweetConfirmation("Did you recently visited "+ u.branchName(branch) +"?",
+                                        function(){
 
+                                        }
+                                    )
+                                }
+                            },
+                        });
+                    }
+                });
+            }
         },
+
         getBranches:function(){
             let u = this;
             $.get('/api/branch/getBranches/active',function(response){
@@ -45,11 +73,18 @@ new Vue({
                 method: 'POST',
                 data: this.newUser,
                 success: function (){
-                    window.location.href = '../../login?message=registered&email='+u.newUser.email;
+                    $.ajax({
+                        url: '/api/user/sendConfirmation?email='+u.newUser.email,
+                        method: 'GET',
+                        data: this.newUser,
+                        complete: function (){
+                            window.location.href = '../../login?message=registered&email='+u.newUser.email;
+                        },
+                    });
                 },
                 error:function(error){
                     if(error.status === 400){
-                        let msg = error.responseJSON.error;
+                        var msg = error.responseJSON.error;
                         if(msg.toString().search("email has already") !== -1){
                             SweetConfirmation("The email you area trying to use is already registered, do you want to Login?",
                                 function(){
@@ -57,11 +92,26 @@ new Vue({
                                 }
                             )
                         }
+                        else{
+                            if(msg.length>3){
+                                msg.splice(3, msg.length);
+                            }
+                            toastr.error(msg);
+                        }
                     }
                     $btn.button('reset');
                 },
             });
         },
+        branchName:function(id){
+            var branch = 'Default';
+            for(var x=0;x<this.branches.length;x++){
+                if(id == this.branches[x].id){
+                    branch = this.branches[x].branch_name;
+                }
+            }
+            return branch;
+        }
     },
     mounted:function(){
         this.token = $.cookie("login_cookie");
@@ -76,5 +126,13 @@ new Vue({
 
         this.getTerms();
         this.getBranches();
+
+        let u = this;
+        $("#autocomplete").change(function(event){
+            setTimeout(function(){
+                console.log(event);
+                u.newUser.user_address = event.target.value;
+            },500);
+        });
     }
 });

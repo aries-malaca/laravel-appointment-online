@@ -6,7 +6,7 @@
 <!--<![endif]-->
 <!-- BEGIN HEAD -->
 <head>
-    <title>Verify Password Request</title>
+    <title>Verify Email</title>
     @include('layouts.head')
     <link href="../../../../theme/pages/css/login-2.min.css" rel="stylesheet" type="text/css" />
 </head>
@@ -22,14 +22,14 @@
 <div class="content">
     @if($result == 'success')
         <div class="alert alert-success" style="text-align:center">
-            <b>Success!</b> We've sent you a temporary password, please check your email and try to Login.
+            <b>Success!</b> Your email address has been verified.
         </div>
-        <a href="../../login" class="btn-primary btn btn-block" id="register-btn">Go to Login Page</a>
+        <a href="../../login" class="btn-primary btn btn-block" id="register-btn">Okay</a>
     @else
         <div class="alert alert-danger" style="text-align:center">
             <b>Failed!</b> {{ $error }}
         </div>
-        <a href="../../login" class="btn-primary btn btn-block" id="register-btn">Go to Login Page</a>
+        <a href="../../login" class="btn-primary btn btn-block" id="register-btn">Okay</a>
     @endif
 </div>
 </body>

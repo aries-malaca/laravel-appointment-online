@@ -90,7 +90,8 @@
                                         <div class="col-md-8">
                                             <div class="form-group">
                                                 <label class="control-label">Address</label>
-                                                <input type="text" v-model="profile.user_address" placeholder="Ex: Makati City" class="form-control" />
+                                                <input type="text" v-model="profile.user_address" id="autocomplete"  placeholder="Enter your address"
+                                                       onFocus="geolocate()" class="form-control" />
                                             </div>
                                         </div>
                                     </div>

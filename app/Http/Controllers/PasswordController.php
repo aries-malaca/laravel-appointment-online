@@ -68,21 +68,16 @@ class PasswordController extends Controller{
                         $message->subject('Temporary Password');
                         $message->to($user['email'], $user['first_name']);
                     });
-
                     $data = array("result"=>"success");
                 }
-                else{
+                else
                     $data = array("result"=>"failed", "error"=>"Link Expired.");
-                }
             }
-            else{
+            else
                 $data = array("result"=>"failed", "error"=>"Link Mismatch.");
-            }
         }
-        else{
+        else
             $data = array("result"=>"failed", "error"=>"Invalid Link.");
-        }
-
         return view('auth.forgot_verify', $data);
     }
 }

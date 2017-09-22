@@ -6,7 +6,7 @@
 <!--<![endif]-->
 <!-- BEGIN HEAD -->
 <head>
-    <title>User Login</title>
+    <title>Forgot Password</title>
     @include('layouts.head')
     <link href="../../theme/pages/css/login-2.min.css" rel="stylesheet" type="text/css" />
 </head>
@@ -52,7 +52,7 @@
         </div>
         <div v-else>
             <div class="alert alert-success" style="text-align:center">
-                <b>Success!</b> Please check your email and close this window.
+                <b>Success!</b> Please check your email to get the verification link and close this window. Note: the link provided will be valid for 3 minutes.
             </div>
         </div>
         <!-- END LOGIN FORM -->

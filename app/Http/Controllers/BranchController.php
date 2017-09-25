@@ -12,6 +12,7 @@ class BranchController extends Controller{
         if($request->segment(4)== 'active')
             return response()->json(Branch::where('is_active', 1)
                                             ->select('id','branch_name')
+                                            ->orderBy('branch_name', 'asc')
                                             ->get());
         return response()->json(Branch::get());
     }

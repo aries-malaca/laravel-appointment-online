@@ -28,7 +28,7 @@ class UserController extends Controller{
 
         if(isset($u['id'])){
             if($u['is_active'] == 0)
-                return response()->json(["result"=>"failed","error"=>"User is inactive."],400);
+                return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
 
             if(Hash::check($request['password'], $u['password'])){
                 $token = JWTAuth::fromUser(User::find($u['id']));
@@ -385,20 +385,22 @@ class UserController extends Controller{
 
     public function register(Request $request){
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|max:255',
-            'last_name' => 'required|max:255',
-            'user_mobile' => 'required|max:255',
-            'user_address' => 'required|max:255',
-            'email' => 'required|email|unique:users,email',
-            'gender' => 'required|in:male,female',
-            'home_branch' => 'required|not_in:0',
-            'password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
-            'verify_password' => 'required|same:password',
-            'birth_date' => 'required'
+            'first_name'        => 'required|max:255',
+            'last_name'         => 'required|max:255',
+            'user_mobile'       => 'required|max:255',
+            'user_address'      => 'required|max:255',
+            'email'             => 'required|email|unique:users,email',
+            'gender'            => 'required|in:male,female',
+            'home_branch'       => 'required|not_in:0',
+            'password'          => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
+            'verify_password'   => 'required|same:password',
+            'birth_date'        => 'required'
         ]);
+
 
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
 
         $user = new User;
         $user->first_name = $request->input('first_name');

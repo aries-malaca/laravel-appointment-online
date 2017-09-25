@@ -318,6 +318,68 @@ class MobileApiController extends Controller
     	}
 	}
 
+	public function registerUser(Request $request){
+
+		
+	 	$rule 	= [
+            		// required and has to match the password field
+	            	'addLname'          => 'required|max:255',
+	            	'addFname'          => 'required|max:255',
+		            'addMobile'         => 'required|max:255',
+		            'addAddress'        => 'required|max:255',
+		            'addEmail'          => 'required|email|unique:users,email',
+		            'addGender'         => 'required',
+		            'addBranch'         => 'required|not_in:0',
+		            'addPassword'       => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
+		            'addBday'        	=> 'required'
+        		];
+        $message = [
+        			'addFname.required'				=> 'First name.', 
+        			'addLname.required'	 			=> 'Last name', 
+        			'addMobile.required'			=> 'Contact no.', 
+        			'addAddress.required'			=> 'Complete address.', 
+        			'addEmail.required'				=> 'Email address.', 
+        			'addEmail.email'				=> 'Email is not valid', 
+        			'addEmail.unique'				=> 'Email address is already taken', 
+        			'addGender.required'			=> 'Gender.', 
+        			'addBranch.required'			=> 'Home Branch.', 
+        			'addPassword.regex'			    => 'Password must be atleast 10 alphanumeric.', 
+        			'addBday.required'			    => 'Birth date'
+        		];
+
+        $validator = Validator::make($request->all(),$rule,$message);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        $bday 			= new DateTime($request->input('addBday'));
+        $birth_date     = $bday->format("Y-m-d H:i:s");
+        $branch 		= $request->input('addBranch');
+        $gender 		= strtolower($request->input('addGender'));
+        $user 			= new User;
+        $user->first_name 	= $request->input('addFname');
+        $user->middle_name 	= $request->input('addMname');
+        $user->last_name 	= $request->input('addLname');
+        $user->user_mobile 	= $request->input('addMobile');
+        $user->username 	= $request->input('addFname')." ".$request->input('addLname');
+        $user->email 		= $request->input('addEmail');
+        $user->password 	= bcrypt($request->input('addPassword'));
+        $user->gender 		= $gender;
+        $user->birth_date 	= $birth_date;
+        $user->user_address = $request->input('addAddress');
+        $user->level 		= 0;
+        $user->is_client 	= 1;
+        $user->is_active 	= 0;
+        $user->is_confirmed = 0;
+        $user->is_agreed 	= 1;
+        $user->user_data 	= json_encode(array("home_branch"=>$branch,
+                                             "premier_status"=>0));
+        $user->device_data  = '[]';
+        $user->user_picture = 'no photo '.$gender.'.jpg';
+        $user->save();
+
+        return response()->json(["result"=>"success"]);
+	}
+
 
 
 

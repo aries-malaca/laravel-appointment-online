@@ -39,7 +39,7 @@ Route::patch('/client/updateSettings', 'ClientController@updateSettings');
 
 
 //resend Email Confirmation API
-Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
+Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
 
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
@@ -107,4 +107,6 @@ Route::patch('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch')
 Route::patch('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');
 Route::patch('/mobile/updateAccount', 'MobileApiController@updateAccount');
 Route::patch('/mobile/uploadUserImage', 'MobileApiController@uploadUserImage');
+Route::patch('/mobile/registerUser', 'MobileApiController@registerUser');
+
 

@@ -88,6 +88,8 @@ Route::get('/service/getServicePackages', 'ServiceController@getServicePackages'
 Route::post('/service/addServicePackage', 'ServiceController@addServicePackage');
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
 
+Route::get('/config/getTerms', 'ConfigController@getTerms');
+
 
 
 

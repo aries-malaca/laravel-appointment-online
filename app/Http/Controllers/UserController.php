@@ -272,6 +272,15 @@ class UserController extends Controller{
             return response()->json(["result"=>"success","token"=>$token]);
         }
 
+        if($result = $this->selfMigrateClient($fb_user['email'])){
+            if($request->input('device') === null)
+                $this->registerToken($result['id'], $result['token']);
+            else
+                $this->registerToken($result['id'], $result['token'], $request->input('device'), $request->input('device_info'));
+
+            return response()->json(["token"=>$result['token'], "result"=>'success']);
+        }
+
         return response()->json(['result'=>'failed', "user"=>$fb_user],300);
     }
 

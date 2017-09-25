@@ -388,18 +388,6 @@ class UserController extends Controller{
 
     public function register(Request $request){
         $validator = Validator::make($request->all(), [
-<<<<<<< HEAD
-            'first_name'        => 'required|max:255',
-            'last_name'         => 'required|max:255',
-            'user_mobile'       => 'required|max:255',
-            'user_address'      => 'required|max:255',
-            'email'             => 'required|email|unique:users,email',
-            'gender'            => 'required|in:male,female',
-            'home_branch'       => 'required|not_in:0',
-            'password'          => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
-            'verify_password'   => 'required|same:password',
-            'birth_date'        => 'required'
-=======
             'first_name' => 'required|max:255',
             'last_name' => 'required|max:255',
             'middle_name' => 'required|max:255',
@@ -411,7 +399,6 @@ class UserController extends Controller{
             'password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
             'verify_password' => 'required|same:password',
             'birth_date' => 'required'
->>>>>>> 6ff0a74679bd4c2cccfc374133eb0b6b4b440df8
         ]);
 
 

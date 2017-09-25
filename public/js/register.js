@@ -14,6 +14,7 @@ var reg = new Vue({
             gender:'female',
             home_branch:0,
             user_mobile:'',
+            from_facebook:false,
         },
         branches:[],
         agree:false,
@@ -22,7 +23,7 @@ var reg = new Vue({
     },
     methods:{
         listenKey:function(event){
-            return false;
+
             let u = this;
             if(event.target.placeholder == 'First Name' || event.target.placeholder == 'Last Name' || event.target.type == 'date'){
              this.clicked_yes = false;
@@ -40,7 +41,7 @@ var reg = new Vue({
                                     u.clicked_yes = true;
                                     SweetConfirmation("Did you recently visited "+ u.branchName(branch) +"?",
                                         function(){
-
+                                            u.boss_id = response.client_id;
                                         }
                                     )
                                 }
@@ -50,7 +51,6 @@ var reg = new Vue({
                 });
             }
         },
-
         getBranches:function(){
             let u = this;
             $.get('/api/branch/getBranches/active',function(response){
@@ -115,19 +115,38 @@ var reg = new Vue({
     },
     mounted:function(){
         this.token = $.cookie("login_cookie");
-
+        let u = this;
         if(this.token !== undefined)
             window.location.href = '../../';
 
-        this.newUser.email = $("#email").val();
-        this.newUser.first_name = $("#first_name").val();
-        this.newUser.middle_name = $("#middle_name").val();
-        this.newUser.last_name = $("#last_name").val();
+        if($("#fbid").val() !== '' && $("#accessToken").val() !== '')
+            $.ajax({
+                url: '../../api/user/fbLogin',
+                method: 'POST',
+                data: {userID: $("#fbid").val(), accessToken: $("#accessToken").val()},
+                success: function (data) {
+                    $.cookie("login_cookie", data, { path: '/' });
+                    window.location.href = '../../';
+                },
+                error:function(error){
+
+                    let user = error.responseJSON.user;
+                    u.newUser.from_facebook = true;
+                    u.newUser.first_name = user.first_name;
+                    u.newUser.middle_name = user.middle_name!==undefined?user.middle_name:'';
+                    u.newUser.last_name = user.last_name;
+                    u.newUser.gender = user.gender;
+                    u.newUser.email = user.email!==undefined?user.email:'';
+                    if(user.email !== undefined ){
+                        u.newUser.from_facebook = true;
+                        u.newUser.fbid = $("#fbid").val();
+                    }
+                },
+            });
 
         this.getTerms();
         this.getBranches();
 
-        let u = this;
         $("#autocomplete").change(function(event){
             setTimeout(function(){
                 console.log(event);

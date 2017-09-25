@@ -49,10 +49,8 @@
 <!-- END LOGO -->
 <!-- BEGIN LOGIN -->
 <div class="content" id="register" v-if="token === undefined">
-    <input type="hidden" value="{{ (isset($_GET['email'])?$_GET['email']:'') }}" id="email" />
-    <input type="hidden" value="{{ (isset($_GET['first_name'])?$_GET['first_name']:'') }}" id="first_name" />
-    <input type="hidden" value="{{ (isset($_GET['middle_name'])?$_GET['middle_name']:'') }}" id="middle_name" />
-    <input type="hidden" value="{{ (isset($_GET['last_name'])?$_GET['last_name']:'') }}" id="last_name" />
+    <input type="hidden" value="{{ (isset($_GET['fbid'])?$_GET['fbid']:'') }}" id="fbid" />
+    <input type="hidden" value="{{ (isset($_GET['accessToken'])?$_GET['accessToken']:'') }}" id="accessToken" />
     <!-- BEGIN LOGIN FORM -->
     <div @change="listenKey($event)">
         <div>
@@ -60,7 +58,7 @@
                 <label class="control-label visible-ie8 visible-ie9">First Name</label>
                 <div class="input-icon">
                     <i class="fa fa-font"></i>
-                    <input v-model="newUser.first_name" class="form-control placeholder-no-fix" type="text" placeholder="First Name"/>
+                    <input :disabled="newUser.from_facebook" v-model="newUser.first_name" class="form-control placeholder-no-fix" type="text" placeholder="First Name"/>
                 </div>
             </div>
             <div class="form-group">
@@ -74,7 +72,7 @@
                 <label class="control-label visible-ie8 visible-ie9">Last Name</label>
                 <div class="input-icon">
                     <i class="fa fa-font"></i>
-                    <input v-model="newUser.last_name" class="form-control placeholder-no-fix" type="text" placeholder="Last Name"/>
+                    <input :disabled="newUser.from_facebook" v-model="newUser.last_name" class="form-control placeholder-no-fix" type="text" placeholder="Last Name"/>
                 </div>
             </div>
 
@@ -89,7 +87,7 @@
             <div class="row">
                 <div class="col-xs-6">
                     <label class="control-label visible-ie8 visible-ie9">Gender</label>
-                    <select class="form-control" v-model="newUser.gender">
+                    <select :disabled="newUser.from_facebook" class="form-control" v-model="newUser.gender">
                         <option value="female">Female</option>
                         <option value="male">Male</option>
                     </select>
@@ -122,7 +120,7 @@
                 <label class="control-label visible-ie8 visible-ie9">Email</label>
                 <div class="input-icon">
                     <i class="fa fa-envelope"></i>
-                    <input class="form-control placeholder-no-fix" type="text" placeholder="Email" v-model="newUser.email"/>
+                    <input :disabled="newUser.from_facebook" class="form-control placeholder-no-fix" type="text" placeholder="Email" v-model="newUser.email"/>
                 </div>
             </div>
             <div class="form-group">
@@ -139,15 +137,8 @@
                     <input class="form-control placeholder-no-fix" v-model="newUser.verify_password" type="password" placeholder="Re-type Your Password" />
                 </div>
             </div>
-            <div class="form-group">
-                <label class="mt-checkbox mt-checkbox-outline">
-                    <input type="checkbox" v-model="agree"> I agree to the
-                    <a href="#terms-modal" data-toggle="modal">Terms & Conditions </a>
-                    <span></span>
-                </label>
-            </div>
             <div class="form-actions">
-                <button @click="register($event)" v-bind:disabled="!agree" id="btn-register" data-loading-text="Please wait..." class="btn green btn-block uppercase">Register</button>
+                <a href="#terms-modal" data-toggle="modal" id="btn-register" class="btn green btn-block uppercase">Register</a>
             </div>
         </div>
         <div class="create-account">
@@ -169,6 +160,7 @@
 
                 </div>
                 <div class="modal-footer">
+                    <button class="btn-success btn green" @click="register($event)"  data-loading-text="Please wait...">I agree and Register</button>
                     <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
                 </div>
             </div>

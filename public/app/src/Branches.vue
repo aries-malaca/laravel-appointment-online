@@ -454,7 +454,7 @@
             getProductName:function(id){
                 for(var x=0;x<this.products.length;x++){
                     if(id == this.products[x].id)
-                        return this.products[x].product_name;
+                        return this.products[x].product_code;
                 }
                 return 'Unknown';
             },

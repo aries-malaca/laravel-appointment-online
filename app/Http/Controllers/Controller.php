@@ -120,6 +120,10 @@ class Controller extends BaseController{
                 ->where('password', md5($password))
                 ->get()->first();
         }
+        elseif($password === null && $birth_date === null){
+            $client = Client::where('cusemail', $email)
+                ->get()->first();
+        }
         else{
             $client = Client::where('cusemail', $email)
                 ->where('cusbday', 'LIKE', $birth_date.'%')

@@ -109,4 +109,6 @@ Route::patch('/mobile/updateAccount', 'MobileApiController@updateAccount');
 Route::patch('/mobile/uploadUserImage', 'MobileApiController@uploadUserImage');
 Route::patch('/mobile/registerUser', 'MobileApiController@registerUser');
 
-
+Route::post('/mobile/verifyMyPassword', 'MobileApiController@verifyMyPassword');
+Route::patch('/mobile/FacebookLogin', 'MobileApiController@FacebookLogin');
+// Route::post('/forgot/requestPassword', 'PasswordController@requestPassword');

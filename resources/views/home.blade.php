@@ -66,6 +66,7 @@
     <script src="../../theme/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
     <!-- END THEME LAYOUT SCRIPTS -->
     <script src="../../theme/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="../../js/moment-round.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/morris/morris.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-tabdrop/js/bootstrap-tabdrop.js" type="text/javascript"></script>

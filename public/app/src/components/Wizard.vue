@@ -16,7 +16,7 @@
                 <a v-if="currentStep != steps.length - 1" class="wizard__next pull-right" @click="goNext()">
                     <span>Next</span> <i class="fa fa-angle-right"></i>
                 </a>
-                <a v-if="currentStep == steps.length - 1" class="wizard__next pull-right final-step" @click="goNext()">
+                <a v-if="currentStep == steps.length - 1" class="wizard__next pull-right final-step" @click="goNext()" v-bind:disabled="disable_saving">
                     {{finalStepLabel}}
                 </a>
             </div>
@@ -32,6 +32,8 @@
             finalStepLabel: {default: 'Save'},
             onNext: {},
             onBack: {},
+            toggle:{},
+            disable_saving:{}
         },
         data () {
             return {
@@ -76,6 +78,11 @@
                 }
             },
         },
+        watch:{
+            toggle:function(){
+                this.currentStep = 0;
+            }
+        }
     };
 </script>
 
@@ -115,7 +122,7 @@
         line-height: 0
     }
     .wizard__step{
-        height: 70px;
+        height: 50px;
         vertical-align: bottom;
         display: inline-block;
         text-align: center;
@@ -156,7 +163,7 @@
     /* Wizard body
     *******************************/
     .wizard__body{
-        margin-top:  30px;
+        margin-top:  -5px;
         min-height:  300px;
         margin-left:  50px;
         margin-right:  50px;
@@ -175,7 +182,7 @@
         width:  30px;
         height:  30px;
         border:  1px solid #aebac4;
-        top:  85px; /* height of step + body margin -15 */
+        top:  60px; /* height of step + body margin -15 */
         border-top-right-radius: 5px;
         background-color: #fff;
         border-left: none;

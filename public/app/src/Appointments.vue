@@ -6,7 +6,7 @@
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
                 </div> &nbsp;
-                <button v-if="user.is_client == 1" data-toggle="modal" href="#booking-modal" type="button" class="btn green-meadow">Book Now</button>
+                <button v-if="user.is_client == 1" @click="toggle = !toggle" type="button" class="btn green-meadow">Book Now</button>
                 <div class="tools">
                     <a href="" class="collapse" data-original-title="" title=""> </a>
                     <a href="" class="reload" data-original-title="" title=""> </a>
@@ -14,11 +14,11 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="false" :appointments="active_appointments" :token="token"
-                                    :configs="configs" />
+                <appointments-table title="Active Appointments" :hide_client="true"
+                                    :appointments="active_appointments" :token="token" :configs="configs" />
             </div>
         </div>
-        <booking-modal></booking-modal>
+        <booking-modal :toggle="toggle" @get_appointments="getAppointments" :branches="branches" :token="token" :user="user"></booking-modal>
     </div>
 </template>
 
@@ -34,14 +34,27 @@
             return {
                 title: 'Appointments',
                 active_appointments:[],
+                branches:[],
+                toggle:false
             }
         },
         methods:{
+            getBranches:function() {
+                let u = this;
+                axios.get('/api/branch/getBranches/active')
+                .then(function (response) {
+                    u.branches = response.data;
+                });
+            },
+            getAppointments:function(){
 
+            }
         },
         mounted:function(){
             this.$emit('update_title', this.title);
             this.$emit('update_user');
+
+            this.getBranches();
         }
     }
 </script>

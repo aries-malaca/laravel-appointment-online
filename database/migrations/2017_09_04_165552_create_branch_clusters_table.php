@@ -16,8 +16,8 @@ class CreateBranchClustersTable extends Migration
         Schema::create('branch_clusters', function (Blueprint $table) {
             $table->increments('id');
             $table->string('cluster_name');
-            $table->string('cluster_owner');
-            $table->string('cluster_email');
+            $table->string('cluster_owner')->nullable();
+            $table->string('cluster_email')->nullable();
             $table->text('services');
             $table->text('products');
             $table->integer('is_active');
@@ -33,6 +33,6 @@ class CreateBranchClustersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('branch_clusers');
+        Schema::dropIfExists('branch_clusters');
     }
 }

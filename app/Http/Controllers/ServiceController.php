@@ -11,16 +11,24 @@ use Storage;
 class ServiceController extends Controller{
 
     public function getServices(Request $request){
-        if($request->segment(4)=='active')
-            return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
-                                            ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                            ->select('services.*','service_name','package_name','service_description')
-                                            ->where('services.is_active', 1)->get());
+        $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
+                        ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
+                        ->select('services.*','service_name','package_name','service_description','service_picture');
 
-        return response()->json(Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
-                                            ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                            ->select('services.*','service_name','package_name','service_description')
-                                            ->get());
+        if($request->segment(4)=='active')
+            $services = $services->where('services.is_active', 1);
+
+        $services=$services->get()->toArray();
+
+        foreach($services as $key=>$value){
+            if($value['service_type_id'] === 0){
+                $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
+                $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
+                $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+            }
+        }
+
+        return response()->json($services);
     }
 
     public function addService(Request $request){

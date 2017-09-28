@@ -13,6 +13,8 @@
             <div class="wizard__body__actions clearfix">
                 <a v-if="backEnabled" class="wizard__back pull-left" @click="goBack()"> <i class="fa fa-angle-left"></i> <span>Back</span>
                 </a>
+                <a class="wizard__close pull-left" v-if="!backEnabled && close_enabled" @click="goBack()"> <span>Close</span>
+                </a>
                 <a v-if="currentStep != steps.length - 1" class="wizard__next pull-right" @click="goNext()">
                     <span>Next</span> <i class="fa fa-angle-right"></i>
                 </a>
@@ -33,7 +35,8 @@
             onNext: {},
             onBack: {},
             toggle:{},
-            disable_saving:{}
+            disable_saving:{},
+            close_enabled:{}
         },
         data () {
             return {
@@ -226,5 +229,8 @@
     }
     .wizard__body__actions a.final-step{
         background-color: #6eb165;
+    }
+    .wizard__close{
+        background-color: #ff4b4b !important;
     }
 </style>

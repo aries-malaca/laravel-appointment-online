@@ -89,7 +89,7 @@ Route::post('/service/addServicePackage', 'ServiceController@addServicePackage')
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
 
 Route::get('/config/getTerms', 'ConfigController@getTerms');
-Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getActiveAppointments');
+Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getAppointments');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
 
 

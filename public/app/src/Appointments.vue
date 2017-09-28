@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="true"
+                <appointments-table title="Active Appointments" :hide_client="true" :user="user"
                                     :appointments="active_appointments" :token="token" :configs="configs" />
             </div>
         </div>
@@ -47,7 +47,29 @@
                 });
             },
             getAppointments:function(){
-
+                let u = this;
+                axios.get('/api/appointment/getAppointments/client/'+ this.user.id +'/active')
+                    .then(function (response) {
+                        u.active_appointments = [];
+                        response.data.forEach(function(item){
+                            item.status_formatted = u.statusHtml(item.transaction_status);
+                            u.active_appointments.push(item);
+                        });
+                    });
+            },
+            statusHtml:function(status){
+                if(status === 'reserved'){
+                    return '<span class="badge badge-warning">Reserved</span>';
+                }
+                else if(status === 'completed'){
+                    return '<span class="badge badge-success">Completed</span>';
+                }
+                else if(status === 'expired'){
+                    return '<span class="badge badge-danger">Expired</span>';
+                }
+                else if(status === 'cancelled'){
+                    return '<span class="badge badge-danger">Cancelled</span>';
+                }
             }
         },
         mounted:function(){
@@ -55,6 +77,11 @@
             this.$emit('update_user');
 
             this.getBranches();
+        },
+        watch:{
+            'user':function(){
+                this.getAppointments();
+            }
         }
     }
 </script>

@@ -20,7 +20,7 @@ class CreateMenusTable extends Migration
             $table->string('description');
             $table->string('url');
             $table->string('permission');
-            $table->string('icon');
+            $table->string('icon')->nullable();
             $table->integer('order');
             $table->integer('is_active');
             $table->integer('is_parent');

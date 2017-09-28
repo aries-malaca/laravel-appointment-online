@@ -1,6 +1,6 @@
 <template>
     <div id="booking-modal" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-full">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
@@ -11,18 +11,19 @@
                             :onNext="nextClicked"
                             :onBack="backClicked"
                             :toggle="toggle"
-                            :disable_saving="disable_saving">
+                            :disable_saving="disable_saving"
+                            :close_enabled="true">
                         <div slot="page1">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Select Branch</h3>
+                                        <h4>Select Branch</h4>
                                         <vue-select v-model="newTransaction.branch" :options="branch_selection"></vue-select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Select Date</h3>
+                                        <h4>Select Date</h4>
                                         <div class="row">
                                             <div class="col-xs-12">
                                                 <input type="date" v-bind:min="current_date" v-model="newTransaction.transaction_date" class="form-control"/>
@@ -34,7 +35,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group" v-if="show_technicians">
-                                        <h3>Select Technician <input type="checkbox" v-model="show_technicians" /></h3>
+                                        <h4>Select Technician <input type="checkbox" v-model="show_technicians" /></h4>
                                         <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
                                     </div>
                                     <div v-else>
@@ -48,26 +49,34 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <h3>Item Selection</h3>
+                                        <h4>Item Selection</h4>
                                         <select class="form-control large" v-model="show_item_type">
                                             <option value="services">Services</option>
                                             <option value="products">Products</option>
                                         </select>
                                     </div>
                                     <div class="form-group" v-if="show_item_type=='services'">
-                                        <h3>Select Service</h3>
+                                        <h4>Select Service</h4>
                                         <vue-select v-model="service" :options="service_selection"></vue-select>
                                     </div>
                                     <div class="form-group" v-else>
-                                        <h3>Select Product</h3>
+                                        <h4>Select Product</h4>
                                         <vue-select v-model="product" :options="product_selection"></vue-select>
                                     </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-success btn-lg" @click="addItem()"
-                                                v-if="(service!==null && show_item_type=='services')
-                                                        || (product!==null && show_item_type=='products')">
-                                            ADD TO LIST
-                                        </button>
+                                    <div class="form-group" v-if="(service!==null && show_item_type=='services')
+                                                    || (product!==null && show_item_type=='products')">
+                                        <item-card v-if="show_item_type=='products'"
+                                                   type="products"
+                                                   :picture="product.picture"
+                                                   :description="product.description"
+                                                />
+                                        <item-card v-else
+                                                   type="services"
+                                                   :picture="service.picture"
+                                                   :description="service.description"
+                                                />
+                                        <br/>
+                                        <button class="btn btn-success btn-lg" @click="addItem()"> ADD TO LIST</button>
                                     </div>
                                 </div>
                                 <div class="col-md-8" v-if="newTransaction.products !== undefined">
@@ -142,9 +151,6 @@
                         </div>
                     </wizard>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn dark btn-outline">Cancel</button>
-                </div>
             </div>
         </div>
     </div>
@@ -154,11 +160,12 @@
     import VueSelect from 'vue-select';
     import VueTimepicker from 'vue2-timepicker'
     import Wizard from '../components/Wizard.vue';
+    import ItemCard from '../components/ItemCard.vue';
 
     export default {
         name: 'Booking Modal',
         props: ['user', 'branches','toggle','token'],
-        components: { Wizard, VueSelect, VueTimepicker  },
+        components: { Wizard, VueSelect, VueTimepicker, ItemCard },
         data: function(){
             return {
                 current_date:moment().format("YYYY-MM-DD"),
@@ -198,6 +205,7 @@
                 let u = this;
                 axios.get('/api/product/getProducts/active')
                     .then(function (response) {
+                        u.products = [];
                         response.data.forEach(function(item){
                             let name = item.product_group_name + " " + item.product_size + " " + item.product_variant;
                             item.name = name;
@@ -295,6 +303,9 @@
                 return true; //return false if you want to prevent moving to next page
             },
             backClicked(currentPage) {
+                if(currentPage === 0){
+                    $("#booking-modal").modal("hide");
+                }
                 if(currentPage === 1){
                     if(confirm("Selected items will be discarded, do you want to go back?")){
                         this.newTransaction.services = [];
@@ -345,7 +356,9 @@
                     products.push({
                         label: this.products[x].name,
                         value: this.products[x].id,
-                        price: this.products[x].product_price
+                        price: this.products[x].product_price,
+                        picture: this.products[x].product_picture,
+                        description: this.products[x].product_description
                     });
                 }
                 return products;
@@ -360,6 +373,8 @@
                             value: this.services[x].id,
                             price: this.services[x].service_price,
                             minutes: this.services[x].service_minutes,
+                            picture: this.services[x].service_picture,
+                            description: this.services[x].service_description
                         });
                     }
                 }

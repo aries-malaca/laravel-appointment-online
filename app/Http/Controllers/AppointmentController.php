@@ -5,6 +5,15 @@ use Illuminate\Http\Request;
 use App\Transaction;
 use App\TransactionItem;
 use Validator;
+use App\Branch;
+use App\User;
+use App\Technician;
+use App\Service;
+use App\ServicePackage;
+use App\ServiceType;
+use App\Product;
+use App\ProductGroup;
+
 
 class AppointmentController extends Controller{
     public function addAppointment(Request $request){
@@ -21,11 +30,15 @@ class AppointmentController extends Controller{
                 'platform' => 'required'
             ]);
 
+            if ($validator->fails()) {
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+            }
+
             $appointment = new Transaction;
             $appointment->reference_no = "";
             $appointment->branch_id = $request->input('branch')['value'];
             $appointment->client_id = $client_id;
-            $appointment->transaction_datetime = date('Y-m-d H:i:s', strtotime($request->input('transaction_date').' '. $this->getFirstServiceTime($request->input('services'))));
+            $appointment->transaction_datetime = date('Y-m-d H:i:s', strtotime( $this->getFirstServiceTime($request->input('services'))));
             $appointment->transaction_status = 'reserved';
             $appointment->platform = $request->input('platform');
             $appointment->booked_by_name = $api['user']['username'];
@@ -72,6 +85,59 @@ class AppointmentController extends Controller{
     }
 
     public function getAppointments(Request $request){
+        switch($request->segment(4)){
+            case 'client':
+                $appointments = Transaction::where('client_id', $request->segment(5));
+                break;
+            case 'branch':
+                $appointments = Transaction::where('branch_id', $request->segment(5));
+                break;
+            default:
+                $appointments = Transaction;
+        }
 
+        if($request->segment(6) === 'active')
+            $appointments = $appointments->where('transaction_status', 'reserved');
+        elseif($request->segment(6) === 'inactive')
+            $appointments = $appointments->where('transaction_status', '<>','reserved');
+
+
+        $appointments = $appointments->orderBy('transaction_datetime')->get()->toArray();
+
+        foreach($appointments as $key=>$value){
+            $branch = Branch::find($value['branch_id']);
+            $client = User::find($value['client_id']);
+            $technician = Technician::find($value['technician_id']);
+            $appointments[$key]['branch_name'] = isset($branch)?$branch->branch_name:'N/A';
+            $appointments[$key]['client_name'] = isset($client)?$client->username:'N/A';
+            $appointments[$key]['client_contact'] = isset($client)?$client->user_mobile:'N/A';
+            $appointments[$key]['technician_name'] = isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
+            $appointments[$key]['items'] = $this->getAppointmentItems($value['id']);
+            $appointments[$key]['transaction_date_formatted'] = date('m/d/Y', strtotime($value['transaction_datetime']));
+            $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
+            $appointments[$key]['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($value['created_at']));
+        }
+
+        return response()->json($appointments);
+    }
+
+    function getAppointmentItems($id){
+        $items = TransactionItem::where('transaction_id', $id)->get()->toArray();
+        foreach($items as $key=>$value){
+            if($value['item_type'] === 'service'){
+                $service = Service::find($value['item_id']);
+                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_type_name:ServicePackage::find($service->service_package_id)->package_name;
+                $items[$key]['item_name'] = $service_name;
+                $items[$key]['item_info']['gender'] = $service->service_gender;
+            }
+            else{
+                $product = Product::find($value['item_id']);
+                $product_name = ProductGroup::find($product->product_group_id)->product_group_name;
+                $items[$key]['item_name'] = $product_name;
+                $items[$key]['item_info']['size'] = $product->product_size;
+                $items[$key]['item_info']['variant'] = $product->product_variant;
+            }
+        }
+        return $items;
     }
 }

@@ -15,6 +15,8 @@ use DateTime;
 use Validator;
 use Hash;
 use DB;
+use Mail;
+use JWTAuth;
 class MobileApiController extends Controller
 {
 
@@ -289,19 +291,6 @@ class MobileApiController extends Controller
             $clientID   		= $request->input('upload_client_id');
             $image 				= $request->input('upload_image');
 
-            // list($type, $image)  = explode(';',$image);
-            // list(,$image) 		 = explode(',', $image);
-
-
-            // if($type == 'data:image/jpeg')
-            //    $ext  = 'jpg';
-            // elseif($type == 'data:image/png')
-            //     $ext = 'png';
-            // else
-            //     return response()->json(["result"=>"failed","error"=>"Warning! Invalid File Format."],400);
-
-
-
             $filename = $clientID . '_' . time().'.jpg';
             $image = base64_decode($image);
             file_put_contents(public_path('images/users/'). $filename, $image );
@@ -380,6 +369,181 @@ class MobileApiController extends Controller
         return response()->json(["result"=>"success"]);
 	}
 
+
+    public function verifyMyPassword(Request $request){
+
+         $rule  = [
+                    // required and has to match the password field
+                    'verify_email'      => 'required|max:255',
+                    'verify_birth_date' => 'required|max:255'
+                ];
+        $message = [
+                    'verify_email.required'             => 'Email is empty', 
+                    'verify_birth_date.required'        => 'Birth date is empty'
+                ];
+
+        $validator = Validator::make($request->all(),$rule,$message);
+
+
+        if ($validator->fails()) {
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        }
+
+        $email      = $request->input('verify_email');
+        $bday       = new DateTime($request->input('verify_birth_date'));
+        $birth_date = $bday->format("Y-m-d H:i:s");
+
+        $user = User::where('email', $email)
+                            ->where('birth_date', 'LIKE',$birth_date.'%')
+                            ->get()->first();
+
+
+        if(!isset($user['id'])) {
+            if($result = $this->selfMigrateClient($email,null, $birth_date) ){
+                $user = User::where('id', $result['id'])->get()->first();
+            }
+        }
+
+        if(isset($user['id'])) {
+            $generated = md5(rand(1,600));
+            $user_data = json_decode($user['user_data'],true);
+            $user_data['reset_password_key'] = $generated;
+            $user_data['reset_password_expiration'] = time() + 300;
+            User::where('id', $user['id'])
+                        ->update(['user_data'=> json_encode($user_data)]);
+
+            Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+                $message->from('notification@system.lay-bare.com', 'LBO');
+                $message->subject('Password Reset');
+                $message->to($user['email'], $user['first_name']);
+            });
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json([
+                            "result" => "failed",
+                            "error"  => "No email address or birthdate exist"
+                        ],400);
+    }
+
+    public function FacebookLogin(Request $request){
+        
+        $facebook_id = $request->input("fb_id");
+        
+        $email       = $request->input("fb_email");
+        $bday        = $request->input("fb_bday");
+        $fname       = $request->input("fb_fname");
+        $lname       = $request->input("fb_lname");
+        $gender      = $request->input("fb_gender");
+        $image       = $request->input("fb_image");
+        $device      = $request->input("device");
+        $device_name = $request->input("device_info");
+        $user_facebook_query    = User::where('user_data','LIKE', '%"facebook_id":"'.$facebook_id.'"%')
+                                ->get()
+                                ->first();
+        $branch_id      = "";                  
+        $clientID = $user_facebook_query['id']; 
+        if(count($user_facebook_query) > 0){
+
+            $token                  = JWTAuth::fromUser($user_facebook_query);
+            $this->registerToken($clientID, $token,$device,$device_name);
+            $client                 = User::find($clientID);
+            $data                   = json_decode($client->user_data,true);
+            $data['facebook_id']    = $facebook_id;
+            $client->user_data      = json_encode($data);
+            $client->last_activity  = date('Y-m-d H:i:s');
+            $client->last_login     = date('Y-m-d H:i:s');
+            $client->is_confirmed   = 1;
+            $client->save();
+
+            $objResult = array(
+                        "clientID"      => $clientID,
+                        "first_name"    => $user_facebook_query->first_name,
+                        "middle_name"   => $user_facebook_query->middle_name,
+                        "last_name"     => $user_facebook_query->last_name,
+                        "address"       => $user_facebook_query->user_address,
+                        "gender"        => strtolower($user_facebook_query->gender),
+                        "image"         => $user_facebook_query->user_picture,
+                        "birthday"      => $user_facebook_query->birth_date,
+                        "mobile"        => $user_facebook_query->user_mobile,
+                        "token"         => $token 
+                                );
+        
+             return response()->json([
+                        "result"        =>"success",
+                        "isAlready"     => true,
+                        "objResult"     => $objResult
+                    ]);
+        }
+        else{
+
+            if($email != "" || $email != null){
+                $user_email_query = User::where('email','=', $email)
+                                        ->get()
+                                        ->first();
+                if(count($user_email_query) > 0){
+
+                    $clientID               = $user_email_query['id']; 
+
+                    $token = JWTAuth::fromUser($user_email_query);
+                     $this->registerToken($clientID, $token,$fb_device,$device_name);
+
+                    $client                 = User::find($clientID);
+                    $data                   = json_decode($client->user_data,true);
+                    $data['facebook_id']    = $facebook_id;
+                    $client->user_data      = json_encode($data);
+                    $client->last_activity  = date('Y-m-d H:i:s');
+                    $client->last_login     = date('Y-m-d H:i:s');
+                    $client->is_confirmed   = 1;
+                    $client->save();
+
+                    $objResult = array(
+                                "clientID"      => $clientID,
+                                "first_name"    => $user_email_query->first_name,
+                                "middle_name"   => $user_email_query->middle_name,
+                                "last_name"     => $user_email_query->last_name,
+                                "address"       => $user_email_query->user_address,
+                                "gender"        => strtolower($user_email_query->gender),
+                                "image"         => $user_email_query->user_picture,
+                                "birthday"      => $user_email_query->birth_date,
+                                "mobile"        => $user_email_query->user_mobile,
+                                "token"         => $token 
+                                        );
+                
+                     return response()->json([
+                                "result"        =>"success",
+                                "isAlready"     => true,
+                                "objResult"     => $objResult
+                            ]);
+                }
+                else{
+                    return response()->json(["result"=>"success", "isAlready" => false]);
+                }
+            }
+
+          
+            
+        }
+  
+
+
+       
+       // if(!isset($user_facebook_query['id']) && isset($fb_user['email']))
+       //      $user = User::where('email', $fb_user['email'])->get()->first();
+
+       //  if(isset($user['id'])){
+       //      $token = JWTAuth::fromUser($user);
+
+       //      $this->registerToken($user['id'], $token);
+       //      User::where('id',$user['id'])->update(['is_confirmed'=>1]);
+       //      return response()->json(["result"=>"success","token"=>$token]);
+       //  }
+
+       //  return response()->json(['result'=>'failed', "user"=>$fb_user],300);
+       
+
+
+
+    }
 
 
 

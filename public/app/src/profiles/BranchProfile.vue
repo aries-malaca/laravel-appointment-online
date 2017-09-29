@@ -134,12 +134,19 @@
                     </div>
                 </div>
                 <!--tab_1_2-->
-                <div class="tab-pane" id="account">
-
-                </div>
-                <!--end tab-pane-->
                 <div class="tab-pane" id="appointments">
-
+                    <div class="row">
+                        <div class="col-md-12">
+                            <appointments-table title="Active Appointments" :hide_branch="true" :configs="configs"
+                                                :appointments="active_appointments" :token="token" :user="user"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <appointments-table title="Appointment History" :hide_branch="true" :user="user"
+                                                :appointments="appointment_history" :token="token" :configs="configs" />
+                        </div>
+                    </div>
                 </div>
                 <!--end tab-pane-->
                 <div class="tab-pane" id="transactions">
@@ -166,14 +173,17 @@
 
 <script>
     import UploadPictureModal from "../modals/UploadPictureModalSmall.vue";
+    import AppointmentsTable from "../tables/AppointmentsTable.vue";
     export default {
         name: 'BranchProfile',
-        props: ['token','configs','id','with_back','id','show'],
-        components:{ UploadPictureModal },
+        props: ['token','configs','id','with_back','id','show','user'],
+        components:{ UploadPictureModal, AppointmentsTable },
         data: function(){
            return {
                branch:{},
                pictures:[],
+               appointment_history:[],
+               active_appointments:[],
                slickOptions: {
                    slidesToShow: 3,
                    // Any other options that can be got from plugin documentation
@@ -190,12 +200,11 @@
                 .then(function (response) {
                     if(response.data.id !== undefined){
                         u.branch = response.data;
-                        u.branch.branch_pictures = JSON.parse(response.data.branch_pictures);
-                        u.branch.branch_data = JSON.parse(response.data.branch_data);
+                        u.branch.branch_pictures = response.data.branch_pictures;
+                        u.branch.branch_data = response.data.branch_data;
                         u.pictures = u.branch.branch_pictures;
-                        u.branch.map_coordinates = JSON.parse(u.branch.map_coordinates);
-                        u.branch.social_media_accounts = JSON.parse(u.branch.social_media_accounts);
-
+                        u.branch.map_coordinates = u.branch.map_coordinates;
+                        u.branch.social_media_accounts = u.branch.social_media_accounts;
 
                         setTimeout(function(){
                             let latlng = new google.maps.LatLng(u.branch.map_coordinates.lat,u.branch.map_coordinates.long);
@@ -212,6 +221,9 @@
                         },1000);
 
                     }
+                }).catch(function(error){
+                    if(this.with_back)
+                        this.back();
                 });
             },
             addPicture:function(){
@@ -243,13 +255,50 @@
             },
             editBranch:function(){
                 this.$emit('edit_branch', this.branch);
-            }
+            },
+            getAppointments:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/branch/'+ this.id +'/active';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.active_appointments = [];
+                        response.data.forEach(function(item){
+                            u.active_appointments.push(item);
+                        });
+                    });
+            },
+            getAppointmentHistory:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/branch/'+ this.id +'/inactive';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.appointment_history = [];
+                        response.data.forEach(function(item){
+                            u.appointment_history.push(item);
+                        });
+                    });
+            },
         },
         watch:{
             id:function(){
-                this.getBranch();
+                if(this.id !== 0){
+                    this.getAppointments();
+                    this.getAppointmentHistory();
+                    this.getBranch();
+                }
             }
         },
+        mounted:function(){
+            let u = this;
+            this.$options.sockets.refreshAppointments = function(data){
+                if(data.branch_id === u.id){
+                    u.getAppointments();
+                    u.getAppointmentHistory();
+                }
+            };
+        }
     }
 </script>
 

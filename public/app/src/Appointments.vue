@@ -16,6 +16,9 @@
             <div class="portlet-body">
                 <appointments-table title="Active Appointments" :hide_client="true" :user="user"
                                     :appointments="active_appointments" :token="token" :configs="configs" />
+
+                <appointments-table title="Appointment History" :hide_client="true" :user="user"
+                                    :appointments="appointment_history" :token="token" :configs="configs" />
             </div>
         </div>
         <booking-modal :toggle="toggle" @get_appointments="getAppointments" :branches="branches" :token="token" :user="user"></booking-modal>
@@ -34,6 +37,7 @@
             return {
                 title: 'Appointments',
                 active_appointments:[],
+                appointment_history:[],
                 branches:[],
                 toggle:false
             }
@@ -48,39 +52,58 @@
             },
             getAppointments:function(){
                 let u = this;
-                axios.get('/api/appointment/getAppointments/client/'+ this.user.id +'/active')
+                var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/active';
+
+                if(this.user.is_client !== 1)
+                    url = '/api/appointment/getAppointments/all/all/active';
+
+                axios.get(url)
                     .then(function (response) {
                         u.active_appointments = [];
                         response.data.forEach(function(item){
-                            item.status_formatted = u.statusHtml(item.transaction_status);
+                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                                return false;
+
                             u.active_appointments.push(item);
                         });
                     });
             },
-            statusHtml:function(status){
-                if(status === 'reserved'){
-                    return '<span class="badge badge-warning">Reserved</span>';
-                }
-                else if(status === 'completed'){
-                    return '<span class="badge badge-success">Completed</span>';
-                }
-                else if(status === 'expired'){
-                    return '<span class="badge badge-danger">Expired</span>';
-                }
-                else if(status === 'cancelled'){
-                    return '<span class="badge badge-danger">Cancelled</span>';
-                }
-            }
+            getAppointmentHistory:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/inactive';
+
+                if(this.user.is_client !== 1)
+                    url = '/api/appointment/getAppointments/all/all/inactive';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.appointment_history = [];
+                        response.data.forEach(function(item){
+                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                                return false;
+
+                            u.appointment_history.push(item);
+                        });
+                    });
+            },
         },
         mounted:function(){
             this.$emit('update_title', this.title);
             this.$emit('update_user');
-
             this.getBranches();
+
+            let u = this;
+            this.$options.sockets.refreshAppointments = function(data){
+                if(data.client_id !== u.user.id && u.user.is_client ===1)
+                    return false;
+                u.getAppointments();
+                u.getAppointmentHistory();
+            };
         },
         watch:{
             'user':function(){
                 this.getAppointments();
+                this.getAppointmentHistory();
             }
         }
     }

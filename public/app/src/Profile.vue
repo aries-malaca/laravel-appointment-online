@@ -202,8 +202,6 @@
                 axios.get('/api/user/getUser?token=' + this.token)
                 .then(function (response) {
                     u.profile = response.data.user;
-                    u.profile.device_data = JSON.parse(u.profile.device_data);
-                    u.profile.user_data = JSON.parse(u.profile.user_data);
                     u.$emit('update_user');
                 })
                 .catch(function (error) {

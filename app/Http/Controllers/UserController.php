@@ -72,6 +72,8 @@ class UserController extends Controller{
             else
                 $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name;
 
+            $api["user"]['user_data'] = json_decode($api["user"]['user_data']);
+            $api["user"]['device_data'] = json_decode($api["user"]['device_data']);
             return response()->json(["user"=>$api["user"],
                                      "menus"=>$this->getUserMenus($api["user"]),
                                      "configs"=> Config::get()->toArray()

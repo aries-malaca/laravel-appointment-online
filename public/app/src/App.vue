@@ -117,6 +117,10 @@
             this.token = $.cookie("login_cookie");
             if(this.token === undefined)
                 this.logout();
+
+            this.$options.sockets.broadcast = function(count){
+                console.log(count);
+            };
         }
     }
 </script>

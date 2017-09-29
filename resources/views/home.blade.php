@@ -22,7 +22,7 @@
         <!-- BEGIN THEME LAYOUT STYLES -->
         <link href="../../theme/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/layouts/layout4/css/themes/lbo.css" rel="stylesheet" type="text/css" id="style_color" />
-        <link href="../../theme/layouts/layout4/css/custom.css" rel="stylesheet" type="text/css" />
+        <link href="../../css/custom.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
 
         <link href="../../theme/global/plugins/socicon/socicon.css" rel="stylesheet" type="text/css" />
@@ -75,8 +75,8 @@
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
-    <script src="../../app/dist/build.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script src="../../app/dist/build.js"></script>
 </html>

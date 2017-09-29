@@ -116,8 +116,8 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <appointments-table :hide_client="true" title="Active Appointments" :active_appointments="active_appointments" :token="token"
-                                                           :configs="configs" />
+                                <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
+                                                    :token="token" :configs="configs" :user="user"/>
                             </div>
                         </div>
                     </div>
@@ -223,8 +223,16 @@
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="appointments">
-                        <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
-                                            :token="token" :configs="configs" />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <appointments-table title="Active Appointments" :hide_client="true" :configs="configs"
+                                                    :appointments="active_appointments" :token="token" :user="user"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                            </div>
+                        </div>
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions">
@@ -258,14 +266,15 @@
 
     export default {
         name: 'ClientProfile',
-        props: ['token','configs','with_back','id','show'],
+        props: ['token','configs','with_back','id','show','user'],
         components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable},
         data: function(){
             return {
                 client:{},
                 newClient:{},
                 branches:[],
-                active_appointments:[]
+                active_appointments:[],
+                appointment_history:[]
             }
         },
         methods:{
@@ -363,15 +372,51 @@
                         u.newClient.user_address = event.target.value;
                     },100);
                 })
-            }
+            },
+            getAppointments:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/client/'+ this.id +'/active';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.active_appointments = [];
+                        response.data.forEach(function(item){
+                            u.active_appointments.push(item);
+                        });
+                    });
+            },
+            getAppointmentHistory:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/client/'+ this.id +'/inactive';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.appointment_history = [];
+                        response.data.forEach(function(item){
+                            u.appointment_history.push(item);
+                        });
+                    });
+            },
         },
         watch:{
             id:function(){
-                this.getClient();
+                if(this.id !== 0){
+                    this.getClient();
+                    this.getAppointments();
+                    this.getAppointmentHistory();
+                }
             }
         },
         mounted:function(){
             this.getBranches();
+
+            let u = this;
+            this.$options.sockets.refreshAppointments = function(data){
+                if(data.client_id === u.id){
+                    u.getAppointments();
+                    u.getAppointmentHistory();
+                }
+            };
         },
         computed:{
             branch_selection:function(){

@@ -34,7 +34,7 @@
         </div>
 
         <branch-profile @edit_branch="editBranch" @back="view='list',view_id=0" :show="view=='single'" :with_back="true"
-                :token="token" @update_branch="getBranches" :configs="configs" :id="view_id" />
+                :token="token" @update_branch="getBranches" :configs="configs" :id="view_id" :user="user" />
 
         <div class="modal fade" id="add-branch-modal" data-backdrop="static" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -263,7 +263,7 @@
     export default {
         name: 'Branches',
         components:{ DataTable, VueSelect, BranchProfile },
-        props: ['token','configs'],
+        props: ['token','configs','user'],
         data: function(){
             return {
                 title: 'Branches',
@@ -447,14 +447,14 @@
             getServiceName:function(id){
                 for(var x=0;x<this.services.length;x++){
                     if(id == this.services[x].id)
-                        return this.services[x].service_name===null?this.services[x].package_name:this.services[x].service_name;
+                        return (this.services[x].service_name===null?this.services[x].package_name:this.services[x].service_name)  + ' (' + this.services[x].service_gender.toUpperCase() +')';
                 }
                 return 'Unknown';
             },
             getProductName:function(id){
                 for(var x=0;x<this.products.length;x++){
                     if(id == this.products[x].id)
-                        return this.products[x].product_code;
+                        return this.products[x].product_group_name + ' ' + this.products[x].product_size + ' ' + this.products[x].product_variant;
                 }
                 return 'Unknown';
             },
@@ -496,21 +496,18 @@
             },
             editBranch:function(branch) {
                 let u = this;
+
                 axios.get('/api/branch/getBranch/' + branch.id)
                 .then(function (response) {
                     if(response.data.id !== undefined){
                         u.newBranch = response.data;
                         u.newBranch.search_id = response.data.id;
                         u.newBranch.opening_date = moment(response.data.opening_date).format("YYYY-MM-DD");
-                        u.newBranch.branch_pictures = JSON.parse(u.newBranch.branch_pictures);
-                        u.newBranch.branch_data = JSON.parse(u.newBranch.branch_data);
                         u.pictures = u.newBranch.branch_pictures;
-                        u.newBranch.map_coordinates = JSON.parse(u.newBranch.map_coordinates);
-                        u.newBranch.social_media_accounts = JSON.parse(u.newBranch.social_media_accounts);
                     }
 
                     setTimeout(function(){
-                        initMap(u.newBranch.map_coordinates.lat, u.newBranch.map_coordinates.long);
+                        initMap(branch.map_coordinates.lat, branch.map_coordinates.long);
                     },1000)
                 });
 
@@ -566,14 +563,14 @@
                 var a = [];
                 this.services.forEach(function(item){
                     var name = item.service_name ===null? item.package_name:item.service_name;
-                    a.push({label:name, value:item.id});
+                    a.push({label:name + ' (' + item.service_gender.toUpperCase() +')', value:item.id});
                 });
                 return a;
             },
             product_selection:function(){
                 var a = [];
                 this.products.forEach(function(item){
-                    a.push({label:item.product_name, value:item.id});
+                    a.push({label:item.product_code, value:item.id});
                 });
                 return a;
             }

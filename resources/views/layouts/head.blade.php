@@ -19,6 +19,6 @@
 <!-- BEGIN THEME LAYOUT STYLES -->
 <link href="../../theme/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css" />
 <link href="../../theme/layouts/layout4/css/themes/lbo.css" rel="stylesheet" type="text/css" id="style_color" />
-<link href="../../theme/layouts/layout4/css/custom.css" rel="stylesheet" type="text/css" />
+<link href="../../js/custom.css" rel="stylesheet" type="text/css" />
 <!-- END THEME LAYOUT STYLES -->
 <link rel="icon" type="image/png" href="favicon.png">

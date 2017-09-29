@@ -175,6 +175,7 @@
                 products:[],
                 service:null,
                 product:null,
+                client_id:null,
                 newTransaction:{},
                 steps: [
                     {
@@ -328,6 +329,7 @@
                         toastr.success("Successfully booked.");
                         u.disable_saving = false;
                         $("#booking-modal").modal("hide");
+                        u.$socket.emit('refreshAppointments', u.newTransaction.branch.value, u.client_id);
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -396,6 +398,10 @@
                 return total;
             }
         },
+        mounted:function(){
+            if(this.user.is_client === 1)
+                this.client_id = this.user.id;
+        },
         watch:{
             'newTransaction.branch':function(){
                 this.getServices();
@@ -403,7 +409,10 @@
             },
             toggle:function(){
                 this.newTransaction={
-                    branch:null,
+                    branch:{
+                        value: this.user.branch.value,
+                        label : this.user.branch.label
+                     },
                     technician:null,
                     id:0,
                     transaction_date:moment().format("YYYY-MM-DD"),

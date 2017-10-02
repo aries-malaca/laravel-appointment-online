@@ -137,13 +137,13 @@
                 <div class="tab-pane" id="appointments">
                     <div class="row">
                         <div class="col-md-12">
-                            <appointments-table title="Active Appointments" :hide_branch="true" :configs="configs"
+                            <appointments-table title="Active Appointments" :hide_branch="true" :configs="configs" @get_appointments="getAppointments"
                                                 :appointments="active_appointments" :token="token" :user="user"/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <appointments-table title="Appointment History" :hide_branch="true" :user="user"
+                            <appointments-table title="Appointment History" :hide_branch="true" :user="user" @get_appointments="getAppointmentHistory"
                                                 :appointments="appointment_history" :token="token" :configs="configs" />
                         </div>
                     </div>

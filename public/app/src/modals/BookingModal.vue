@@ -15,34 +15,48 @@
                             :close_enabled="true">
                         <div slot="page1">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <h4>Select Branch</h4>
-                                        <vue-select v-model="newTransaction.branch" :options="branch_selection"></vue-select>
+                                <div class="col-md-4">
+                                    <div class="form-group" v-if="!lock_client">
+                                        <h4>Select Client</h4>
+                                        <vue-select :debounce="250" :on-search="searchClients" :options="client_selection"
+                                                    placeholder="Search for Client..." v-model="newTransaction.client" />
+                                    </div>
+                                    <div class="form-group" v-else>
+                                        <h4>Client</h4>
+                                        <h4 style="font-weight:bold" v-if="default_client!==null">{{ default_client.label }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <h4>Select Date</h4>
-                                        <div class="row">
-                                            <div class="col-xs-12">
-                                                <input type="date" v-bind:min="current_date" v-model="newTransaction.transaction_date" class="form-control"/>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group" v-if="!lock_branch">
+                                                <h4>Select Branch</h4>
+                                                <vue-select v-model="newTransaction.branch" :options="branch_selection"></vue-select>
+                                            </div>
+                                            <div class="form-group" v-else>
+                                                <h4>Selected Branch</h4>
+                                                <h4 style="font-weight:bold" v-if="default_branch!==null">{{ default_branch.label }}</h4>
+                                            </div>
+                                            <div class="form-group" v-if="show_technicians">
+                                                <h4>Select Technician <input type="checkbox" v-model="show_technicians" /></h4>
+                                                <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
+                                            </div>
+                                            <div v-else>
+                                                <button class="btn btn-success btn-md" @click="show_technicians=true"> Select preferred technician.</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <h4>Select Date</h4>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <input type="date" v-bind:min="current_date" v-model="newTransaction.transaction_date" class="form-control"/>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group" v-if="show_technicians">
-                                        <h4>Select Technician <input type="checkbox" v-model="show_technicians" /></h4>
-                                        <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
-                                    </div>
-                                    <div v-else>
-                                        <button class="btn btn-success btn-md" @click="show_technicians=true"> Select preferred technician.</button>
-                                    </div>
-                                </div>
-                                <div class="col-md-6"></div>
                             </div>
                         </div>
                         <div slot="page2">
@@ -164,7 +178,7 @@
 
     export default {
         name: 'Booking Modal',
-        props: ['user', 'branches','toggle','token'],
+        props: ['user', 'branches','toggle','token','default_branch', 'lock_branch', 'default_client', 'lock_client'],
         components: { Wizard, VueSelect, VueTimepicker, ItemCard },
         data: function(){
             return {
@@ -175,7 +189,7 @@
                 products:[],
                 service:null,
                 product:null,
-                client_id:null,
+                clients:[],
                 newTransaction:{},
                 steps: [
                     {
@@ -282,8 +296,8 @@
                 let dt = this.newTransaction.transaction_date ;
 
                 if(currentPage===0){
-                    if(this.newTransaction.branch === null || this.newTransaction.transaction_date === "" ){
-                        toastr.error("Select Branch and Date.");
+                    if(this.newTransaction.branch === null || this.newTransaction.transaction_date === "" || this.newTransaction.client === null ){
+                        toastr.error("Please set Client, Branch and Date.");
                         return false;
                     }
                     if(Number(moment(dt).format("X")) < Number(moment(moment().format("YYYY-MM-DD")).format("X"))){
@@ -297,16 +311,15 @@
                         return false;
                     }
                 }
-                else if(currentPage === 2){
+                else if(currentPage === 2)
                     this.addAppointment();
-                }
 
                 return true; //return false if you want to prevent moving to next page
             },
             backClicked(currentPage) {
-                if(currentPage === 0){
+                if(currentPage === 0)
                     $("#booking-modal").modal("hide");
-                }
+
                 if(currentPage === 1){
                     if(confirm("Selected items will be discarded, do you want to go back?")){
                         this.newTransaction.services = [];
@@ -314,13 +327,15 @@
                         return true;
                     }
                 }
-                else if(currentPage === 2){
+                else if(currentPage === 2)
                     return true;
-                }
 
                 return false;
             },
             addAppointment:function(){
+                if(this.disable_saving){
+                    return false;
+                }
                 let u = this;
                 this.disable_saving = true;
                 axios({url:'/api/appointment/addAppointment?token=' + this.token, method:'post', data:this.newTransaction})
@@ -335,7 +350,19 @@
                         XHRCatcher(error);
                         u.disable_saving = false;
                     });
-            }
+            },
+            searchClients:function(keyword,loading){
+                loading(true);
+                let u = this;
+                axios.get('/api/client/searchClients', {params:{keyword:keyword}})
+                    .then(function (response) {
+                        u.clients = [];
+                        response.data.forEach(function(item){
+                            u.clients.push(item);
+                        });
+                        loading(false);
+                    });
+            },
         },
         computed:{
             branch_selection:function(){
@@ -347,6 +374,17 @@
                     });
                 }
                 return branches;
+            },
+            client_selection:function(){
+                var clients=[];
+                for(var x=0;x<this.clients.length;x++){
+                    clients.push({
+                        label:this.clients[x].username,
+                        value:this.clients[x].id,
+                        gender:this.clients[x].gender,
+                    });
+                }
+                return clients;
             },
             technician_selection:function(){
                 return [{label:"aries", value:1},
@@ -368,17 +406,18 @@
             service_selection:function(){
                 var services = [];
                 for(var x=0;x<this.services.length;x++){
-                    if(this.services[x].service_gender === this.user.gender){
-                        var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
-                        services.push({
-                            label: name + ' ' + this.user.gender.toUpperCase(),
-                            value: this.services[x].id,
-                            price: this.services[x].service_price,
-                            minutes: this.services[x].service_minutes,
-                            picture: this.services[x].service_picture,
-                            description: this.services[x].service_description
-                        });
-                    }
+                    if(this.newTransaction.client !== null)
+                        if(this.services[x].service_gender === this.newTransaction.client.gender){
+                            var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
+                            services.push({
+                                label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
+                                value: this.services[x].id,
+                                price: this.services[x].service_price,
+                                minutes: this.services[x].service_minutes,
+                                picture: this.services[x].service_picture,
+                                description: this.services[x].service_description
+                            });
+                        }
                 }
                 return services;
             },
@@ -392,15 +431,11 @@
             },
             total_products:function(){
                 var total = 0;
-                for(var x=0;x<this.newTransaction.products.length;x++){
-                    total += (this.newTransaction.products[x].price * this.newTransaction.products[x].quantity) ;
-                }
+                for(var x=0;x<this.newTransaction.products.length;x++)
+                    total += (this.newTransaction.products[x].price * this.newTransaction.products[x].quantity);
+
                 return total;
             }
-        },
-        mounted:function(){
-            if(this.user.is_client === 1)
-                this.client_id = this.user.id;
         },
         watch:{
             'newTransaction.branch':function(){
@@ -408,11 +443,17 @@
                 this.getProducts();
             },
             toggle:function(){
+                this.clients = [];
                 this.newTransaction={
-                    branch:{
-                        value: this.user.branch.value,
-                        label : this.user.branch.label
-                     },
+                    branch:this.default_branch!==null?{
+                        value: this.default_branch.value,
+                        label : this.default_branch.label
+                    }:null,
+                    client:this.default_client!==null?{
+                        value: this.default_client.value,
+                        label : this.default_client.label,
+                        gender : this.default_client.gender
+                    }:null,
                     technician:null,
                     id:0,
                     transaction_date:moment().format("YYYY-MM-DD"),

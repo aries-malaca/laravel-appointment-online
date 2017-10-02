@@ -14,14 +14,15 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="true" :user="user"
+                <appointments-table title="Active Appointments" :hide_client="true" :user="user" @get_appointments="getAppointments"
                                     :appointments="active_appointments" :token="token" :configs="configs" />
 
-                <appointments-table title="Appointment History" :hide_client="true" :user="user"
+                <appointments-table title="Appointment History" :hide_client="true" :user="user" @get_appointments="getAppointmentHistory"
                                     :appointments="appointment_history" :token="token" :configs="configs" />
             </div>
         </div>
-        <booking-modal :toggle="toggle" @get_appointments="getAppointments" :branches="branches" :token="token" :user="user"></booking-modal>
+        <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"
+                   @get_appointments="getAppointments" :branches="branches" :token="token" :user="user" />
     </div>
 </template>
 
@@ -39,7 +40,8 @@
                 active_appointments:[],
                 appointment_history:[],
                 branches:[],
-                toggle:false
+                toggle:false,
+                client:{}
             }
         },
         methods:{
@@ -99,11 +101,19 @@
                 u.getAppointments();
                 u.getAppointmentHistory();
             };
+
         },
         watch:{
             'user':function(){
                 this.getAppointments();
                 this.getAppointmentHistory();
+
+                this.client = {
+                    label:this.user.username,
+                    value:this.user.id,
+                    gender:this.user.gender
+                };
+
             }
         }
     }

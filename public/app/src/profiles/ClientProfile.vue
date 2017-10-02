@@ -117,7 +117,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
-                                                    :token="token" :configs="configs" :user="user"/>
+                                                    :token="token" :configs="configs" :user="user" @get_appointments="getAppointments"/>
                             </div>
                         </div>
                     </div>
@@ -226,7 +226,10 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <appointments-table title="Active Appointments" :hide_client="true" :configs="configs"
-                                                    :appointments="active_appointments" :token="token" :user="user"/>
+                                    @get_appointments="getAppointments" :appointments="active_appointments" :token="token" :user="user"/>
+
+                                <appointments-table title="Appointment History" :hide_client="true" :configs="configs"
+                                    @get_appointments="getAppointmentHistory" :appointments="appointment_history" :token="token" :user="user"/>
                             </div>
                         </div>
                         <div class="row">

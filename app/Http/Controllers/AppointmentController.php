@@ -17,6 +17,7 @@ class AppointmentController extends Controller{
     public function addAppointment(Request $request){
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
+            'client' => 'required',
             'transaction_date' => 'required',
             'transaction_time' => 'required',
             'services' => 'required',
@@ -29,7 +30,7 @@ class AppointmentController extends Controller{
 
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
-            $client_id = $api['user']['is_client'] === 1 ?  $client_id = $api['user']['id'] : $request->input('client_id');
+            $client_id = $api['user']['is_client'] === 1 ?  $client_id = $api['user']['id'] : $request->input('client')['value'];
 
             $appointment = new Transaction;
             $appointment->reference_no = "";
@@ -150,19 +151,47 @@ class AppointmentController extends Controller{
     }
 
     function formatStatus($status){
-        if($status === 'reserved'){
+        if($status === 'reserved')
             return '<span class="badge badge-info">Reserved</span>';
-        }
-        else if($status === 'completed'){
+        else if($status === 'completed')
             return '<span class="badge badge-success">Completed</span>';
-        }
-        else{
+        else
             return '<span class="badge badge-danger">'.$status.'</span>';
-        }
     }
 
     public function callAppointment(Request $request){
+        TransactionItem::where('id', $request->input('item_id'))
+                        ->update(['item_data'=>json_encode(['called'=>time()])]);
+        return response()->json(["result"=>"success"]);
+    }
 
+    public function serveAppointment(Request $request){
+        TransactionItem::where('id', $request->input('item_id'))
+            ->update(['serve_time' => date('Y-m-d H:i'),
+                      'item_data' => json_encode(array())]);
+        return response()->json(["result"=>"success"]);
+    }
+
+    public function unServeAppointment(Request $request){
+        TransactionItem::where('id', $request->input('item_id'))
+            ->update(['serve_time'=>null]);
+        return response()->json(["result"=>"success"]);
+    }
+
+    public function completeAppointment(Request $request){
+        $item = TransactionItem::find($request->input('item_id'));
+        $item->complete_time = date('Y-m-d H:i');
+        $item->item_status = 'completed';
+        $item->save();
+
+        $this->refreshStatus($item->transaction_id, 'cancelled');
+        return response()->json(["result"=>"success"]);
+    }
+
+    public function unCallAppointment(Request $request){
+        TransactionItem::where('id', $request->input('item_id'))
+            ->update(['item_data'=>json_encode(['called'=>0])]);
+        return response()->json(["result"=>"success"]);
     }
 
     public function cancelAppointment(Request $request){

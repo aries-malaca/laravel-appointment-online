@@ -97,9 +97,9 @@ Route::patch('/appointment/cancelAppointment', 'AppointmentController@cancelAppo
 Route::patch('/appointment/callAppointment', 'AppointmentController@callAppointment');
 Route::patch('/appointment/unCallAppointment', 'AppointmentController@unCallAppointment');
 Route::patch('/appointment/cancelItem', 'AppointmentController@cancelItem');
-Route::patch('/appointment/serveItem', 'AppointmentController@serveItem');
-Route::patch('/appointment/unServeItem', 'AppointmentController@unServeItem');
-Route::patch('/appointment/completeItem', 'AppointmentController@completeItem');
+Route::patch('/appointment/serveAppointment', 'AppointmentController@serveAppointment');
+Route::patch('/appointment/unServeAppointment', 'AppointmentController@unServeAppointment');
+Route::patch('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 
 
 

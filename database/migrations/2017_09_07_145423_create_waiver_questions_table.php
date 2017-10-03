@@ -18,7 +18,8 @@ class CreateWaiverQuestionsTable extends Migration
             $table->string('question');
             $table->string('target_gender');
             $table->string('question_type');
-            $table->text('choices');
+            $table->text('question_data');
+            $table->integer('question_order');
             $table->timestamps();
         });
     }

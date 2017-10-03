@@ -14,10 +14,10 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="true" :user="user" @get_appointments="getAppointments"
+                <appointments-table title="Active Appointments" :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointments"
                                     :appointments="active_appointments" :token="token" :configs="configs" />
 
-                <appointments-table title="Appointment History" :hide_client="true" :user="user" @get_appointments="getAppointmentHistory"
+                <appointments-table title="Appointment History" :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointmentHistory"
                                     :appointments="appointment_history" :token="token" :configs="configs" />
             </div>
         </div>

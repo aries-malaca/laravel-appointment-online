@@ -599,7 +599,7 @@
         width: calc(100% - 24px);
         height: 34px;
         padding: 6px 12px;
-        font-size: 14px;
+        font-size: 12px;
         line-height: 1.42857143;
         color: #555;
         background-color: #fff;
@@ -666,7 +666,7 @@
 
     .table-header .table-title{
         margin:  0px;
-        font-size: 18px;
+        font-size: 14px;
     }
 
 
@@ -697,7 +697,7 @@
     .pagination-controls a{
         text-decoration: none;
         color: rgba(0, 0, 0, 0.66);
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         opacity: 0.8;
     }

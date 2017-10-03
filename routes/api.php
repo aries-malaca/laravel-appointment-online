@@ -101,7 +101,7 @@ Route::patch('/appointment/serveAppointment', 'AppointmentController@serveAppoin
 Route::patch('/appointment/unServeAppointment', 'AppointmentController@unServeAppointment');
 Route::patch('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 
-
+Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
 
 //mobile

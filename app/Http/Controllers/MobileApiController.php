@@ -99,23 +99,31 @@ class MobileApiController extends Controller
 
 
 		//papalitan mamaya
-		// $product_query = DB::table('products as a')
-		// 				->join('product_groups as b','a.product_group_id','=','b.id')
-		// 				->where("a.is_active","=","1")
-		// 				->select("a.id as product_id","a.product_name","a.product_desc","a.product_price","a.product_price")
-		// 				->get();
-		// foreach ($product_query as $rowProduct) {
-		// 	$product_array[] = array(
-		// 					'id' => $rowProduct->product_id,
-		// 					'id' => $rowProduct->product_id,
-		// 					'id' => $rowProduct->product_id,
-		// 						);
-		// }
+		 $product_query  =  DB::table('products')
+                                    ->leftJoin('product_groups','products.product_group_id','=','product_groups.id')
+                                    ->select('products.*','product_group_name','product_picture', 'product_description')
+                                    ->where('products.is_active', 1)
+                                    ->where('products.product_price', '>',"0")
+                                    ->get();
         
-        $response['carousel']   = $advertisement_query;
-		$response['services']    = $service_array;
-		$response['products']    = $product_array;
-		$response['date_today'] = $today;
+
+        foreach ($product_query as $rowProduct) {
+            $product_array[] = array(
+                            'id'                    => $rowProduct->id,
+                            'name'                  => $rowProduct->product_group_name,
+                            'size'                  => $rowProduct->product_size,
+                            'image'                 => $rowProduct->product_picture,
+                            'desc'                  => $rowProduct->product_description,
+                            'variant'               => $rowProduct->product_size,
+                            'updated_at'            => $rowProduct->updated_at,
+                            'price'                 => number_format($rowProduct->product_price,2)
+                                );
+        }
+        
+        $response['carousel']    = $advertisement_query;
+        $response['services']    = $service_array;
+        $response['products']    = $product_array;
+        $response['date_today'] = $today;
 		
 		return response()->json($response);
 	}
@@ -148,10 +156,10 @@ class MobileApiController extends Controller
           	$bday     = new DateTime($rowUsers->birth_date);
             $email 	  = $rowUsers->email;
        		
-   //     		$total_discount  	= file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
-			// $total_transaction 	= file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
-			$total_discount		= "190";
-			$total_transaction  = "5520";
+       		$total_discount  	= file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
+			$total_transaction 	= file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
+			// $total_discount		= "190";
+			// $total_transaction  = "5520";
         	$response[] = array(
         					"id" 				=> $rowUsers->id,
         					"fname" 			=> ucfirst($rowUsers->first_name),
@@ -165,8 +173,8 @@ class MobileApiController extends Controller
         					"branch" 			=> $rowUsers->branch,
         					"image" 			=> $rowUsers->user_picture,
         					"terms" 			=> $rowUsers->is_agreed,
-        					"total_transaction" => number_format($total_transaction,2),
-        					"total_discount" 	=> number_format($total_discount,2),
+        					"total_transaction" => number_format((int)($total_transaction),2),
+        					"total_discount" 	=> number_format((int)($total_discount),2),
         						);
 
             return response()->json($response,$api["status_code"]);
@@ -309,7 +317,6 @@ class MobileApiController extends Controller
 
 	public function registerUser(Request $request){
 
-		
 	 	$rule 	= [
             		// required and has to match the password field
 	            	'addLname'          => 'required|max:255',
@@ -337,18 +344,24 @@ class MobileApiController extends Controller
         		];
 
         $validator = Validator::make($request->all(),$rule,$message);
-
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-        $bday 			= new DateTime($request->input('addBday'));
-        $birth_date     = $bday->format("Y-m-d H:i:s");
-        $branch 		= $request->input('addBranch');
-        $gender 		= strtolower($request->input('addGender'));
-        $user 			= new User;
+
+        $bday 			    = new DateTime($request->input('addBday'));
+        $birth_date         = $bday->format("Y-m-d H:i:s");
+        $branch 		    = $request->input('addBranch');
+        
+        $gender 		    = lcfirst($request->input('addGender'));
+        $device             = $request->input('addDevice');
+        $device_name        = $request->input('addDeviceName');
+        $facebook_id        = $request->input('addFBID');
+
+        $user 			    = new User;
         $user->first_name 	= $request->input('addFname');
         $user->middle_name 	= $request->input('addMname');
         $user->last_name 	= $request->input('addLname');
-        $user->user_mobile 	= $request->input('addMobile');
+        $user->username     = $request->input('addFname').' '.$request->input('addLname');
+        $user->user_mobile 	= "0".$request->input('addMobile');
         $user->username 	= $request->input('addFname')." ".$request->input('addLname');
         $user->email 		= $request->input('addEmail');
         $user->password 	= bcrypt($request->input('addPassword'));
@@ -360,19 +373,55 @@ class MobileApiController extends Controller
         $user->is_active 	= 0;
         $user->is_confirmed = 0;
         $user->is_agreed 	= 1;
-        $user->user_data 	= json_encode(array("home_branch"=>$branch,
-                                             "premier_status"=>0));
-        $user->device_data  = '[]';
-        $user->user_picture = 'no photo '.$gender.'.jpg';
-        $user->save();
+        $user->user_picture = "";
+        if($facebook_id == "" || $facebook_id == null){
+            $user->user_data    = json_encode(array(
+                                        "home_branch"    =>  $branch,
+                                        "premier_status" => 0
+                                        ));
+            $user->device_data  = '[]';
+            $user->save();
+            return response()->json([
+                                "result"        =>"success", 
+                                "isFacebook"    =>  false
+                            ]);
+        }
+        else{
 
-        return response()->json(["result"=>"success"]);
-	}
+            $user->device_data  = '[]';
+            $user->user_data    = json_encode(array(
+                                        "home_branch"    => $branch,
+                                        "premier_status" => 0,
+                                        "facebook_id"    => $facebook_id,
+                                        ));
 
+            $user->save();
+            $clientID = $user->id;
+            $filename = $clientID.'_'.time().'.jpg';
+            $data     = file_get_contents('https://graph.facebook.com/'.$facebook_id.'/picture?type=large');
+            file_put_contents(public_path('images/users/').$filename, $data);
+
+            $token    = JWTAuth::fromUser($user);
+            $this->registerToken($clientID, $token,$device,$device_name);
+            $array_response         = array( 
+                            "result"        =>  "success",
+                            "isFacebook"    =>   true,
+                            "image"         =>  $filename,
+                            "token"         =>  $token,
+                            "client_id"     =>  $clientID
+                                );
+
+            $user    = User::find($clientID);
+            $user->user_picture = $filename;   
+            $user->save();
+            
+            return response()->json($array_response);
+        }
+    }
 
     public function verifyMyPassword(Request $request){
 
-         $rule  = [
+        $rule  = [
                     // required and has to match the password field
                     'verify_email'      => 'required|max:255',
                     'verify_birth_date' => 'required|max:255'
@@ -413,7 +462,7 @@ class MobileApiController extends Controller
                         ->update(['user_data'=> json_encode($user_data)]);
 
             Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
-                $message->from('notification@system.lay-bare.com', 'LBO');
+                $message->from('notification@system.lay-bare.com', 'Lay Bare Online - Mobile Application');
                 $message->subject('Password Reset');
                 $message->to($user['email'], $user['first_name']);
             });
@@ -422,52 +471,84 @@ class MobileApiController extends Controller
         return response()->json([
                             "result" => "failed",
                             "error"  => "No email address or birthdate exist"
+
                         ],400);
     }
 
     public function FacebookLogin(Request $request){
         
-        $facebook_id = $request->input("fb_id");
-        
-        $email       = $request->input("fb_email");
-        $bday        = $request->input("fb_bday");
-        $fname       = $request->input("fb_fname");
-        $lname       = $request->input("fb_lname");
-        $gender      = $request->input("fb_gender");
-        $image       = $request->input("fb_image");
-        $device      = $request->input("device");
-        $device_name = $request->input("device_info");
-        $user_facebook_query    = User::where('user_data','LIKE', '%"facebook_id":"'.$facebook_id.'"%')
-                                ->get()
-                                ->first();
-        $branch_id      = "";                  
-        $clientID = $user_facebook_query['id']; 
-        if(count($user_facebook_query) > 0){
 
-            $token                  = JWTAuth::fromUser($user_facebook_query);
+        $rule  = [
+                    'fb_email'      => 'required|max:255'
+                ];
+        $message = [
+                    'fb_email.required'             => 'Email must not empty.'
+                ];
+
+        $validator = Validator::make($request->all(),$rule,$message);
+
+        if ($validator->fails()) {
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        }
+
+        $facebook_id        = $request->input("fb_id");
+        $email              = $request->input("fb_email");
+        $bday               = $request->input("fb_bday");
+        $fname              = $request->input("fb_fname");
+        $lname              = $request->input("fb_lname");
+        $gender             = $request->input("fb_gender");
+        $image              = $request->input("fb_image");
+        $device             = $request->input("device");
+        $device_name        = $request->input("device_info");
+        $branch_id          = "";  
+        $branch_name        = ""; 
+
+        $user_fb_login_query = User::where('user_data','LIKE', '%"facebook_id":"'.$facebook_id.'"%')
+                                 ->where('email','=',$email)
+                                 ->get()
+                                 ->first();
+        if($email != ""){
+            $user_fb_login_query  = User::where('email','=',$email)
+                                  ->get()
+                                  ->first();
+        }
+        if(count($user_fb_login_query)){                        
+                          
+            $clientID = $user_fb_login_query['id']; 
+            $token                  = JWTAuth::fromUser($user_fb_login_query);
             $this->registerToken($clientID, $token,$device,$device_name);
             $client                 = User::find($clientID);
             $data                   = json_decode($client->user_data,true);
             $data['facebook_id']    = $facebook_id;
+            $branch_id              = $data['home_branch'];
             $client->user_data      = json_encode($data);
             $client->last_activity  = date('Y-m-d H:i:s');
             $client->last_login     = date('Y-m-d H:i:s');
             $client->is_confirmed   = 1;
             $client->save();
-
+            $query_branch = DB::table('branches')
+                                    ->where('id','=',$branch_id)
+                                    ->get()  
+                                    ->first();                                     
+            $branch_name  = $query_branch->branch_name;
             $objResult = array(
-                        "clientID"      => $clientID,
-                        "first_name"    => $user_facebook_query->first_name,
-                        "middle_name"   => $user_facebook_query->middle_name,
-                        "last_name"     => $user_facebook_query->last_name,
-                        "address"       => $user_facebook_query->user_address,
-                        "gender"        => strtolower($user_facebook_query->gender),
-                        "image"         => $user_facebook_query->user_picture,
-                        "birthday"      => $user_facebook_query->birth_date,
-                        "mobile"        => $user_facebook_query->user_mobile,
-                        "token"         => $token 
-                                );
-        
+                        "clientID"              => $clientID,
+                        "first_name"            => $user_fb_login_query->first_name,
+                        "middle_name"           => $user_fb_login_query->middle_name,
+                        "last_name"             => $user_fb_login_query->last_name,
+                        "email"                 => $user_fb_login_query->email,
+                        "address"               => $user_fb_login_query->user_address,
+                        "gender"                => strtolower($user_fb_login_query->gender),
+                        "image"                 => $user_fb_login_query->user_picture,
+                        "birthday"              => $user_fb_login_query->birth_date,
+                        "mobile"                => $user_fb_login_query->user_mobile,
+                        "terms"                 => $user_fb_login_query->is_agreed,
+                        "branch_id"             => $branch_id,
+                        "branch_name"           => $branch_name,
+                        "total_transaction"     => "5500",
+                        "total_discount"        => "340",
+                        "token"                 => $token 
+                        );
              return response()->json([
                         "result"        =>"success",
                         "isAlready"     => true,
@@ -475,74 +556,28 @@ class MobileApiController extends Controller
                     ]);
         }
         else{
-
-            if($email != "" || $email != null){
-                $user_email_query = User::where('email','=', $email)
-                                        ->get()
-                                        ->first();
-                if(count($user_email_query) > 0){
-
-                    $clientID               = $user_email_query['id']; 
-
-                    $token = JWTAuth::fromUser($user_email_query);
-                     $this->registerToken($clientID, $token,$fb_device,$device_name);
-
-                    $client                 = User::find($clientID);
-                    $data                   = json_decode($client->user_data,true);
-                    $data['facebook_id']    = $facebook_id;
-                    $client->user_data      = json_encode($data);
-                    $client->last_activity  = date('Y-m-d H:i:s');
-                    $client->last_login     = date('Y-m-d H:i:s');
-                    $client->is_confirmed   = 1;
-                    $client->save();
-
-                    $objResult = array(
-                                "clientID"      => $clientID,
-                                "first_name"    => $user_email_query->first_name,
-                                "middle_name"   => $user_email_query->middle_name,
-                                "last_name"     => $user_email_query->last_name,
-                                "address"       => $user_email_query->user_address,
-                                "gender"        => strtolower($user_email_query->gender),
-                                "image"         => $user_email_query->user_picture,
-                                "birthday"      => $user_email_query->birth_date,
-                                "mobile"        => $user_email_query->user_mobile,
-                                "token"         => $token 
-                                        );
-                
-                     return response()->json([
-                                "result"        =>"success",
-                                "isAlready"     => true,
-                                "objResult"     => $objResult
-                            ]);
-                }
-                else{
-                    return response()->json(["result"=>"success", "isAlready" => false]);
-                }
-            }
-
-          
-            
+            return response()->json(['result'=>'success',"isAlready"=> false, "error" => "Email not found. Redirecting.."]);
         }
-  
+        return response()->json(['result'=>'failed', "error" => "Cannot proceed to login to facebook"],400);
 
+    }
 
+    //update terms and conditions applied
+    public function updateTerms(Request $request){
+        $api      = $this->authenticateAPI();
+        
+
+        if($api['result'] === 'success'){
+            $clientID = $request->input('client_id');
+            $query                   = User::find($clientID);
+            $query->is_agreed        = "1";
+            $query->save();
+            return response()->json(['result'=>'success',"clientID" => $clientID]);
+        }
+        else{
+             // return response()->json($api, $api["status_code"]);
+        }
        
-       // if(!isset($user_facebook_query['id']) && isset($fb_user['email']))
-       //      $user = User::where('email', $fb_user['email'])->get()->first();
-
-       //  if(isset($user['id'])){
-       //      $token = JWTAuth::fromUser($user);
-
-       //      $this->registerToken($user['id'], $token);
-       //      User::where('id',$user['id'])->update(['is_confirmed'=>1]);
-       //      return response()->json(["result"=>"success","token"=>$token]);
-       //  }
-
-       //  return response()->json(['result'=>'failed', "user"=>$fb_user],300);
-       
-
-
-
     }
 
 

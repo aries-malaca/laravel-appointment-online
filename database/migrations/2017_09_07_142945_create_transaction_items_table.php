@@ -20,11 +20,11 @@ class CreateTransactionItemsTable extends Migration
             $table->string('item_type');
             $table->float('amount');
             $table->integer('quantity');
-            $table->datetime('book_start_time');
-            $table->datetime('book_end_time');
-            $table->datetime('serve_start_time');
-            $table->datetime('serve_end_time');
-            $table->datetime('complete_time');
+            $table->datetime('book_start_time')->nullable();
+            $table->datetime('book_end_time')->nullable();
+            $table->datetime('serve_start_time')->nullable();
+            $table->datetime('serve_end_time')->nullable();
+            $table->datetime('complete_time')->nullable();
             $table->string('item_status');
             $table->text('item_data');
             $table->timestamps();

@@ -89,6 +89,17 @@ Route::post('/service/addServicePackage', 'ServiceController@addServicePackage')
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
 
 Route::get('/config/getTerms', 'ConfigController@getTerms');
+Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getAppointments');
+Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
+Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
+
+Route::patch('/appointment/cancelAppointment', 'AppointmentController@cancelAppointment');
+Route::patch('/appointment/callAppointment', 'AppointmentController@callAppointment');
+Route::patch('/appointment/unCallAppointment', 'AppointmentController@unCallAppointment');
+Route::patch('/appointment/cancelItem', 'AppointmentController@cancelItem');
+Route::patch('/appointment/serveAppointment', 'AppointmentController@serveAppointment');
+Route::patch('/appointment/unServeAppointment', 'AppointmentController@unServeAppointment');
+Route::patch('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 
 
 

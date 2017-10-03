@@ -22,7 +22,7 @@
         <!-- BEGIN THEME LAYOUT STYLES -->
         <link href="../../theme/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/layouts/layout4/css/themes/lbo.css" rel="stylesheet" type="text/css" id="style_color" />
-        <link href="../../theme/layouts/layout4/css/custom.css" rel="stylesheet" type="text/css" />
+        <link href="../../css/custom.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
 
         <link href="../../theme/global/plugins/socicon/socicon.css" rel="stylesheet" type="text/css" />
@@ -66,6 +66,7 @@
     <script src="../../theme/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
     <!-- END THEME LAYOUT SCRIPTS -->
     <script src="../../theme/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="../../js/moment-round.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/morris/morris.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-tabdrop/js/bootstrap-tabdrop.js" type="text/javascript"></script>
@@ -74,8 +75,8 @@
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
-    <script src="../../app/dist/build.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script src="../../app/dist/build.js"></script>
 </html>

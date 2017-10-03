@@ -17,7 +17,7 @@ class CreateAdvertismentsTable extends Migration
             $table->increments('id');
             $table->string('ads_image')->nullable();
             $table->string('description')->nullable();
-            $table->string('isActive')->nullable();
+            $table->string('is_active')->nullable();
             $table->timestamps();
         });
     }

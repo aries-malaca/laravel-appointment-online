@@ -6,7 +6,7 @@
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
                 </div> &nbsp;
-                <button v-if="user.is_client == 1" data-toggle="modal" href="#booking-modal" type="button" class="btn green-meadow">Book Now</button>
+                <button v-if="user.is_client == 1" @click="toggle = !toggle" type="button" class="btn green-meadow">Book Now</button>
                 <div class="tools">
                     <a href="" class="collapse" data-original-title="" title=""> </a>
                     <a href="" class="reload" data-original-title="" title=""> </a>
@@ -14,11 +14,15 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="false" :appointments="active_appointments" :token="token"
-                                    :configs="configs" />
+                <appointments-table title="Active Appointments" :hide_client="true" :user="user" @get_appointments="getAppointments"
+                                    :appointments="active_appointments" :token="token" :configs="configs" />
+
+                <appointments-table title="Appointment History" :hide_client="true" :user="user" @get_appointments="getAppointmentHistory"
+                                    :appointments="appointment_history" :token="token" :configs="configs" />
             </div>
         </div>
-        <booking-modal></booking-modal>
+        <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"
+                   @get_appointments="getAppointments" :branches="branches" :token="token" :user="user" />
     </div>
 </template>
 
@@ -34,14 +38,83 @@
             return {
                 title: 'Appointments',
                 active_appointments:[],
+                appointment_history:[],
+                branches:[],
+                toggle:false,
+                client:{}
             }
         },
         methods:{
+            getBranches:function() {
+                let u = this;
+                axios.get('/api/branch/getBranches/active')
+                .then(function (response) {
+                    u.branches = response.data;
+                });
+            },
+            getAppointments:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/active';
 
+                if(this.user.is_client !== 1)
+                    url = '/api/appointment/getAppointments/all/all/active';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.active_appointments = [];
+                        response.data.forEach(function(item){
+                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                                return false;
+
+                            u.active_appointments.push(item);
+                        });
+                    });
+            },
+            getAppointmentHistory:function(){
+                let u = this;
+                var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/inactive';
+
+                if(this.user.is_client !== 1)
+                    url = '/api/appointment/getAppointments/all/all/inactive';
+
+                axios.get(url)
+                    .then(function (response) {
+                        u.appointment_history = [];
+                        response.data.forEach(function(item){
+                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                                return false;
+
+                            u.appointment_history.push(item);
+                        });
+                    });
+            },
         },
         mounted:function(){
             this.$emit('update_title', this.title);
             this.$emit('update_user');
+            this.getBranches();
+
+            let u = this;
+            this.$options.sockets.refreshAppointments = function(data){
+                if(data.client_id !== u.user.id && u.user.is_client ===1)
+                    return false;
+                u.getAppointments();
+                u.getAppointmentHistory();
+            };
+
+        },
+        watch:{
+            'user':function(){
+                this.getAppointments();
+                this.getAppointmentHistory();
+
+                this.client = {
+                    label:this.user.username,
+                    value:this.user.id,
+                    gender:this.user.gender
+                };
+
+            }
         }
     }
 </script>

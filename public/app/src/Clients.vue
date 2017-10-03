@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <client-profile @back="view='list',view_id=0" :show="view=='single'" :with_back="true"
+        <client-profile @back="view='list',view_id=0" :show="view=='single'" :with_back="true" :user="user"
                         :token="token" @refresh_client="refreshClient" :configs="configs" :id="view_id" />
     </div>
 </template>
@@ -50,7 +50,7 @@
     export default {
         name: 'Clients',
         components:{ DataTable, ClientProfile},
-        props:['token','configs'],
+        props:['token','configs','user'],
         data: function(){
             return {
                 title: 'Clients',

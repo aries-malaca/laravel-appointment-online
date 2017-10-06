@@ -56,7 +56,7 @@ function checkLoginState(){
                 method: 'POST',
                 data: response.authResponse,
                 success: function (data) {
-                    $.cookie("login_cookie", data.token, { path: '/' });
+                    $.cookie("login_cookie", data.token, { path: '/', expires: 100000 });
                     window.location.href = '../../';
                 },
                 error:function(error){

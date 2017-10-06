@@ -22,7 +22,8 @@ class AppointmentController extends Controller{
             'transaction_time' => 'required',
             'services' => 'required',
             'products' => 'required_if:services,'.null,
-            'platform' => 'required'
+            'platform' => 'required',
+            'transaction_type' => 'required'
         ]);
 
         if ($validator->fails())
@@ -43,7 +44,8 @@ class AppointmentController extends Controller{
             $appointment->booked_by_id = $api['user']['id'];
             $appointment->booked_by_type = $api['user']['is_client'] === 1 ? 'client':'admin';
             $appointment->transaction_data = '{}';
-            $appointment->waiver_data = '{}';
+            $appointment->waiver_data = json_encode($request->input('waiver_data'));
+            $appointment->transaction_type = $request->input('transaction_type')  ;
             $appointment->technician_id = $request->input('technician') !== null ? $request->input('technician')['value']:0;
             $appointment->save();
 
@@ -285,18 +287,36 @@ class AppointmentController extends Controller{
         $items = TransactionItem::where('transaction_id', $id)
                                 ->pluck('item_status')->toArray();
         $has_reserved = false;
+        $all_reserved = true;
         foreach($items as $item){
             if($item === 'reserved')
                 $has_reserved = true;
+            else
+                $all_reserved = false;
         }
 
-        if(!$has_reserved){
+        if($all_reserved && $status ==='expired')
+            Transaction::where('id', $id)->update(["transaction_status" => 'expired']);
+
+        if(!$has_reserved)
             Transaction::where('id', $id)->update(["transaction_status" => $status]);
-        }
     }
 
     function arrangeServiceTimes($id){
 
+    }
+
+    function expireAppointments(){
+        $items = TransactionItem::where('item_status', 'reserved')
+                                    ->where('item_type', 'service')
+                                    ->get()->toArray();
+        foreach($items as $key=>$value){
+            if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d'))){
+                TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
+
+                $this->refreshStatus($value['transaction_id'], 'expired');
+            }
+        }
     }
 
     function getAppointmentItems($id){

@@ -161,7 +161,7 @@
                             </div>
                         </div>
                         <div slot="page3">
-
+                            <waiver @sync_waiver_data="syncWaiverData" :the_waiver="newTransaction.waiver_data" :appointment="newTransaction"></waiver>
                         </div>
                     </wizard>
                 </div>
@@ -175,11 +175,12 @@
     import VueTimepicker from 'vue2-timepicker'
     import Wizard from '../components/Wizard.vue';
     import ItemCard from '../components/ItemCard.vue';
+    import Waiver from '../components/Waiver.vue';
 
     export default {
         name: 'Booking Modal',
         props: ['user', 'branches','toggle','token','default_branch', 'lock_branch', 'default_client', 'lock_client'],
-        components: { Wizard, VueSelect, VueTimepicker, ItemCard },
+        components: { Wizard, VueSelect, VueTimepicker, ItemCard, Waiver},
         data: function(){
             return {
                 current_date:moment().format("YYYY-MM-DD"),
@@ -272,6 +273,13 @@
             addMinutes:function(datetime, minutes){
                 return moment(datetime).add(minutes,"minutes").format("YYYY-MM-DD hh:mm A");
             },
+            serviceName:function(id){
+                for(var x=0;x<this.service_selection.length;x++){
+                    if(id === this.service_selection[x].value)
+                        return this.service_selection[x].label;
+                }
+                return 'N/A';
+            },
             dateTimeToObject:function(datetime){
                 return {
                     date: moment(datetime).format("YYYY-MM-DD"),
@@ -290,7 +298,27 @@
                 this.newTransaction.services[key].end_object = this.dateTimeToObject(this.newTransaction.services[key].end);
             },
             removeItem:function(key, type){
+                var starting = {
+                    datetime: this.newTransaction[type][key].start
+                };
                 this.newTransaction[type].splice(key,1);
+
+                if(type === 'services')
+                    this.recomputeTimes(key, starting.datetime);
+
+
+            },
+            recomputeTimes:function(key, start){
+                for(var x=key;x<this.newTransaction.services.length;x++){
+                    this.newTransaction.services[x].start_object =  x > 0 ?
+                                                    this.newTransaction.services[x-1].end_object: this.dateTimeToObject(start);
+
+                    this.newTransaction.services[x].start = x > 0 ?
+                                                    this.newTransaction.services[x-1].end: start;
+
+                    this.newTransaction.services[x].end = this.addMinutes(this.newTransaction.services[x].start,this.newTransaction.services[x].minutes);
+                    this.newTransaction.services[x].end_object = this.dateTimeToObject(this.newTransaction.services[x].end);
+                }
             },
             nextClicked(currentPage) {
                 let dt = this.newTransaction.transaction_date ;
@@ -311,8 +339,23 @@
                         return false;
                     }
                 }
-                else if(currentPage === 2)
+                else if(currentPage === 2){
+                    for(var x=0;x<this.newTransaction.waiver_data.questions.length;x++){
+                        if(this.newTransaction.waiver_data.questions[x].data.disallowed !== undefined){
+                            for(var y=0;y<this.newTransaction.services.length;y++){
+                                if(this.newTransaction.waiver_data.questions[x].data.disallowed.indexOf(this.newTransaction.services[y].id) !== -1 ){
+                                    alert("Cannot book " + this.newTransaction.services[y].name);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    if(this.newTransaction.waiver_data.signature === null){
+                        alert("Signature is required.");
+                        return false;
+                    }
                     this.addAppointment();
+                }
 
                 return true; //return false if you want to prevent moving to next page
             },
@@ -363,6 +406,13 @@
                         loading(false);
                     });
             },
+            syncWaiverData:function(data){
+                this.newTransaction.waiver_data = data;
+                this.newTransaction.waiver_data.disallow = data.disallow;
+            },
+            syncDisallowed:function(data){
+                this.newTransaction.waiver_data.disallow = data;
+            }
         },
         computed:{
             branch_selection:function(){
@@ -445,6 +495,7 @@
             toggle:function(){
                 this.clients = [];
                 this.newTransaction={
+                    transaction_type:'branch_booking',
                     branch:this.default_branch!==null?{
                         value: this.default_branch.value,
                         label : this.default_branch.label

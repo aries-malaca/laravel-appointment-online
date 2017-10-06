@@ -16,7 +16,9 @@
                     <a href="#account" data-toggle="tab"> Account </a>
                 </li>
                 <li>
-                    <a href="#appointments" data-toggle="tab"> Appointments </a>
+                    <a href="#appointments" data-toggle="tab"> Appointments &nbsp;
+                        <span class="badge badge-success" v-if="active_appointments.length>0"> {{ active_appointments.length }} </span>
+                    </a>
                 </li>
                 <li>
                     <a href="#transactions" data-toggle="tab"> Transactions </a>

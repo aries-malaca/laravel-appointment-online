@@ -76,7 +76,9 @@
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
+    <script type="text/javascript" src="../../js/signature_pad.js"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script src="../../theme/pages/scripts/components-bootstrap-switch.min.js" type="text/javascript"></script>
     <script src="../../app/dist/build.js"></script>
 </html>

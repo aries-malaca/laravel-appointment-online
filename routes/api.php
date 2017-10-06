@@ -103,6 +103,8 @@ Route::patch('/appointment/completeAppointment', 'AppointmentController@complete
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
+Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
+
 
 //mobile
 //flag = active:string

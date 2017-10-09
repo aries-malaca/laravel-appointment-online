@@ -16,7 +16,7 @@
                                         <td> Client Name: </td>
                                         <td v-if="user.is_client===1"> {{ appointment.client_name }} </td>
                                         <td v-else>
-                                            <router-link v-bind:to="'/clients/'+appointment.client_id">{{ appointment.client_name }}</router-link>
+                                            <a target="_blank" v-bind:href="'/#/clients/'+appointment.client_id">{{ appointment.client_name }}</a>
                                         </td>
                                     </tr>
                                     <tr>
@@ -33,7 +33,9 @@
                                     </tr>
                                     <tr>
                                         <td> Branch: </td>
-                                        <td> {{ appointment.branch_name }} </td>
+                                        <td>
+                                            <a target="_blank" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td> Date: </td>

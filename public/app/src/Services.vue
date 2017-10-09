@@ -463,7 +463,7 @@
             },
             searchItem:function(id, type){
                 let u = this;
-                axios.get( this.getConfig('Search Item API') +id+'&type='+type)
+                axios.get( this.getConfig('SEARCH_ITEM_API') +id+'&type='+type)
                 .then(function (response) {
                     if(response.data.item_id !== undefined) {
                         if (type == 'product' && response.data.gender == null) {

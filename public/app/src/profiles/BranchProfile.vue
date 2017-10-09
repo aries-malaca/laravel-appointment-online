@@ -123,9 +123,7 @@
                                     </ul>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div id="map-single">
-
-                                            </div>
+                                            <div id="map-single"></div>
                                         </div>
                                     </div>
                                     <div class="alert alert-info">Directions: {{ branch.directions}} </div>
@@ -155,6 +153,13 @@
 
                 </div>
                 <!--end tab-pane-->
+
+                <schedules :token="token" @refresh_branch="getBranch" :configs="configs" :branch="branch" v-if="branch.id !== undefined"></schedules>
+
+                <div class="tab-pane" id="reviews">
+
+                </div>
+                <!--end tab-pane-->
             </div>
         </div>
 
@@ -176,20 +181,18 @@
 <script>
     import UploadPictureModal from "../modals/UploadPictureModalSmall.vue";
     import AppointmentsTable from "../tables/AppointmentsTable.vue";
+    import Schedules from "./branch/Schedules.vue";
+
     export default {
         name: 'BranchProfile',
-        props: ['token','configs','id','with_back','id','show','user'],
-        components:{ UploadPictureModal, AppointmentsTable },
+        props: ['token','configs','id','with_back','show','user'],
+        components:{ UploadPictureModal, AppointmentsTable, Schedules },
         data: function(){
            return {
                branch:{},
                pictures:[],
                appointment_history:[],
                active_appointments:[],
-               slickOptions: {
-                   slidesToShow: 3,
-                   // Any other options that can be got from plugin documentation
-               },
            }
         },
         methods:{
@@ -282,6 +285,7 @@
                         });
                     });
             },
+            moment:moment
         },
         watch:{
             id:function(){

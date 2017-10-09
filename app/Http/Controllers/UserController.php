@@ -5,6 +5,7 @@ use App\Http\Requests;
 use App\User;
 use App\UserLevel;
 use App\Branch;
+use App\BranchSchedule;
 use App\Config;
 use JWTAuth;
 use Validator;
@@ -61,13 +62,20 @@ class UserController extends Controller{
         if($api['result'] === 'success'){
             $user_data = json_decode($api['user']['user_data'],true);
             if($api['user']['is_client'] == 1){
-                $branch = Branch::find($user_data['home_branch']);
-                if(isset($branch->id))
-                    $branch = $branch->branch_name;
+                $b = Branch::find($user_data['home_branch']);
+                if(isset($b->id))
+                    $branch = $b->branch_name;
                 else
                     $branch = 'N/A';
 
-                $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
+                $api['user']['branch'] = [
+                                "value"=>$user_data['home_branch'],
+                                "label"=> $branch,
+                                "rooms"=>isset($b->rooms_count)?$b->rooms_count:0,
+                                "schedules"=>BranchSchedule::where('branch_id', $b->id)
+                                                ->orderBy('schedule_type')
+                                                ->get()->toArray()
+                        ];
             }
             else
                 $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name;

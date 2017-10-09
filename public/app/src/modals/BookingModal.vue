@@ -193,18 +193,9 @@
                 clients:[],
                 newTransaction:{},
                 steps: [
-                    {
-                        label: 'Appointment Info',
-                        slot: 'page1',
-                    },
-                    {
-                        label: 'Product/Services',
-                        slot: 'page2',
-                    },
-                    {
-                        label: 'Waiver',
-                        slot: 'page3',
-                    }
+                    { label: 'Appointment Info',  slot: 'page1' },
+                    { label: 'Product/Services', slot: 'page2' },
+                    { label: 'Waiver',  slot: 'page3' }
                 ],
                 disable_saving:false
             }
@@ -305,8 +296,6 @@
 
                 if(type === 'services')
                     this.recomputeTimes(key, starting.datetime);
-
-
             },
             recomputeTimes:function(key, start){
                 for(var x=key;x<this.newTransaction.services.length;x++){
@@ -332,20 +321,33 @@
                         toastr.error("Appointment date must be not less than current date and time.");
                         return false;
                     }
+
+                    if(!this.branch_operating_schedule){
+                        toastr.error("Selected Branch were closed in selected date.");
+                        return false;
+                    }
                 }
                 else if(currentPage === 1){
-                    if(this.newTransaction.services.length === 0 && this.newTransaction.products.length === 0){
-                        toastr.error("Please add at least one service or product to proceed.");
+                    if(this.newTransaction.services.length === 0){
+                        toastr.error("Please add at least one service to proceed.");
                         return false;
+                    }
+
+                    for(var x=0;x<this.newTransaction.services.length;x++){
+                        var obj = this.newTransaction.services[x].start_object;
+                        if(obj.A === "" || obj.hh === "" || obj.mm === ""){
+                            toastr.error("Invalid time for service #" + (x+1) + ".");
+                            return false;
+                        }
                     }
                 }
                 else if(currentPage === 2){
                     for(var x=0;x<this.newTransaction.waiver_data.questions.length;x++){
-                        if(this.newTransaction.waiver_data.questions[x].data.disallowed !== undefined){
+                        if(this.newTransaction.waiver_data.questions[x].data.disallowed !== undefined && this.newTransaction.waiver_data.questions[x].selected){
                             for(var y=0;y<this.newTransaction.services.length;y++){
                                 if(this.newTransaction.waiver_data.questions[x].data.disallowed.indexOf(this.newTransaction.services[y].id) !== -1 ){
                                     alert("Cannot book " + this.newTransaction.services[y].name);
-                                    return true;
+                                    return false;
                                 }
                             }
                         }
@@ -356,7 +358,6 @@
                     }
                     this.addAppointment();
                 }
-
                 return true; //return false if you want to prevent moving to next page
             },
             backClicked(currentPage) {
@@ -376,9 +377,9 @@
                 return false;
             },
             addAppointment:function(){
-                if(this.disable_saving){
+                if(this.disable_saving)
                     return false;
-                }
+
                 let u = this;
                 this.disable_saving = true;
                 axios({url:'/api/appointment/addAppointment?token=' + this.token, method:'post', data:this.newTransaction})
@@ -420,7 +421,9 @@
                 for(var x=0;x<this.branches.length;x++){
                     branches.push({
                         label:this.branches[x].branch_name,
-                        value:this.branches[x].id
+                        value:this.branches[x].id,
+                        rooms:this.branches[x].rooms_count,
+                        schedules:this.branches[x].schedules,
                     });
                 }
                 return branches;
@@ -473,9 +476,8 @@
             },
             total_services:function() {
                 var total = 0;
-                for(var x=0;x<this.newTransaction.services.length;x++){
+                for(var x=0;x<this.newTransaction.services.length;x++)
                     total += this.newTransaction.services[x].price;
-                }
 
                 return total;
             },
@@ -485,6 +487,33 @@
                     total += (this.newTransaction.products[x].price * this.newTransaction.products[x].quantity);
 
                 return total;
+            },
+            branch_operating_schedule:function(){
+                if(this.newTransaction.branch !== undefined && this.newTransaction.transaction_date !==""){
+                    var f = this.newTransaction.transaction_date;
+
+                    for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
+                        var e = this.newTransaction.branch.schedules[x];
+
+                        if( Number(moment(e.date_start).format("X") < Number(moment(f).format("X")) ) &&
+                            Number(moment(e.date_end).format("X") > Number(moment(f).format("X"))) ){
+
+                            if(e.schedule_type === 'closed')
+                                return false;
+                            else if(e.schedule_type === 'custom'){
+                                return e.schedule_data[Number(moment(f).format("e"))];
+                            }
+                        }
+                    }
+
+                    for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
+                        if(this.newTransaction.branch.schedules[x].schedule_type === 'regular'){
+                            return this.newTransaction.branch.schedules[x].schedule_data[Number(moment(f).format("e"))];
+                        }
+                    }
+                }
+
+                return false;
             }
         },
         watch:{
@@ -498,7 +527,9 @@
                     transaction_type:'branch_booking',
                     branch:this.default_branch!==null?{
                         value: this.default_branch.value,
-                        label : this.default_branch.label
+                        label : this.default_branch.label,
+                        rooms : this.default_branch.rooms_count,
+                        schedules : this.default_branch.schedules,
                     }:null,
                     client:this.default_client!==null?{
                         value: this.default_client.value,

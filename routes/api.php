@@ -89,6 +89,7 @@ Route::post('/service/addServicePackage', 'ServiceController@addServicePackage')
 Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePackage');
 
 Route::get('/config/getTerms', 'ConfigController@getTerms');
+Route::get('/config/getConfigs', 'ConfigController@getConfigs');
 Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getAppointments');
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
@@ -104,6 +105,10 @@ Route::patch('/appointment/completeAppointment', 'AppointmentController@complete
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
+
+Route::patch('/schedule/updateBranchSchedule', 'BranchController@updateBranchSchedule');
+Route::post('/schedule/addBranchSchedule', 'BranchController@addBranchSchedule');
+Route::patch('/schedule/deleteBranchSchedule', 'BranchController@deleteBranchSchedule');
 
 
 //mobile

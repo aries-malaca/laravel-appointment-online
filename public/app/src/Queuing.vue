@@ -53,7 +53,10 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="queued">
-                            <table class="table-responsive table table-hover table-bordered">
+                            <div class="alert alert-info" v-if="queued.length===0">
+                                No Queued Appointment for Today,
+                            </div>
+                            <table class="table-responsive table table-hover table-bordered" v-else>
                                 <thead>
                                     <tr>
                                         <th>Client</th>
@@ -76,7 +79,7 @@
                                                             <span class="badge badge-info">RESERVED</span>
                                                         </td>
                                                         <td>
-                                                            <button class="btn btn-xs btn-warning">View</button>
+                                                            <button class="btn btn-xs btn-warning" @click="viewAppointment(item.transaction_id)">View</button>
                                                             <button class="btn btn-xs btn-danger" @click="emitUnCallItem(item.id)" v-if="isOnCall(item)">Uncall</button>
                                                             <button class="btn btn-xs btn-success" @click="emitCallItem(item.id)"  v-if="!isOnCall(item) && !isOnServe(item)">Call</button>
 
@@ -95,7 +98,10 @@
                             </table>
                         </div>
                         <div class="tab-pane" id="completed">
-                            <table class="table-responsive table table-hover table-bordered">
+                            <div class="alert alert-info" v-if="completed.length===0">
+                                No Completed Appointment for Today,
+                            </div>
+                            <table class="table-responsive table table-hover table-bordered" v-else>
                                 <thead>
                                 <tr>
                                     <th>Client</th>
@@ -119,6 +125,9 @@
                                                     </td>
                                                     <td>Served: {{ moment(item.serve_time).format("hh:mm A") }}</td>
                                                     <td>Completed: {{ moment(item.complete_time).format("hh:mm A") }}</td>
+                                                    <td>
+                                                        <button class="btn btn-xs btn-warning" @click="viewAppointment(item.transaction_id)">View</button>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -128,8 +137,45 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="tab-pane active" id="cancelled">
-
+                        <div class="tab-pane" id="cancelled">
+                            <div class="alert alert-info" v-if="cancelled.length===0">
+                                No Cancelled Appointment for Today,
+                            </div>
+                            <table class="table-responsive table table-hover table-bordered" v-else>
+                                <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Technician</th>
+                                    <th>Services</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="app in cancelled">
+                                    <td>{{ app.client.client_name }}</td>
+                                    <td>{{ app.client.technician_name }}</td>
+                                    <td>
+                                        <table class="table-responsive table table-bordered">
+                                            <tbody>
+                                            <tr v-for="item in app.items">
+                                                <td>{{ item.item_name }}</td>
+                                                <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
+                                                <td>
+                                                    <span class="badge badge-danger">CANCELLED</span>
+                                                </td>
+                                                <td v-if="item.item_data!==undefined">Reason: {{ item.item_data.cancel_reason }}</td>
+                                                <td v-if="item.item_data!==undefined">Cancelled By: {{ item.item_data.cancel_by_name }} ({{ item.item_data.cancel_by_type.toUpperCase() }})</td>
+                                                <td>
+                                                    <button class="btn btn-xs btn-warning" @click="viewAppointment(item.transaction_id)">View</button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="tab-pane" id="statistics">
 
@@ -138,6 +184,8 @@
                 </div>
             </div>
         </div>
+        <appointment-modal @refresh_list="getAppointments" @close_modal="closeModal" :user="user" :token="token" :id="display_id"></appointment-modal>
+
         <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true"
                :default_branch="branch" :default_client="null" :lock_client="false" :branches="branches" :token="token" :user="user" />
     </div>
@@ -145,12 +193,13 @@
 
 <script>
     import BookingModal from "./modals/BookingModal.vue";
+    import AppointmentModal from "./modals/AppointmentModal.vue";
     import VueSelect from "vue-select"
 
     export default {
         name: 'Queuing',
         props:['token','user'],
-        components:{ VueSelect, BookingModal },
+        components:{ VueSelect, BookingModal, AppointmentModal },
         data: function(){
             return {
                 title: 'Queuing',
@@ -158,10 +207,21 @@
                 branch:null,
                 appointments:[],
                 toggle:false,
-                show:false
+                show:false,
+                display_id:undefined
             }
         },
         methods:{
+            viewAppointment:function(id) {
+                this.display_id = id;
+                setTimeout(function(){
+                    $("#appointment-modal-" + id).modal("show");
+                },200);
+            },
+            closeModal:function(){
+                $("#appointment-modal-" + this.display_id).modal("hide");
+                this.display_id = undefined;
+            },
             getBranches:function(){
                 let u = this;
                 axios.get('/api/branch/getBranches/active')
@@ -310,7 +370,12 @@
             branch_selection:function(){
                 var a = [];
                 this.branches.forEach(function(item, i){
-                    a.push({label:item.branch_name, value:item.id});
+                    a.push({
+                            label:item.branch_name,
+                            value:item.id,
+                            rooms:item.rooms_count,
+                        schedules:item.schedules,
+                    });
                 });
                 return a;
             },

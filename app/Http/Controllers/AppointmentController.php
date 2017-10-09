@@ -23,7 +23,8 @@ class AppointmentController extends Controller{
             'services' => 'required',
             'products' => 'required_if:services,'.null,
             'platform' => 'required',
-            'transaction_type' => 'required'
+            'transaction_type' => 'required',
+            'waiver_data.signature' =>'required'
         ]);
 
         if ($validator->fails())
@@ -34,7 +35,7 @@ class AppointmentController extends Controller{
             $client_id = $api['user']['is_client'] === 1 ?  $client_id = $api['user']['id'] : $request->input('client')['value'];
 
             $appointment = new Transaction;
-            $appointment->reference_no = "";
+            $appointment->reference_no = $this->generateReferenceNo($request->input('branch')['value']);
             $appointment->branch_id = $request->input('branch')['value'];
             $appointment->client_id = $client_id;
             $appointment->transaction_datetime = date('Y-m-d H:i:s', strtotime( $this->getFirstServiceTime($request->input('services'))));
@@ -78,6 +79,24 @@ class AppointmentController extends Controller{
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function generateReferenceNo($branch_id){
+        //branch code year series
+        $year = date('Y');
+        $branch_code = Branch::find($branch_id)->branch_code;
+
+        $last = Transaction::where('reference_no', 'LIKE', $branch_code.'-'.$year.'-%')
+                                ->orderBy('id','DESC')
+                                ->get()->first();
+
+        if(isset($last['id'])){
+            $reference_no = $last['reference_no'];
+            $str = explode("-", $reference_no);
+            return $branch_code . '-' . $year . '-' . str_pad(($str[2]+1), 8,"0",STR_PAD_LEFT);
+        }
+
+        return $branch_code . '-' . $year . '-' . str_pad(1, 8,"0",STR_PAD_LEFT);
     }
 
     function getFirstServiceTime($services){

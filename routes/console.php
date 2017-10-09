@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Foundation\Inspiring;
+use App\Transaction;
+use App\TransactionItem;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +18,13 @@ use Illuminate\Foundation\Inspiring;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->describe('Display an inspiring quote');
+
+
+Artisan::command('expire',function(){
+    Transaction::where("transaction_datetime","<", date('Y-m-d',time()-86400))
+                ->where('transaction_status','reserved')
+                ->update(["transaction_status"=>"expired"]);
+    TransactionItem::where("book_start_time","<", date('Y-m-d',time()-86400))
+        ->where('item_status','reserved')
+        ->update(["item_status"=>"expired"]);
+});

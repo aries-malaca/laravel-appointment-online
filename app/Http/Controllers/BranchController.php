@@ -11,13 +11,6 @@ use Storage;
 
 class BranchController extends Controller{
     public function getBranches(Request $request){
-<<<<<<< HEAD
-        if($request->segment(4)== 'active')
-            return response()->json(Branch::where('is_active', 1)
-                                            ->select('id','branch_name','branch_address')
-                                            ->orderBy('branch_name', 'asc')
-                                            ->get());
-=======
         if($request->segment(4)== 'active') {
             $data = Branch::leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
                 ->where('branches.is_active', 1)
@@ -38,7 +31,7 @@ class BranchController extends Controller{
 
             return response()->json($data);
         }
->>>>>>> e6cfaba7a52e1f33477df0c1cc698cd9ae0b9b7f
+
         return response()->json(Branch::get());
     }
 

@@ -40,61 +40,58 @@ class MobileApiController extends Controller
 		$service_array 		= array();
 		$product_array   	= array();
 		$option = array();
+
+        $price_male       = "";
+        $price_female     = "";
+        $duration_male    = "";
+        $duration_female  = "";
+
 		$service_single_query  = ServiceType::where("is_active","=","1")
 								->get();
 		foreach($service_single_query as $rowService){
-			$service_type_id 	 = $rowService->id;
-			$serv_count 		 = DB::table('services')
+            $price_male       = "0.00";
+            $price_female     = "0.00";
+            $duration_male    = "0";
+            $duration_female  = "0";
+			$service_type_id 	  = $rowService->id;
+			$serv		          = DB::table('services')
 								 ->where("is_active","=","1")
 								 ->where("service_type_id","=",$service_type_id)
-								 ->count();
-			if($serv_count <= 0){
-				$option['price_female']		="";
-				$option['price_male']		="";
-				$option['duration_female']	="";
-				$option['duration_male']	="";
-			}
-			else{
-				$service_price_query = DB::table('services')
-									 ->where("is_active","=","1")
-									 ->where("service_type_id","=",$service_type_id)
-									 ->get();
-				foreach($service_price_query as $rowServicePrice){	
-					$gender 	= $rowServicePrice->service_gender;
-					// echo $gender;
-					if($gender == "male"){
-						$option['price_male']        = number_format($rowServicePrice->service_price,2);
-						$option['duration_male']	 = $rowServicePrice->service_minutes;
-						// $option['duration_female']	 = "";
-						// $option['price_female']		 = "";
-					}
-					else if($gender == "female"){
-						$option['price_female']      = number_format($rowServicePrice->service_price,2);
-						$option['duration_female']	 = $rowServicePrice->service_minutes;
-						// $option['duration_male']	="";
-						// $option['price_male']		="";
-					}
-					else{
-						$option['price_female']		="";
-						$option['price_male']		="";
-						$option['duration_female']	="";
-						$option['duration_male']	="";
-					}
-				}	
-			}
-				
+                                 ->select("service_price","service_minutes","service_gender")
+								 ->get();
+
+            foreach ($serv as $row) {
+                if($row->service_gender == "male"){
+                    $price_male    = $row->service_price;
+                    $duration_male = $row->service_minutes;
+                }       
+                else if($row->service_gender == "female"){
+                    $price_female    = $row->service_price;
+                    $duration_female = $row->service_minutes;
+                }    
+                else{
+                    $price_male      = "0.00";
+                    $price_female    = "0.00";
+                    $duration_female = "0";
+                    $duration_male   = "0";
+                }        
+            }            
+
+		
+	
 			$service_array[] 	= array(
 							'id'    		  => $rowService->id,
 							'service_name'    => $rowService->service_name,
 							'desc'            => $rowService->service_description,
-							'image' 	   	  => $rowService->service_picture,
+							'image' 	   	  => str_replace(" ","%20",$rowService->service_picture),
 							'service_type' 	  => $service_type_id,
-							'price_male' 	  => $option['price_female'],
-							'price_female' 	  => $option['price_male'],
-							'duration_male'   => $option['duration_female'],
-							'duration_female' => $option['duration_male'],
+							'price_male' 	  => $price_male,
+							'price_female' 	  => $price_female,
+							'duration_male'   => $duration_male,
+							'duration_female' => $duration_female,
 							'updated_at' 	  => $rowService->updated_at,
 								);
+       
 		}		
 
 
@@ -112,7 +109,7 @@ class MobileApiController extends Controller
                             'id'                    => $rowProduct->id,
                             'name'                  => $rowProduct->product_group_name,
                             'size'                  => $rowProduct->product_size,
-                            'image'                 => $rowProduct->product_picture,
+                            'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
                             'desc'                  => $rowProduct->product_description,
                             'variant'               => $rowProduct->product_size,
                             'updated_at'            => $rowProduct->updated_at,
@@ -156,8 +153,10 @@ class MobileApiController extends Controller
           	$bday     = new DateTime($rowUsers->birth_date);
             $email 	  = $rowUsers->email;
        		
-       		$total_discount  	= file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
-			$total_transaction 	= file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
+       		$total_discount  	= 5550;
+            // file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
+			$total_transaction 	= 230;
+            // file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
 			// $total_discount		= "190";
 			// $total_transaction  = "5520";
         	$response[] = array(
@@ -171,7 +170,7 @@ class MobileApiController extends Controller
         					"email" 			=> $email,
         					"cusgender" 		=> $rowUsers->gender,
         					"branch" 			=> $rowUsers->branch,
-        					"image" 			=> $rowUsers->user_picture,
+        					"image" 			=> str_replace(" ","%20",$rowUsers->user_picture),
         					"terms" 			=> $rowUsers->is_agreed,
         					"total_transaction" => number_format((int)($total_transaction),2),
         					"total_discount" 	=> number_format((int)($total_discount),2),

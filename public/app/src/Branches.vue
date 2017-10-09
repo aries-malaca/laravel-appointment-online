@@ -48,11 +48,17 @@
                         <div class="row">
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <label class="control-label">ID</label>
+                                    <label class="control-label">ID(BOSS)</label>
                                     <input type="number" @change="searchBranch(newBranch.search_id)"  class="form-control" v-model="newBranch.search_id" />
                                 </div>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-2" v-if="newBranch.branch_data!==undefined">
+                                <div class="form-group">
+                                    <label class="control-label">ID(EMS)</label>
+                                    <input type="number" class="form-control" v-model="newBranch.branch_data.ems_id" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="control-label">Branch Name</label>
                                     <input type="text" class="form-control" v-model="newBranch.branch_name" />
@@ -64,7 +70,7 @@
                                     <input type="text" class="form-control" v-model="newBranch.branch_code" />
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="control-label">Classification</label>
                                     <select class="form-control" v-model="newBranch.branch_classification">
@@ -224,6 +230,22 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row" v-if="newCluster.cluster_data !== undefined">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>EMS Supported</label>
+                                    <div class="md-checkbox">
+                                        <input type="checkbox" id="mmm" class="md-check" v-model="newCluster.cluster_data.ems_supported"/>
+                                        <label for="mmm">
+                                            <span></span>
+                                            <span class="check"></span>
+                                            <span class="box"></span>
+                                            {{newCluster.cluster_data.ems_supported?'YES':'NO' }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -342,6 +364,9 @@
                     welcome_message:'',
                     branch_pictures:[],
                     cluster_id:0,
+                    branch_data:{
+                        ems_id:0
+                    }
                 };
                 $("#add-branch-modal").modal("show");
                 let u = this;
@@ -356,7 +381,10 @@
                     cluster_owner:'',
                     cluster_email:'',
                     services:[],
-                    products:[]
+                    products:[],
+                    cluster_data:{
+                        ems_supported:false
+                    }
                 };
                 $("#add-cluster-modal").modal("show");
             },
@@ -389,7 +417,10 @@
                     cluster_owner:cluster.cluster_owner,
                     cluster_email:cluster.cluster_email,
                     services:[],
-                    products:[]
+                    products:[],
+                    cluster_data:{
+                        ems_supported:cluster.cluster_data.ems_supported
+                    }
                 };
                 for(var x=0;x<cluster.services.length;x++){
                     this.newCluster.services.push({
@@ -460,7 +491,7 @@
             },
             searchBranch:function(id){
                 let u = this;
-                axios.get( this.getConfig('Search Branch API') +id)
+                axios.get( this.getConfig('SEARCH_BRANCH_API') +id)
                     .then(function (response) {
                         if(response.data.branch_id !== undefined){
                             if(!confirm("Branch has found in BOSS Server. Do you want to auto-ill fields?"))
@@ -504,6 +535,7 @@
                         u.newBranch.search_id = response.data.id;
                         u.newBranch.opening_date = moment(response.data.opening_date).format("YYYY-MM-DD");
                         u.pictures = u.newBranch.branch_pictures;
+                        u.branch_data = response.data.branch_data;
                     }
 
                     setTimeout(function(){

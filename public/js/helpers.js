@@ -44,3 +44,16 @@ var SweetConfirmation = function(text, confirm_callback){
             }
         });
 };
+
+
+var SweetAlert = function(text){
+    swal({
+        title:"Alert",
+        text: text,
+        closeOnCancel: false,
+        confirmButtonClass:'btn-sm red',
+        confirmButtonText:'Okay',
+    });
+};
+
+

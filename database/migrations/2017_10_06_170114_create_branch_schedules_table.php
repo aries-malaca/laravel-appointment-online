@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserFeaturesTable extends Migration
+class CreateBranchSchedulesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class CreateUserFeaturesTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_features', function (Blueprint $table) {
+        Schema::create('branch_schedules', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('feature');
-            $table->text('actions');
+            $table->integer('branch_id');
+            $table->string('schedule_type');
+            $table->datetime('date_start');
+            $table->datetime('date_end');
+            $table->text('schedule_data');
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ class CreateUserFeaturesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_features');
+        Schema::dropIfExists('branch_schedules');
     }
 }

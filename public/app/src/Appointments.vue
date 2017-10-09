@@ -1,24 +1,32 @@
 <template>
     <div class="appointments">
         <div class="portlet light">
-            <div class="portlet-title">
+            <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
                 </div> &nbsp;
                 <button v-if="user.is_client == 1" @click="toggle = !toggle" type="button" class="btn green-meadow">Book Now</button>
-                <div class="tools">
-                    <a href="" class="collapse" data-original-title="" title=""> </a>
-                    <a href="" class="reload" data-original-title="" title=""> </a>
-                    <a href="" class="fullscreen" data-original-title="" title=""> </a>
-                </div>
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#active-appointments" data-toggle="tab">Active Appointments</a>
+                    </li>
+                    <li>
+                        <a href="#appointment-history" data-toggle="tab">Appointment History</a>
+                    </li>
+                </ul>
             </div>
             <div class="portlet-body">
-                <appointments-table title="Active Appointments" :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointments"
-                                    :appointments="active_appointments" :token="token" :configs="configs" />
-
-                <appointments-table title="Appointment History" :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointmentHistory"
-                                    :appointments="appointment_history" :token="token" :configs="configs" />
+                <div class="tab-content">
+                    <div class="tab-pane active" id="active-appointments">
+                        <appointments-table :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointments"
+                                            :paginate="true" :appointments="active_appointments" :token="token" :configs="configs" />
+                    </div>
+                    <div class="tab-pane" id="appointment-history">
+                        <appointments-table :hide_client="user.is_client===1" :user="user" @get_appointments="getAppointmentHistory"
+                                            :paginate="true" :appointments="appointment_history" :token="token" :configs="configs" />
+                    </div>
+                </div>
             </div>
         </div>
         <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"

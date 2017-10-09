@@ -22,7 +22,9 @@ class AppointmentController extends Controller{
             'transaction_time' => 'required',
             'services' => 'required',
             'products' => 'required_if:services,'.null,
-            'platform' => 'required'
+            'platform' => 'required',
+            'transaction_type' => 'required',
+            'waiver_data.signature' =>'required'
         ]);
 
         if ($validator->fails())
@@ -33,7 +35,7 @@ class AppointmentController extends Controller{
             $client_id = $api['user']['is_client'] === 1 ?  $client_id = $api['user']['id'] : $request->input('client')['value'];
 
             $appointment = new Transaction;
-            $appointment->reference_no = "";
+            $appointment->reference_no = $this->generateReferenceNo($request->input('branch')['value']);
             $appointment->branch_id = $request->input('branch')['value'];
             $appointment->client_id = $client_id;
             $appointment->transaction_datetime = date('Y-m-d H:i:s', strtotime( $this->getFirstServiceTime($request->input('services'))));
@@ -43,7 +45,8 @@ class AppointmentController extends Controller{
             $appointment->booked_by_id = $api['user']['id'];
             $appointment->booked_by_type = $api['user']['is_client'] === 1 ? 'client':'admin';
             $appointment->transaction_data = '{}';
-            $appointment->waiver_data = '{}';
+            $appointment->waiver_data = json_encode($request->input('waiver_data'));
+            $appointment->transaction_type = $request->input('transaction_type')  ;
             $appointment->technician_id = $request->input('technician') !== null ? $request->input('technician')['value']:0;
             $appointment->save();
 
@@ -76,6 +79,24 @@ class AppointmentController extends Controller{
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function generateReferenceNo($branch_id){
+        //branch code year series
+        $year = date('Y');
+        $branch_code = Branch::find($branch_id)->branch_code;
+
+        $last = Transaction::where('reference_no', 'LIKE', $branch_code.'-'.$year.'-%')
+                                ->orderBy('id','DESC')
+                                ->get()->first();
+
+        if(isset($last['id'])){
+            $reference_no = $last['reference_no'];
+            $str = explode("-", $reference_no);
+            return $branch_code . '-' . $year . '-' . str_pad(($str[2]+1), 8,"0",STR_PAD_LEFT);
+        }
+
+        return $branch_code . '-' . $year . '-' . str_pad(1, 8,"0",STR_PAD_LEFT);
     }
 
     function getFirstServiceTime($services){
@@ -285,18 +306,36 @@ class AppointmentController extends Controller{
         $items = TransactionItem::where('transaction_id', $id)
                                 ->pluck('item_status')->toArray();
         $has_reserved = false;
+        $all_reserved = true;
         foreach($items as $item){
             if($item === 'reserved')
                 $has_reserved = true;
+            else
+                $all_reserved = false;
         }
 
-        if(!$has_reserved){
+        if($all_reserved && $status ==='expired')
+            Transaction::where('id', $id)->update(["transaction_status" => 'expired']);
+
+        if(!$has_reserved)
             Transaction::where('id', $id)->update(["transaction_status" => $status]);
-        }
     }
 
     function arrangeServiceTimes($id){
 
+    }
+
+    function expireAppointments(){
+        $items = TransactionItem::where('item_status', 'reserved')
+                                    ->where('item_type', 'service')
+                                    ->get()->toArray();
+        foreach($items as $key=>$value){
+            if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d'))){
+                TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
+
+                $this->refreshStatus($value['transaction_id'], 'expired');
+            }
+        }
     }
 
     function getAppointmentItems($id){

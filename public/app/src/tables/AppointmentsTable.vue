@@ -4,6 +4,7 @@
             :title="title"
             :columns="appointmentTable.columns"
             :rows="appointments"
+            :paginate="paginate"
             :onClick="appointmentTable.rowClicked"
             styleClass="table table-bordered table-hover table-striped"
         />
@@ -19,7 +20,7 @@
     export default {
         name: 'ActiveAppointments',
         components:{ DataTable, AppointmentModal },
-        props:['token', 'appointments', 'title', 'configs','hide_client', 'user', 'hide_branch'],
+        props:['token', 'appointments', 'title', 'configs','hide_client', 'user', 'hide_branch','paginate'],
         data: function(){
             return {
                 appointmentTable:{

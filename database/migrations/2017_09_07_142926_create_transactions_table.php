@@ -17,6 +17,7 @@ class CreateTransactionsTable extends Migration{
             $table->integer('client_id');
             $table->datetime('transaction_datetime');
             $table->string('transaction_status');
+            $table->string('transaction_type');
             $table->string('platform');
             $table->string('booked_by_name');
             $table->integer('booked_by_id');

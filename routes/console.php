@@ -21,10 +21,10 @@ Artisan::command('inspire', function () {
 
 
 Artisan::command('expire',function(){
-    Transaction::where("transaction_datetime","<", date('Y-m-d',time()-86400))
+    Transaction::where("transaction_datetime","<", date('Y-m-d H:i',time()-86400))
                 ->where('transaction_status','reserved')
                 ->update(["transaction_status"=>"expired"]);
-    TransactionItem::where("book_start_time","<", date('Y-m-d',time()-86400))
+    TransactionItem::where("book_start_time","<", date('Y-m-d H:i',time()-86400))
         ->where('item_status','reserved')
         ->update(["item_status"=>"expired"]);
 });

@@ -23,7 +23,7 @@
                                     </div>
                                     <div class="form-group" v-else>
                                         <h4>Client</h4>
-                                        <h4 style="font-weight:bold" v-if="default_client!==null">{{ default_client.label }}</h4>
+                                        <h3 style="font-weight:bold" v-if="default_client!==null">{{ default_client.label }}</h3>
                                     </div>
                                 </div>
                                 <div class="col-md-8">
@@ -35,7 +35,7 @@
                                             </div>
                                             <div class="form-group" v-else>
                                                 <h4>Selected Branch</h4>
-                                                <h4 style="font-weight:bold" v-if="default_branch!==null">{{ default_branch.label }}</h4>
+                                                <h3 style="font-weight:bold" v-if="default_branch!==null">{{ default_branch.label }}</h3>
                                             </div>
                                             <div class="form-group" v-if="show_technicians">
                                                 <h4>Select Technician <input type="checkbox" v-model="show_technicians" /></h4>
@@ -495,8 +495,8 @@
                     for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
                         var e = this.newTransaction.branch.schedules[x];
 
-                        if( Number(moment(e.date_start).format("X") < Number(moment(f).format("X")) ) &&
-                            Number(moment(e.date_end).format("X") > Number(moment(f).format("X"))) ){
+                        if( Number(moment(e.date_start).format("X") <= Number(moment(f).format("X")) ) &&
+                            Number(moment(e.date_end).format("X") >= Number(moment(f).format("X"))) ){
 
                             if(e.schedule_type === 'closed')
                                 return false;

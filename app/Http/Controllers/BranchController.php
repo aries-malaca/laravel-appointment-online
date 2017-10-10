@@ -21,6 +21,7 @@ class BranchController extends Controller{
             foreach($data as $key=>$value){
                 $data[$key]['cluster_data'] = json_decode($value['cluster_data']);
                 $data[$key]['schedules'] = BranchSchedule::where('branch_id', $value['id'])
+                                                            ->select('date_start','date_end','schedule_data','schedule_type')
                                                             ->orderBy('schedule_type')
                                                             ->get()->toArray();
 

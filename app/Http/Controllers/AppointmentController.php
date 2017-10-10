@@ -149,7 +149,8 @@ class AppointmentController extends Controller{
         elseif($request->segment(6) === 'queue')
             $appointments = $appointments->where('transaction_datetime', 'LIKE', date('Y-m-d').'%');
 
-        $appointments = $appointments->orderBy('transaction_datetime')->get()->toArray();
+        $appointments = $appointments->orderBy('transaction_datetime')
+                                    ->get()->toArray();
 
         foreach($appointments as $key=>$value){
             $branch = Branch::find($value['branch_id']);

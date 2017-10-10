@@ -74,7 +74,10 @@ class TechnicianController extends Controller{
                 $name = $tech->first_name .' ' . $tech->last_name;
                 if($e['schedule'] != '00:00'){
                     $technicians[] = array("id"=>$value['technician_id'],
-                                            "schedule"=>$e['schedule'],
+                                            "schedule"=>array(
+                                                        "start" => $e['schedule'],
+                                                        "end" => date("H:i", strtotime(date('Y-m-d ').' '.$e['schedule']) + 32400 ),
+                                            ),
                                             "name" => $name,
                                              "type"=>$e['type']
                                              );

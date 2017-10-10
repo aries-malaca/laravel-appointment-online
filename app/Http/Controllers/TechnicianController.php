@@ -70,11 +70,16 @@ class TechnicianController extends Controller{
         foreach($find as $key=>$value){
             if($e = $this->compareExtract($technicians, $value, idate('w', strtotime($date)))){
 
-                if($e['schedule'] != '00:00')
+                $tech = Technician::find($value['technician_id']);
+                $name = $tech->first_name .' ' . $tech->last_name;
+                if($e['schedule'] != '00:00'){
                     $technicians[] = array("id"=>$value['technician_id'],
-                                        "schedule"=>$e['schedule'],
-                                        "type"=>$e['type']
-                                        );
+                                            "schedule"=>$e['schedule'],
+                                            "name" => $name,
+                                             "type"=>$e['type']
+                                             );
+
+                }
             }
         }
 

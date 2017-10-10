@@ -14,7 +14,7 @@ class BranchController extends Controller{
         if($request->segment(4)== 'active') {
             $data = Branch::leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
                 ->where('branches.is_active', 1)
-                ->select('branches.id as id','branch_name','rooms_count','cluster_data')
+                ->select('branches.id as id','branch_name','rooms_count','cluster_data','branch_address')
                 ->orderBy('branch_name', 'asc')
                 ->get()->toArray();
 

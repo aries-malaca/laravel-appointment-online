@@ -21,6 +21,8 @@ class CreateTechniciansTable extends Migration
             $table->string('technician_status');
             $table->string('technician_picture');
             $table->integer('cluster_id');
+            $table->srting('employee_id');
+            $table->text('technician_data');
             $table->integer('is_active');
             $table->timestamps();
         });

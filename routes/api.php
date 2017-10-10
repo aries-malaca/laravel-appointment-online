@@ -110,6 +110,9 @@ Route::patch('/schedule/updateBranchSchedule', 'BranchController@updateBranchSch
 Route::post('/schedule/addBranchSchedule', 'BranchController@addBranchSchedule');
 Route::patch('/schedule/deleteBranchSchedule', 'BranchController@deleteBranchSchedule');
 
+Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
+Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 
 //mobile
 //flag = active:string

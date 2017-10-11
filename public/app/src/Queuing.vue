@@ -60,7 +60,6 @@
                                 <thead>
                                     <tr>
                                         <th>Client</th>
-                                        <th>Technician</th>
                                         <th>Services</th>
                                         <th></th>
                                     </tr>
@@ -68,12 +67,12 @@
                                 <tbody>
                                     <tr v-for="app in queued">
                                         <td>{{ app.client.client_name }}</td>
-                                        <td>{{ app.client.technician_name }}</td>
                                         <td>
                                             <table class="table-responsive table table-bordered">
                                                 <tbody>
                                                     <tr v-for="item in app.items">
                                                         <td>{{ item.item_name }}</td>
+                                                        <td>{{ item.technician_name }}</td>
                                                         <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
                                                         <td>
                                                             <span class="badge badge-info">RESERVED</span>
@@ -105,7 +104,6 @@
                                 <thead>
                                 <tr>
                                     <th>Client</th>
-                                    <th>Technician</th>
                                     <th>Services</th>
                                     <th></th>
                                 </tr>
@@ -113,12 +111,12 @@
                                 <tbody>
                                 <tr v-for="app in completed">
                                     <td>{{ app.client.client_name }}</td>
-                                    <td>{{ app.client.technician_name }}</td>
                                     <td>
                                         <table class="table-responsive table table-bordered">
                                             <tbody>
                                                 <tr v-for="item in app.items">
                                                     <td>{{ item.item_name }}</td>
+                                                    <td>{{ item.technician_name }}</td>
                                                     <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
                                                     <td>
                                                         <span class="badge badge-info">RESERVED</span>
@@ -145,7 +143,6 @@
                                 <thead>
                                 <tr>
                                     <th>Client</th>
-                                    <th>Technician</th>
                                     <th>Services</th>
                                     <th></th>
                                 </tr>
@@ -153,12 +150,12 @@
                                 <tbody>
                                 <tr v-for="app in cancelled">
                                     <td>{{ app.client.client_name }}</td>
-                                    <td>{{ app.client.technician_name }}</td>
                                     <td>
                                         <table class="table-responsive table table-bordered">
                                             <tbody>
                                             <tr v-for="item in app.items">
                                                 <td>{{ item.item_name }}</td>
+                                                <td>{{ item.technician_name }}</td>
                                                 <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
                                                 <td>
                                                     <span class="badge badge-danger">CANCELLED</span>
@@ -186,7 +183,7 @@
         </div>
         <appointment-modal @refresh_list="getAppointments" @close_modal="closeModal" :user="user" :token="token" :id="display_id"></appointment-modal>
 
-        <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true"
+        <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true" :queued="queued" :configs="configs"
                :default_branch="branch" :default_client="null" :lock_client="false" :branches="branches" :token="token" :user="user" />
     </div>
 </template>
@@ -198,7 +195,7 @@
 
     export default {
         name: 'Queuing',
-        props:['token','user'],
+        props:['token','user','configs'],
         components:{ VueSelect, BookingModal, AppointmentModal },
         data: function(){
             return {
@@ -268,8 +265,10 @@
                 for(var x=0;x<this.appointments.length;x++){
                     if(client_id === this.appointments[x].client_id){
                         for(var y=0;y<this.appointments[x].items.length;y++){
-                            if(status === this.appointments[x].items[y].item_status && this.appointments[x].items[y].item_type ==='service')
+                            if(status === this.appointments[x].items[y].item_status && this.appointments[x].items[y].item_type ==='service'){
+                                this.appointments[x].items[y].technician_name = this.appointments[x].technician_name;
                                 data.push(this.appointments[x].items[y]);
+                            }
                         }
                     }
                 }
@@ -371,10 +370,11 @@
                 var a = [];
                 this.branches.forEach(function(item, i){
                     a.push({
-                            label:item.branch_name,
-                            value:item.id,
-                            rooms:item.rooms_count,
+                        label:item.branch_name,
+                        value:item.id,
+                        rooms:item.rooms_count,
                         schedules:item.schedules,
+                        branch_data:item.branch_data,
                     });
                 });
                 return a;
@@ -386,8 +386,6 @@
                         clients.push({
                             client_id:this.appointments[x].client_id,
                             client_name:this.appointments[x].client_name,
-                            technician_id:this.appointments[x].technician_id,
-                            technician_name:this.appointments[x].technician_name,
                         });
                 }
                 return clients;
@@ -409,3 +407,8 @@
         }
     }
 </script>
+<style>
+    .queuing .portlet td{
+        font-size:12px !important;
+    }
+</style>

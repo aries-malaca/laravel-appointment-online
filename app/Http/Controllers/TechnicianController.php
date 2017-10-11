@@ -5,12 +5,17 @@ use App\Technician;
 use App\TechnicianSchedule;
 use App\Config;
 use App\Branch;
+use App\BranchCluster;
 
 class TechnicianController extends Controller{
     function getTechnicians(){
         $data = Technician::get()->toArray();
         foreach($data as $key=>$value){
-            $data[$key]['schedules'] = TechnicianSchedule::where('technician_id', $value['id'])->get()->toArray();
+            $cluster = BranchCluster::find($value['cluster_id']);
+            $data[$key]['technician_data'] = json_decode($value['technician_data']);
+            $data[$key]['name'] = $value['first_name'] .' ' . $value['last_name'];
+            $data[$key]['cluster_name'] = isset($cluster->id)?$cluster->cluster_name:'';
+            $data[$key]['picture_html'] = '<img class="img-circle" style="height:35px" src="images/technicians/'. $data[$key]['technician_picture'] .'" />';
         }
 
         return response()->json($data);
@@ -18,32 +23,41 @@ class TechnicianController extends Controller{
 
     function fetchEMSTechnicians(){
         $api = Config::where('config_name', 'FETCH_TECHNICIANS')->get()->first()['config_value'];
+        $picture_path = Config::where('config_name', 'EMS_TECHNICIAN_PICTURES_PATH')->get()->first()['config_value'];
+
 
         $data = file_get_contents($api);
         $data = json_decode($data,true);
 
         foreach($data as $key=>$value) {
             $find = Technician::where('employee_id', $value['employee_no'])->get()->first();
+            $cluster = BranchCluster::where('cluster_data','LIKE','%"ems_supported":true%')->get()->first();
 
             if (isset($find['id']))
                 $technician = Technician::find($find['id']);
             else
                 $technician = new Technician;
 
+
+            $picture = file_get_contents($picture_path. $value['picture']);
+            file_put_contents(public_path('images/technicians/'. $value['employee_no'].'.jpg'), $picture);
+
             $technician->first_name = $value['first_name'];
             $technician->middle_name = $value['middle_name'];
             $technician->last_name = $value['last_name'];
             $technician->technician_status = '';
-            $technician->technician_picture = '';
-            $technician->cluster_id = 0;
+            $technician->technician_picture = $value['employee_no'].'.jpg';
+            $technician->cluster_id = isset($cluster['id'])?$cluster['id']:0;
             $technician->is_active = 1;
             $technician->technician_data = json_encode(array(
                 "mobile" => $value['mobile'],
+                "gender" => $value['gender'],
                 "email" => $value['email'],
                 "civil_status" => $value['civil_status'],
                 "position_name" => $value['position_name'],
                 "birth_date" => $value['birth_date'],
                 "hired_date" => $value['hired_date'],
+                "address" => $value['address'],
             ));
             $technician->employee_id = $value['employee_no'];
             $technician->save();
@@ -73,14 +87,15 @@ class TechnicianController extends Controller{
                 $tech = Technician::find($value['technician_id']);
                 $name = $tech->first_name .' ' . $tech->last_name;
                 if($e['schedule'] != '00:00'){
-                    $technicians[] = array("id"=>$value['technician_id'],
-                                            "schedule"=>array(
-                                                        "start" => $e['schedule'],
+                    $technicians[] = array("employee_id"=>$tech['employee_id'],
+                                            "id"=>$value['technician_id'],
+                                            "schedule"=>
+                                                array("start" => $e['schedule'],
                                                         "end" => date("H:i", strtotime(date('Y-m-d ').' '.$e['schedule']) + 32400 ),
                                             ),
                                             "name" => $name,
                                              "type"=>$e['type']
-                                             );
+                                        );
 
                 }
             }
@@ -91,11 +106,13 @@ class TechnicianController extends Controller{
 
     function compareExtract($list, $data, $i){
 
-        foreach($list as $key=>$value ){
-            if($value['id'] == $data['technician_id'] ){
-                if($value['type'] == 'SINGLE'){
+        foreach($list as $key=>$value ) {
+            if ($value['id'] == $data['technician_id']) {
+                if ($value['type'] == 'SINGLE')
                     return false;
-                }
+                else
+                    if ($data['schedule_type'] == 'RANGE')
+                        return false;
             }
         }
 

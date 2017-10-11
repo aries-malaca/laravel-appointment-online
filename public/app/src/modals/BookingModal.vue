@@ -17,28 +17,38 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group" v-if="!lock_client">
-                                        <h4>Select Client</h4>
+                                        <h4>Select Client:</h4>
                                         <vue-select :debounce="250" :on-search="searchClients" :options="client_selection"
                                                     placeholder="Search for Client..." v-model="newTransaction.client" />
                                     </div>
                                     <div class="form-group" v-else>
-                                        <h4>Client</h4>
+                                        <h4>Client:</h4>
                                         <h3 style="font-weight:bold" v-if="default_client!==null">{{ default_client.label }}</h3>
+                                    </div>
+                                    <div v-if="newTransaction.client !== undefined" class="form-group">
+                                        <div v-if="newTransaction.client !== null">
+                                            <span v-html="newTransaction.client.picture_html_big"></span><br/>
+                                            <span>Mobile: {{ newTransaction.client.user_mobile }}</span><br/>
+                                            <span>Gender:
+                                                <span v-if="newTransaction.client.gender === 'male'" class="badge badge-success">Male</span>
+                                                <span class="badge badge-warning" v-else>Female</span>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-8">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group" v-if="!lock_branch">
-                                                <h4>Select Branch</h4>
+                                                <h4>Select Branch:</h4>
                                                 <vue-select v-model="newTransaction.branch" :options="branch_selection"></vue-select>
                                             </div>
                                             <div class="form-group" v-else>
-                                                <h4>Selected Branch</h4>
+                                                <h4>Selected Branch:</h4>
                                                 <h3 style="font-weight:bold" v-if="default_branch!==null">{{ default_branch.label }}</h3>
                                             </div>
                                             <div class="form-group" v-if="show_technicians">
-                                                <h4>Select Technician <input type="checkbox" v-model="show_technicians" /></h4>
+                                                <h4>Select Technician: <input type="checkbox" v-model="show_technicians" /></h4>
                                                 <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
                                             </div>
                                             <div v-else>
@@ -47,7 +57,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <h4>Select Date</h4>
+                                                <h4>Select Date:</h4>
                                                 <div class="row">
                                                     <div class="col-xs-12">
                                                         <input type="date" v-bind:min="current_date" v-model="newTransaction.transaction_date" class="form-control"/>
@@ -77,8 +87,7 @@
                                         <h4>Select Product</h4>
                                         <vue-select v-model="product" :options="product_selection"></vue-select>
                                     </div>
-                                    <div class="form-group" v-if="(service!==null && show_item_type=='services')
-                                                    || (product!==null && show_item_type=='products')">
+                                    <div class="form-group" v-if="(service!==null && show_item_type=='services') || (product!==null && show_item_type=='products')">
                                         <item-card v-if="show_item_type=='products'"
                                                    type="products"
                                                    :picture="product.picture"
@@ -129,34 +138,37 @@
                                     </table>
                                     <table class="table-responsive table table-hover table-bordered" v-if="newTransaction.products.length>0">
                                         <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>Product</th>
-                                            <th>Price</th>
-                                            <th>Qty</th>
-                                            <th>Amount</th>
-                                        </tr>
+                                            <tr>
+                                                <th></th>
+                                                <th>Product</th>
+                                                <th>Price</th>
+                                                <th>Qty</th>
+                                                <th>Amount</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="(product,key) in newTransaction.products">
-                                            <td><button @click="removeItem(key, 'products')" class="btn pull-right btn-xs btn-danger">X</button></td>
-                                            <td>{{ product.name }}</td>
-                                            <td>
-                                                <span class="pull-right">{{ product.price.toFixed(2) }}</span>
-                                            </td>
-                                            <td>
-                                                <input type="number" style="width:80px" class="form-control" v-model="newTransaction.products[key].quantity"/>
-                                            </td>
-                                            <td>
-                                                <span class="pull-right">{{ (product.price * product.quantity).toFixed(2) }}</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4"><h4 class="pull-right" style="font-weight: bold">Total Products:</h4></td>
-                                            <td><h4 style="font-weight: bold;text-align:right">{{ total_products.toFixed(2) }}</h4></td>
-                                        </tr>
+                                            <tr v-for="(product,key) in newTransaction.products">
+                                                <td><button @click="removeItem(key, 'products')" class="btn pull-right btn-xs btn-danger">X</button></td>
+                                                <td>{{ product.name }}</td>
+                                                <td>
+                                                    <span class="pull-right">{{ product.price.toFixed(2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <input type="number" style="width:80px" class="form-control" v-model="newTransaction.products[key].quantity"/>
+                                                </td>
+                                                <td>
+                                                    <span class="pull-right">{{ (product.price * product.quantity).toFixed(2) }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4"><h4 class="pull-right" style="font-weight: bold">Total Products:</h4></td>
+                                                <td><h4 style="font-weight: bold;text-align:right">{{ total_products.toFixed(2) }}</h4></td>
+                                            </tr>
                                         </tbody>
                                     </table>
+                                    <div v-if="booking_warning !== false" class="alert alert-danger">
+                                        {{ booking_warning }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +191,7 @@
 
     export default {
         name: 'Booking Modal',
-        props: ['user', 'branches','toggle','token','default_branch', 'lock_branch', 'default_client', 'lock_client'],
+        props: ['user', 'branches','toggle','token','default_branch', 'lock_branch', 'default_client', 'lock_client', 'queued','configs'],
         components: { Wizard, VueSelect, VueTimepicker, ItemCard, Waiver},
         data: function(){
             return {
@@ -192,12 +204,13 @@
                 product:null,
                 clients:[],
                 newTransaction:{},
-                steps: [
-                    { label: 'Appointment Info',  slot: 'page1' },
-                    { label: 'Product/Services', slot: 'page2' },
-                    { label: 'Waiver',  slot: 'page3' }
+                steps: [    { label: 'Appointment Info',  slot: 'page1' },
+                            { label: 'Product/Services', slot: 'page2' },
+                            { label: 'Waiver',  slot: 'page3' }
                 ],
-                disable_saving:false
+                disable_saving:false,
+                technicians:[],
+                queue:[],
             }
         },
         methods: {
@@ -253,12 +266,10 @@
                         toastr.error("Product already in list.");
                         return false;
                     }
-                    this.newTransaction.products.push({
-                        id: this.product.value,
-                        name: this.product.label,
-                        price: this.product.price,
-                        quantity: 1
-                    });
+                    this.newTransaction.products.push({ id: this.product.value,
+                                                        name: this.product.label,
+                                                        price: this.product.price,
+                                                        quantity: 1});
                 }
             },
             addMinutes:function(datetime, minutes){
@@ -340,22 +351,23 @@
                             return false;
                         }
                     }
+                    if(this.booking_warning){
+                        toastr.error(this.booking_warning);
+                        return false;
+                    }
                 }
                 else if(currentPage === 2){
                     for(var x=0;x<this.newTransaction.waiver_data.questions.length;x++){
                         if(this.newTransaction.waiver_data.questions[x].data.disallowed !== undefined && this.newTransaction.waiver_data.questions[x].selected){
                             for(var y=0;y<this.newTransaction.services.length;y++){
                                 if(this.newTransaction.waiver_data.questions[x].data.disallowed.indexOf(this.newTransaction.services[y].id) !== -1 ){
-                                    alert("Cannot book " + this.newTransaction.services[y].name);
+                                    toastr.error("Cannot book " + this.newTransaction.services[y].name);
                                     return false;
                                 }
                             }
                         }
                     }
-                    if(this.newTransaction.waiver_data.signature === null){
-                        alert("Signature is required.");
-                        return false;
-                    }
+
                     this.addAppointment();
                 }
                 return true; //return false if you want to prevent moving to next page
@@ -388,7 +400,7 @@
                         toastr.success("Successfully booked.");
                         u.disable_saving = false;
                         $("#booking-modal").modal("hide");
-                        u.$socket.emit('refreshAppointments', u.newTransaction.branch.value, u.client_id);
+                        u.$socket.emit('refreshAppointments', u.newTransaction.branch.value, u.newTransaction.client.value);
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -413,45 +425,150 @@
             },
             syncDisallowed:function(data){
                 this.newTransaction.waiver_data.disallow = data;
+            },
+            getTechnicians:function(){
+                let u =this;
+                axios.get('/api/technician/getBranchTechnicians/'+this.newTransaction.branch.value+'/'+this.newTransaction.transaction_date)
+                .then(function (response) {
+                    u.technicians = response.data;
+                });
+            },
+            getQueue:function(){
+                let u =this;
+                axios.get('/api/appointment/getAppointments/queue/'+this.newTransaction.branch.value+'/'+this.newTransaction.transaction_date)
+                    .then(function (response) {
+                        u.queue = response.data;
+                    });
+            },
+            isConflicted:function(newData, oldData){
+                var a = Number(moment(newData.start).format("X"));
+                var b = Number(moment(newData.end).format("X"));
+                var c = Number(moment(oldData.book_start_time).format("X"));
+                var d = Number(moment(oldData.book_end_time).format("X"));
+
+                console.log(((a<=c && b>=c) ||  (c<=b && b<=d)));
+                return ((a<=c && b>=c) ||  (c<=b && b<=d));
             }
         },
         computed:{
+            filtered_queue:function(){
+                var queue = [];
+                for(var x=0;x<this.queue.length;x++){
+                    for(var y=0;y<this.queue[x].items.length;y++){
+                        if(this.queue[x].items[y].item_status==='reserved')
+                            queue.push(this.queue[x].items[y]);
+                    }
+                }
+                return queue;
+            },
+            filtered_technician_queue:function(){
+                var queue = [];
+                if(this.newTransaction.technician !== null){
+                    for(var x=0;x<this.queue.length;x++){
+                        for(var y=0;y<this.queue[x].items.length;y++){
+                            if(this.queue[x].items[y].item_status==='reserved' && this.queue[x].technician_id === this.newTransaction.technician.value){
+                                queue.push(this.queue[x].items[y]);
+                            }
+                        }
+                    }
+                }
+                return queue;
+            },
+            booking_warning:function(){
+                let today = this.newTransaction.transaction_date;
+                var allowance = (this.configs!==undefined)?Number(this.configs.SERVICE_TIME_ALLOWANCE):0;
+                var extension = 0;
+
+                if(this.newTransaction.branch!==undefined)
+                    extension = this.newTransaction.branch.branch_data.type==='stand-alone'?Number(this.newTransaction.branch.branch_data.extension_minutes):0;
+
+                for(var x=0;x<this.newTransaction.services.length;x++){
+                    var s_start = Number(moment(this.newTransaction.services[x].start).format("X"));
+                    var s_end = Number(moment(this.newTransaction.services[x].end).format("X"));
+                    var operating_start = Number(moment(today+" "+this.branch_operating_schedule.start).format("X"));
+                    var operating_end = Number(moment(today+" "+this.branch_operating_schedule.end).format("X"));
+                    var hits = 0;
+
+                    if((Number(s_start - moment().format("X"))) < (allowance*60))
+                        return "Service time start must be " + (allowance/60) + ' hours after the current time.';
+
+
+                    if(s_start <  operating_start || s_start > operating_end || (operating_end + (60 * extension) )  < s_end )
+                        return "Branch operating schedule is be between "+ moment(today+" "+this.branch_operating_schedule.start).format("hh:mm A") +" to " +
+                                    moment(today+" "+this.branch_operating_schedule.end).format("hh:mm A") +".";
+
+                    if(this.newTransaction.technician !== null){
+                        var tech = this.newTransaction.technician;
+                        var technician_start = Number(moment(today+" "+tech.schedule.start).format("X"));
+                        var technician_end = Number(moment(today+" "+tech.schedule.end).format("X"));
+
+                        if(s_start <  technician_start || s_start > technician_end)
+                            return "Technician: " + tech.label + " only available between "+ moment(today+" "+ tech.schedule.start).format("hh:mm A")
+                                    +" to " + moment(today+" "+tech.schedule.end).format("hh:mm A") +".";
+                    }
+
+                    for(var y=0;y<this.filtered_technician_queue.length;y++){
+                        if(this.isConflicted(this.newTransaction.services[x], this.filtered_technician_queue[y]))
+                            return "Technician selected has already booked the same time as service #" + (x+1);
+                    }
+
+                    for(var y=0;y<this.filtered_queue.length;y++){
+                        if(this.isConflicted(this.newTransaction.services[x], this.filtered_queue[y])){
+                            hits=hits+1;
+                            console.log(hits);
+                            if(this.newTransaction.branch.rooms >= hits){
+                                return "No room available for the time as service #" + (x+1);
+                            }
+                        }
+                    }
+                }
+                return false;
+            },
             branch_selection:function(){
                 var branches=[];
                 for(var x=0;x<this.branches.length;x++){
-                    branches.push({
-                        label:this.branches[x].branch_name,
-                        value:this.branches[x].id,
-                        rooms:this.branches[x].rooms_count,
-                        schedules:this.branches[x].schedules,
-                    });
+                    branches.push({ label:this.branches[x].branch_name,
+                                    value:this.branches[x].id,
+                                    rooms:this.branches[x].rooms_count,
+                                    schedules:this.branches[x].schedules,
+                                    branch_data:this.branches[x].branch_data,
+                                 });
                 }
                 return branches;
             },
             client_selection:function(){
                 var clients=[];
                 for(var x=0;x<this.clients.length;x++){
-                    clients.push({
-                        label:this.clients[x].username,
-                        value:this.clients[x].id,
-                        gender:this.clients[x].gender,
+                    clients.push({  label:this.clients[x].username,
+                                    value:this.clients[x].id,
+                                    gender:this.clients[x].gender,
+                                    user_mobile:this.clients[x].user_mobile,
+                                    picture_html_big:this.clients[x].picture_html_big,
                     });
                 }
                 return clients;
             },
             technician_selection:function(){
-                return [{label:"aries", value:1},
-                        {label:"buboy", value:2}]
+                this.newTransaction.technician = null;
+                var technicians=[];
+                for(var x=0;x<this.technicians.length;x++){
+                    technicians.push({   label:this.technicians[x].name,
+                                        value:this.technicians[x].id,
+                                        schedule:this.technicians[x].schedule,
+                                        employee_id:this.technicians[x].employee_id,
+                                        attendance:false,
+                    });
+                }
+                return technicians;
             },
             product_selection:function(){
                 var products = [];
                 for(var x=0;x<this.products.length;x++){
-                    products.push({
-                        label: this.products[x].name,
-                        value: this.products[x].id,
-                        price: this.products[x].product_price,
-                        picture: this.products[x].product_picture,
-                        description: this.products[x].product_description
+                    products.push({ label: this.products[x].name,
+                                    value: this.products[x].id,
+                                    price: this.products[x].product_price,
+                                    picture: this.products[x].product_picture,
+                                    description: this.products[x].product_description
                     });
                 }
                 return products;
@@ -459,11 +576,10 @@
             service_selection:function(){
                 var services = [];
                 for(var x=0;x<this.services.length;x++){
-                    if(this.newTransaction.client !== null)
+                    if(this.newTransaction.client !== null){
                         if(this.services[x].service_gender === this.newTransaction.client.gender){
                             var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
-                            services.push({
-                                label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
+                            services.push({ label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
                                 value: this.services[x].id,
                                 price: this.services[x].service_price,
                                 minutes: this.services[x].service_minutes,
@@ -471,6 +587,7 @@
                                 description: this.services[x].service_description
                             });
                         }
+                    }
                 }
                 return services;
             },
@@ -500,19 +617,16 @@
 
                             if(e.schedule_type === 'closed')
                                 return false;
-                            else if(e.schedule_type === 'custom'){
+                            else if(e.schedule_type === 'custom')
                                 return e.schedule_data[Number(moment(f).format("e"))];
-                            }
                         }
                     }
 
                     for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
-                        if(this.newTransaction.branch.schedules[x].schedule_type === 'regular'){
+                        if(this.newTransaction.branch.schedules[x].schedule_type === 'regular')
                             return this.newTransaction.branch.schedules[x].schedule_data[Number(moment(f).format("e"))];
-                        }
                     }
                 }
-
                 return false;
             }
         },
@@ -520,36 +634,65 @@
             'newTransaction.branch':function(){
                 this.getServices();
                 this.getProducts();
+                this.getTechnicians();
+                this.getQueue();
+            },
+            'newTransaction.transaction_date':function(){
+                this.getTechnicians();
+                this.getQueue();
+            },
+            'newTransaction.technician':function(){
+                if(this.newTransaction.technician !==null){
+                    let u =this;
+                    axios.get(this.configs.GET_TECHNICIAN_ATTENDANCE+this.newTransaction.technician.employee_id+'/'+this.newTransaction.transaction_date)
+                        .then(function (response) {
+                            u.newTransaction.technician.attendance = response.data;
+                            console.log(response.data);
+                        }).catch(function(){
+                            u.newTransaction.technician.attendance = false;
+                        });
+                }
             },
             toggle:function(){
+                var allowance = (this.configs!==undefined)?Number(this.configs.SERVICE_TIME_ALLOWANCE):0;
                 this.clients = [];
                 this.newTransaction={
                     transaction_type:'branch_booking',
                     branch:this.default_branch!==null?{
                         value: this.default_branch.value,
                         label : this.default_branch.label,
-                        rooms : this.default_branch.rooms_count,
+                        rooms : this.default_branch.rooms,
                         schedules : this.default_branch.schedules,
+                        branch_data : this.default_branch.branch_data,
                     }:null,
-                    client:this.default_client!==null?{
-                        value: this.default_client.value,
-                        label : this.default_client.label,
-                        gender : this.default_client.gender
-                    }:null,
+                    client:this.default_client!==null?{ value: this.default_client.value,
+                                                        label : this.default_client.label,
+                                                        gender : this.default_client.gender,
+                                                        user_mobile: this.default_client.user_mobile,
+                                                        picture_html_big : this.default_client.picture_html_big}
+                                                        :null,
                     technician:null,
                     id:0,
                     transaction_date:moment().format("YYYY-MM-DD"),
-                    transaction_time:{
-                        hh:moment().format("hh"),
-                        mm: new moment().round(5,"minutes").format("mm"),
-                        A:moment().format("A")
-                    },
+                    transaction_time:{   hh:moment().add((allowance/60),"hours").format("hh"),
+                                         mm: new moment().add(5,"minutes").round(5,"minutes").format("mm"),
+                                         A:moment().format("A")
+                                    },
                     platform:'WEB',
                     services:[],
                     products:[]
                 };
                 $("#booking-modal").modal("show");
             }
+        },
+        mounted:function(){
+            let u = this;
+            this.$options.sockets.refreshAppointments = function(data){
+                if(u.newTransaction.branch !== null)
+                    if(data.branch_id === u.newTransaction.branch.value)
+                        u.getQueue();
+
+            };
         }
     }
 </script>

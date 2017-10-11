@@ -28,3 +28,8 @@ Artisan::command('expire',function(){
         ->where('item_status','reserved')
         ->update(["item_status"=>"expired"]);
 });
+
+
+Artisan::command('pull-technicians',function(){
+
+});

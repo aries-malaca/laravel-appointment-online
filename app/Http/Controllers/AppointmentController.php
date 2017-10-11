@@ -146,8 +146,13 @@ class AppointmentController extends Controller{
             $appointments = $appointments->where('transaction_status', 'reserved');
         elseif($request->segment(6) === 'inactive')
             $appointments = $appointments->where('transaction_status', '<>','reserved');
-        elseif($request->segment(6) === 'queue')
-            $appointments = $appointments->where('transaction_datetime', 'LIKE', date('Y-m-d').'%');
+        elseif($request->segment(4) === 'queue'){
+
+            if($request->segment(6) === 'queue')
+                $appointments = $appointments->where('transaction_datetime', 'LIKE', date('Y-m-d').'%');
+            else
+                $appointments = $appointments->where('transaction_datetime', 'LIKE',$request->segment(6) .'%');
+        }
 
         $appointments = $appointments->orderBy('transaction_datetime')
                                     ->get()->toArray();
@@ -167,6 +172,7 @@ class AppointmentController extends Controller{
             $appointments[$key]['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($value['created_at']));
             $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
             $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
+            $appointments[$key]['waiver_data'] = null;
         }
 
         return response()->json($appointments);

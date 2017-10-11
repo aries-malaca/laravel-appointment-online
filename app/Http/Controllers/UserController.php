@@ -80,11 +80,12 @@ class UserController extends Controller{
             else
                 $api['user']['level_name'] = UserLevel::find($api['user']['level'])->level_name;
 
+            $api['user']['picture_html_big'] = '<img class="img-responsive" style="width:80px" src="images/users/'. $api['user']['user_picture'] .'" />';
             $api["user"]['user_data'] = json_decode($api["user"]['user_data']);
             $api["user"]['device_data'] = json_decode($api["user"]['device_data']);
             return response()->json(["user"=>$api["user"],
                                      "menus"=>$this->getUserMenus($api["user"]),
-                                     "configs"=> Config::get()->toArray()
+                                     "configs"=> $this->getConfigs()
                                     ],
                             $api["status_code"]);
         }

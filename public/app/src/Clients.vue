@@ -30,7 +30,6 @@
                         styleClass="table table-bordered table-hover table-striped"
                     />
 
-                    <client-modal :token="token" @refresh_client="refreshClient" :client="display_client"></client-modal>
                 </div>
                 <div class="alert alert-info" v-if="show_not_found">
                     <strong>No Client found with your search parameters.</strong>
@@ -84,17 +83,9 @@
 
                 axios.get('/api/client/searchClients', {params:this.search})
                 .then(function (response) {
-                    u.clients = [];
-                    response.data.forEach(function(item){
-                        item.name = item.first_name +' ' + item.last_name;
-                        item.picture_html = '<img class="img-circle" style="height:35px" src="images/users/'+ item.user_picture +'" />';
-                        item.gender_html = '<span class="badge badge-'+ (item.gender=='male'?'success':'warning')+'">'+item.gender.toUpperCase()+'</span>';
-                        item.user_data = JSON.parse(item.user_data);
-                        u.clients.push(item);
-                    });
-                    if(response.data.length==0){
+                    u.clients = response.data;
+                    if(response.data.length==0)
                         u.show_not_found = true;
-                    }
                     $btn.button('reset');
                 })
                 .catch(function (error) {

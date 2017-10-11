@@ -188,6 +188,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row" v-if="newBranch.branch_data !== undefined">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Establishment Type</label>
+                                    <select class="form-control" v-model="newBranch.branch_data.type">
+                                        <option value="stand-alone">Stand Alone</option>
+                                        <option value="mall">Mall</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4" v-if="newBranch.branch_data.type === 'stand-alone'">
+                                <div class="form-group">
+                                    <label class="control-label">Extension Minutes</label>
+                                    <input type="number" class="form-control" v-model="newBranch.branch_data.extension_minutes" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
@@ -365,7 +382,9 @@
                     branch_pictures:[],
                     cluster_id:0,
                     branch_data:{
-                        ems_id:0
+                        ems_id:0,
+                        type:'stand-alone',
+                        extension_minutes:60
                     }
                 };
                 $("#add-branch-modal").modal("show");
@@ -535,7 +554,11 @@
                         u.newBranch.search_id = response.data.id;
                         u.newBranch.opening_date = moment(response.data.opening_date).format("YYYY-MM-DD");
                         u.pictures = u.newBranch.branch_pictures;
-                        u.branch_data = response.data.branch_data;
+                        u.newBranch.branch_data = {
+                            ems_id:response.data.branch_data.ems_id,
+                            type:response.data.branch_data.type!==undefined?response.data.branch_data.type:'',
+                            extension_minutes:response.data.branch_data.extension_minutes!==undefined?response.data.branch_data.extension_minutes:0
+                        }
                     }
 
                     setTimeout(function(){

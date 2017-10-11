@@ -6,6 +6,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Client;
+use App\Config;
 use App\Menu;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -160,6 +161,16 @@ class Controller extends BaseController{
             return ['token'=>JWTAuth::fromUser(User::find($user->id)), 'id'=> $user->id];
         }
         return false;
+    }
+
+    function getConfigs(){
+        $data = Config::get()->toArray();
+        $array = array();
+        foreach($data as $key=>$value){
+            $array[$value['config_name']] = $value['config_value'];
+        }
+
+        return $array;
     }
 
     public function getBossClient($email){

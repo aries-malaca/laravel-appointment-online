@@ -14,12 +14,15 @@ class BranchController extends Controller{
         if($request->segment(4)== 'active') {
             $data = Branch::leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
                 ->where('branches.is_active', 1)
-                ->select('branches.id as id','branch_name','rooms_count','cluster_data','branch_address')
+                ->select('branches.id as id','branch_name','rooms_count','cluster_data','branch_address','branch_data','services','products')
                 ->orderBy('branch_name', 'asc')
                 ->get()->toArray();
 
             foreach($data as $key=>$value){
                 $data[$key]['cluster_data'] = json_decode($value['cluster_data']);
+                $data[$key]['services'] = json_decode($value['services']);
+                $data[$key]['products'] = json_decode($value['products']);
+                $data[$key]['branch_data'] = json_decode($value['branch_data']);
                 $data[$key]['schedules'] = BranchSchedule::where('branch_id', $value['id'])
                                                             ->select('date_start','date_end','schedule_data','schedule_type')
                                                             ->orderBy('schedule_type')

@@ -15,6 +15,11 @@ import Reports from './Reports.vue';
 import Services from './Services.vue';
 import Technicians from './Technicians.vue';
 import Transactions from './Transactions.vue';
+import Testimonials from './tools/Testimonials.vue';
+import BranchLocator from './tools/BranchLocator.vue';
+import FrequentlyAskedQuestions from './tools/FrequentlyAskedQuestions.vue';
+import PromoWallet from './tools/PromoWallet.vue';
+import PremierLoyaltyCard from './tools/PremierLoyaltyCard.vue';
 
 Vue.use(Router);
 
@@ -94,6 +99,31 @@ export default new Router({
             path: '/transactions',
             name: 'Transactions',
             component: Transactions
+        },
+        {
+            path: '/plc',
+            name: 'PremierLoyaltyCard',
+            component: PremierLoyaltyCard
+        },
+        {
+            path: '/faqs',
+            name: 'FrequentlyAskedQuestions',
+            component: FrequentlyAskedQuestions
+        },
+        {
+            path: '/locator',
+            name: 'BranchLocator',
+            component: BranchLocator
+        },
+        {
+            path: '/wallet',
+            name: 'PromoWallet',
+            component: PromoWallet
+        },
+        {
+            path: '/testimonials',
+            name: 'Testimonials',
+            component: Testimonials
         }
     ]
 })

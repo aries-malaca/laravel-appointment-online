@@ -41,8 +41,23 @@
             </div>
         </div>
         <!-- END FOOTER -->
+        <div class="chat-toggler quick-sidebar-toggler">
+            <strong><i class="icon icon-bubbles"></i> Chat System</strong>
+        </div>
     </div>
 </template>
+
+<style>
+    .chat-toggler{
+        position:fixed;
+        right:0px;
+        bottom: 0px;
+        z-index:1001;
+        display: block;
+        background-color: white;
+        padding: 10px 30px;
+    }
+</style>
 
 <script>
     import HeaderLayout from './layouts/HeaderLayout.vue';
@@ -70,6 +85,7 @@
                     u.user = response.data.user;
                     u.menus = response.data.menus;
                     u.configs = response.data.configs;
+                    u.getBossTransactions();
                 })
                 .catch(function (error) {
                     XHRCatcher(error);
@@ -115,7 +131,7 @@
             },
             getBossTransactions:function(){
                 let u = this;
-                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined)
+                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.user.is_client === 1)
                     return false;
                 axios.get(this.configs.FETCH_BOSS_TRANSACTIONS +""+ this.user.email)
                     .then(function (response) {
@@ -134,13 +150,6 @@
             this.$options.sockets.broadcast = function(count){
                 console.log(count);
             };
-
-            this.getBossTransactions();
-        },
-        watch:{
-            'configs':function(){
-                this.getBossTransactions();
-            }
         }
     }
 </script>

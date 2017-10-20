@@ -72,6 +72,7 @@ class UserController extends Controller{
                                 "value"=>$user_data['home_branch'],
                                 "label"=> $branch,
                                 "branch_data"=> $b['branch_data'],
+                                "branch_address"=> $b['branch_address'],
                                 "rooms"=>isset($b->rooms_count)?$b->rooms_count:0,
                                 "schedules"=>BranchSchedule::where('branch_id', $b->id)
                                                 ->orderBy('schedule_type')
@@ -150,9 +151,8 @@ class UserController extends Controller{
         }
 
         //default return if not authenticated
-        if($u){
+        if($u)
             return response()->json(["result"=>"success"]);
-        }
 
         return response()->json(["result"=>"failed"]);
     }
@@ -422,10 +422,8 @@ class UserController extends Controller{
             'birth_date' => 'required'
         ]);
 
-
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-
 
         $user = new User;
         $user->first_name = $request->input('first_name');
@@ -457,7 +455,6 @@ class UserController extends Controller{
             User::where('id', $user->id)
                     ->update(['user_picture' => $filename]);
         }
-
 
         return response()->json(["result"=>"success"]);
     }

@@ -8,31 +8,34 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <div class="form-horizontal">
-                    <div class="form-group">
-                        <div class="row">
-                            <label class="control-label col-md-3">Search</label>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" @keypress="listenKey($event)" v-model="search.keyword" />
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" id="btn-search" class="btn-success btn btn-md" @click="searchClients($event)">Search</button>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="control-label col-md-3">Search</label>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" @keypress="listenKey($event)" v-model="search.keyword" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" id="btn-search" class="btn-success btn btn-md" @click="searchClients($event)">Search</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <div v-if="clients.length>0">
+                            <data-table
+                                    :columns="clientTable.columns"
+                                    :rows="clients"
+                                    :paginate="true"
+                                    :onClick="clientTable.rowClicked"
+                                    styleClass="table table-bordered table-hover table-striped"
+                            />
+                        </div>
+                        <div class="alert alert-info" v-if="show_not_found">
+                            <strong>No Client found with your search parameters.</strong>
+                        </div>
                     </div>
-                </div>
-                <div v-if="clients.length>0">
-                    <data-table
-                        :columns="clientTable.columns"
-                        :rows="clients"
-                        :paginate="true"
-                        :onClick="clientTable.rowClicked"
-                        styleClass="table table-bordered table-hover table-striped"
-                    />
-
-                </div>
-                <div class="alert alert-info" v-if="show_not_found">
-                    <strong>No Client found with your search parameters.</strong>
                 </div>
             </div>
         </div>

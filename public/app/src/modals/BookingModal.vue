@@ -28,11 +28,21 @@
                                     <div v-if="newTransaction.client !== undefined" class="form-group">
                                         <div v-if="newTransaction.client !== null">
                                             <span v-html="newTransaction.client.picture_html_big"></span><br/>
-                                            <span>Mobile: {{ newTransaction.client.user_mobile }}</span><br/>
-                                            <span>Gender:
-                                                <span v-if="newTransaction.client.gender === 'male'" class="badge badge-success">Male</span>
-                                                <span class="badge badge-warning" v-else>Female</span>
-                                            </span>
+                                            <table class="table table-hover table-light">
+                                                <tbody>
+                                                    <tr>
+                                                        <td> Mobile:</td>
+                                                        <td> {{ newTransaction.client.user_mobile }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td> Gender:</td>
+                                                        <td>
+                                                            <span v-if="newTransaction.client.gender === 'male'" class="badge badge-success">Male</span>
+                                                            <span class="badge badge-warning" v-else>Female</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -47,13 +57,13 @@
                                                 <h4>Selected Branch:</h4>
                                                 <h3 style="font-weight:bold" v-if="default_branch!==null">{{ default_branch.label }}</h3>
                                             </div>
-                                            <div class="form-group" v-if="show_technicians">
-                                                <h4>Select Technician: <input type="checkbox" v-model="show_technicians" /></h4>
-                                                <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
-                                            </div>
-                                            <div v-else>
-                                                <button class="btn btn-success btn-md" @click="show_technicians=true"> Select preferred technician.</button>
-                                            </div>
+                                            <table v-if="newTransaction.branch !== undefined" class="table table-hover table-light">
+                                                <tbody>
+                                                    <tr>
+                                                        <td> {{ newTransaction.branch.branch_address }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -63,6 +73,13 @@
                                                         <input type="date" v-bind:min="current_date" v-model="newTransaction.transaction_date" class="form-control"/>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="form-group" v-if="show_technicians">
+                                                <h4>Select Technician: <input type="checkbox" v-model="show_technicians" /></h4>
+                                                <vue-select v-model="newTransaction.technician" :options="technician_selection"></vue-select>
+                                            </div>
+                                            <div v-else>
+                                                <button class="btn btn-success btn-md btn-block" @click="show_technicians=true"> Select technician.</button>
                                             </div>
                                         </div>
                                     </div>
@@ -99,10 +116,10 @@
                                                    :description="service.description"
                                                 />
                                         <br/>
-                                        <button class="btn btn-success btn-lg" @click="addItem()"> ADD TO LIST</button>
+                                        <button class="btn btn-success btn-lg btn-block" @click="addItem()"> ADD TO LIST</button>
                                     </div>
                                 </div>
-                                <div class="col-md-8" v-if="newTransaction.products !== undefined">
+                                <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll">
                                     <table class="table-responsive table table-hover table-bordered" v-if="newTransaction.services.length>0">
                                         <thead>
                                             <tr>
@@ -204,8 +221,8 @@
                 product:null,
                 clients:[],
                 newTransaction:{},
-                steps: [    { label: 'Appointment Info',  slot: 'page1' },
-                            { label: 'Product/Services', slot: 'page2' },
+                steps: [    { label: 'Info',  slot: 'page1' },
+                            { label: 'Services', slot: 'page2' },
                             { label: 'Waiver',  slot: 'page3' }
                 ],
                 disable_saving:false,
@@ -532,6 +549,7 @@
                                     rooms:this.branches[x].rooms_count,
                                     schedules:this.branches[x].schedules,
                                     branch_data:this.branches[x].branch_data,
+                                    branch_address:this.branches[x].branch_address
                                  });
                 }
                 return branches;
@@ -664,6 +682,7 @@
                         rooms : this.default_branch.rooms,
                         schedules : this.default_branch.schedules,
                         branch_data : this.default_branch.branch_data,
+                        branch_address:this.default_branch.branch_address
                     }:null,
                     client:this.default_client!==null?{ value: this.default_client.value,
                                                         label : this.default_client.label,
@@ -691,7 +710,6 @@
                 if(u.newTransaction.branch !== null && u.newTransaction.branch !== undefined)
                     if(data.branch_id === u.newTransaction.branch.value)
                         u.getQueue();
-
             };
         }
     }

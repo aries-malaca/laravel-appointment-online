@@ -301,7 +301,7 @@ class AppointmentController extends Controller{
             $item->item_data = json_encode($item_data);
             $item->save();
 
-            $this->arrangeServiceTimes($item->transaction_id);
+            $this->arrangeServiceTimes($item->transaction_id, $item->id);
             $this->refreshStatus($item->transaction_id, 'cancelled');
 
             return response()->json(["result"=>"success"], 200);
@@ -328,8 +328,28 @@ class AppointmentController extends Controller{
             Transaction::where('id', $id)->update(["transaction_status" => $status]);
     }
 
-    function arrangeServiceTimes($id){
+    function arrangeServiceTimes($transaction_id, $item_id){
+        $items = TransactionItem::where('transaction_id', $transaction_id)
+                                    ->get()->toArray();
+        $index = 0;
+        $start = '';
+        foreach($items as $key=>$value){
+            if($item_id == $value['id']){
+                $index = $key;
+                $start = $value['book_start_time'];
+            }
+        }
 
+        $start = strtotime($start);
+        foreach($items as $key=>$value){
+            if($key > $index){
+                $interval = strtotime($value['book_end_time']) - strtotime($value['book_start_time']);
+
+                TransactionItem::where('id', $value['id'])
+                                ->update(['book_start_time' => date('Y-m-d H:i',$start) ,
+                                          'book_end_time' => date('Y-m-d H:i',$start+=$interval)]);
+            }
+        }
     }
 
     function expireAppointments(){

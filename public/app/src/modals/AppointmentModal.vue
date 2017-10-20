@@ -34,7 +34,8 @@
                                     <tr>
                                         <td> Branch: </td>
                                         <td>
-                                            <a target="_blank" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
+                                            <a target="_blank" v-if="user.is_client===0" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
+                                            <span v-else> {{ appointment.branch_name }} </span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -266,9 +267,9 @@
                 $btn.button('loading');
                 this.cancel.id = this.id;
                 this.makeRequest('/api/appointment/cancelAppointment?token=' + this.token, 'patch', this.cancel, function(){
-                        u.getAppointment();
                         u.$socket.emit('refreshAppointment', u.id);
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+                        u.getAppointment();
                         toastr.success("Appointment successfully cancelled.");
                         $btn.button('reset');
                         $("#cancel-item-modal-"+u.id).modal('hide');

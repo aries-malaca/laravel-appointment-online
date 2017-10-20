@@ -25,7 +25,7 @@
     import DataTable from './components/DataTable.vue';
     export default {
         name: 'Technicians',
-        props:['token','user'],
+        props:['token','user','configs'],
         components:{ DataTable },
         data: function(){
             return {

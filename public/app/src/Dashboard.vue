@@ -1,6 +1,6 @@
 <template>
     <div class="dashboard">
-        <client-dashboard v-if="user.is_client === 1"></client-dashboard>
+        <client-dashboard v-if="user.username !== undefined" :user="user" :configs="configs" :token="token" v-if="user.is_client === 1"></client-dashboard>
     </div>
 </template>
 

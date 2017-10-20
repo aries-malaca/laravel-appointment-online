@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @update_user="getAuthenticatedUser" @update_title="updateTitle" :user="user" :token="token" :configs="configs"></router-view>
+                    <router-view @update_user="getAuthenticatedUser" :transactions="transactions" @update_title="updateTitle" :user="user" :token="token" :configs="configs"></router-view>
                     <!-- END PAGE BASE CONTENT -->
                 </div>
                 <!-- END CONTENT BODY -->
@@ -58,7 +58,8 @@
                 menus:[],
                 configs:[],
                 title:'Dashboard',
-                token:undefined
+                token:undefined,
+                transactions:[]
             }
         },
         methods:{
@@ -111,6 +112,18 @@
             updateTitle: function(title) {
                 this.title = title;
                 document.title = 'LAY-BARE Online | '+ title;
+            },
+            getBossTransactions:function(){
+                let u = this;
+                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined)
+                    return false;
+                axios.get(this.configs.FETCH_BOSS_TRANSACTIONS +""+ this.user.email)
+                    .then(function (response) {
+                        u.transactions = response.data;
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             }
         },
         mounted:function(){
@@ -121,6 +134,13 @@
             this.$options.sockets.broadcast = function(count){
                 console.log(count);
             };
+
+            this.getBossTransactions();
+        },
+        watch:{
+            'configs':function(){
+                this.getBossTransactions();
+            }
         }
     }
 </script>

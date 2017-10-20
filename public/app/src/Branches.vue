@@ -510,7 +510,7 @@
             },
             searchBranch:function(id){
                 let u = this;
-                axios.get( this.getConfig('SEARCH_BRANCH_API') +id)
+                axios.get( this.configs.SEARCH_BRANCH_API +id)
                     .then(function (response) {
                         if(response.data.branch_id !== undefined){
                             if(!confirm("Branch has found in BOSS Server. Do you want to auto-ill fields?"))
@@ -529,13 +529,6 @@
             backClicked(currentPage) {
                 console.log('back clicked', currentPage);
                 return true; //return false if you want to prevent moving to previous page
-            },
-            getConfig:function(config_name){
-                for(var x=0;x<this.configs.length;x++){
-                    if(config_name == this.configs[x].config_name)
-                        return this.configs[x].config_value;
-                }
-                toastr.error("Invalid configuration for " + config_name);
             },
             confirmMap:function(){
                 let position = document.getElementById("position").value;

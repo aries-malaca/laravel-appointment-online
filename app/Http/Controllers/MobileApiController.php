@@ -11,6 +11,7 @@ use App\Product;
 use App\ProductGroup;
 use App\Branch;
 use App\Config;
+use App\ServicePackage;
 use DateTime;
 use Validator;
 use Hash;
@@ -579,6 +580,51 @@ class MobileApiController extends Controller
        
     }
 
+    public function getPackageWithDescription(Request $request){
+
+       if($request->segment(4)=='active')
+            $data = ServicePackage::where('is_active', 1)->get()->toArray();
+        else{
+            $data = ServicePackage::get()->toArray();
+        }
+        foreach ($data as $key=>$value){
+            $query  = Service::where('service_package_id','=',$data[$key]['id'])
+                            ->select('service_minutes','service_price')
+                            ->get()
+                            ->first();
+            $data[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
+            
+            $data[$key]['service_duration'] = $query['service_minutes'];
+            $data[$key]['service_price']    = $query['service_price'];
+        } 
+        return response()->json($data);
+    }
+
+    public function getServices(Request $request){
+        
+        if($request->segment(4)!=""){
+            $gender = $request->segment(4);
+
+            $query  =  DB::table('services as a')
+                        ->leftJoin('service_types as b','a.service_type_id','=','b.id')
+                        ->where('a.service_type_id', '<>',0)
+                        ->where('a.is_active', 1)
+                        ->where('a.service_gender', $gender)
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->get();
+        }
+        else{
+              $query  =  DB::table('services as a')
+                        ->leftJoin('service_types as b','a.service_type_id','=','b.id')
+                        ->where('a.service_type_id', '<>',0)
+                        ->where('a.is_active', 1)
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->get();
+
+        }
+        return response()->json($query);
+        
+    }
 
 
 

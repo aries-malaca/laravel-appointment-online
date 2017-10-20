@@ -137,3 +137,6 @@ Route::patch('/mobile/FacebookLogin', 'MobileApiController@FacebookLogin');
 
 Route::patch('/mobile/updateTerms', 'MobileApiController@updateTerms');
 // Route::post('/forgot/requestPassword', 'PasswordController@requestPassword');
+Route::get('/mobile/getPackageWithDescription/{flag}', 'MobileApiController@getPackageWithDescription');
+Route::get('/mobile/getServices/{flag}', 'MobileApiController@getServices');
+Route::get('/mobile/getServices/', 'MobileApiController@getServices');

@@ -208,6 +208,10 @@ class ServiceController extends Controller{
 
         foreach ($data as $key=>$value){
             $data[$key]['service_list'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
+            $query          = Service::where('service_package_id','=',$data[$key]['id'])
+                            ->select('service_minutes')
+                            ->get();
+            $data[$key]['service_duration'] = $query;
         }
 
         return response()->json($data);

@@ -6,7 +6,8 @@ use App\TechnicianSchedule;
 use App\Config;
 use App\Branch;
 use App\BranchCluster;
-
+use DB;
+use DateTime;
 class TechnicianController extends Controller{
     function getTechnicians(){
         $data = Technician::get()->toArray();
@@ -81,23 +82,51 @@ class TechnicianController extends Controller{
                                     ->where('date_end','>=', $date .' 23:59:59')
                                     ->get()->toArray();
 
+
         foreach($find as $key=>$value){
             if($e = $this->compareExtract($technicians, $value, idate('w', strtotime($date)))){
 
-                $tech = Technician::find($value['technician_id']);
-                $name = $tech->first_name .' ' . $tech->last_name;
+                $tech               = Technician::find($value['technician_id']);
+                $name               = $tech->first_name .' ' . $tech->last_name;
+                $tech_id            = $value['technician_id'];
+                $transaction_status = "reserved";
+                $array_reserved_sched     = array();
+                // echo $date.' 23:59:59';
+                $getAppointment = DB::table("transaction_items as a")
+                                        ->leftJoin("transactions as b","a.transaction_id","=","b.id")
+                                      
+                                        ->where("b.technician_id","=",$tech_id)
+                                        // ->where("b.transaction_datetime","=",$date)
+                                        ->where("b.transaction_datetime",'<=','2017-10-19 23:59:59')
+                                        ->where("b.transaction_status","=",$transaction_status)
+                                        ->where("a.item_status","=",$transaction_status)
+                                        ->select("a.book_start_time","a.book_end_time")
+                                        ->get();
+               foreach ($getAppointment as $key) {
+                    $converted_start = new DateTime($key->book_start_time);
+                    $converted_end   = new DateTime($key->book_end_time);
+                    
+                    $array_reserved_sched[] = array(
+                                            "sched_appointment_start"    => $converted_start->format("H:i"),
+                                            "sched_appointment_end"      => $converted_end->format("H:i")
+                                                );
+
+               }                         
+                                        
                 if($e['schedule'] != '00:00'){
-                    $technicians[] = array("employee_id"=>$tech['employee_id'],
-                                            "id"=>$value['technician_id'],
-                                            "schedule"=>
+                    $technicians[] = array("employee_id"    =>$tech['employee_id'],
+                                            "id"            =>$tech_id,
+                                            "schedule"      =>
                                                 array("start" => $e['schedule'],
                                                         "end" => date("H:i", strtotime(date('Y-m-d ').' '.$e['schedule']) + 32400 ),
                                             ),
-                                            "name" => $name,
-                                             "type"=>$e['type']
+                                            "name"          => $name,
+                                            "type"         => $e['type'],
+                                            "appointment"  => $array_reserved_sched
                                         );
 
                 }
+
             }
         }
 

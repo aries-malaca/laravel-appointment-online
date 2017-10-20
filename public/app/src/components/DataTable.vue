@@ -60,6 +60,7 @@
                     <span>{{rowsPerPageText}}</span>
                     <span v-if="perPage" class="perpage-count">{{perPage}}</span>
                     <select v-if="!perPage" class="browser-default" @change="onTableLength">
+                        <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>

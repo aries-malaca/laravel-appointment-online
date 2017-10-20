@@ -463,7 +463,7 @@
             },
             searchItem:function(id, type){
                 let u = this;
-                axios.get( this.getConfig('SEARCH_ITEM_API') +id+'&type='+type)
+                axios.get( this.configs.SEARCH_ITEM_API +id+'&type='+type)
                 .then(function (response) {
                     if(response.data.item_id !== undefined) {
                         if (type == 'product' && response.data.gender == null) {
@@ -784,13 +784,6 @@
                     .catch(function (error) {
                         error_callback(error);
                     });
-            },
-            getConfig:function(config_name){
-                for(var x=0;x<this.configs.length;x++){
-                    if(config_name == this.configs[x].config_name)
-                        return this.configs[x].config_value;
-                }
-                toastr.error("Invalid configuration for " + config_name);
             }
         },
         mounted:function(){

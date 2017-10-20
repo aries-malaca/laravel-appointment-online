@@ -675,8 +675,8 @@
                     id:0,
                     transaction_date:moment().format("YYYY-MM-DD"),
                     transaction_time:{   hh:moment().add((allowance/60),"hours").format("hh"),
-                                         mm: new moment().add(5,"minutes").round(5,"minutes").format("mm"),
-                                         A:moment().format("A")
+                                         mm: new moment().add((allowance/60),"hours").add(5,"minutes").round(5,"minutes").format("mm"),
+                                         A:moment().add((allowance/60),"hours").format("A")
                                     },
                     platform:'WEB',
                     services:[],
@@ -688,7 +688,7 @@
         mounted:function(){
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){
-                if(u.newTransaction.branch !== null)
+                if(u.newTransaction.branch !== null && u.newTransaction.branch !== undefined)
                     if(data.branch_id === u.newTransaction.branch.value)
                         u.getQueue();
 

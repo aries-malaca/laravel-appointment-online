@@ -32,6 +32,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row" v-if="newUserLevel.level_data !== undefined">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Dashboard</label>
+                                    <select v-model="newUserLevel.level_data.dashboard" class="form-control">
+                                        <option v-bind:value="dashboard" v-for="dashboard in dashboards">{{ dashboard }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
@@ -60,10 +70,18 @@
                 userLevelTable:{
                     columns: [
                         { label: 'Level', field: 'level_name', filterable: true },
-                        { label: 'Description', field: 'description', filterable: true }
+                        { label: 'Description', field: 'description', filterable: true },
+                        { label: 'Dashboard', field: 'level_data.dashboard', filterable: true }
                     ],
                     rowClicked: this.viewUserLevel
-                }
+                },
+                dashboards:["AdminDashboard",
+                            "BranchSupervisorDashboard",
+                            "CustomerServiceDashboard",
+                            "FranchisingDashboard",
+                            "PurchasingDashboard",
+                            "TrainingDashboard"
+                            ]
             }
         },
         methods:{
@@ -90,7 +108,10 @@
                 this.newUserLevel = {
                     id:0,
                     level_name:'',
-                    description:''
+                    description:'',
+                    level_data:{
+                        dashboard:'AdminDashboard'
+                    }
                 };
                 $("#add-user-level-modal").modal("show");
             },
@@ -98,7 +119,10 @@
                 this.newUserLevel = {
                     id:level.id,
                     level_name:level.level_name,
-                    description:level.description
+                    description:level.description,
+                    level_data:{
+                        dashboard: level.level_data.dashboard
+                    }
                 };
                 $("#add-user-level-modal").modal("show");
             },

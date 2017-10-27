@@ -41,7 +41,7 @@
             </div>
         </div>
         <!-- END FOOTER -->
-        <div class="chat-toggler quick-sidebar-toggler">
+        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer">
             <strong><i class="icon icon-bubbles"></i> Chat System</strong>
         </div>
     </div>
@@ -130,6 +130,9 @@
                 document.title = 'LAY-BARE Online | '+ title;
             },
             getBossTransactions:function(){
+                if(this.user.is_client !== 1)
+                    return false;
+
                 let u = this;
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.user.is_client === 1)
                     return false;

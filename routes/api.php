@@ -39,7 +39,7 @@ Route::patch('/client/updateSettings', 'ClientController@updateSettings');
 
 
 //resend Email Confirmation API
-Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
+Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
@@ -114,6 +114,10 @@ Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 
+
+Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
+Route::post('/premier/applyPremier', 'PremierController@applyPremier');
+Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

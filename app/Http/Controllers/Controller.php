@@ -174,7 +174,18 @@ class Controller extends BaseController{
     }
 
     public function getBossClient($email){
-        $boss_data = file_get_contents('http://boss.lay-bare.com/laybare-online/API/search_client.php?email=' . $email);
+        $boss_data = file_get_contents(Config::where('config_name', 'SEARCH_BOSS_CLIENT')->get()->first()->config_value . $email);
+
+        if($boss_data === false){
+            return false;
+        }
+        //start self migration
+
+        return json_decode($boss_data,true);
+    }
+
+    function getBossID($email){
+        $boss_data = file_get_contents(Config::where('config_name', 'GET_BOSS_ID')->get()->first()->config_value . $email);
 
         if($boss_data === false){
             return false;

@@ -385,4 +385,8 @@ class AppointmentController extends Controller{
         }
         return $items;
     }
+
+    function sendNotification(Request $request){
+
+    }
 }

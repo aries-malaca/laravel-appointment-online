@@ -441,6 +441,12 @@
         mounted:function(){
             this.getBranches();
 
+            if(this.id !== 0){
+                this.getClient();
+                this.getAppointments();
+                this.getAppointmentHistory();
+            }
+
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){
                 if(data.client_id === u.id){

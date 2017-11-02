@@ -310,6 +310,13 @@
         },
         mounted:function(){
             let u = this;
+
+            if(this.id !== 0){
+                this.getAppointments();
+                this.getAppointmentHistory();
+                this.getBranch();
+            }
+
             this.$options.sockets.refreshAppointments = function(data){
                 if(data.branch_id === u.id){
                     u.getAppointments();

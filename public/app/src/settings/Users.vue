@@ -77,7 +77,7 @@
                             </div>
                         </div>
                         <div class="row" v-if="newUser.user_data!==undefined">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label">Branch Assignment</label>
                                     <vue-select multiple v-model="newUser.user_data.branches" :options="branch_selection"></vue-select>

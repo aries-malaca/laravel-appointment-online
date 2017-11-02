@@ -13,6 +13,12 @@
                                 <table class="table table-hover table-light" v-if="appointment.id !== undefined && user.id !== undefined">
                                     <tbody>
                                     <tr>
+                                        <td>Reference No:</td>
+                                        <td>
+                                            {{ appointment.reference_no }}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td> Client Name: </td>
                                         <td v-if="user.is_client===1"> {{ appointment.client_name }} </td>
                                         <td v-else>

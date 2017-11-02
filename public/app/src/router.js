@@ -5,6 +5,8 @@ import Appointments from './Appointments.vue';
 import Branches from './Branches.vue';
 import Calendar from './Calendar.vue';
 import Clients from './Clients.vue';
+import ClientProfileContainer from './profiles/ClientProfileContainer.vue';
+import BranchProfileContainer from './profiles/BranchProfileContainer.vue';
 import ControlPanel from './ControlPanel.vue';
 import Dashboard from './Dashboard.vue';
 import Messages from './Messages.vue';
@@ -36,6 +38,11 @@ export default new Router({
             component: Branches
         },
         {
+            path: '/branches/:id',
+            name: 'Branch Profile',
+            component: BranchProfileContainer
+        },
+        {
             path: '/calendar',
             name: 'Calendar',
             component: Calendar
@@ -44,6 +51,11 @@ export default new Router({
             path: '/clients',
             name: 'Clients',
             component: Clients
+        },
+        {
+            path: '/clients/:id',
+            name: 'Client Profile',
+            component: ClientProfileContainer
         },
         {
             path: '/control_panel',

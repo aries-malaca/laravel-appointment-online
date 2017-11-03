@@ -96,13 +96,11 @@
                                         </div>
                                     </div>
                                     <div class="row" v-if="profile.branch!==undefined">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label class="control-label">Home Branch</label>
                                                 <vue-select v-model="profile.branch" :options="branch_selection"></vue-select>
                                             </div>
-                                        </div>
-                                        <div class="col-md-6">
                                         </div>
                                     </div>
                                     <my-devices-table @emit_host="getProfile" :user_id="user.id"

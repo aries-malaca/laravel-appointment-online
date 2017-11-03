@@ -38,7 +38,45 @@
                 </div>
             </div>
             <div class="col-md-6">
-
+                <div class="portlet light">
+                    <!-- STAT -->
+                    <div class="row list-separated profile-stat">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.clients }} </div>
+                            <div class="uppercase profile-stat-text"> Clients </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.products }} </div>
+                            <div class="uppercase profile-stat-text"> Products </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.services }} </div>
+                            <div class="uppercase profile-stat-text"> Services </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.appointments }} </div>
+                            <div class="uppercase profile-stat-text"> Appointments </div>
+                        </div>
+                    </div>
+                    <div class="row list-separated profile-stat">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.technicians }} </div>
+                            <div class="uppercase profile-stat-text"> Technicians </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.branches }} </div>
+                            <div class="uppercase profile-stat-text"> Branches </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.new_users }} </div>
+                            <div class="uppercase profile-stat-text"> Registered Today </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <div class="uppercase profile-stat-title"> {{ stats.admin_login }} </div>
+                            <div class="uppercase profile-stat-text"> Admin Login </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -50,7 +88,25 @@
         props:['user','token','configs'],
         data: function(){
             return {
+                stats:{
+                    clients:0,
+                    products:0,
+                    services:0,
+                    appointments:0,
+                    technicians:0,
+                    branches:0,
+                    new_users:0,
+                    admin_login:0
+                }
             }
+        },
+        methods:{
+            loadStats:function(){
+
+            }
+        },
+        mounted:function(){
+            this.loadStats();
         }
     }
 </script>

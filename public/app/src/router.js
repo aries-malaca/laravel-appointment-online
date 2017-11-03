@@ -11,6 +11,7 @@ import ControlPanel from './ControlPanel.vue';
 import Dashboard from './Dashboard.vue';
 import Messages from './Messages.vue';
 import Notifications from './Notifications.vue';
+import PLCTracker from './tools/PLCTracker.vue';
 import Profile from './Profile.vue';
 import Queuing from './Queuing.vue';
 import Reports from './Reports.vue';
@@ -86,6 +87,11 @@ export default new Router({
             path: '/profile',
             name: 'Profile',
             component: Profile
+        },
+        {
+            path: '/plctracker',
+            name: 'PLCTracker',
+            component: PLCTracker
         },
         {
             path: '/queuing',

@@ -118,6 +118,18 @@ Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianContro
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
 Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
+
+Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
+
+Route::get('/message/getConversation/{partner_id}', 'MessageController@getConversation');
+Route::post('/message/sendMessage', 'MessageController@sendMessage');
+Route::post('/message/deleteConversation', 'MessageController@deleteConversation');
+Route::patch('/message/seenMessages', 'MessageController@seenMessages');
+Route::get('/message/getContactList', 'MessageController@getContactList');
+Route::get('/message/countUnseenMessages/{partner_id}', 'MessageController@countUnseenMessages');
+Route::get('/message/getLastMessage/{sender_id}', 'MessageController@getLastMessage');
+
+
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

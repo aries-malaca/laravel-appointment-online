@@ -29,7 +29,7 @@
             </div>
             <!-- END CONTENT -->
             <!-- BEGIN QUICK SIDEBAR -->
-                <chat-layout></chat-layout>
+                <chat-layout :user="user" :token="token" :configs="configs" @refreshUnseen="refreshUnseen"></chat-layout>
             <!-- END QUICK SIDEBAR -->
         </div>
         <!-- END CONTAINER -->
@@ -42,7 +42,10 @@
         </div>
         <!-- END FOOTER -->
         <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer">
-            <strong><i class="icon icon-bubbles"></i> Chat System</strong>
+            <strong><i class="icon icon-bubbles"></i>
+                Chat System
+                <span v-show="unseen_messages>0" class="badge badge-success">{{ unseen_messages }}</span>
+            </strong>
         </div>
     </div>
 </template>
@@ -74,10 +77,14 @@
                 configs:[],
                 title:'Dashboard',
                 token:undefined,
-                transactions:[]
+                transactions:[],
+                unseen_messages:0
             }
         },
         methods:{
+            refreshUnseen:function(count){
+                this.unseen_messages = count;
+            },
             getAuthenticatedUser:function(){
                 var u = this;
                 axios.get('/api/user/getUser?token=' + this.token)
@@ -153,6 +160,8 @@
             this.$options.sockets.broadcast = function(count){
                 console.log(count);
             };
+
+            Notification.requestPermission();
         }
     }
 </script>

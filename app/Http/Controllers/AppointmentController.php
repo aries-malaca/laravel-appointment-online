@@ -147,7 +147,6 @@ class AppointmentController extends Controller{
         elseif($request->segment(6) === 'inactive')
             $appointments = $appointments->where('transaction_status', '<>','reserved');
         elseif($request->segment(4) === 'queue'){
-
             if($request->segment(6) === 'queue')
                 $appointments = $appointments->where('transaction_datetime', 'LIKE', date('Y-m-d').'%');
             else

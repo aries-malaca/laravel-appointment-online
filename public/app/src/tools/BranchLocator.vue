@@ -60,7 +60,7 @@
                         u.branches = response.data;
                     });
             },
-            withinDistance:function(coordinates){
+            withinDistance:function(coordinates, name){
                 var mylat= this.geolocation.lat;
                 var mylong = this.geolocation.lng;
                 var marker_lat = coordinates.lat;
@@ -70,6 +70,7 @@
                     Math.cos( marker_lat *(Math.PI/180) ) *
                     Math.cos( marker_long *(Math.PI/180)  - mylong *(Math.PI/180) ) +
                     Math.sin( mylat *(Math.PI/180) ) * Math.sin( marker_lat *(Math.PI/180)) ) );
+                console.log(distance +" " + name);
                 return distance<this.configs.NEARBY_BRANCH_DISTANCE;
             },
             clearMarkers:function(){
@@ -149,7 +150,7 @@
 
                 var branches = [];
                 for(var x=0;x<this.branches.length;x++){
-                   if(this.withinDistance(this.branches[x].map_coordinates) && branches.length < 10)
+                   if(this.withinDistance(this.branches[x].map_coordinates,this.branches[x].branch_name ) && branches.length < 20)
                        branches.push(this.branches[x]);
                 }
                 return branches;

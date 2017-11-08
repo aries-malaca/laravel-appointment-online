@@ -50,7 +50,8 @@
 
                         </div>
                         <div id="applications" class="tab-pane">
-
+                            <data-table :columns="plcTable.columns" :rows="premiers" :paginate="true"
+                                        :onClick="plcTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                         </div>
                     </div>
                 </div>
@@ -65,10 +66,11 @@
 </style>
 <script>
     import VueSelect from 'vue-select';
+    import DataTable from '../components/DataTable.vue';
     export default {
         name: 'PLC',
         props: ['user','token','configs','transactions'],
-        components:{ VueSelect },
+        components:{ VueSelect, DataTable },
         data: function(){
             return {
                 title: 'Premier Loyalty Card',
@@ -78,6 +80,16 @@
                     branch:null,
                     type:'New',
                     platform:'WEB'
+                },
+                plcTable:{
+                    columns: [
+                        { label: 'BOSS ID', field: 'reference_no', filterable: true },
+                        { label: 'Application Type', field: 'application_type', filterable: true },
+                        { label: 'Branch', field: 'branch_name', filterable: true },
+                        { label: 'Remarks', field: 'remarks', filterable: true },
+                        { label: 'Date Applied', field: 'date_applied', filterable: true },
+                        { label: 'Status', field: 'status', filterable: true },
+                    ]
                 }
             }
         },

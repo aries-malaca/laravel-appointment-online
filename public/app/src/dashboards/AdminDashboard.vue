@@ -2,42 +2,6 @@
     <div class="client-dashboard">
         <div class="row">
             <div class="col-md-6">
-                <div class="portlet light bordered">
-                    <div class="portlet-title">
-                        <div class="caption">
-                            <i class="icon-settings font-green-sharp"></i>
-                            <span class="caption-subject font-green-sharp bold uppercase">Quick Access Menu</span>
-                        </div>
-                    </div>
-                    <div class="portlet-body tiles">
-                        <a href="../../#/plctracker" class="tile bg-green-meadow">
-                            <div class="tile-body">
-                                <i class="icon icon-book-open"></i>
-                            </div>
-                            <div class="tile-object">
-                                <div class="name" style="text-align:center"> PLC Tracker </div>
-                            </div>
-                        </a>
-                        <a href="../../#/queuing" class="tile bg-red-intense">
-                            <div class="tile-body">
-                                <i class="icon icon-list"></i>
-                            </div>
-                            <div class="tile-object">
-                                <div class="name" style="text-align:center"> Queuing </div>
-                            </div>
-                        </a>
-                        <a href="../../#/faqs" class="tile bg-green-seagreen">
-                            <div class="tile-body">
-                                <i class="icon icon-bubbles"></i>
-                            </div>
-                            <div class="tile-object">
-                                <div class="name" style="text-align:center"> FAQs </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
                 <div class="portlet light">
                     <!-- STAT -->
                     <div class="row list-separated profile-stat">
@@ -77,6 +41,53 @@
                         </div>
                     </div>
                 </div>
+                <div class="portlet light bordered">
+                    <div class="portlet-body tiles">
+                        <a href="../../#/plctracker" class="tile bg-yellow-saffron">
+                            <div class="tile-body">
+                                <i class="icon icon-book-open"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> PLC Tracker </div>
+                            </div>
+                        </a>
+                        <a href="../../#/queuing" class="tile bg-red-intense">
+                            <div class="tile-body">
+                                <i class="icon icon-list"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> Queuing </div>
+                            </div>
+                        </a>
+                        <a href="../../#/faqs" class="tile bg-green-seagreen">
+                            <div class="tile-body">
+                                <i class="icon icon-bubbles"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> FAQs </div>
+                            </div>
+                        </a>
+                        <a href="../../#/careers" class="tile bg-blue-hoki">
+                            <div class="tile-body">
+                                <i class="icon icon-briefcase"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> Careers </div>
+                            </div>
+                        </a>
+                        <a href="../../#/news" class="tile bg-yellow-soft">
+                            <div class="tile-body">
+                                <i class="icon icon-speech"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> News Feeds </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+
             </div>
         </div>
     </div>
@@ -102,7 +113,23 @@
         },
         methods:{
             loadStats:function(){
-
+                let u = this;
+                axios.get('/api/stats/getAdminStats')
+                    .then(function (response) {
+                        u.stats = {
+                            clients:response.data.clients,
+                            products:response.data.products,
+                            services:response.data.services,
+                            appointments:response.data.appointments,
+                            technicians:response.data.technicians,
+                            branches:response.data.branches,
+                            new_users:0,
+                            admin_login:0
+                        }
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             }
         },
         mounted:function(){

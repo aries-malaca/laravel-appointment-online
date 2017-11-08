@@ -4,12 +4,32 @@ use Illuminate\Http\Request;
 use App\PremierLoyaltyCard;
 use App\User;
 use App\Config;
+use App\Branch;
 use Mail;
 use Validator;
 
 class PremierController extends Controller{
     function getPremiers(Request $request){
-        return response()->json([]);
+        if($request->segment(4) != 'all')
+            $premiers = PremierLoyaltyCard::where('client_id','=', $request->segment(4));
+        else
+            $premiers = PremierLoyaltyCard::where('id','>',0);
+
+        if($request->segment(5) != 'all')
+            $premiers = $premiers->where('status','=', $request->segment(4));
+
+        $premiers = $premiers->get()->toArray();
+
+        foreach($premiers as $key=>$value){
+            $branch = Branch::find($value['branch_id']);
+            $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
+
+            $premiers[$key]['branch_name'] = $branch_name;
+            $premiers[$key]['plc_data'] = json_decode($value['plc_data']);
+            $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+        }
+
+        return response()->json($premiers);
     }
 
     function applyPremier(Request $request){
@@ -22,30 +42,71 @@ class PremierController extends Controller{
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
         $api = $this->authenticateAPI();
-        if($api['result'] === 'success'){
+        if($api['result'] === 'success') {
+
+            if ($status = $this->hasPendingApplication($api['user']['id']))
+                return response()->json(['result' => 'failed', 'error' => "You already have " . $status . " application."], 400);
+
+            if ($request->input('type') == 'New') {
+                if (!$this->isQualifiedForNew($api['user']['id']))
+                    return response()->json(['result' => 'failed', 'error' => "Not qualified for new application."], 400);
+            } else {
+                if (!$this->isQualifiedForReplacement($api['user']['id']))
+                    return response()->json(['result' => 'failed', 'error' => "Not qualified for replacement."], 400);
+            }
 
             $amount = $this->evaluatePremier($api['user']['email']);
             $boss_id = $this->getBossID($api['user']['email']);
 
-            if(is_array($boss_id)){
-                $premier = new PremierLoyaltyCard;
+            if (is_array($boss_id)) {
+                if (!$amount) {
+                    $find = PremierLoyaltyCard::where('client_id', $api['user']['id'])
+                        ->where('status', 'denied')->get()->first();
+                    if (isset($find['id']))
+                        $premier = PremierLoyaltyCard::find($find['id']);
+                }
+
+                if (!isset($premier))
+                    $premier = new PremierLoyaltyCard;
+
                 $premier->client_id = $api['user']['id'];
                 $premier->branch_id = $request->input('branch')['value'];
                 $premier->application_type = $request->input('type');
                 $premier->platform = $request->input('platform');
-                $premier->status = $amount?'approved':'denied';
+                $premier->status = $amount ? 'approved' : 'denied';
                 $premier->reference_no = $boss_id[0];
-                $premier->remarks = $amount?'':'Failed to reach the qualified amount';
+                $premier->remarks = $amount ? '' : 'Failed to reach the qualified amount';
                 $premier->plc_data = '{}';
+                $premier->created_at = date('Y-m-d H:i:s');
                 $premier->save();
-
-                if($amount)
-                    return response()->json(["result" => "success", "amount"=>$amount]);
+                return response()->json(["result" => $premier->remarks=='approved'?'success':'failed', "amount" => $amount]);
             }
 
-            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment."]);
+            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment.", 400]);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function hasPendingApplication($client_id){
+        $find = PremierLoyaltyCard::where('status', '<>','denied')
+                                    ->where('client_id', $client_id)->orderBy('created_at', 'DESC')->get()->first();
+
+        if(isset($find['id']))
+            return $find['status']=='approved'?'pending':$find['status'];
+
+        return false;
+    }
+
+    function isQualifiedForNew($client_id){
+        return PremierLoyaltyCard::where('status', '=','picked-up')
+                ->where('client_id', $client_id)
+                ->count() == 0;
+    }
+
+    function isQualifiedForReplacement($client_id){
+        return PremierLoyaltyCard::where('status', '=','picked-up')
+                                ->where('client_id', $client_id)
+                                ->count()>0;
     }
 
     function evaluatePremier($email){

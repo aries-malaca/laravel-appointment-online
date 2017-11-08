@@ -31,5 +31,5 @@ Artisan::command('expire',function(){
 
 
 Artisan::command('pull-technicians',function(){
-
+    file_get_contents(env('APP_URL').'/api/technician/fetchEMSTechnicians');
 });

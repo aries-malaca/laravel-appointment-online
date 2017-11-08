@@ -2,3 +2,53 @@
 .cancelled{
     text-decoration: line-through;
 }
+
+.page-quick-sidebar-wrapper{
+    background: #ffffff !important;
+    color:#4d4d3f !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar{
+    background: #91624f !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .list-items>li{
+    border-bottom-color:#e8fec7!important;
+}
+.page-quick-sidebar-wrapper .page-quick-sidebar .list-items>li:hover{
+    background: #f6ffdb !important;
+}
+.page-quick-sidebar-wrapper .page-quick-sidebar .nav-tabs>li>a{
+    color: #e8fec7 !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .nav-tabs>li.active>a{
+    border-bottom: 3px solid #c8d046 !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post.in .message{
+    background: #d0ffb9 !important;
+}
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post.out .message{
+    background: #fcffc9 !important;
+}
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post .body{
+    color: #463131 !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post .datetime, .page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post .name{
+    color: #91624f !important;
+    font-weight: bold;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post.out .message .arrow{
+   border-left-color: #fcffc9 !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-chat .page-quick-sidebar-chat-user .page-quick-sidebar-chat-user-messages .post.in .message .arrow{
+    border-right-color: #d0ffb9 !important;
+}
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-item .page-quick-sidebar-nav{
+    padding: 5px 10px 0 !important;
+    margin-bottom: 10px !important;
+}

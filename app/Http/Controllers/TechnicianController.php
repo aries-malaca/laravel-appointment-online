@@ -97,9 +97,10 @@ class TechnicianController extends Controller{
                                       
                                         ->where("b.technician_id","=",$tech_id)
                                         // ->where("b.transaction_datetime","=",$date)
-                                        ->where("b.transaction_datetime",'<=','2017-10-19 23:59:59')
+                                        ->where("b.transaction_datetime",'<=',$date.' 23:59:59')
                                         ->where("b.transaction_status","=",$transaction_status)
                                         ->where("a.item_status","=",$transaction_status)
+                                        ->where("a.item_type","=","service")
                                         ->select("a.book_start_time","a.book_end_time")
                                         ->get();
                foreach ($getAppointment as $key) {

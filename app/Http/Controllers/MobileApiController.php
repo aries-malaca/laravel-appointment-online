@@ -589,13 +589,14 @@ class MobileApiController extends Controller
         }
         foreach ($data as $key=>$value){
             $query  = Service::where('service_package_id','=',$data[$key]['id'])
-                            ->select('service_minutes','service_price')
+                            ->select('service_minutes','service_price','id as service_id')
                             ->get()
                             ->first();
+
             $data[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
-            
             $data[$key]['service_duration'] = $query['service_minutes'];
             $data[$key]['service_price']    = $query['service_price'];
+            $data[$key]['service_id']       = $query['service_id'];
         } 
         return response()->json($data);
     }
@@ -610,7 +611,7 @@ class MobileApiController extends Controller
                         ->where('a.service_type_id', '<>',0)
                         ->where('a.is_active', 1)
                         ->where('a.service_gender', $gender)
-                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
         }
         else{
@@ -618,7 +619,7 @@ class MobileApiController extends Controller
                         ->leftJoin('service_types as b','a.service_type_id','=','b.id')
                         ->where('a.service_type_id', '<>',0)
                         ->where('a.is_active', 1)
-                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
 
         }

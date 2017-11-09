@@ -26,10 +26,10 @@
                     </div>
                     <div class="col-md-6">
                         <div class="row" v-if="branch !== null">
-                            <div class="col-xs-6">
+                            <div class="col-md-6">
                                 <button @click="toggle = !toggle" type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
-                            <div class="col-xs-6">
+                            <div class="col-md-6">
                                 <button class="btn btn-warning btn-block">Queuing Screen</button>
                             </div>
                         </div>
@@ -375,6 +375,7 @@
                         rooms:item.rooms_count,
                         schedules:item.schedules,
                         branch_data:item.branch_data,
+                        branch_address:item.branch_address,
                     });
                 });
                 return a;

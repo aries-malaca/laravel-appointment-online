@@ -45,12 +45,6 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="portlet light bordered">
-                    <div class="portlet-title">
-                        <div class="caption">
-                            <i class="icon-settings font-green-sharp"></i>
-                            <span class="caption-subject font-green-sharp bold uppercase">Quick Access Menu</span>
-                        </div>
-                    </div>
                     <div class="portlet-body tiles">
                         <a href="../../#/calendar" class="tile bg-green-meadow">
                             <div class="tile-body">

@@ -101,7 +101,7 @@
                         <div class="col-md-4">
                             <div class="portlet sale-summary">
                                 <div class="portlet-title">
-                                    <div class="caption font-red sbold"> Transaction Summary </div>
+                                    <div class="caption font-red sbold"> Today's Transaction Summary </div>
                                     <div class="tools">
                                         <a class="reload" href="javascript:;"> </a>
                                     </div>
@@ -137,14 +137,26 @@
                 <div class="tab-pane" id="appointments">
                     <div class="row">
                         <div class="col-md-12">
-                            <appointments-table title="Active Appointments" :hide_branch="true" :configs="configs" @get_appointments="getAppointments"
-                                                :appointments="active_appointments" :token="token" :user="user"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <appointments-table title="Appointment History" :hide_branch="true" :user="user" @get_appointments="getAppointmentHistory"
-                                                :appointments="appointment_history" :token="token" :configs="configs" />
+                            <div class="tabbable-line">
+                                <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#active" data-toggle="tab">Active Appointments</a>
+                                    </li>
+                                    <li>
+                                        <a href="#inactive" data-toggle="tab">Appointment History</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="active">
+                                        <appointments-table :hide_branch="true" :configs="configs" @get_appointments="getAppointments"
+                                                :paginate="true" :appointments="active_appointments" :token="token" :user="user"/>
+                                    </div>
+                                    <div id="inactive" class="tab-pane">
+                                        <appointments-table :hide_branch="true" :user="user" @get_appointments="getAppointmentHistory"
+                                                :paginate="true" :appointments="appointment_history" :token="token" :configs="configs" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -298,6 +310,13 @@
         },
         mounted:function(){
             let u = this;
+
+            if(this.id !== 0){
+                this.getAppointments();
+                this.getAppointmentHistory();
+                this.getBranch();
+            }
+
             this.$options.sockets.refreshAppointments = function(data){
                 if(data.branch_id === u.id){
                     u.getAppointments();

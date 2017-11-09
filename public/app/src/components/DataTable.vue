@@ -88,7 +88,7 @@
 <script>
     import parse from 'date-fns/parse';
     import format from 'date-fns/format';
-    import compareAsc from 'date-fns/compare_asc';
+    import compareAsc from 'date-fns/compareAsc';
     export default {
         name: 'DataTable',
         props: {

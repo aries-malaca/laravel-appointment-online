@@ -71,13 +71,13 @@
                                 <div class="form-group">
                                     <label class="control-label">User Level</label>
                                     <select class="form-control" v-model="newUser.level">
-                                        <option v-for="level in userLevels" v-bind:value="level.id">{{ level.level_name }}</option>
+                                        <option v-for="level in levels" v-bind:value="level.id">{{ level.level_name }}</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div class="row" v-if="newUser.user_data!==undefined">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label">Branch Assignment</label>
                                     <vue-select multiple v-model="newUser.user_data.branches" :options="branch_selection"></vue-select>
@@ -109,6 +109,7 @@
             return {
                 branches:[],
                 users:[],
+                levels:[],
                 newUser:{},
                 userTable:{
                     columns: [
@@ -128,6 +129,9 @@
                     .then(function (response) {
                         u[field] = response.data;
                     });
+            },
+            getLevels:function(){
+                this.getData('/api/user/getUserLevels', 'levels');
             },
             makeRequest:function(url, method, data, success_callback, error_callback){
                 axios({url:url, method:method, data:data})
@@ -237,6 +241,7 @@
         mounted:function(){
             this.getUsers();
             this.getBranches();
+            this.getLevels();
         },
         computed:{
             branch_selection:function(){

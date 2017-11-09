@@ -9,7 +9,11 @@ use App\UserLevel;
 class UserLevelController extends Controller{
 
     public function getUserLevels(){
-        return response()->json(UserLevel::get()->toArray());
+        $data = UserLevel::get()->toArray();
+        foreach($data as $key=>$value){
+            $data[$key]['level_data'] = json_decode($value['level_data']);
+        }
+        return response()->json($data);
     }
 
     public function addUserLevel(Request $request){
@@ -26,7 +30,7 @@ class UserLevelController extends Controller{
             $level = new UserLevel;
             $level->level_name = $request->input('level_name');
             $level->description = $request->input('description');
-            $level->level_data = '{}';
+            $level->level_data = json_encode($request->input('level_data'));
             $level->is_active = 1;
             $level->save();
 
@@ -50,6 +54,7 @@ class UserLevelController extends Controller{
             $level = UserLevel::find($request->input('id'));
             $level->level_name = $request->input('level_name');
             $level->description = $request->input('description');
+            $level->level_data = json_encode($request->input('level_data'));
             $level->save();
 
             return response()->json(["result"=>"success"]);

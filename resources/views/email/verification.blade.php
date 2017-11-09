@@ -13,7 +13,7 @@
         <td class="container">
             <div class="content">
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Reset Password</span>
+                <span class="preheader">Email Verification</span>
                 <table class="main">
                     <!-- START MAIN CONTENT AREA -->
                     <tr>

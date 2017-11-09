@@ -13,6 +13,12 @@
                                 <table class="table table-hover table-light" v-if="appointment.id !== undefined && user.id !== undefined">
                                     <tbody>
                                     <tr>
+                                        <td>Reference No:</td>
+                                        <td>
+                                            {{ appointment.reference_no }}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td> Client Name: </td>
                                         <td v-if="user.is_client===1"> {{ appointment.client_name }} </td>
                                         <td v-else>
@@ -82,7 +88,7 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="(service,key) in services">
+                                            <tr v-bind:style="service.item_status==='expired' || service.item_status==='cancelled'? 'text-decoration:line-through':''" v-for="(service,key) in services">
                                                 <td v-class="">{{ service.item_name }}</td>
                                                 <td>
                                                     <span>{{ moment(service.book_start_time).format("hh:mm A") }} - </span>
@@ -124,7 +130,7 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr v-for="(product,key) in products">
+                                            <tr  v-bind:style="product.item_status==='expired' || product.item_status==='cancelled'? 'text-decoration:line-through':''" v-for="(product,key) in products">
                                                 <td>{{ product.item_name }}</td>
                                                 <td>{{ product.amount.toFixed(2) }}</td>
                                                 <td>{{ product.quantity }}</td>

@@ -29,7 +29,7 @@
             </div>
             <!-- END CONTENT -->
             <!-- BEGIN QUICK SIDEBAR -->
-                <chat-layout></chat-layout>
+                <chat-layout :user="user" :token="token" :configs="configs" @refreshUnseen="refreshUnseen"></chat-layout>
             <!-- END QUICK SIDEBAR -->
         </div>
         <!-- END CONTAINER -->
@@ -41,8 +41,26 @@
             </div>
         </div>
         <!-- END FOOTER -->
+        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer">
+            <strong><i class="icon icon-bubbles"></i>
+                Chat System
+                <span v-show="unseen_messages>0" class="badge badge-success">{{ unseen_messages }}</span>
+            </strong>
+        </div>
     </div>
 </template>
+
+<style>
+    .chat-toggler{
+        position:fixed;
+        right:0px;
+        bottom: 0px;
+        z-index:1001;
+        display: block;
+        background-color: white;
+        padding: 10px 30px;
+    }
+</style>
 
 <script>
     import HeaderLayout from './layouts/HeaderLayout.vue';
@@ -59,10 +77,14 @@
                 configs:[],
                 title:'Dashboard',
                 token:undefined,
-                transactions:[]
+                transactions:[],
+                unseen_messages:0
             }
         },
         methods:{
+            refreshUnseen:function(count){
+                this.unseen_messages = count;
+            },
             getAuthenticatedUser:function(){
                 var u = this;
                 axios.get('/api/user/getUser?token=' + this.token)
@@ -70,6 +92,7 @@
                     u.user = response.data.user;
                     u.menus = response.data.menus;
                     u.configs = response.data.configs;
+                    u.getBossTransactions();
                 })
                 .catch(function (error) {
                     XHRCatcher(error);
@@ -114,8 +137,11 @@
                 document.title = 'LAY-BARE Online | '+ title;
             },
             getBossTransactions:function(){
+                if(this.user.is_client !== 1)
+                    return false;
+
                 let u = this;
-                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined)
+                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.user.is_client === 1)
                     return false;
                 axios.get(this.configs.FETCH_BOSS_TRANSACTIONS +""+ this.user.email)
                     .then(function (response) {
@@ -135,12 +161,7 @@
                 console.log(count);
             };
 
-            this.getBossTransactions();
-        },
-        watch:{
-            'configs':function(){
-                this.getBossTransactions();
-            }
+            Notification.requestPermission();
         }
     }
 </script>

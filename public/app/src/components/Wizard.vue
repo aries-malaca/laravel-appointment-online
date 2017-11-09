@@ -207,7 +207,7 @@
         background-color: #b9c7d2;
     }
     .wizard__body__actions a{
-        width:  120px;
+        width:  100px;
         height:  100%;
         display: block;
         background-color: #51abe4;

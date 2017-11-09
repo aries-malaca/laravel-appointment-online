@@ -5,16 +5,24 @@ import Appointments from './Appointments.vue';
 import Branches from './Branches.vue';
 import Calendar from './Calendar.vue';
 import Clients from './Clients.vue';
+import ClientProfileContainer from './profiles/ClientProfileContainer.vue';
+import BranchProfileContainer from './profiles/BranchProfileContainer.vue';
 import ControlPanel from './ControlPanel.vue';
 import Dashboard from './Dashboard.vue';
 import Messages from './Messages.vue';
 import Notifications from './Notifications.vue';
+import PLCTracker from './tools/PLCTracker.vue';
 import Profile from './Profile.vue';
 import Queuing from './Queuing.vue';
 import Reports from './Reports.vue';
 import Services from './Services.vue';
 import Technicians from './Technicians.vue';
 import Transactions from './Transactions.vue';
+import Testimonials from './tools/Testimonials.vue';
+import BranchLocator from './tools/BranchLocator.vue';
+import FrequentlyAskedQuestions from './tools/FrequentlyAskedQuestions.vue';
+import PromoWallet from './tools/PromoWallet.vue';
+import PremierLoyaltyCard from './tools/PremierLoyaltyCard.vue';
 
 Vue.use(Router);
 
@@ -31,6 +39,11 @@ export default new Router({
             component: Branches
         },
         {
+            path: '/branches/:id',
+            name: 'Branch Profile',
+            component: BranchProfileContainer
+        },
+        {
             path: '/calendar',
             name: 'Calendar',
             component: Calendar
@@ -39,6 +52,11 @@ export default new Router({
             path: '/clients',
             name: 'Clients',
             component: Clients
+        },
+        {
+            path: '/clients/:id',
+            name: 'Client Profile',
+            component: ClientProfileContainer
         },
         {
             path: '/control_panel',
@@ -71,6 +89,11 @@ export default new Router({
             component: Profile
         },
         {
+            path: '/plctracker',
+            name: 'PLCTracker',
+            component: PLCTracker
+        },
+        {
             path: '/queuing',
             name: 'Queuing',
             component: Queuing
@@ -94,6 +117,31 @@ export default new Router({
             path: '/transactions',
             name: 'Transactions',
             component: Transactions
+        },
+        {
+            path: '/plc',
+            name: 'PremierLoyaltyCard',
+            component: PremierLoyaltyCard
+        },
+        {
+            path: '/faqs',
+            name: 'FrequentlyAskedQuestions',
+            component: FrequentlyAskedQuestions
+        },
+        {
+            path: '/locator',
+            name: 'BranchLocator',
+            component: BranchLocator
+        },
+        {
+            path: '/wallet',
+            name: 'PromoWallet',
+            component: PromoWallet
+        },
+        {
+            path: '/testimonials',
+            name: 'Testimonials',
+            component: Testimonials
         }
     ]
 })

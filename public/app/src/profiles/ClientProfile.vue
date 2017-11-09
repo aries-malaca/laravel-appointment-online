@@ -141,7 +141,7 @@
                                     </li>
                                     <li>
                                         <a data-toggle="tab" href="#account-settings">
-                                            <i class="fa fa-eye"></i> Account Settings </a>
+                                            <i class="fa fa-eye"></i> Settings </a>
                                     </li>
                                 </ul>
                             </div>
@@ -227,21 +227,32 @@
                     <div class="tab-pane" id="appointments">
                         <div class="row">
                             <div class="col-md-12">
-                                <appointments-table title="Active Appointments" :hide_client="true" :configs="configs"
-                                    @get_appointments="getAppointments" :appointments="active_appointments" :token="token" :user="user"/>
-
-                                <appointments-table title="Appointment History" :hide_client="true" :configs="configs"
-                                    @get_appointments="getAppointmentHistory" :appointments="appointment_history" :token="token" :user="user"/>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
+                                <div class="tabbable-line">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active">
+                                            <a href="#active" data-toggle="tab">Active Appointments</a>
+                                        </li>
+                                        <li>
+                                            <a href="#inactive" data-toggle="tab">Appointment History</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="active">
+                                            <appointments-table :paginate="true" :hide_client="true" :configs="configs"
+                                                    @get_appointments="getAppointments" :appointments="active_appointments" :token="token" :user="user"/>
+                                        </div>
+                                        <div id="inactive" class="tab-pane">
+                                            <appointments-table :paginate="true" :hide_client="true" :configs="configs"
+                                                    @get_appointments="getAppointmentHistory" :appointments="appointment_history" :token="token" :user="user"/>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions">
-
+                        <transactions-view :client="client" :user="user" :configs="configs" :transactions="transactions"></transactions-view>
                     </div>
                     <!--end tab-pane-->
                 </div>
@@ -267,19 +278,21 @@
     import UploadPictureModal from "../modals/UploadPictureModal.vue";
     import AppointmentsTable from "../tables/AppointmentsTable.vue";
     import MyDevicesTable from "../tables/MyDevicesTable.vue";
+    import TransactionsView from "../components/TransactionsView.vue";
     import VueSelect from "vue-select"
 
     export default {
         name: 'ClientProfile',
         props: ['token','configs','with_back','id','show','user'],
-        components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable},
+        components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable, TransactionsView},
         data: function(){
             return {
                 client:{},
                 newClient:{},
                 branches:[],
                 active_appointments:[],
-                appointment_history:[]
+                appointment_history:[],
+                transactions:[]
             }
         },
         methods:{
@@ -314,6 +327,7 @@
                                 password:'',
                                 device_data:response.data.device_data
                             };
+                            u.getBossTransactions();
                         }
                     });
             },
@@ -402,6 +416,18 @@
                         });
                     });
             },
+            getBossTransactions:function(){
+                let u = this;
+                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
+                    return false;
+                axios.get(this.configs.FETCH_BOSS_TRANSACTIONS +""+ this.client.email)
+                    .then(function (response) {
+                        u.transactions = response.data;
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            }
         },
         watch:{
             id:function(){
@@ -414,6 +440,12 @@
         },
         mounted:function(){
             this.getBranches();
+
+            if(this.id !== 0){
+                this.getClient();
+                this.getAppointments();
+                this.getAppointmentHistory();
+            }
 
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){

@@ -62,7 +62,6 @@
     <!-- BEGIN THEME LAYOUT SCRIPTS -->
     <script src="../../theme/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script>
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
-    <script src="../../theme/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script>
     <script src="../../theme/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
     <!-- END THEME LAYOUT SCRIPTS -->
     <script src="../../theme/global/plugins/moment.min.js" type="text/javascript"></script>
@@ -77,6 +76,8 @@
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
     <script type="text/javascript" src="../../js/signature_pad.js"></script>
+    <script type="text/javascript" src="../../js/chat.js"></script>
+    <script type="text/javascript" src="../../js/notify.js"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
     <script src="../../theme/pages/scripts/components-bootstrap-switch.min.js" type="text/javascript"></script>

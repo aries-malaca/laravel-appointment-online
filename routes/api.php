@@ -134,8 +134,16 @@ Route::patch('/faq/updateFAQ', 'FAQController@updateFAQ');
 Route::post('/faq/deleteFAQ', 'FAQController@deleteFAQ');
 Route::patch('/faq/moveFAQ', 'FAQController@moveFAQ');
 
+Route::get('/career/getCareers', 'CareerController@getCareers');
+Route::post('/career/addCareer', 'CareerController@addCareer');
+Route::patch('/career/updateCareer', 'CareerController@updateCareer');
+Route::post('/career/deleteCareer', 'CareerController@deleteCareer');
+Route::patch('/career/moveCareer', 'CareerController@moveCareer');
 
 Route::get('/promotion/getPromotions', 'PromotionController@getPromotions');
+Route::post('/promotion/addPromotion', 'PromotionController@addPromotion');
+Route::patch('/promotion/updatePromotion', 'PromotionController@updatePromotion');
+Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion');
 
 //mobile
 //flag = active:string

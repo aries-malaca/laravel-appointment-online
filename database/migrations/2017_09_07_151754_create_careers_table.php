@@ -18,7 +18,6 @@ class CreateCareersTable extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('order');
-            $table->datetime('date_posted');
             $table->text('career_data');
             $table->timestamps();
         });

@@ -19,4 +19,8 @@ class PromotionController extends Controller{
 
         return response()->json($data);
     }
+
+    function addPromotion(){
+
+    }
 }

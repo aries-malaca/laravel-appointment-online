@@ -11,7 +11,6 @@ class FAQController extends Controller{
             $validator = Validator::make($request->all(), [
                 'question' => 'required|max:255',
                 'answer' => 'required',
-                'type' => 'required|in:type,html'
             ]);
 
             if ($validator->fails())
@@ -20,7 +19,6 @@ class FAQController extends Controller{
             $faq = new Faq;
             $faq->question = $request->input('question');
             $faq->answer = $request->input('answer');
-            $faq->type = $request->input('type');
             $faq->order = Faq::count()+1;
             $faq->save();
 
@@ -34,8 +32,7 @@ class FAQController extends Controller{
         if($api['result'] === 'success'){
             $validator = Validator::make($request->all(), [
                 'question' => 'required|max:255',
-                'answer' => 'required',
-                'type' => 'required|in:type,html'
+                'answer' => 'required'
             ]);
 
             if ($validator->fails())
@@ -44,7 +41,6 @@ class FAQController extends Controller{
             $faq = Faq::find($request->input('id'));
             $faq->question = $request->input('question');
             $faq->answer = $request->input('answer');
-            $faq->type = $request->input('type');
             $faq->save();
 
             return response()->json(["result"=>"success"]);
@@ -53,7 +49,12 @@ class FAQController extends Controller{
     }
 
     function getFAQs(){
-        return response()->json(Faq::get()->toArray());
+        $data = Faq::orderBy('order')->get()->toArray();
+
+        foreach($data as $key=>$value)
+            $data[$key]['answer'] = 'Answer: '. nl2br( $value['answer']);
+
+        return response()->json($data);
     }
 
     function moveFAQ(Request $request){

@@ -85,7 +85,7 @@
                         </a>
                         <a href="../../#/promotions" class="tile bg-purple-studio">
                             <div class="tile-body">
-                                <i class="icon icon-speech"></i>
+                                <i class="fa fa-tags"></i>
                             </div>
                             <div class="tile-object">
                                 <div class="name" style="text-align:center"> Promotions </div>

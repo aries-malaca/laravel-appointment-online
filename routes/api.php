@@ -90,10 +90,10 @@ Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePa
 
 Route::get('/config/getTerms', 'ConfigController@getTerms');
 Route::get('/config/getConfigs', 'ConfigController@getConfigs');
+
 Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getAppointments');
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
-
 Route::patch('/appointment/cancelAppointment', 'AppointmentController@cancelAppointment');
 Route::patch('/appointment/callAppointment', 'AppointmentController@callAppointment');
 Route::patch('/appointment/unCallAppointment', 'AppointmentController@unCallAppointment');
@@ -101,10 +101,9 @@ Route::patch('/appointment/cancelItem', 'AppointmentController@cancelItem');
 Route::patch('/appointment/serveAppointment', 'AppointmentController@serveAppointment');
 Route::patch('/appointment/unServeAppointment', 'AppointmentController@unServeAppointment');
 Route::patch('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
+Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
-
-Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 
 Route::patch('/schedule/updateBranchSchedule', 'BranchController@updateBranchSchedule');
 Route::post('/schedule/addBranchSchedule', 'BranchController@addBranchSchedule');
@@ -129,14 +128,16 @@ Route::get('/message/getContactList', 'MessageController@getContactList');
 Route::get('/message/countUnseenMessages/{partner_id}', 'MessageController@countUnseenMessages');
 Route::get('/message/getLastMessage/{sender_id}', 'MessageController@getLastMessage');
 
+Route::get('/faq/getFAQs', 'FAQController@getFAQs');
+Route::post('/faq/addFAQ', 'FAQController@addFAQ');
+Route::patch('/faq/updateFAQ', 'FAQController@updateFAQ');
+Route::post('/faq/deleteFAQ', 'FAQController@deleteFAQ');
+Route::patch('/faq/moveFAQ', 'FAQController@moveFAQ');
 
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
-
-// Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
-
 
 Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');

@@ -52,3 +52,18 @@
     padding: 5px 10px 0 !important;
     margin-bottom: 10px !important;
 }
+.chat-toggler{
+    position:fixed;
+    right:0px;
+    bottom: 0px;
+    z-index:1001;
+    display: block;
+    background-color: white;
+    padding: 5px 30px;
+}
+.page-content{
+    padding-top:0px !important;
+}
+.page-footer{
+    height:30px
+}

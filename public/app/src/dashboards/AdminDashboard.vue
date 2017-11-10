@@ -83,6 +83,14 @@
                                 <div class="name" style="text-align:center"> News Feeds </div>
                             </div>
                         </a>
+                        <a href="../../#/promotions" class="tile bg-purple-studio">
+                            <div class="tile-body">
+                                <i class="icon icon-speech"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> Promotions </div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>

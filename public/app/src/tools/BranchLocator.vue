@@ -195,7 +195,7 @@
                 for(var x=0;x<this.branches.length;x++)
                     this.branches[x].distance = this.getDistance(this.branches[x].map_coordinates);
             },
-            'user':function(){
+            user:function(){
                 this.client = {
                     label:this.user.username,
                     value:this.user.id,
@@ -203,6 +203,13 @@
                     user_mobile:this.user.user_mobile,
                     picture_html_big:this.user.picture_html_big,
                 };
+            },
+            geolocation:function(){
+                new google.maps.Marker({
+                    position: this.geolocation,
+                    map: this.map,
+                    animation: google.maps.Animation.DROP
+                })
             }
         }
     }

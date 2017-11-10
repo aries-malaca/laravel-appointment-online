@@ -15,6 +15,7 @@ import NewsFeeds from './tools/NewsFeeds.vue';
 import Notifications from './Notifications.vue';
 import PLCTracker from './tools/PLCTracker.vue';
 import Profile from './Profile.vue';
+import Promotions from './tools/Promotions.vue';
 import Queuing from './tools/Queuing.vue';
 import Reports from './Reports.vue';
 import Services from './Services.vue';
@@ -99,6 +100,11 @@ export default new Router({
             path: '/profile',
             name: 'Profile',
             component: Profile
+        },
+        {
+            path: '/promotions',
+            name: 'Promotions',
+            component: Promotions
         },
         {
             path: '/plctracker',

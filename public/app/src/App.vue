@@ -49,19 +49,6 @@
         </div>
     </div>
 </template>
-
-<style>
-    .chat-toggler{
-        position:fixed;
-        right:0px;
-        bottom: 0px;
-        z-index:1001;
-        display: block;
-        background-color: white;
-        padding: 10px 30px;
-    }
-</style>
-
 <script>
     import HeaderLayout from './layouts/HeaderLayout.vue';
     import SidebarLayout from './layouts/SidebarLayout.vue';

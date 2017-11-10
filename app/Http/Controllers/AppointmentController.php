@@ -19,12 +19,12 @@ class AppointmentController extends Controller{
             'branch' => 'required',
             'client' => 'required',
             'transaction_date' => 'required',
-            'transaction_time' => 'required',
+            // 'transaction_time' => 'required',
             'services' => 'required',
             'products' => 'required_if:services,'.null,
             'platform' => 'required',
             'transaction_type' => 'required',
-            'waiver_data.signature' =>'required'
+            // 'waiver_data.signature' =>'required'
         ]);
 
         if ($validator->fails())
@@ -118,7 +118,9 @@ class AppointmentController extends Controller{
             $appointment['client_contact'] = $client->user_mobile;
             $appointment['client_gender'] = $client->gender;
             $appointment['technician_name'] = isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
+
             $appointment['items'] = $this->getAppointmentItems($appointment['id']);
+
             $appointment['transaction_date_formatted'] = date('m/d/Y', strtotime($appointment['transaction_datetime']));
             $appointment['transaction_time_formatted'] = date('h:i A', strtotime($appointment['transaction_datetime']));
             $appointment['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($appointment['created_at']));
@@ -371,15 +373,29 @@ class AppointmentController extends Controller{
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
-                $items[$key]['item_name'] = $service_name;
+
+                $service_image = "";
+                if($service->service_type_id !== 0){
+                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
+                }
+                else{
+                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
+                }
+
+                $items[$key]['item_name']       = $service_name;
+                $items[$key]['item_image']      = $service_image;
+                $items[$key]['item_duration']   = $service->service_minutes;
                 $items[$key]['item_info']['gender'] = $service->service_gender;
             }
             else{
-                $product = Product::find($value['item_id']);
-                $product_name = ProductGroup::find($product->product_group_id)->product_group_name;
-                $items[$key]['item_name'] = $product_name;
-                $items[$key]['item_info']['size'] = $product->product_size;
+                $product       = Product::find($value['item_id']);
+                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
+                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
+                $items[$key]['item_name']            = $product_name;
+                $items[$key]['item_info']['size']    = $product->product_size;
                 $items[$key]['item_info']['variant'] = $product->product_variant;
+                $items[$key]['item_image']           = $product_image;
+
             }
         }
         return $items;

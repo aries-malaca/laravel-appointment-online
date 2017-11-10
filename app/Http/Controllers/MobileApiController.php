@@ -40,6 +40,7 @@ class MobileApiController extends Controller
 		$serv = 1;		  
 		$service_array 		= array();
 		$product_array   	= array();
+        $package_array      = array();
 		$option = array();
 
         $price_male       = "";
@@ -47,57 +48,38 @@ class MobileApiController extends Controller
         $duration_male    = "";
         $duration_female  = "";
 
-		$service_single_query  = ServiceType::where("is_active","=","1")
-								->get();
-		foreach($service_single_query as $rowService){
-            $price_male       = "0.00";
-            $price_female     = "0.00";
-            $duration_male    = "0";
-            $duration_female  = "0";
-			$service_type_id 	  = $rowService->id;
-			$serv		          = DB::table('services')
-								 ->where("is_active","=","1")
-								 ->where("service_type_id","=",$service_type_id)
-                                 ->select("service_price","service_minutes","service_gender")
-								 ->get();
+        $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
+                        ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
+                        ->select('services.*','service_name','package_name','service_description','service_picture')
+                        ->where('services.is_active', 1)
+                        ->where('services.service_type_id',"<>",0);
 
-            foreach ($serv as $row) {
-                if($row->service_gender == "male"){
-                    $price_male    = $row->service_price;
-                    $duration_male = $row->service_minutes;
-                }       
-                else if($row->service_gender == "female"){
-                    $price_female    = $row->service_price;
-                    $duration_female = $row->service_minutes;
-                }    
-                else{
-                    $price_male      = "0.00";
-                    $price_female    = "0.00";
-                    $duration_female = "0";
-                    $duration_male   = "0";
-                }        
-            }            
+        $services=$services->get()->toArray();
 
-		
-	
-			$service_array[] 	= array(
-							'id'    		  => $rowService->id,
-							'service_name'    => $rowService->service_name,
-							'desc'            => $rowService->service_description,
-							'image' 	   	  => str_replace(" ","%20",$rowService->service_picture),
-							'service_type' 	  => $service_type_id,
-							'price_male' 	  => $price_male,
-							'price_female' 	  => $price_female,
-							'duration_male'   => $duration_male,
-							'duration_female' => $duration_female,
-							'updated_at' 	  => $rowService->updated_at,
-								);
-       
-		}		
+        foreach($services as $key=>$value){
+            if($value['service_type_id'] === 0){
+                $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
+                $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
+                $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+            }
+        }
+      
+      //packages
+        $data = ServicePackage::where('is_active', 1)->get()->toArray();
+        foreach ($data as $key=>$value){
+            $query  = Service::where('service_package_id','=',$data[$key]['id'])
+                            ->select('service_minutes','service_price','id as service_id')
+                            ->get()
+                            ->first();
+            $data[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
+            $data[$key]['service_duration'] = $query['service_minutes'];
+            $data[$key]['service_price']    = $query['service_price'];
+            $data[$key]['id_service']       = $query['service_id'];
+        } 
 
 
 		//papalitan mamaya
-		 $product_query  =  DB::table('products')
+		$product_query  =  DB::table('products')
                                     ->leftJoin('product_groups','products.product_group_id','=','product_groups.id')
                                     ->select('products.*','product_group_name','product_picture', 'product_description')
                                     ->where('products.is_active', 1)
@@ -119,7 +101,8 @@ class MobileApiController extends Controller
         }
         
         $response['carousel']    = $advertisement_query;
-        $response['services']    = $service_array;
+        $response['services']    = $services;
+        $response['package']     = $data;
         $response['products']    = $product_array;
         $response['date_today'] = $today;
 		
@@ -589,13 +572,14 @@ class MobileApiController extends Controller
         }
         foreach ($data as $key=>$value){
             $query  = Service::where('service_package_id','=',$data[$key]['id'])
-                            ->select('service_minutes','service_price')
+                            ->select('service_minutes','service_price','id as service_id')
                             ->get()
                             ->first();
+
             $data[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
-            
             $data[$key]['service_duration'] = $query['service_minutes'];
             $data[$key]['service_price']    = $query['service_price'];
+            $data[$key]['service_id']       = $query['service_id'];
         } 
         return response()->json($data);
     }
@@ -610,7 +594,7 @@ class MobileApiController extends Controller
                         ->where('a.service_type_id', '<>',0)
                         ->where('a.is_active', 1)
                         ->where('a.service_gender', $gender)
-                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
         }
         else{
@@ -618,7 +602,7 @@ class MobileApiController extends Controller
                         ->leftJoin('service_types as b','a.service_type_id','=','b.id')
                         ->where('a.service_type_id', '<>',0)
                         ->where('a.is_active', 1)
-                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture')
+                        ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
 
         }

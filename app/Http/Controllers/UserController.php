@@ -71,7 +71,7 @@ class UserController extends Controller{
                 $api['user']['branch'] = [
                                 "value"=>$user_data['home_branch'],
                                 "label"=> $branch,
-                                "branch_data"=> $b['branch_data'],
+                                "branch_data"=> json_decode($b['branch_data']),
                                 "branch_address"=> $b['branch_address'],
                                 "rooms"=>isset($b->rooms_count)?$b->rooms_count:0,
                                 "schedules"=>BranchSchedule::where('branch_id', $b->id)

@@ -2,13 +2,18 @@
     <div class="page-quick-sidebar-item">
         <div class="page-quick-sidebar-chat-user">
             <div class="page-quick-sidebar-nav">
-                <a @click="hideConversation" class="page-quick-sidebar-back-to-list"><i class="icon-arrow-left"></i>Back</a>
+                <a @click="hideConversation" class="page-quick-sidebar-back-to-list"><i class="icon-arrow-left"></i>
+                    Back
+                </a>
                 <div class="btn-group  pull-right">
                     <button class="btn blue dropdown-toggle btn-xs" type="button" data-toggle="dropdown" aria-expanded="false">
-                        Options
+                        {{ partner.first_name }} {{ partner.last_name }}
                         <i class="fa fa-angle-down"></i>
                     </button>
                     <ul class="dropdown-menu" role="menu">
+                        <li v-if="partner.is_client == 1">
+                            <a v-bind:href="'../../#/clients/'+partner.id"> View Profile </a>
+                        </li>
                         <li>
                             <a @click="deleteConversation"> Delete Conversation </a>
                         </li>
@@ -28,11 +33,14 @@
                     </div>
                 </div>
             </div>
-            <div class="page-quick-sidebar-chat-user-form">
+            <div class="page-quick-sidebar-chat-user-form" style="padding-top:0px;">
+                <div style="padding:5px 0px 5px;font-size:11px;font-style: italic" v-bind:style="!is_typing?'color:#f2f6f9':''">
+                    {{ partner.first_name }} is typing a message...
+                </div>
                 <div class="input-group">
-                    <input type="text" id="txt" class="form-control" @keypress="pressEnter($event)" v-model="newMessage.body" placeholder="Type a message here...">
+                    <input type="text" id="txt" class="form-control" @keypress="keyPress($event)" v-model="newMessage.body" placeholder="Type a message here...">
                     <div class="input-group-btn">
-                        <button type="button" id="btn" class="btn green" @click="sendMessage">
+                        <button type="button" id="btn" class="btn green" @click="sendMessage" data-loading-text="Sending...">
                             <i class="fa fa-send"></i>
                         </button>
                     </div>
@@ -48,9 +56,11 @@
         data:function(){
             return{
                 newMessage:{
-                    body:'',
-                    recipient_id:undefined
-                }
+                    body:''
+                },
+                typing_stamp: 0,
+                now:50,
+                timer:false
             }
         },
         methods:{
@@ -74,10 +84,9 @@
                         u.newMessage.body = '';
                     });
             },
-            pressEnter:function(event){
-                if(event.keyCode === 13){
+            keyPress:function(event){
+                if(event.keyCode === 13)
                     this.sendMessage();
-                }
             },
             deleteConversation:function(){
                 let u = this;
@@ -91,6 +100,30 @@
                     });
             },
             moment:moment
-        }
+        },
+        watch:{
+            'partner.id':function(){
+                let u = this;
+                this.$options.sockets.notifyTyping = function(data){
+                    if(data.recipient_id===u.user.id && this.partner.id===data.sender_id)
+                        u.typing_stamp = Number(moment().format('X'));
+                };
+            },
+            messages:function(){
+                this.typing_stamp = 0;
+                let u = this;
+                this.timer = setInterval(function(){
+                    u.now = Number(moment().format("X"));
+                },200);
+            },
+            'newMessage.body':function(){
+                this.$socket.emit('notifyTyping', this.partner.id, this.user.id);
+            }
+        },
+        computed:{
+            is_typing:function(){
+                return (Number(this.now) - this.typing_stamp) < 2;
+            }
+        },
     }
 </script>

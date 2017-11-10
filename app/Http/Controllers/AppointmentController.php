@@ -211,7 +211,7 @@ class AppointmentController extends Controller{
         $item->item_status = 'completed';
         $item->save();
 
-        $this->refreshStatus($item->transaction_id, 'cancelled');
+        $this->refreshStatus($item->transaction_id, 'completed');
         return response()->json(["result"=>"success"]);
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="page-quick-sidebar-wrapper" data-close-on-body-click="false">
+    <div class="page-quick-sidebar-wrapper" data-close-on-body-click="false" style="border-left:solid 1px #91624f">
         <a href="javascript:;" @click="show_conversation=false" class="page-quick-sidebar-toggler">
             <i class="icon-login"></i>
         </a>
@@ -64,6 +64,7 @@
             },
             showConversation:function(value, user){
                 this.show_conversation = value;
+
                 if(value){
                     this.partner = user;
                     this.seenMessages();
@@ -101,17 +102,14 @@
         mounted:function(){
             let u = this;
             this.$options.sockets.newMessage = function(data){
-                if(data.recipient_id === u.user.id){
+                if(data.recipient_id === u.user.id)
                     u.getMessages();
-                }
 
-                if(data.sender_id === u.partner.id && u.show_conversation){
+                if(data.sender_id === u.partner.id && u.show_conversation)
                     u.seenMessages();
-                }
 
-                if((u.partner.id !== data.sender_id || !u.show_conversation )&& data.recipient_id === u.user.id){
+                if((u.partner.id !== data.sender_id || !u.show_conversation )&& data.recipient_id === u.user.id)
                     u.notifyMe(data.sender_id);
-                }
             };
         }
     }

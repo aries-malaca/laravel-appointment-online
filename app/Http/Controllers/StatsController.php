@@ -19,6 +19,11 @@ class StatsController extends Controller{
                   "appointments"=>Transaction::where('transaction_status', 'reserved')->count(),
                   "technicians"=>Technician::count(),
                   "branches"=>Branch::count(),
+                  "registered"=>User::where('created_at', 'LIKE', date('Y-m-d').'%')
+                                        ->where('is_client', 1)
+                                        ->count(),
+                  "login"=>User::where('last_activity', 'LIKE', date('Y-m-d'.'%'))
+                                        ->count()
                 )
         );
     }

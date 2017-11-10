@@ -32,11 +32,11 @@
                             <div class="uppercase profile-stat-text"> Branches </div>
                         </div>
                         <div class="col-md-3 col-sm-3">
-                            <div class="uppercase profile-stat-title"> {{ stats.new_users }} </div>
+                            <div class="uppercase profile-stat-title"> {{ stats.registered }} </div>
                             <div class="uppercase profile-stat-text"> Registered Today </div>
                         </div>
                         <div class="col-md-3 col-sm-3">
-                            <div class="uppercase profile-stat-title"> {{ stats.admin_login }} </div>
+                            <div class="uppercase profile-stat-title"> {{ stats.login }} </div>
                             <div class="uppercase profile-stat-text"> Admin Login </div>
                         </div>
                     </div>
@@ -106,8 +106,8 @@
                     appointments:0,
                     technicians:0,
                     branches:0,
-                    new_users:0,
-                    admin_login:0
+                    registered:0,
+                    login:0
                 }
             }
         },
@@ -123,8 +123,8 @@
                             appointments:response.data.appointments,
                             technicians:response.data.technicians,
                             branches:response.data.branches,
-                            new_users:0,
-                            admin_login:0
+                            registered:response.data.registered,
+                            login:response.data.login
                         }
                     })
                     .catch(function (error) {

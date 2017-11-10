@@ -4,16 +4,18 @@ import Router from 'vue-router';
 import Appointments from './Appointments.vue';
 import Branches from './Branches.vue';
 import Calendar from './Calendar.vue';
+import Careers from './tools/Careers.vue';
 import Clients from './Clients.vue';
 import ClientProfileContainer from './profiles/ClientProfileContainer.vue';
 import BranchProfileContainer from './profiles/BranchProfileContainer.vue';
 import ControlPanel from './ControlPanel.vue';
 import Dashboard from './Dashboard.vue';
 import Messages from './Messages.vue';
+import NewsFeeds from './tools/NewsFeeds.vue';
 import Notifications from './Notifications.vue';
 import PLCTracker from './tools/PLCTracker.vue';
 import Profile from './Profile.vue';
-import Queuing from './Queuing.vue';
+import Queuing from './tools/Queuing.vue';
 import Reports from './Reports.vue';
 import Services from './Services.vue';
 import Technicians from './Technicians.vue';
@@ -42,6 +44,11 @@ export default new Router({
             path: '/branches/:id',
             name: 'Branch Profile',
             component: BranchProfileContainer
+        },
+        {
+            path: '/careers',
+            name: 'Careers',
+            component: Careers
         },
         {
             path: '/calendar',
@@ -77,6 +84,11 @@ export default new Router({
             path: '/messages',
             name: 'Messages',
             component: Messages
+        },
+        {
+            path: '/news',
+            name: 'NewsFeeds',
+            component: NewsFeeds
         },
         {
             path: '/notifications',

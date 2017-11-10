@@ -30,13 +30,18 @@
                 </div>
             </div>
         </div>
+        <booking-modal :toggle="toggle" :default_branch="default_branch" :lock_branch="true" :default_client="client" :lock_client="true"
+                       :branches="branches" :token="token" :user="user" :configs="configs" />
     </div>
 </template>
 
 <script>
+    import BookingModal from "../modals/BookingModal.vue";
+
     export default {
         name: 'BranchLocator',
-        props:['configs'],
+        props:['configs','user','token'],
+        components:{ BookingModal },
         data: function(){
             return {
                 title: 'Branch Locator',
@@ -49,7 +54,11 @@
                 show_map:false,
                 markers:[],
                 infos:[],
-                filter_nearby:true
+                filter_nearby:true,
+                toggle:false,
+                client:{},
+                default_branch:{},
+                current_window:false
             }
         },
         methods:{
@@ -60,18 +69,16 @@
                         u.branches = response.data;
                     });
             },
-            withinDistance:function(coordinates, name){
-                var mylat= this.geolocation.lat;
-                var mylong = this.geolocation.lng;
-                var marker_lat = coordinates.lat;
-                var marker_long = coordinates.long;
+            getDistance:function(coordinates){
+                let mylat= this.geolocation.lat;
+                let mylong = this.geolocation.lng;
+                let marker_lat = coordinates.lat;
+                let marker_long = coordinates.long;
 
-                var distance = ( 3959 * Math.acos( Math.cos( mylat *(Math.PI/180) ) *
+               return ( 3959 * Math.acos( Math.cos( mylat *(Math.PI/180) ) *
                     Math.cos( marker_lat *(Math.PI/180) ) *
                     Math.cos( marker_long *(Math.PI/180)  - mylong *(Math.PI/180) ) +
                     Math.sin( mylat *(Math.PI/180) ) * Math.sin( marker_lat *(Math.PI/180)) ) );
-                console.log(distance +" " + name);
-                return distance<this.configs.NEARBY_BRANCH_DISTANCE;
             },
             clearMarkers:function(){
                 for (var i = 0; i < this.markers.length; i++) {
@@ -124,12 +131,32 @@
 
                         let info = new google.maps.InfoWindow({
                             content: '<h3><b>'+ branch.branch_name +' </b></h3>' +
-                            '<p>Address: '+ branch.branch_address +'</p>' +
-                            '<p>Phone: '+ branch.branch_contact +'</p>'
+                            '<p>Address: '+ branch.branch_address +'<br/>' +
+                            'Phone: '+ branch.branch_contact +'</p>' +
+                            '<button class="btn btn-success btn-md" id="btn-book">Book Appointment</button> &nbsp' +
+                            '<button class="btn btn-info btn-md">View Queue</button>'
                         });
 
+
                         u.markers[x].addListener('click', function(){
+                            if(u.current_window)
+                                u.current_window.close();
+
+                            u.current_window = info;
                             info.open(map, marker);
+                            setTimeout(function(){
+                                $('#btn-book').click(function(){
+                                    u.default_branch = {
+                                        branch_address:branch.branch_address,
+                                        branch_data:branch.branch_data,
+                                        label:branch.branch_name,
+                                        rooms:branch.rooms,
+                                        schedules:branch.schedules,
+                                        value:branch.id,
+                                    };
+                                    u.toggle = !u.toggle;
+                                });
+                            }, 50);
                         });
                     }
                     google.maps.event.trigger(u.map, 'resize');
@@ -148,17 +175,34 @@
                 if(!this.filter_nearby)
                     return this.branches;
 
+                var b = this.branches.sort(function(a, b) {
+                    return a.distance - b.distance;
+                });
+
                 var branches = [];
-                for(var x=0;x<this.branches.length;x++){
-                   if(this.withinDistance(this.branches[x].map_coordinates,this.branches[x].branch_name ) && branches.length < 20)
+                for(var x=0;x<b.length;x++){
+                   if(this.branches[x].distance<=this.configs.NEARBY_BRANCH_DISTANCE && branches.length < 10)
                        branches.push(this.branches[x]);
                 }
-                return branches;
+                return branches
             }
         },
         watch:{
             filter_nearby:function(){
                 this.initializeMarkers();
+            },
+            branches:function(){
+                for(var x=0;x<this.branches.length;x++)
+                    this.branches[x].distance = this.getDistance(this.branches[x].map_coordinates);
+            },
+            'user':function(){
+                this.client = {
+                    label:this.user.username,
+                    value:this.user.id,
+                    gender:this.user.gender,
+                    user_mobile:this.user.user_mobile,
+                    picture_html_big:this.user.picture_html_big,
+                };
             }
         }
     }

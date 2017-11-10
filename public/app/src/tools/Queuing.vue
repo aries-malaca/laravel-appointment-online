@@ -85,7 +85,7 @@
                                                             <button class="btn btn-xs purple" @click="emitServeItem(item.id)" v-if="isOnCall(item)">Serve</button>
                                                             <button class="btn btn-xs btn-danger" @click="emitUnServeItem(item.id)" v-if="isOnServe(item)">Unserve</button>
 
-                                                            <button class="btn btn-xs btn-info" @click="emitCompleteItem(item.id)" v-if="isOnServe(item)">Complete</button>
+                                                            <button class="btn btn-xs btn-info" @click="emitCompleteItem(item)" v-if="isOnServe(item)">Complete</button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -119,7 +119,7 @@
                                                     <td>{{ item.technician_name }}</td>
                                                     <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
                                                     <td>
-                                                        <span class="badge badge-info">RESERVED</span>
+                                                        <span class="badge badge-success">Completed</span>
                                                     </td>
                                                     <td>Served: {{ moment(item.serve_time).format("hh:mm A") }}</td>
                                                     <td>Completed: {{ moment(item.complete_time).format("hh:mm A") }}</td>
@@ -189,8 +189,8 @@
 </template>
 
 <script>
-    import BookingModal from "./modals/BookingModal.vue";
-    import AppointmentModal from "./modals/AppointmentModal.vue";
+    import BookingModal from "../modals/BookingModal.vue";
+    import AppointmentModal from "../modals/AppointmentModal.vue";
     import VueSelect from "vue-select"
 
     export default {
@@ -267,6 +267,7 @@
                         for(var y=0;y<this.appointments[x].items.length;y++){
                             if(status === this.appointments[x].items[y].item_status && this.appointments[x].items[y].item_type ==='service'){
                                 this.appointments[x].items[y].technician_name = this.appointments[x].technician_name;
+                                this.appointments[x].items[y].client_id = this.appointments[x].client_id;
                                 data.push(this.appointments[x].items[y]);
                             }
                         }
@@ -324,11 +325,11 @@
                         XHRCatcher(error);
                     });
             },
-            emitCompleteItem:function(item_id){
+            emitCompleteItem:function(item){
                 let u = this;
-                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'patch', data:{item_id:item_id}})
+                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'patch', data:{item_id:item.id}})
                     .then(function () {
-                        u.$socket.emit('refreshAppointments', u.branch.value);
+                        u.$socket.emit('refreshAppointments', u.branch.value,item.client_id);
                     })
                     .catch(function (error) {
                         XHRCatcher(error);

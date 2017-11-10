@@ -89,15 +89,16 @@ class MessageController extends Controller{
                 }
             }
 
-            $data = DB::select("SELECT first_name, last_name, a.id as id, user_picture, level_name, is_client,(SELECT COUNT(id) as unread FROM messages 
+            $data = DB::select("SELECT first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client,(SELECT COUNT(id) as unread FROM messages 
                                                 WHERE is_read=0 AND
                                                     sender_id=a.id
                                                     AND recipient_id=" . $api['user']['id'] . " 
-                                                ) as unread 
+                                                ) as unread,
+                                               ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online
                                               FROM users AS a 
                                               LEFT JOIN user_levels AS b ON a.level=b.id 
-                                              WHERE 1=1 ". $where . " AND a.id <> ". $api['user']['id'] ." 
-                                              ORDER BY unread DESC, first_name");
+                                              WHERE 1=1 ". $where . " AND a.id <> ". $api['user']['id'] ."
+                                              ORDER BY unread DESC, is_online DESC, first_name");
 
             return response()->json($data);
         }

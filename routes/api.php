@@ -39,7 +39,7 @@ Route::patch('/client/updateSettings', 'ClientController@updateSettings');
 
 
 //resend Email Confirmation API
-Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
+Route::get('/user/resendConfirmation', 'UserController@resendConfirmation');
 
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
@@ -115,32 +115,14 @@ Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTech
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 
 
-Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
-Route::post('/premier/applyPremier', 'PremierController@applyPremier');
-Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
-
-Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
-
-Route::get('/message/getConversation/{partner_id}', 'MessageController@getConversation');
-Route::post('/message/sendMessage', 'MessageController@sendMessage');
-Route::post('/message/deleteConversation', 'MessageController@deleteConversation');
-Route::patch('/message/seenMessages', 'MessageController@seenMessages');
-Route::get('/message/getContactList', 'MessageController@getContactList');
-Route::get('/message/countUnseenMessages/{partner_id}', 'MessageController@countUnseenMessages');
-Route::get('/message/getLastMessage/{sender_id}', 'MessageController@getLastMessage');
-
-
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
-
 // Route::get('/mobile/getSapnuPuas', 'MobileApiController@SapnuPuas1');
-
 
 Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
-
 
 Route::patch('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
 Route::patch('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');

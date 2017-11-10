@@ -134,6 +134,9 @@ Route::patch('/faq/updateFAQ', 'FAQController@updateFAQ');
 Route::post('/faq/deleteFAQ', 'FAQController@deleteFAQ');
 Route::patch('/faq/moveFAQ', 'FAQController@moveFAQ');
 
+
+Route::get('/promotion/getPromotions', 'PromotionController@getPromotions');
+
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

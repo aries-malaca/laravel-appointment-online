@@ -79,13 +79,15 @@ class PremierController extends Controller{
                 $premier->plc_data = '{}';
                 $premier->created_at = date('Y-m-d H:i:s');
                 $premier->save();
+
+
                 if($premier->remarks=='approved')
                     return response()->json(["result" => 'success', "amount" => $amount]);
                 else
                     return response()->json(["result" => 'failed', "error" => $premier->remarks], 400);
             }
 
-            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment.", 400]);
+            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment."], 400);
         }
         return response()->json($api, $api["status_code"]);
     }

@@ -1,60 +1,63 @@
 <template>
-    <div class="portlet light">
-        <div class="portlet-title">
-            <div class="caption">
-                <i class="icon-puzzle font-grey-gallery"></i>
-                <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
+    <div id="plc" v-if="user.is_client === 1">
+        <div class="portlet light">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-puzzle font-grey-gallery"></i>
+                    <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
+                </div>
+                <div class="tools">
+                    <a href="" class="collapse" data-original-title="" title=""> </a>
+                    <a href="" class="reload" data-original-title="" title=""> </a>
+                    <a href="" class="fullscreen" data-original-title="" title=""> </a>
+                </div>
             </div>
-            <div class="tools">
-                <a href="" class="collapse" data-original-title="" title=""> </a>
-                <a href="" class="reload" data-original-title="" title=""> </a>
-                <a href="" class="fullscreen" data-original-title="" title=""> </a>
-            </div>
-        </div>
-        <div class="portlet-body">
-            <div class="tabbable-line">
-                <ul class="nav nav-tabs">
-                    <li class="active">
-                        <a href="#apply-now" data-toggle="tab">Apply Now</a>
-                    </li>
-                    <li>
-                        <a href="#applications" data-toggle="tab">Recent Applications</a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="apply-now">
-                        <div class="alert alert-info" style="font-size:11px;" v-html="configs.PLC_APPLICATION_MESSAGE"></div>
+            <div class="portlet-body">
+                <div class="tabbable-line">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#apply-now" data-toggle="tab">Apply Now</a>
+                        </li>
+                        <li>
+                            <a href="#applications" data-toggle="tab">Recent Applications</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="apply-now">
+                            <div class="alert alert-info" style="font-size:11px;" v-html="configs.PLC_APPLICATION_MESSAGE"></div>
 
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label>Select Branch:</label>
-                                    <vue-select v-model="apply.branch" :options="branch_selection"></vue-select>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Select Branch:</label>
+                                        <vue-select v-model="apply.branch" :options="branch_selection"></vue-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Application Type</label>
+                                        <select class="form-control" v-model="apply.type">
+                                            <option value="New">New</option>
+                                            <option value="Replacement">Replacement</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-success btn-block" data-loading-text="Please Wait..." @click="applyPLC($event)">Submit</button>
                                 </div>
-                                <div class="form-group">
-                                    <label>Application Type</label>
-                                    <select class="form-control" v-model="apply.type">
-                                        <option value="New">New</option>
-                                        <option value="Replacement">Replacement</option>
-                                    </select>
+                                <div class="col-md-7">
+                                    <img style="display:block; margin:auto;" v-bind:src="'../../images/app/plc_'+ user.gender +'.png'">
+                                    <div style="display:block; text-align:center;" v-if="user.gender === 'female'">For Her</div>
+                                    <div style="display:block; text-align:center;"  v-else>For Him</div>
                                 </div>
-                                <button class="btn btn-success btn-block" data-loading-text="Please Wait..." @click="applyPLC($event)">Submit</button>
                             </div>
-                            <div class="col-md-7">
-                                <img style="display:block; margin:auto;" v-bind:src="'../../images/app/plc_'+ user.gender +'.png'">
-                                <div style="display:block; text-align:center;" v-if="user.gender === 'female'">For Her</div>
-                                <div style="display:block; text-align:center;"  v-else>For Him</div>
-                            </div>
+
                         </div>
-
-                    </div>
-                    <div id="applications" class="tab-pane">
-                        <data-table :columns="plcTable.columns" :rows="premiers" :paginate="true"
-                                    :onClick="plcTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
+                        <div id="applications" class="tab-pane">
+                            <data-table :columns="plcTable.columns" :rows="premiers" :paginate="true"
+                                        :onClick="plcTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
     </div>
 </template>
 <style>
@@ -65,10 +68,12 @@
 <script>
     import VueSelect from 'vue-select';
     import DataTable from '../components/DataTable.vue';
+    import UnauthorizedError from '../errors/UnauthorizedError.vue';
+
     export default {
         name: 'PLC',
         props: ['user','token','configs','transactions'],
-        components:{ VueSelect, DataTable },
+        components:{ VueSelect, DataTable, UnauthorizedError },
         data: function(){
             return {
                 title: 'Premier Loyalty Card',

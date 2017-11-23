@@ -1,6 +1,6 @@
 <template>
     <div class="branch-locator">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client === 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -30,6 +30,8 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
+
         <booking-modal :toggle="toggle" :default_branch="default_branch" :lock_branch="true" :default_client="client" :lock_client="true"
                        :branches="branches" :token="token" :user="user" :configs="configs" />
     </div>
@@ -37,11 +39,12 @@
 
 <script>
     import BookingModal from "../modals/BookingModal.vue";
+    import UnauthorizedError from '../errors/UnauthorizedError.vue';
 
     export default {
         name: 'BranchLocator',
         props:['configs','user','token'],
-        components:{ BookingModal },
+        components:{ BookingModal, UnauthorizedError },
         data: function(){
             return {
                 title: 'Branch Locator',

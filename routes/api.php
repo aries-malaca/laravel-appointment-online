@@ -90,6 +90,7 @@ Route::patch('/service/updateServicePackage', 'ServiceController@updateServicePa
 
 Route::get('/config/getTerms', 'ConfigController@getTerms');
 Route::get('/config/getConfigs', 'ConfigController@getConfigs');
+Route::get('/menu/getAllMenus', 'MenuController@getAllMenus');
 
 Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentController@getAppointments');
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');

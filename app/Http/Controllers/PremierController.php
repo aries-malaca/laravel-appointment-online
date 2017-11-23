@@ -58,7 +58,7 @@ class PremierController extends Controller{
             $amount = $this->evaluatePremier($api['user']['email']);
             $boss_id = $this->getBossID($api['user']['email']);
 
-            if (is_array($boss_id)) {
+            if (!empty($boss_id)) {
                 if (!$amount) {
                     $find = PremierLoyaltyCard::where('client_id', $api['user']['id'])
                         ->where('status', 'denied')->get()->first();

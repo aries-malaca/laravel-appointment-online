@@ -1,6 +1,6 @@
 <template>
     <div class="transactions">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client === 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -16,15 +16,18 @@
                 <transactions-view :client="user" :user="user" :configs="configs" :transactions="transactions"></transactions-view>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
     </div>
 </template>
 
 <script>
     import TransactionsView from './components/TransactionsView.vue';
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
+
     export default {
         name: 'Transactions',
         props:["configs", "user", "token", "transactions"],
-        components: { TransactionsView },
+        components: { TransactionsView, UnauthorizedError },
         data: function(){
             return {
                 title: 'Transactions',

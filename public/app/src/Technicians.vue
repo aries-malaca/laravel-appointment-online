@@ -1,6 +1,6 @@
 <template>
     <div class="technicians">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client !== 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -19,14 +19,17 @@
                 />
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
     </div>
 </template>
 <script>
     import DataTable from './components/DataTable.vue';
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
+
     export default {
         name: 'Technicians',
         props:['token','user','configs'],
-        components:{ DataTable },
+        components:{ DataTable, UnauthorizedError },
         data: function(){
             return {
                 title: 'Technicians',

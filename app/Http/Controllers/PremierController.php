@@ -81,7 +81,7 @@ class PremierController extends Controller{
                 $premier->save();
 
 
-                if($premier->remarks=='approved')
+                if($premier->remarks=='')
                     return response()->json(["result" => 'success', "amount" => $amount]);
                 else
                     return response()->json(["result" => 'failed', "error" => $premier->remarks], 400);

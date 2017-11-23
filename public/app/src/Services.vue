@@ -1,6 +1,6 @@
 <template>
     <div class="services">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client !== 1">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -59,6 +59,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
 
         <div class="modal fade" id="add-service-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
@@ -326,14 +327,15 @@
 </template>
 
 <script>
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
     import DataTable from './components/DataTable.vue';
     import UploadForm from './components/UploadForm.vue';
     import VueSelect from "vue-select"
 
     export default {
         name: 'Services',
-        components:{ DataTable, UploadForm, VueSelect },
-        props: ['token','configs'],
+        components:{ DataTable, UploadForm, VueSelect, UnauthorizedError },
+        props: ['token','configs','user'],
         data: function(){
             return {
                 title: 'Services',

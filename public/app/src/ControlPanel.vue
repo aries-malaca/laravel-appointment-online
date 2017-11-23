@@ -1,6 +1,6 @@
 <template>
     <div class="control_panel">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client !== 1">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -34,6 +34,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
     </div>
 </template>
 
@@ -45,11 +46,12 @@
     import Levels from './settings/Levels.vue';
     import Users from './settings/Users.vue';
     import Permissions from './settings/Permissions.vue';
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
 
     export default {
         name: 'ControlPanel',
-        components:{ VueSelect, DataTable, Places, Levels, Users, Settings},
-        props: ['token'],
+        components:{ VueSelect, DataTable, Places, Levels, Users, Settings, UnauthorizedError},
+        props: ['token','configs','user'],
         data: function(){
             return {
                 title: 'Control Panel',

@@ -4,7 +4,7 @@
             <div class="caption">
                 <i class="icon-puzzle font-grey-gallery"></i>
                 <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
-                <button class="btn btn-info" @click="showAddModal"> Add Career </button>
+                <button v-if="user.is_client !== 1" class="btn btn-info" @click="showAddModal"> Add Career </button>
             </div>
         </div>
         <div class="portlet-body">
@@ -33,7 +33,7 @@
                                     <ul>
                                         <li v-for="requirement in career.career_data.requirements"> {{ requirement }} </li>
                                     </ul>
-                                    <div class="row">
+                                    <div class="row" v-if="user.is_client !== 1">
                                         <div class="col-md-12">
                                             <button class="btn btn-warning btn-sm" @click="moveCareer(1, career)">Move Up</button>
                                             <button class="btn btn-warning btn-sm" @click="moveCareer(0, career)">Move Down</button>

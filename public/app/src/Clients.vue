@@ -1,6 +1,6 @@
 <template>
     <div class="clients">
-        <div class="portlet light" v-show="view=='list'">
+        <div class="portlet light" v-show="view=='list'" v-if="user.is_client !== 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -39,6 +39,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
 
         <client-profile @back="view='list',view_id=0" :show="view=='single'" :with_back="true" :user="user"
                         :token="token" @refresh_client="refreshClient" :configs="configs" :id="view_id" />
@@ -46,12 +47,13 @@
 </template>
 
 <script>
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
     import DataTable from './components/DataTable.vue';
     import ClientProfile from './profiles/ClientProfile.vue';
 
     export default {
         name: 'Clients',
-        components:{ DataTable, ClientProfile},
+        components:{ DataTable, ClientProfile, UnauthorizedError},
         props:['token','configs','user'],
         data: function(){
             return {

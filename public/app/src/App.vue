@@ -22,7 +22,9 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @update_user="getAuthenticatedUser" :transactions="transactions" @update_title="updateTitle" :user="user" :token="token" :configs="configs"></router-view>
+                    <router-view @update_user="getAuthenticatedUser" :transactions="transactions" @update_title="updateTitle"
+                             :user="user" :token="token" :configs="configs">
+                    </router-view>
                     <!-- END PAGE BASE CONTENT -->
                 </div>
                 <!-- END CONTENT BODY -->

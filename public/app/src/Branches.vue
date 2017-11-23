@@ -1,6 +1,6 @@
 <template>
     <div class="branches">
-        <div class="portlet light" v-show="view=='list'">
+        <div class="portlet light" v-show="view=='list'" v-if="user.is_client !== 1">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -32,6 +32,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
 
         <branch-profile @edit_branch="editBranch" @back="view='list',view_id=0" :show="view=='single'" :with_back="true"
                 :token="token" @update_branch="getBranches" :configs="configs" :id="view_id" :user="user" />
@@ -295,13 +296,14 @@
 </template>
 
 <script>
+    import UnauthorizedError from './errors/UnauthorizedError.vue';
     import DataTable from './components/DataTable.vue';
     import VueSelect from 'vue-select';
     import BranchProfile from './profiles/BranchProfile.vue';
 
     export default {
         name: 'Branches',
-        components:{ DataTable, VueSelect, BranchProfile },
+        components:{ DataTable, VueSelect, BranchProfile, UnauthorizedError },
         props: ['token','configs','user'],
         data: function(){
             return {

@@ -1,6 +1,6 @@
 <template>
     <div class="queuing">
-        <div class="portlet light">
+        <div class="portlet light" v-if="user.is_client !== 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -181,6 +181,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
         <appointment-modal @refresh_list="getAppointments" @close_modal="closeModal" :user="user" :token="token" :id="display_id"></appointment-modal>
 
         <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true" :queued="queued" :configs="configs"
@@ -192,11 +193,12 @@
     import BookingModal from "../modals/BookingModal.vue";
     import AppointmentModal from "../modals/AppointmentModal.vue";
     import VueSelect from "vue-select"
+    import UnauthorizedError from '../errors/UnauthorizedError.vue';
 
     export default {
         name: 'Queuing',
         props:['token','user','configs'],
-        components:{ VueSelect, BookingModal, AppointmentModal },
+        components:{ VueSelect, BookingModal, AppointmentModal, UnauthorizedError },
         data: function(){
             return {
                 title: 'Queuing',

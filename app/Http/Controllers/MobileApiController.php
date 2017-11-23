@@ -27,10 +27,19 @@ class MobileApiController extends Controller
 
 		$response = array();
 		$today    = date('Y-m-d');
-		$advertisement_query  = Advertisment::where("is_active","=","1")
-							  ->select("ads_image as images","description")
-							  ->orderBy('created_at')
-							  ->get();
+
+		$advertisement_query  = Config::where("config_name","=","APP_BANNER")
+    							  ->orderBy('created_at')
+                                  ->select('config_value as module_array','config_description as module_version')
+    							  ->get()
+                                  ->first();
+
+        $nav_query            = Config::where("config_name","=","APP_NAVIGATION_BAR")
+                                  ->orderBy('created_at')
+                                  ->select('config_value as module_array','config_description as module_version')
+                                  ->get()
+                                  ->first();
+
 
 		$duration_male 		= "";
 		$duration_female 	= "";
@@ -100,11 +109,14 @@ class MobileApiController extends Controller
                                 );
         }
         
-        $response['carousel']    = $advertisement_query;
-        $response['services']    = $services;
-        $response['package']     = $data;
-        $response['products']    = $product_array;
-        $response['date_today'] = $today;
+        $response['version_carousel']   = $advertisement_query['module_version'];
+        $response['version_navigation'] = $nav_query['module_version'];
+        $response['carousel']           = json_decode($advertisement_query['module_array'],true);
+        $response['navigation']         = json_decode($nav_query['module_array'],true);
+        $response['services']           = $services;
+        $response['package']            = $data;
+        $response['products']           = $product_array;
+        $response['date_today']         = $today;
 		
 		return response()->json($response);
 	}

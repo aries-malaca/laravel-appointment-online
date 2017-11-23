@@ -67,15 +67,14 @@ class AppointmentController extends Controller{
             foreach($request->input('products') as $key=>$value){
                 $item = new TransactionItem;
                 $item->transaction_id = $appointment->id;
-                $item->item_id = $value['id'];
-                $item->item_type = 'product';
-                $item->amount = $value['price'];
-                $item->quantity = 1;
-                $item->item_status = 'reserved';
-                $item->item_data = '{}';
+                $item->item_id      = $value['id'];
+                $item->item_type    = 'product';
+                $item->amount       = $value['price'];
+                $item->quantity     = $value['quantity'];
+                $item->item_status  = 'reserved';
+                $item->item_data    = '{}';
                 $item->save();
             }
-
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
@@ -100,7 +99,7 @@ class AppointmentController extends Controller{
     }
 
     function getFirstServiceTime($services){
-        foreach($services as $key=>$value){
+        foreach($services as $key => $value){
             if($key === 0)
                 return $value['start'];
         }

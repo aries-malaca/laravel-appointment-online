@@ -51,10 +51,12 @@ class FAQController extends Controller{
     function getFAQs(){
         $data = Faq::orderBy('order')->get()->toArray();
 
-        foreach($data as $key=>$value)
-            $data[$key]['answer'] = 'Answer: '. nl2br( $value['answer']);
-
-        return response()->json($data);
+        foreach($data as $key=>$value){
+            $data[$key]['answer']   = 'Answer: '. nl2br( $value['answer']);
+        }
+        $response['questions'] = $data;
+        $response['category']  = $this->getFAQCategory();
+        return response()->json($response);
     }
 
     function moveFAQ(Request $request){
@@ -75,4 +77,33 @@ class FAQController extends Controller{
         }
         return response()->json($api, $api["status_code"]);
     }
+
+    function getFAQCategory(){
+        $array_res = array(
+            array(
+                "image"         => "images/a_plc.png",
+                "title"         => "Premiere Loyalty Card",
+                "category_id"   => 1
+            ),
+            array(
+                "image" => "images/a_booking_faq.png",
+                "title" => "Appointment Booking",
+                "category_id"   => 2
+            ),
+            array(
+                "image" => "images/a_wax.png",
+                "title" => "About Waxing",
+                "category_id"   => 3
+            ),
+            array(
+                "image" => "images/a_transaction_faq.png",
+                "title" => "Transaction History",
+                "category_id"   => 4
+            )
+        );
+     
+        return $array_res;
+    }
+
+
 }

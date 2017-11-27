@@ -17,9 +17,6 @@
                         <a href="#user-levels" data-toggle="tab">User Levels</a>
                     </li>
                     <li>
-                        <a href="#permissions" data-toggle="tab">Permissions</a>
-                    </li>
-                    <li>
                         <a href="#places" data-toggle="tab">Places</a>
                     </li>
                 </ul>
@@ -28,7 +25,6 @@
                 <div class="tab-content">
                     <settings :token="token"></settings>
                     <levels :token="token"></levels>
-                    <permissions :token="token"></permissions>
                     <places :token="token"></places>
                     <users :token="token"></users>
                 </div>
@@ -45,7 +41,6 @@
     import Places from './settings/Places.vue';
     import Levels from './settings/Levels.vue';
     import Users from './settings/Users.vue';
-    import Permissions from './settings/Permissions.vue';
     import UnauthorizedError from './errors/UnauthorizedError.vue';
 
     export default {

@@ -80,5 +80,5 @@
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
     <script src="../../theme/pages/scripts/components-bootstrap-switch.min.js" type="text/javascript"></script>
-    <script src="../../app/dist/build.js"></script>
+    <script src="../../app/dist/build.js?cache=<?=rand()?>"></script>
 </html>

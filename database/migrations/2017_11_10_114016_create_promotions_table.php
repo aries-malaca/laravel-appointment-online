@@ -22,6 +22,7 @@ class CreatePromotionsTable extends Migration
             $table->datetime('date_start')->nullable();
             $table->datetime('date_end')->nullable();
             $table->text('branches');
+            $table->text('promotions_data');
             $table->integer('is_active');
             $table->integer('posted_by_id');
             $table->timestamps();

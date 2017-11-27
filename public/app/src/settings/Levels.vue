@@ -10,7 +10,7 @@
                 styleClass="table table-bordered table-hover table-striped"  />
 
         <div class="modal fade" id="add-user-level-modal" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
@@ -19,27 +19,46 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Level Name</label>
                                     <input type="text" v-model="newUserLevel.level_name" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">Description</label>
                                     <input type="text" v-model="newUserLevel.description" placeholder="(Optional)" class="form-control" />
                                 </div>
                             </div>
-                        </div>
-                        <div class="row" v-if="newUserLevel.level_data !== undefined">
-                            <div class="col-md-6">
+                            <div class="col-md-3" v-if="newUserLevel.level_data !== undefined">
                                 <div class="form-group">
                                     <label class="control-label">Dashboard</label>
                                     <select v-model="newUserLevel.level_data.dashboard" class="form-control">
                                         <option v-bind:value="dashboard" v-for="dashboard in dashboards">{{ dashboard }}</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row" v-if="newUserLevel.level_data !== undefined">
+                            <div class="col-md-12">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead>
+                                        <th>Permission Category</th>
+                                        <th>Actions</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="permission,key in newUserLevel.level_data.permissions">
+                                            <td>{{ permission.name }}</td>
+                                            <td>
+                                                <label v-for="action,k in permission.actions">
+                                                    <input type="checkbox" v-model="newUserLevel.level_data.permissions[key].actions[k].value"/>
+                                                    {{ action.label }}&nbsp;
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -121,9 +140,17 @@
                     level_name:level.level_name,
                     description:level.description,
                     level_data:{
-                        dashboard: level.level_data.dashboard
+                        dashboard: level.level_data.dashboard,
+                        permissions:[]
                     }
                 };
+
+                for(var x=0;x<level.level_data.permissions.length;x++){
+                    this.newUserLevel.level_data.permissions.push(
+                        level.level_data.permissions[x]
+                    );
+                }
+
                 $("#add-user-level-modal").modal("show");
             },
             addUserLevel:function(){

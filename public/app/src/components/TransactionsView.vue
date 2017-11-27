@@ -7,7 +7,7 @@
                         <h3 class="list-title">Transaction History</h3>
                     </div>
                 </div>
-                <div>
+                <div v-if="transactions.length>0">
                     <div class="panel-group accordion" id="accordion1" style="max-height:360px;overflow-y:scroll">
                         <div class="panel panel-default" v-for="transaction,key in transactions">
                             <div class="panel-heading">
@@ -95,6 +95,9 @@
                         </div>
                     </div>
                 </div>
+                <div class="alert alert-warning" v-else>
+                    No transactions found for your account.
+                </div>
             </div>
         </div>
         <div class="col-md-4">
@@ -105,21 +108,31 @@
                     <br/>
                     <a class="btn btn-info btn-md" href="../../#/plc" >Apply Here</a>
                 </div>
+                <div class="alert alert-info" v-else>
+                    <b>Not reached the minimum amount </b> <br/> You may request account review for us to sync your transactions. <br/><br/>
+                    <button class="btn btn-success" @click="showReviewModal">Click Here</button>
+                </div>
             </div>
         </div>
+        <premier-review-modal :user="user" :configs="configs" :token="token"></premier-review-modal>
     </div>
 </template>
 
 <script>
     import TransactionSummary from '../components/TransactionsSummary.vue';
+    import PremierReviewModal from '../modals/PremierReviewModal.vue';
+
     export default {
         name: 'TransactionsView',
-        components:{ TransactionSummary },
-        props:["client", "transactions", "user", "configs"],
+        components:{ TransactionSummary, PremierReviewModal },
+        props:["client", "transactions", "user", "configs", "token"],
         methods:{
             formatNumber:function(number){
                 number = Number(number);
                 return number.toLocaleString(undefined, {minimumFractionDigits: 2,maximumFractionDigits:2}) // "1,234.57"
+            },
+            showReviewModal:function(){
+                $("#premier-review-modal").modal("show");
             }
         },
         computed:{

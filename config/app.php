@@ -13,7 +13,6 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -230,4 +229,54 @@ return [
         'ImageOptimizer' =>  Spatie\LaravelImageOptimizer\Facades\ImageOptimizer::class
     ],
 
+    'permissions' => [
+        ['name'=>'queuing',
+         'actions'=>['view','book','update']
+        ],
+        ['name'=>'clients',
+            'actions'=>['view','update']
+        ],
+        ['name'=>'branches',
+            'actions'=>['view','add','update']
+        ],
+        ['name'=>'clusters',
+            'actions'=>['view','add','update']
+        ],
+        ['name'=>'technicians',
+            'actions'=>['view','add','update']
+        ],
+        ['name'=>'services',
+            'actions'=>['view','add','update']
+        ],
+        ['name'=>'products',
+            'actions'=>['view','add','update']
+        ],
+        ['name'=>'plctracker',
+            'actions'=>['view','process','deliver','ready','pickup','delete']
+        ],
+        ['name'=>'faq',
+            'actions'=>['view','add','update','delete']
+        ],
+        ['name'=>'careers',
+            'actions'=>['view','add','update','delete']
+        ],
+        ['name'=>'news',
+            'actions'=>['view','add','update','delete']
+        ],
+        ['name'=>'promotions',
+            'actions'=>['view','add','update','delete']
+        ],
+        ['name'=>'settings',
+            'actions'=>['view','update']
+        ],
+        ['name'=>'users',
+            'actions'=>['view','update','add']
+        ],
+        ['name'=>'userlevels',
+            'actions'=>['view','update','add']
+        ],
+        ['name'=>'places',
+            'actions'=>['view','update','add','delete']
+        ],
+    ]
 ];

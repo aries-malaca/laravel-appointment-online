@@ -7,31 +7,72 @@
                     <h4 class="modal-title">Premier Review Request</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label>Message:</label>
-                            <textarea v-model="message" rows="3" class="form-control"></textarea>
-                        </div>
-                    </div>
-                    <br/>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Attachment: (In JPG, JPEG, PNG format)</label>
-                                <small>Please provide your Valid ID</small>
-                                <div id="croppie"></div>
-                                <div id="upload-wrapper">
-                                    <div class="fileinput fileinput-new" data-provides="fileinput">
-                                        <div class="input-group">
-                                            <div class="form-control uneditable-input" data-trigger="fileinput">
-                                                <i class="fa fa-file fileinput-exists"></i>&nbsp;
-                                                <span class="fileinput-filename"> </span>
-                                            </div>
-                                            <span class="input-group-addon btn default btn-file">
+                    <ul class="nav nav-tabs tabbable-line">
+                        <li class="active">
+                            <a href="#send-request" data-toggle="tab">Send Request</a>
+                        </li>
+                        <li>
+                            <a href="#request-history" data-toggle="tab">Request History</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="send-request">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label>Message:</label>
+                                    <textarea v-model="message" rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Attachment: (In JPG, JPEG, PNG format)</label>
+                                        <small>Please provide your Valid ID</small>
+                                        <div id="croppie"></div>
+                                        <div id="upload-wrapper">
+                                            <div class="fileinput fileinput-new" data-provides="fileinput">
+                                                <div class="input-group">
+                                                    <div class="form-control uneditable-input" data-trigger="fileinput">
+                                                        <i class="fa fa-file fileinput-exists"></i>&nbsp;
+                                                        <span class="fileinput-filename"> </span>
+                                                    </div>
+                                                    <span class="input-group-addon btn default btn-file">
                                                 <span class="fileinput-new"> Add Attachment </span>
                                                 <span class="fileinput-exists"> Change </span>
                                                 <input type="file" name="file" :id="input_id" @change="setupUploader($event)">
                                             </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-success" v-if="croppie!==null" @click="sendRequest($event)">Send Request</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="request-history">
+                            <div class="panel-group accordion" id="accordion3">
+                                <div v-bind:class=" request.status=='completed'?'panel panel-success':'panel panel-warning'" v-for="request,key in requests">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse"
+                                               data-parent="#accordion3" v-bind:href="'#collapse_'+key" aria-expanded="false">
+                                                {{ request.status.toUpperCase() }}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div v-bind:id="'collapse_'+key" class="panel-collapse collapse" aria-expanded="false">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <img v-bind:src="request.valid_id_image" alt="image" />
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <p>Message: {{ request.message }}</p>
+                                                    <p v-if="request.remarks !== null">Remarks: {{ request.remarks }}</p>
+                                                    <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -41,7 +82,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" v-if="croppie!==null" @click="sendRequest">Send Request</button>
                 </div>
             </div>
             <!-- /.modal-content -->
@@ -59,6 +99,7 @@
                 message:'',
                 croppie:null,
                 image:null,
+                requests:[]
             }
         },
         methods:{
@@ -109,24 +150,50 @@
                     url: u.image,
                 });
             },
-            sendRequest:function(){
+            getRequests:function(){
                 let u = this;
+                axios.get('/api/premier/getRequests?token='+this.token)
+                    .then(function (response) {
+                        u.requests = response.data;
+                    });
+            },
+            deleteRequest:function(data){
+                if(!confirm("Are you sure you want to delete this item?"))
+                    return false;
+
+                let u = this;
+
+                axios({url:'/api/premier/deleteRequest?token='+u.token, method:'post', data:data})
+                    .then(function () {
+                        u.getRequests();
+                        toastr.success("Delete success.")
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
+            sendRequest:function(event){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
                 var file_type = this.image.split(';')[0];
                 if(file_type == 'data:image/jpeg' || file_type == 'data:image/png' || file_type == 'data:image/gif'){
                     this.croppie.result({
                         type:'canvas',
-                        size: {width:128, height:128},
                         format: 'jpeg',
                     }).then(response=>{
-
-                        axios({url:'/api/premier/sendReviewRequest?token='+u.token, method:'post', data:{valid_id_image:response}})
+                        axios({url:'/api/premier/sendReviewRequest?token='+u.token, method:'post', data:{message:u.message, valid_id_image:response}})
                             .then(function () {
+                                u.getRequests();
                                 u.croppie.destroy();
                                 u.croppie = null;
                                 toastr.success("Request successfully sent.");
                                 $("#premier-review-modal").modal("hide");
+                                $btn.button('reset');
                             })
                             .catch(function (error) {
+                                $btn.button('reset');
                                 XHRCatcher(error);
                             });
 
@@ -134,6 +201,7 @@
                 }
                 else{
                     toastr.error("Invalid file format.");
+                    $btn.button('reset');
                 }
             },
         },
@@ -147,6 +215,8 @@
 
                 this.setupCroppie();
             });
+
+            this.getRequests();
         },
     }
 </script>

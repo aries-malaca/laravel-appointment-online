@@ -12,6 +12,7 @@ class UserLevelController extends Controller{
         $data = UserLevel::get()->toArray();
         foreach($data as $key=>$value){
             $data[$key]['level_data'] = json_decode($value['level_data']);
+            $data[$key]['level_data']->permissions = $this->generateUserPermission($data[$key]['level_data']);
         }
         return response()->json($data);
     }

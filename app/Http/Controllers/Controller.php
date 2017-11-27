@@ -187,11 +187,37 @@ class Controller extends BaseController{
     function getBossID($email){
         $boss_data = file_get_contents(Config::where('config_name', 'GET_BOSS_ID')->get()->first()->config_value . $email);
 
-        if($boss_data === false){
+        if($boss_data === false)
             return false;
-        }
-        //start self migration
 
+        //start self migration
         return json_decode($boss_data,true);
+    }
+
+    function generateUserPermission($level_data){
+        $system_permissions = config('app.permissions');
+        foreach($system_permissions as $key=>$value){
+            foreach($value['actions'] as $k=>$v){
+                $system_permissions[$key]['actions'][$k] =
+                    array("label"=>$v,
+                          "value"=>isset($level_data->permissions)?
+                                        $this->getPermissionValue($value['name'], $v, $level_data->permissions):false
+                        );
+            }
+        }
+        return $system_permissions;
+    }
+
+    function getPermissionValue($name, $action, $data){
+        if(isset($data))
+        foreach($data as $key=>$value){
+            if($name == $value->name){
+                foreach($value->actions as $k=>$v){
+                    if($v->label == $action)
+                        return $v->value;
+                }
+            }
+        }
+        return false;
     }
 }

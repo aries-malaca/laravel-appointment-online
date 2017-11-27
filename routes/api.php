@@ -170,3 +170,4 @@ Route::patch('/mobile/updateTerms', 'MobileApiController@updateTerms');
 Route::get('/mobile/getPackageWithDescription/{flag}', 'MobileApiController@getPackageWithDescription');
 Route::get('/mobile/getServices/{flag}', 'MobileApiController@getServices');
 Route::get('/mobile/getServices/', 'MobileApiController@getServices');
+Route::get('/mobile/getPLCDetails/{clientid}/{ifAll}', 'PremierController@getPLCDetails');

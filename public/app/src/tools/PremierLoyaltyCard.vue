@@ -42,6 +42,11 @@
                                     <button class="btn btn-success btn-block" data-loading-text="Please Wait..." @click="applyPLC($event)">Submit</button>
                                 </div>
                                 <div class="col-md-7">
+                                    <transactions-summary :transactions="transactions" v-if="transactions"></transactions-summary>
+                                    <div class="alert alert-info" v-else>
+                                        Please wait while we loading your transactions.
+                                    </div>
+
                                     <img style="display:block; margin:auto;" v-bind:src="'../../images/app/plc_'+ user.gender +'.png'">
                                     <div style="display:block; text-align:center;" v-if="user.gender === 'female'">For Her</div>
                                     <div style="display:block; text-align:center;"  v-else>For Him</div>
@@ -68,12 +73,13 @@
 <script>
     import VueSelect from 'vue-select';
     import DataTable from '../components/DataTable.vue';
+    import TransactionsSummary from '../components/TransactionsSummary.vue';
     import UnauthorizedError from '../errors/UnauthorizedError.vue';
 
     export default {
         name: 'PLC',
         props: ['user','token','configs','transactions'],
-        components:{ VueSelect, DataTable, UnauthorizedError },
+        components:{ VueSelect, DataTable, UnauthorizedError, TransactionsSummary },
         data: function(){
             return {
                 title: 'Premier Loyalty Card',
@@ -147,6 +153,7 @@
         watch:{
           'user':function(){
               this.getPLC();
+              this.$emit('get_transactions');
           }
         },
         computed:{

@@ -16,7 +16,7 @@
                 </div>
                 <div>
                     <div class="panel-group accordion" id="accordion1" style="max-height:360px;overflow-y:scroll">
-                        <div class="panel panel-default" v-for="faq,key in faqs">
+                        <div class="panel panel-default" v-for="faq,key in faqs.questions">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
                                     <a class="accordion-toggle collapsed" data-parent="#accordion1" data-toggle="collapse"

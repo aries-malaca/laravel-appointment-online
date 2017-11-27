@@ -118,6 +118,7 @@ Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianContro
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
 Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
+Route::post('/premier/sendReviewRequest', 'PremierReviewController@sendReviewRequest');
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 

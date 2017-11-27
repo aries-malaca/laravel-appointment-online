@@ -1,6 +1,6 @@
 <template>
     <div id="wallet">
-        <div class="portlet light" v-if="user.is_client !== 1">
+        <div class="portlet light" v-if="user.is_client === 1">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -26,6 +26,7 @@
     export default {
         name: 'PromoWallet',
         components:{ UnauthorizedError },
+        props:['user','configs','token'],
         data: function(){
             return {
                 title: 'Promo Wallet',

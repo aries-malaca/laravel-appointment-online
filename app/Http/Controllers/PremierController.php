@@ -23,9 +23,8 @@ class PremierController extends Controller{
         foreach($premiers as $key=>$value){
             $branch = Branch::find($value['branch_id']);
             $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
-
-            $premiers[$key]['branch_name'] = $branch_name;
-            $premiers[$key]['plc_data'] = json_decode($value['plc_data']);
+            $premiers[$key]['branch_name']  = $branch_name;
+            $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
             $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
         }
 
@@ -33,6 +32,7 @@ class PremierController extends Controller{
     }
 
     function applyPremier(Request $request){
+
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'type' =>   'required|in:New,Replacement',
@@ -50,7 +50,8 @@ class PremierController extends Controller{
             if ($request->input('type') == 'New') {
                 if (!$this->isQualifiedForNew($api['user']['id']))
                     return response()->json(['result' => 'failed', 'error' => "Not qualified for new application."], 400);
-            } else {
+            } 
+            else {
                 if (!$this->isQualifiedForReplacement($api['user']['id']))
                     return response()->json(['result' => 'failed', 'error' => "Not qualified for replacement."], 400);
             }
@@ -178,4 +179,35 @@ class PremierController extends Controller{
         }
         return false;
     }
+    function getPLCDetails(Request $request){
+        
+        $client_id  = $request->segment(4);
+        $ifAll      = $request->segment(5);
+       
+        // ->where('client_id', $client_id)->orderBy('created_at', 'DESC')->get()->first();
+        if($ifAll == "false"){
+            $premiers   =PremierLoyaltyCard::where('client_id','=', $client_id)->orderBy('created_at', 'DESC')->get()->first();
+            if(isset($premiers['id'])){
+                $branch = Branch::find($premiers['branch_id']);
+                $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
+                $premiers['branch_name']  = $branch_name;
+                $premiers['plc_data']     = json_decode($premiers['plc_data']);
+                $premiers['date_applied'] = date('m/d/Y', strtotime($premiers['created_at']));
+            }
+        } 
+        else{
+               $premiers   =PremierLoyaltyCard::where('client_id','=', $client_id)->orderBy('created_at', 'DESC')->get();
+                foreach($premiers as $key=>$value){
+                    $branch = Branch::find($value['branch_id']);
+                    $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
+                    $premiers[$key]['branch_name']  = $branch_name;
+                    $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
+                    $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+                }    
+        }   
+        return response()->json($premiers);
+    }
+    
+
+
 }

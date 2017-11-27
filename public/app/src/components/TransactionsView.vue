@@ -98,28 +98,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="portlet sale-summary">
-                <div class="portlet-title">
-                    <div class="caption font-red sbold"> Transaction Summary </div>
-                </div>
-                <div class="portlet-body">
-                    <ul class="list-unstyled">
-                        <li>
-                            <span class="sale-info"> GROSS AMOUNT </span>
-                            <span class="sale-num"> {{ formatNumber(gross_amount) }} </span>
-                        </li>
-                        <li>
-                            <span class="sale-info"> DISCOUNT AMOUNT</span>
-                            <span class="sale-num"> {{ formatNumber(discount_amount) }} </span>
-                        </li>
-                        <li>
-                            <span class="sale-info"> NET AMOUNT </span>
-                            <span class="sale-num"> {{ formatNumber(net_amount) }} </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
+            <transaction-summary :transactions="transactions"></transaction-summary>
             <div v-if="this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT !== undefined">
                 <div class="alert alert-success" v-if="user.is_client === 1 && net_amount >= this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT">
                     <strong>Hi {{ client.username }}!</strong> You are qualified to apply for a <p>Premier Loyalty Card</p>
@@ -132,8 +111,10 @@
 </template>
 
 <script>
+    import TransactionSummary from '../components/TransactionsSummary.vue';
     export default {
         name: 'TransactionsView',
+        components:{ TransactionSummary },
         props:["client", "transactions", "user", "configs"],
         methods:{
             formatNumber:function(number){
@@ -142,20 +123,6 @@
             }
         },
         computed:{
-            gross_amount:function(){
-                var total=0;
-                for(var x=0;x<this.transactions.length;x++){
-                    total += Number(this.transactions[x].gross_price);
-                }
-                return total;
-            },
-            discount_amount:function(){
-                var total=0;
-                for(var x=0;x<this.transactions.length;x++){
-                    total += Number(this.transactions[x].price_discount);
-                }
-                return total;
-            },
             net_amount:function(){
                 var total=0;
                 for(var x=0;x<this.transactions.length;x++){

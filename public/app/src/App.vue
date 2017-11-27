@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- BEGIN PAGE BASE CONTENT -->
-                    <router-view @update_user="getAuthenticatedUser" :transactions="transactions" @update_title="updateTitle"
+                    <router-view @update_user="getAuthenticatedUser" @get_transactions="getBossTransactions" :transactions="transactions" @update_title="updateTitle"
                              :user="user" :token="token" :configs="configs">
                     </router-view>
                     <!-- END PAGE BASE CONTENT -->
@@ -66,7 +66,7 @@
                 configs:[],
                 title:'Dashboard',
                 token:undefined,
-                transactions:[],
+                transactions:false,
                 unseen_messages:0
             }
         },
@@ -81,7 +81,6 @@
                     u.user = response.data.user;
                     u.menus = response.data.menus;
                     u.configs = response.data.configs;
-                    u.getBossTransactions();
                 })
                 .catch(function (error) {
                     XHRCatcher(error);

@@ -1,6 +1,6 @@
 <template>
     <div id="plc-tracker">
-        <div class="portlet light" v-if="user.is_client === 1">
+        <div class="portlet light" v-if="user.is_client !== 1">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>

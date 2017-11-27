@@ -6,7 +6,7 @@ use App\User;
 use App\UserLevel;
 use App\Branch;
 use App\BranchSchedule;
-use App\Config;
+use App\PlcReviewRequest;
 use JWTAuth;
 use Validator;
 use Hash;
@@ -68,15 +68,18 @@ class UserController extends Controller{
                 else
                     $branch = 'N/A';
 
+                $plc_request = PlcReviewRequest::where('client_id', $api['user']['id'])
+                                                ->get()->first();
+                $api['user']['review_request'] = isset($plc_request['id'])?$plc_request['status']:false;
                 $api['user']['branch'] = [
                                 "value"=>$user_data['home_branch'],
                                 "label"=> $branch,
                                 "branch_data"=> json_decode($b['branch_data']),
                                 "branch_address"=> $b['branch_address'],
-                                "rooms"=>isset($b->rooms_count)?$b->rooms_count:0,
-                                "schedules"=>BranchSchedule::where('branch_id', $b->id)
-                                                ->orderBy('schedule_type')
-                                                ->get()->toArray()
+                                "rooms"=> isset($b->rooms_count)?$b->rooms_count:0,
+                                "schedules"=> BranchSchedule::where('branch_id', $b->id)
+                                                            ->orderBy('schedule_type')
+                                                            ->get()->toArray()
                         ];
             }
             else{
@@ -84,7 +87,6 @@ class UserController extends Controller{
                 $api['user']['level_name'] = $level->level_name;
                 $api['user']['level_data'] = json_decode($level->level_data);
             }
-
 
             $api['user']['picture_html_big'] = '<img class="img-responsive" style="width:80px" src="images/users/'. $api['user']['user_picture'] .'" />';
             $api["user"]['user_data'] = json_decode($api["user"]['user_data']);

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePremierLoyaltyCardsTable extends Migration
+class CreatePlcReviewRequestsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,16 @@ class CreatePremierLoyaltyCardsTable extends Migration
      */
     public function up()
     {
-        Schema::create('premier_loyalty_cards', function (Blueprint $table) {
+        Schema::create('plc_review_requests', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('client_id');
-            $table->integer('branch_id');
-            $table->string('application_type');
-            $table->string('platform');
+            $table->text('valid_id_image');
             $table->string('status');
-            $table->string('reference_no');
-            $table->string('remarks');
-            $table->text('plc_data');
+            $table->integer('updated_by_id');
+            $table->datetime('processed_date')->nullable();
+            $table->text('plc_review_request_data');
+            $table->text('message')->nullable();
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +34,6 @@ class CreatePremierLoyaltyCardsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('premier_loyalty_cards');
+        Schema::dropIfExists('plc_review_requests');
     }
 }

@@ -120,6 +120,7 @@ Route::post('/premier/applyPremier', 'PremierController@applyPremier');
 Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
 Route::post('/premier/sendReviewRequest', 'PremierReviewController@sendReviewRequest');
 Route::get('/premier/getRequests', 'PremierReviewController@getRequests');
+Route::get('/premier/getAllRequests', 'PremierReviewController@getAllRequests');
 Route::post('/premier/deleteRequest', 'PremierReviewController@deleteRequest');
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');

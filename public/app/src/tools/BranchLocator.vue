@@ -125,7 +125,7 @@
                             },
                             map: u.map,
                             animation: google.maps.Animation.DROP,
-                            icon: 'http://lay-bare.com/wp-content/uploads/2016/11/marker3.png'
+                            icon: '../../images/pointer.png'
                         }));
 
                         let branch = u.nearbyBranches[x];

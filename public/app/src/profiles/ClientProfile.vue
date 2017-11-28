@@ -190,7 +190,7 @@
                                                     <input type="text" class="form-control" v-model="newClient.user_mobile">
                                                 </div>
                                             </div>
-                                            <div class="col-md-5" v-if="newClient.home_branch !== undefined ">
+                                            <div class="col-md-8" v-if="newClient.home_branch !== undefined ">
                                                 <div class="form-group">
                                                     <label class="control-label">Home Branch</label>
                                                     <vue-select v-model="newClient.home_branch" :options="branch_selection"></vue-select>

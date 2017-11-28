@@ -28,14 +28,6 @@
                                 <div class="name" style="text-align:center"> FAQs </div>
                             </div>
                         </a>
-                        <a href="../../#/plcreviews" class="tile bg-green-jungle">
-                            <div class="tile-body">
-                                <i class="icon icon-bubbles"></i>
-                            </div>
-                            <div class="tile-object">
-                                <div class="name" style="text-align:center"> Premier Reviews </div>
-                            </div>
-                        </a>
                     </div>
                 </div>
             </div>

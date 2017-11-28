@@ -14,6 +14,7 @@ import Messages from './Messages.vue';
 import NewsFeeds from './tools/NewsFeeds.vue';
 import Notifications from './Notifications.vue';
 import PLCTracker from './tools/PLCTracker.vue';
+import PLCReview from './tools/PLCReview.vue';
 import Profile from './Profile.vue';
 import Promotions from './tools/Promotions.vue';
 import Queuing from './tools/Queuing.vue';
@@ -110,6 +111,11 @@ export default new Router({
             path: '/plctracker',
             name: 'PLCTracker',
             component: PLCTracker
+        },
+        {
+            path: '/plcreview',
+            name: 'PLCReview',
+            component: PLCReview
         },
         {
             path: '/queuing',

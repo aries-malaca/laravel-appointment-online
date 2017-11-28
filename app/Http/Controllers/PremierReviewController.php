@@ -45,6 +45,10 @@ class PremierReviewController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
+    function getAllRequests(){
+        return response()->json(PlcReviewRequest::get()->toArray());
+    }
+
     function deleteRequest(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){

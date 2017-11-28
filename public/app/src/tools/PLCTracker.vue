@@ -5,6 +5,7 @@
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
+                    <a class="btn btn-info" href="../../#/plcreview">Review Requests</a>
                 </div>
                 <ul class="nav nav-tabs">
                     <li class="active">

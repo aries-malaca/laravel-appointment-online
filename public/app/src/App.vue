@@ -9,7 +9,7 @@
         <!-- BEGIN CONTAINER -->
         <div class="page-container">
             <!-- BEGIN SIDEBAR -->
-            <sidebar-layout @logout="logout" :menus="menus" :title="title"></sidebar-layout>
+            <sidebar-layout @logout="logout" :user="user" :menus="menus" :title="title"></sidebar-layout>
             <!-- END SIDEBAR -->
             <!-- BEGIN CONTENT -->
             <div class="page-content-wrapper">

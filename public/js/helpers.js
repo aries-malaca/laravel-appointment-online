@@ -46,14 +46,14 @@ var SweetConfirmation = function(text, confirm_callback){
         });
 };
 
-
-var SweetAlert = function(text){
-    swal({
-        title:"Alert",
-        text: text,
-        closeOnCancel: false,
-        confirmButtonClass:'btn-sm red',
-        confirmButtonText:'Okay',
-    });
-};
-
+function gate(permissions, permission, action){
+    for(var x=0;x<permissions.length;x++){
+        if(permissions[x].name === permission){
+            for(var y=0;y<permissions[x].actions.length;y++){
+                if(permissions[x].actions[y].label === action)
+                    return permissions[x].actions[y].value;
+            }
+        }
+    }
+    return false;
+}

@@ -266,7 +266,7 @@ return [
         ['name'=>'promotions',
             'actions'=>['view','add','update','delete']
         ],
-        ['name'=>'settings',
+        ['name'=>'control_panel',
             'actions'=>['view','update']
         ],
         ['name'=>'users',

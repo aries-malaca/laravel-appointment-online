@@ -27,7 +27,8 @@
                     <div class="col-md-6">
                         <div class="row" v-if="branch !== null">
                             <div class="col-md-6">
-                                <button @click="toggle = !toggle" type="button" class="btn btn-info btn-block">Add Appointment</button>
+                                <button v-if="gate(user.level_data.permissions, 'queuing', 'book')" @click="toggle = !toggle"
+                                        type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
                             <div class="col-md-6">
                                 <button class="btn btn-warning btn-block">Queuing Screen</button>
@@ -350,6 +351,7 @@
             isOnServe:function(item){
                 return item.serve_time !== null;
             },
+            gate:gate,
             moment:moment
         },
         mounted:function(){

@@ -13,7 +13,7 @@
             <!-- DOC: Set data-keep-expand="true" to keep the submenues expanded -->
             <!-- DOC: Set data-auto-speed="200" to adjust the sub menu slide up/down speed -->
             <ul class="page-sidebar-menu" data-keep-expanded="false" data-auto-scroll="true"
-                    data-slide-speed="200" v-if="user.level_data !== undefined">
+                    data-slide-speed="200" v-if="user.level_data !== undefined || user.is_client === 1">
                 <li class="nav-item start" v-bind:class="{ active: (title=='Dashboard') }">
                     <router-link to="/dashboard" class="nav-link">
                         <i class="icon-home"></i>
@@ -21,7 +21,7 @@
                     </router-link>
                 </li>
                 
-                <li class="nav-item" v-for="menu in menus" v-bind:class="{ active: (title==menu.title) }" v-if="gate(user.level_data.permissions, menu.url, 'view')">
+                <li class="nav-item" v-for="menu in menus" v-bind:class="{ active: (title==menu.title) }" v-if="gate(user.level_data.permissions, menu.url, 'view') || user.is_client === 1">
                     <router-link v-bind:to="'/'+ menu.url" class="nav-link">
                         <i v-bind:class="menu.icon"></i>
                         <span class="title">{{  menu.title }}</span>

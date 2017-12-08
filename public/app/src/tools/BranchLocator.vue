@@ -140,7 +140,6 @@
                             '<button class="btn btn-info btn-md">View Queue</button>'
                         });
 
-
                         u.markers[x].addListener('click', function(){
                             if(u.current_window)
                                 u.current_window.close();

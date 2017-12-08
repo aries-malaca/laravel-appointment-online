@@ -7,6 +7,7 @@ use App\Config;
 use App\Branch;
 use Mail;
 use Validator;
+use Excel;
 
 class PremierController extends Controller{
     function getPremiers(Request $request){
@@ -16,7 +17,7 @@ class PremierController extends Controller{
             $premiers = PremierLoyaltyCard::where('id','>',0);
 
         if($request->segment(5) != 'all')
-            $premiers = $premiers->where('status','=', $request->segment(4));
+            $premiers = $premiers->where('status', $request->segment(5));
 
         $premiers = $premiers->get()->toArray();
 
@@ -24,6 +25,9 @@ class PremierController extends Controller{
             $branch = Branch::find($value['branch_id']);
             $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
             $premiers[$key]['branch_name']  = $branch_name;
+            $premiers[$key]['client']  = User::where('id', $value['client_id'])
+                                                ->select('birth_date', 'user_mobile', 'first_name', 'last_name', 'middle_name', 'username',
+                                                            'email', 'gender','user_address')->get()->first();
             $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
             $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
         }
@@ -32,7 +36,6 @@ class PremierController extends Controller{
     }
 
     function applyPremier(Request $request){
-
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'type' =>   'required|in:New,Replacement',
@@ -81,6 +84,11 @@ class PremierController extends Controller{
                 $premier->created_at = date('Y-m-d H:i:s');
                 $premier->save();
 
+                $u = User::find($premier->client_id);
+                $user_data = json_decode($u->user_data);
+                $user_data->boss_id = $boss_id[0];
+                $u->user_data = json_encode($user_data);
+                $u->save();
 
                 if($premier->remarks=='')
                     return response()->json(["result" => 'success', "amount" => $amount]);
@@ -96,7 +104,6 @@ class PremierController extends Controller{
     function hasPendingApplication($client_id){
         $find = PremierLoyaltyCard::where('status', '<>','denied')
                                     ->where('client_id', $client_id)->orderBy('created_at', 'DESC')->get()->first();
-
         if(isset($find['id']))
             return $find['status']=='approved'?'pending':$find['status'];
 
@@ -179,35 +186,87 @@ class PremierController extends Controller{
         }
         return false;
     }
-    function getPLCDetails(Request $request){
-        
-        $client_id  = $request->segment(4);
-        $ifAll      = $request->segment(5);
-       
-        // ->where('client_id', $client_id)->orderBy('created_at', 'DESC')->get()->first();
-        if($ifAll == "false"){
-            $premiers   =PremierLoyaltyCard::where('client_id','=', $client_id)->orderBy('created_at', 'DESC')->get()->first();
-            if(isset($premiers['id'])){
-                $branch = Branch::find($premiers['branch_id']);
+
+    function updatePLC(Request $request){
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+
+
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json(["result"=>"failed"]);
+    }
+
+    function exportExcel(Request $request){
+        $time = time();
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+            $premiers = PremierLoyaltyCard::whereIn('id', $request->input('selected'))
+                                            ->get()->toArray();
+            foreach($premiers as $key=>$value){
+                $branch = Branch::find($value['branch_id']);
                 $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
-                $premiers['branch_name']  = $branch_name;
-                $premiers['plc_data']     = json_decode($premiers['plc_data']);
+                $premiers[$key]['branch_name']  = $branch_name;
+                $premiers[$key]['client']  = User::where('id', $value['client_id'])
+                                                ->select('birth_date', 'user_mobile', 'first_name', 'last_name', 'middle_name', 'username',
+                                                    'email', 'gender','user_address','user_data')->get()->first();
+                $premiers[$key]['client']['user_data'] = json_decode($premiers[$key]['client']['user_data']);
+            }
+
+            Excel::create('PLC_' . $time, function($excel) use($premiers) {
+                $excel->sheet('Sheet1', function($sheet) use($premiers) {
+                    $sheet->row(1, array('BOSS ID', 'Client', 'Email', 'Contact', 'Birthdate', 'Address', 'Branch', 'Type', 'Status'));
+
+                    foreach($premiers as $k=>$v){
+                        $sheet->row($k+2,
+                            array(
+                                $v['client']['user_data']->boss_id,
+                                $v['client']['first_name'].' '.$v['client']['last_name'],
+                                $v['client']['email'],
+                                $v['client']['user_mobile'],
+                                $v['client']['birth_date'],
+                                $v['client']['user_address'],
+                                $v['branch_name'],
+                                $v['application_type'],
+                                $v['status']
+                            )
+                        );
+                    }
+                });
+            })->store('xlsx');
+            return response()->json(["result"=>"success", "filename"=>'PLC_' . $time.'.xlsx']);
+        }
+
+        return response()->json(["result"=>"failed"]);
+    }
+
+    //mobile - usage
+    function getPLCDetails(Request $request){
+        $client_id = $request->segment(4);
+        $ifAll = $request->segment(5);
+
+        if ($ifAll == "false") {
+            $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get()->first();
+            if (isset($premiers['id'])) {
+                $branch = Branch::find($premiers['branch_id']);
+                $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
+                $premiers['branch_name'] = $branch_name;
+                $premiers['plc_data'] = json_decode($premiers['plc_data']);
                 $premiers['date_applied'] = date('m/d/Y', strtotime($premiers['created_at']));
             }
-        } 
-        else{
-               $premiers   =PremierLoyaltyCard::where('client_id','=', $client_id)->orderBy('created_at', 'DESC')->get();
-                foreach($premiers as $key=>$value){
-                    $branch = Branch::find($value['branch_id']);
-                    $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
-                    $premiers[$key]['branch_name']  = $branch_name;
-                    $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
-                    $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
-                }    
-        }   
+        } else {
+            $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get();
+            foreach ($premiers as $key => $value) {
+                $branch = Branch::find($value['branch_id']);
+                $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
+                $premiers[$key]['branch_name'] = $branch_name;
+                $premiers[$key]['plc_data'] = json_decode($value['plc_data']);
+                $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+            }
+        }
         return response()->json($premiers);
     }
-    
-
-
 }

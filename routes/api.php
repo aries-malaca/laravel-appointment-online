@@ -114,14 +114,15 @@ Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 
-
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
 Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
 Route::post('/premier/sendReviewRequest', 'PremierReviewController@sendReviewRequest');
+Route::post('/premier/exportExcel', 'PremierController@exportExcel');
 Route::get('/premier/getRequests', 'PremierReviewController@getRequests');
 Route::get('/premier/getAllRequests', 'PremierReviewController@getAllRequests');
 Route::post('/premier/deleteRequest', 'PremierReviewController@deleteRequest');
+Route::patch('/premier/completeRequest', 'PremierReviewController@completeRequest');
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 

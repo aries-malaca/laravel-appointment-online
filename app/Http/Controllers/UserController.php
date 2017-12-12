@@ -81,6 +81,7 @@ class UserController extends Controller{
                                                             ->orderBy('schedule_type')
                                                             ->get()->toArray()
                         ];
+                $api['user']['level_data'] = array();
             }
             else{
                 $level = UserLevel::find($api['user']['level']);

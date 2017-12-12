@@ -8,6 +8,14 @@
     color:#4d4d3f !important;
 }
 
+.table td, .table th {
+    font-size: 12px;
+}
+
+.selected-row {
+    background: #4caf50 !important;
+}
+
 .page-quick-sidebar-wrapper .page-quick-sidebar{
     background: #91624f !important;
 }

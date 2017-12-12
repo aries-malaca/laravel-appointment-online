@@ -63,16 +63,28 @@
                                     </div>
                                     <div v-bind:id="'collapse_'+key" class="panel-collapse collapse" aria-expanded="false">
                                         <div class="panel-body">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <img v-bind:src="request.valid_id_image" alt="image" />
-                                                </div>
-                                                <div class="col-md-8">
-                                                    <p>Message: {{ request.message }}</p>
-                                                    <p v-if="request.remarks !== null">Remarks: {{ request.remarks }}</p>
-                                                    <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
-                                                </div>
-                                            </div>
+                                            <img class="img img-responsive" v-bind:src="'../../images/ids/'+request.valid_id_url" alt="image" />
+                                            <table class="table table-hover table-light">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Message: </td>
+                                                        <td>{{ request.message }}</td>
+                                                    </tr>
+                                                    <tr v-if="request.remarks !== null">
+                                                        <td>Remarks: </td>
+                                                        <td>{{ request.remarks }}</td>
+                                                    </tr>
+                                                    <tr v-if="request.processed_date !== null">
+                                                        <td>Date Processed: </td>
+                                                        <td>{{ request.processed_date_formatted }}</td>
+                                                    </tr>
+                                                    <tr v-if="request.processed_date !== null">
+                                                        <td>Processed By: </td>
+                                                        <td>{{ request.updated_by }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -103,14 +115,6 @@
             }
         },
         methods:{
-            rotateImage:function(){
-                if(this.current_position===3)
-                   this.current_position = 0;
-                else
-                    this.current_position++;
-
-                this.orientation = this.loop[this.current_position];
-            },
             setupUploader:function(e){
                 let files = e.target.files || e.dataTransfer.files;
 
@@ -183,7 +187,7 @@
                         type:'canvas',
                         format: 'jpeg',
                     }).then(response=>{
-                        axios({url:'/api/premier/sendReviewRequest?token='+u.token, method:'post', data:{message:u.message, valid_id_image:response}})
+                        axios({url:'/api/premier/sendReviewRequest?token='+u.token, method:'post', data:{message:u.message, valid_id_url:response}})
                             .then(function () {
                                 u.getRequests();
                                 u.croppie.destroy();

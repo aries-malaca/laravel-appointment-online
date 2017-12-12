@@ -47,6 +47,8 @@ var SweetConfirmation = function(text, confirm_callback){
 };
 
 function gate(permissions, permission, action){
+    if(permissions === undefined)
+        return false;
     for(var x=0;x<permissions.length;x++){
         if(permissions[x].name === permission){
             for(var y=0;y<permissions[x].actions.length;y++){

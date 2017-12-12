@@ -246,6 +246,7 @@
         computed:{
             branch_selection:function(){
                 var a = [];
+                a.push({label:"ALL", value:0});
                 this.branches.forEach(function(item, i){
                     a.push({label:item.branch_name, value:item.id});
                 });

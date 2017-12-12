@@ -36,7 +36,7 @@
                     <div class="media-body">
                         <h4 class="media-heading">{{ item.first_name }} {{ item.last_name }}</h4>
                         <div class="media-heading-sub">{{ item.level_name }}</div>
-                        <div class="media-heading-small" v-if="!item.is_online">{{ moment(item.last_activity).fromNow() }}</div>
+                        <div class="media-heading-small" v-if="!item.is_online && item.last_activity !== null">{{ moment(item.last_activity).fromNow() }}</div>
                     </div>
                 </li>
             </ul>
@@ -52,7 +52,7 @@
                     <div class="media-body">
                         <h4 class="media-heading">{{ item.first_name }} {{ item.last_name }}</h4>
                         <div class="media-heading-sub">{{ item.level_name }}</div>
-                        <div class="media-heading-small" v-if="!item.is_online && item.last_activit !== null">{{ moment(item.last_activity).fromNow() }}</div>
+                        <div class="media-heading-small" v-if="!item.is_online && item.last_activity !== null">{{ moment(item.last_activity).fromNow() }}</div>
                     </div>
                 </li>
             </ul>

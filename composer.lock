@@ -1150,16 +1150,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.8.15",
+            "version": "v0.8.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "b1d289c2cb03a2f8249912c53e96ced38f879926"
+                "reference": "d4c8eab0683dc056f2ca54ca67f5388527c068b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/b1d289c2cb03a2f8249912c53e96ced38f879926",
-                "reference": "b1d289c2cb03a2f8249912c53e96ced38f879926",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/d4c8eab0683dc056f2ca54ca67f5388527c068b1",
+                "reference": "d4c8eab0683dc056f2ca54ca67f5388527c068b1",
                 "shasum": ""
             },
             "require": {
@@ -1167,14 +1167,13 @@
                 "jakub-onderka/php-console-highlighter": "0.3.*",
                 "nikic/php-parser": "~1.3|~2.0|~3.0",
                 "php": ">=5.3.9",
-                "symfony/console": "~2.3.10|^2.4.2|~3.0",
-                "symfony/var-dumper": "~2.7|~3.0"
+                "symfony/console": "~2.3.10|^2.4.2|~3.0|~4.0",
+                "symfony/var-dumper": "~2.7|~3.0|~4.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "~1.11",
                 "hoa/console": "~3.16|~1.14",
                 "phpunit/phpunit": "^4.8.35|^5.4.3",
-                "symfony/finder": "~2.1|~3.0"
+                "symfony/finder": "~2.1|~3.0|~4.0"
             },
             "suggest": {
                 "ext-pcntl": "Enabling the PCNTL extension makes PsySH a lot happier :)",
@@ -1219,7 +1218,7 @@
                 "interactive",
                 "shell"
             ],
-            "time": "2017-11-16T14:29:51+00:00"
+            "time": "2017-12-10T21:49:27+00:00"
         },
         {
             "name": "pusher/pusher-php-server",
@@ -1406,16 +1405,16 @@
         },
         {
             "name": "spatie/laravel-image-optimizer",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-image-optimizer.git",
-                "reference": "823b779af0d3efe01aed32e0f1636920cbf3b5cf"
+                "reference": "78c2568639466ae7fbc1df589d22dedc7b45f5a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-image-optimizer/zipball/823b779af0d3efe01aed32e0f1636920cbf3b5cf",
-                "reference": "823b779af0d3efe01aed32e0f1636920cbf3b5cf",
+                "url": "https://api.github.com/repos/spatie/laravel-image-optimizer/zipball/78c2568639466ae7fbc1df589d22dedc7b45f5a7",
+                "reference": "78c2568639466ae7fbc1df589d22dedc7b45f5a7",
                 "shasum": ""
             },
             "require": {
@@ -1461,7 +1460,7 @@
                 "laravel-image-optimizer",
                 "spatie"
             ],
-            "time": "2017-09-12T05:59:50+00:00"
+            "time": "2017-12-11T21:45:27+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

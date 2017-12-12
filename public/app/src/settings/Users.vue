@@ -146,6 +146,8 @@
                 this.getData('/api/branch/getBranches/active', 'branches');
             },
             getBranchName:function(id){
+                if(id===0)
+                    return "ALL";
                 for(var x=0;x<this.branches.length;x++){
                     if(id == this.branches[x].id)
                         return this.branches[x].branch_name;
@@ -246,6 +248,7 @@
         computed:{
             branch_selection:function(){
                 var a = [];
+                a.push({label:"ALL", value:0});
                 this.branches.forEach(function(item, i){
                     a.push({label:item.branch_name, value:item.id});
                 });

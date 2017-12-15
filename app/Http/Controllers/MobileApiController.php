@@ -12,14 +12,15 @@ use App\ProductGroup;
 use App\Branch;
 use App\Config;
 use App\ServicePackage;
+use App\PlcReviewRequest;
+use App\PremierLoyaltyCard;
 use DateTime;
 use Validator;
 use Hash;
 use DB;
 use Mail;
 use JWTAuth;
-class MobileApiController extends Controller
-{
+class MobileApiController extends Controller{
 
     
 
@@ -121,9 +122,6 @@ class MobileApiController extends Controller
 		return response()->json($response);
 	}
 
-	
-
-
 	public function getUser(){
         $api = $this->authenticateAPI();
         $response = array();
@@ -177,7 +175,6 @@ class MobileApiController extends Controller
         // return response()->json($api, $api["status_code"]);
     }
 
-
     public function updateHomeBranch(Request $request){
     	$api = $this->authenticateAPI();
         if($api['result'] === 'success'){
@@ -200,7 +197,6 @@ class MobileApiController extends Controller
         }
         return response()->json($api, $api["status_code"]);
     }
-
 
     public function updatePersonalInfo(Request $request){
     	$api = $this->authenticateAPI();
@@ -554,7 +550,6 @@ class MobileApiController extends Controller
             return response()->json(['result'=>'success',"isAlready"=> false, "error" => "Email not found. Redirecting.."]);
         }
         return response()->json(['result'=>'failed', "error" => "Cannot proceed to login to facebook"],400);
-
     }
 
     //update terms and conditions applied
@@ -572,7 +567,6 @@ class MobileApiController extends Controller
         else{
              // return response()->json($api, $api["status_code"]);
         }
-       
     }
 
     public function getPackageWithDescription(Request $request){
@@ -619,10 +613,48 @@ class MobileApiController extends Controller
 
         }
         return response()->json($query);
-        
     }
 
 
+    public function getPLCAllLogs(Request $request){
+        
+        $array_response = array();
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+
+            //request Logs
+            $client_id = $api['user']['id'];
+            $data = PlcReviewRequest::where('client_id', $api['user']['id'])->get()->toArray();
+            foreach($data as $key=>$value){
+                $client = User::find($value['client_id']);
+                $data[$key]['name'] = ($client->id?$client->username:'');
+                $data[$key]['status_html'] = '<span class="badge '.($value['status']=='pending'?'badge-info':'badge-success').'">'. $value['status'] .'</span>';
+                $user = User::find($value['updated_by_id']);
+                $data[$key]['updated_by'] =  (isset($user->id)?$user->username:'');
+                $data[$key]['processed_date_formatted'] =  isset($value['processed_date'])?date('m/d/Y',strtotime($value['processed_date'])):'';
+            }
+
+            $premiers = PremierLoyaltyCard::where('client_id','=', $client_id);
+            $premiers = $premiers->get()->toArray();
+            foreach($premiers as $key=>$value){
+                $branch = Branch::find($value['branch_id']);
+                $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
+                $premiers[$key]['branch_name']  = $branch_name;
+                $premiers[$key]['client']  = User::where('id', $value['client_id'])
+                                                    ->select('birth_date', 'user_mobile', 'first_name', 'last_name', 'middle_name', 'username',
+                                                                'email', 'gender','user_address')->get()->first();
+                $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
+                $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+            }
+            
+            $array_plc_request_logs['request_logs']     = $data;
+            $array_plc_request_logs['application_logs'] = $premiers;
+            return response()->json($array_plc_request_logs);
+
+
+        }
+        return response()->json($api, $api["status_code"]);
+    }
 
 
 }

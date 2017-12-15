@@ -175,3 +175,8 @@ Route::get('/mobile/getPackageWithDescription/{flag}', 'MobileApiController@getP
 Route::get('/mobile/getServices/{flag}', 'MobileApiController@getServices');
 Route::get('/mobile/getServices/', 'MobileApiController@getServices');
 Route::get('/mobile/getPLCDetails/{clientid}/{ifAll}', 'PremierController@getPLCDetails');
+Route::get('/mobile/getRequests/getAllPLCRequestAndApplication', 'MobileApiController@getPLCAllLogs');
+
+Route::get('/mobile/getClientTransactions/{clientid}', 'MobileApiController@getClientTransactions');
+
+

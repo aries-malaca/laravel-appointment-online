@@ -245,8 +245,8 @@ class PremierController extends Controller{
 
     //mobile - usage
     function getPLCDetails(Request $request){
-        $client_id = $request->segment(4);
-        $ifAll = $request->segment(5);
+        $client_id  = $request->segment(4);
+        $ifAll      = $request->segment(5);
 
         if ($ifAll == "false") {
             $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get()->first();

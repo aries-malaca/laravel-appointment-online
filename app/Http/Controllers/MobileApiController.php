@@ -610,18 +610,15 @@ class MobileApiController extends Controller{
                         ->where('a.is_active', 1)
                         ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
-
         }
         return response()->json($query);
     }
 
-
     public function getPLCAllLogs(Request $request){
         
         $array_response = array();
-        $api = $this->authenticateAPI();
+        $api            = $this->authenticateAPI();
         if($api['result'] === 'success'){
-
             //request Logs
             $client_id = $api['user']['id'];
             $data = PlcReviewRequest::where('client_id', $api['user']['id'])->get()->toArray();
@@ -655,6 +652,37 @@ class MobileApiController extends Controller{
         }
         return response()->json($api, $api["status_code"]);
     }
+
+    public function getTotalTransactionAmount(Request $request){
+
+        $object_response = array();
+        $api             = $this->authenticateAPI();
+        $premiers[] = array();
+        if($api['result'] === 'success'){
+
+            $client_id      = $api['user']['id'];
+            $email          = $api['user']['email'];
+            $transactions   = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$email);
+            $minimum = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
+            if(isset($minimum['id'])){
+                $minimum = $minimum->config_value;
+            }
+
+            $premiers = PremierLoyaltyCard::where('client_id','=', $client_id)
+                        ->select("id","reference_no","status","remarks","application_type")
+                        ->orderBy('created_at', 'DESC')->get()->first();
+
+            $object_result                      = json_decode($transactions,true);
+            $object_result["minimum_amount"]    = (double)$minimum;
+            if(count($premiers) > 0){
+                $object_result["premier"]           = $premiers;
+            }
+            return response()->json($object_result);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+
 
 
 }

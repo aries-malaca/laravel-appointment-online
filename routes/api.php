@@ -178,5 +178,5 @@ Route::get('/mobile/getPLCDetails/{clientid}/{ifAll}', 'PremierController@getPLC
 Route::get('/mobile/getRequests/getAllPLCRequestAndApplication', 'MobileApiController@getPLCAllLogs');
 
 Route::get('/mobile/getClientTransactions/{clientid}', 'MobileApiController@getClientTransactions');
-
+Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTransactionAmount');
 

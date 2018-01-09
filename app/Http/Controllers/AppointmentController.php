@@ -15,6 +15,7 @@ use App\ProductGroup;
 
 class AppointmentController extends Controller{
     public function addAppointment(Request $request){
+        
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'client' => 'required',
@@ -117,9 +118,7 @@ class AppointmentController extends Controller{
             $appointment['client_contact'] = $client->user_mobile;
             $appointment['client_gender'] = $client->gender;
             $appointment['technician_name'] = isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
-
             $appointment['items'] = $this->getAppointmentItems($appointment['id']);
-
             $appointment['transaction_date_formatted'] = date('m/d/Y', strtotime($appointment['transaction_datetime']));
             $appointment['transaction_time_formatted'] = date('h:i A', strtotime($appointment['transaction_datetime']));
             $appointment['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($appointment['created_at']));
@@ -153,7 +152,6 @@ class AppointmentController extends Controller{
             else
                 $appointments = $appointments->where('transaction_datetime', 'LIKE',$request->segment(6) .'%');
         }
-
         $appointments = $appointments->orderBy('transaction_datetime')
                                     ->get()->toArray();
 
@@ -175,6 +173,7 @@ class AppointmentController extends Controller{
             $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
             $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
             $appointments[$key]['waiver_data'] = null;
+
         }
 
         return response()->json($appointments);

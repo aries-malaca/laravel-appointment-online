@@ -12,16 +12,19 @@ use App\ProductGroup;
 use App\Branch;
 use App\Config;
 use App\ServicePackage;
+use App\PlcReviewRequest;
+use App\PremierLoyaltyCard;
+use App\Transaction;
+use App\TransactionItem;
+use App\Technician;
 use DateTime;
 use Validator;
 use Hash;
 use DB;
 use Mail;
 use JWTAuth;
-class MobileApiController extends Controller
-{
 
-    
+class MobileApiController extends Controller{
 
 	public function LoadData(){
 
@@ -121,9 +124,6 @@ class MobileApiController extends Controller
 		return response()->json($response);
 	}
 
-	
-
-
 	public function getUser(){
         $api = $this->authenticateAPI();
         $response = array();
@@ -177,7 +177,6 @@ class MobileApiController extends Controller
         // return response()->json($api, $api["status_code"]);
     }
 
-
     public function updateHomeBranch(Request $request){
     	$api = $this->authenticateAPI();
         if($api['result'] === 'success'){
@@ -200,7 +199,6 @@ class MobileApiController extends Controller
         }
         return response()->json($api, $api["status_code"]);
     }
-
 
     public function updatePersonalInfo(Request $request){
     	$api = $this->authenticateAPI();
@@ -554,7 +552,6 @@ class MobileApiController extends Controller
             return response()->json(['result'=>'success',"isAlready"=> false, "error" => "Email not found. Redirecting.."]);
         }
         return response()->json(['result'=>'failed', "error" => "Cannot proceed to login to facebook"],400);
-
     }
 
     //update terms and conditions applied
@@ -572,7 +569,6 @@ class MobileApiController extends Controller
         else{
              // return response()->json($api, $api["status_code"]);
         }
-       
     }
 
     public function getPackageWithDescription(Request $request){
@@ -616,10 +612,149 @@ class MobileApiController extends Controller
                         ->where('a.is_active', 1)
                         ->select('a.id','a.service_gender','a.service_minutes','a.service_price','b.service_name','b.service_description','b.service_picture','b.id as service_type_id')
                         ->get();
-
         }
         return response()->json($query);
+    }
+
+    public function getPLCAllLogs(Request $request){
         
+        $array_response = array();
+        $api            = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            //request Logs
+            $client_id = $api['user']['id'];
+            $data = PlcReviewRequest::where('client_id', $api['user']['id'])->get()->toArray();
+            foreach($data as $key=>$value){
+                $client = User::find($value['client_id']);
+                $data[$key]['name'] = ($client->id?$client->username:'');
+                $data[$key]['status_html'] = '<span class="badge '.($value['status']=='pending'?'badge-info':'badge-success').'">'. $value['status'] .'</span>';
+                $user = User::find($value['updated_by_id']);
+                $data[$key]['updated_by'] =  (isset($user->id)?$user->username:'');
+                $data[$key]['processed_date_formatted'] =  isset($value['processed_date'])?date('m/d/Y',strtotime($value['processed_date'])):'';
+            }
+
+            $premiers = PremierLoyaltyCard::where('client_id','=', $client_id);
+            $premiers = $premiers->get()->toArray();
+            foreach($premiers as $key=>$value){
+                $branch = Branch::find($value['branch_id']);
+                $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
+                $premiers[$key]['branch_name']  = $branch_name;
+                $premiers[$key]['client']  = User::where('id', $value['client_id'])
+                                                    ->select('birth_date', 'user_mobile', 'first_name', 'last_name', 'middle_name', 'username',
+                                                                'email', 'gender','user_address')->get()->first();
+                $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
+                $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+            }
+            
+            $array_plc_request_logs['request_logs']     = $data;
+            $array_plc_request_logs['application_logs'] = $premiers;
+            return response()->json($array_plc_request_logs);
+
+
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    public function getTotalTransactionAmount(Request $request){
+
+        $object_response = array();
+        $api             = $this->authenticateAPI();
+        $premiers[] = array();
+        if($api['result'] === 'success'){
+
+            $client_id      = $api['user']['id'];
+            $email          = $api['user']['email'];
+            $transactions   = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$email);
+            $minimum = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
+            if(isset($minimum['id'])){
+                $minimum = $minimum->config_value;
+            }
+
+            $premiers = PremierLoyaltyCard::where('client_id','=', $client_id)
+                        ->select("id","reference_no","status","remarks","application_type")
+                        ->orderBy('created_at', 'DESC')->get()->first();
+
+            $object_result                      = json_decode($transactions,true);
+            $object_result["minimum_amount"]    = (double)$minimum;
+            if(count($premiers) > 0){
+                $object_result["premier"]           = $premiers;
+            }
+            return response()->json($object_result);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+
+    //get Appointments & User Events(ex: Summer Vacation remind 3 days before the event)
+    public function getAppointmentsByMonth(Request $request){
+
+        $start_date     = $request->input('start_date');
+        $end_date       = $request->input('end_date');
+        $api            = $this->authenticateAPI();
+        $items_array    = array();
+        if($api['result'] === 'success') {
+            $client_id   = $api['user']['id'];
+            $appointments = Transaction::where('client_id', $client_id)
+                                        ->whereBetween('transaction_datetime', array($start_date, $end_date))->get();
+             foreach($appointments as $key => $value){
+                $branch 								= Branch::find($value['branch_id']);
+                $client 								= User::find($value['client_id']);
+                $technician 							= Technician::find($value['technician_id']);
+                $appointments[$key]['branch_name'] 		= isset($branch)?$branch->branch_name:'N/A';
+                $appointments[$key]['client_name'] 		= $client->username;
+                $appointments[$key]['client_contact'] 	= $client->user_mobile;
+                $appointments[$key]['client_gender'] 	= $client->gender;
+                $appointments[$key]['technician_name'] 	= isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
+                $appointments[$key]['items'] 			= $this->getAppointmentItems($value['id']);
+                $appointments[$key]['transaction_date_formatted'] = date('m/d/Y', strtotime($value['transaction_datetime']));
+                $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
+                $appointments[$key]['transaction_added_formatted']= date('m/d/Y h:i A', strtotime($value['created_at']));
+                $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
+                // $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
+                $appointments[$key]['waiver_data'] = null;
+            }
+            return response()->json($appointments);
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+    }
+
+     //get appointment Items
+    function getAppointmentItems($id){
+        
+        $items = TransactionItem::where('transaction_id', $id)->get()->toArray();
+        foreach($items as $key=>$value){
+            $items[$key]['item_data'] = json_decode($value['item_data']);
+            if($value['item_type'] === 'service'){
+                $service = Service::find($value['item_id']);
+                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
+
+                $service_image = "";
+                if($service->service_type_id !== 0){
+                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
+                }
+                else{
+                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
+                }
+
+                $items[$key]['item_name']       = $service_name;
+                $items[$key]['item_image']      = $service_image;
+                $items[$key]['item_duration']   = $service->service_minutes;
+                $items[$key]['item_info']['gender'] = $service->service_gender;
+            }
+            
+            else{
+                $product       = Product::find($value['item_id']);
+                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
+                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
+                $items[$key]['item_name']            = $product_name;
+                $items[$key]['item_info']['size']    = $product->product_size;
+                $items[$key]['item_info']['variant'] = $product->product_variant;
+                $items[$key]['item_image']           = $product_image;
+            }
+        }
+        return $items;
     }
 
 

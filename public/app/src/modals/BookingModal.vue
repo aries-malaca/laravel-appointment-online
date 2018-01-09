@@ -462,9 +462,7 @@
                 var b = Number(moment(newData.end).format("X"));
                 var c = Number(moment(oldData.book_start_time).format("X"));
                 var d = Number(moment(oldData.book_end_time).format("X"));
-
-                console.log(((a<=c && b>=c) ||  (c<=b && b<=d)));
-                return ((a<=c && b>=c) ||  (c<=b && b<=d));
+                return ((c<=a && d<=b &&d>=a) ||  (b<=d && c<=b &&a>=c) || (c<=b && a<=c) || (a<=d && c<= a));
             }
         },
         computed:{
@@ -472,6 +470,7 @@
                 var queue = [];
                 for(var x=0;x<this.queue.length;x++){
                     for(var y=0;y<this.queue[x].items.length;y++){
+                        this.queue[x].items[y].client_id = this.queue[x].client_id;
                         if(this.queue[x].items[y].item_status==='reserved')
                             queue.push(this.queue[x].items[y]);
                     }
@@ -526,16 +525,18 @@
 
                     for(var y=0;y<this.filtered_technician_queue.length;y++){
                         if(this.isConflicted(this.newTransaction.services[x], this.filtered_technician_queue[y]))
-                            return "Technician selected has already booked the same time as service #" + (x+1);
+                            return "Technician selected has already booked the same time for service #" + (x+1);
                     }
 
                     for(var y=0;y<this.filtered_queue.length;y++){
                         if(this.isConflicted(this.newTransaction.services[x], this.filtered_queue[y])){
-                            hits=hits+1;
-                            console.log(hits);
-                            if(this.newTransaction.branch.rooms >= hits){
-                                return "No room available for the time as service #" + (x+1);
-                            }
+                            hits++;
+                            if(this.newTransaction.branch.rooms < hits)
+                                return "No room available for the time for service #" + (x+1);
+                        }
+                        if(this.isConflicted(this.newTransaction.services[x], this.filtered_queue[y])
+                                && this.newTransaction.client.value === this.filtered_queue[y].client_id){
+                            return "Already have existing scheduled booking for selected time at service #" + (x+1);
                         }
                     }
                 }

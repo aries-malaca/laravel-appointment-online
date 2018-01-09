@@ -31,7 +31,7 @@
                                         type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
                             <div class="col-md-6">
-                                <button class="btn btn-warning btn-block">Queuing Screen</button>
+                                <a v-bind:href="'../../queuing/web/' + branch.value" target="_blank" class="btn btn-warning btn-block">Queuing Screen</a>
                             </div>
                         </div>
 
@@ -69,9 +69,9 @@
                                     <tr v-for="app in queued">
                                         <td>{{ app.client.client_name }}</td>
                                         <td>
-                                            <table class="table-responsive table table-bordered">
+                                            <table class="table-responsive table table-bordered" style="margin:0px;">
                                                 <tbody>
-                                                    <tr v-for="item in app.items">
+                                                    <tr v-for="item in app.items" v-bind:style="'background-color:'+ (isOnCall(item)||isOnServe(item)? (isOnCall(item)?'#aaffaa':'#ffccff'):'')">
                                                         <td>{{ item.item_name }}</td>
                                                         <td>{{ item.technician_name }}</td>
                                                         <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
@@ -106,14 +106,13 @@
                                 <tr>
                                     <th>Client</th>
                                     <th>Services</th>
-                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="app in completed">
                                     <td>{{ app.client.client_name }}</td>
                                     <td>
-                                        <table class="table-responsive table table-bordered">
+                                        <table class="table-responsive table table-bordered" style="margin:0px;">
                                             <tbody>
                                                 <tr v-for="item in app.items">
                                                     <td>{{ item.item_name }}</td>
@@ -131,7 +130,6 @@
                                             </tbody>
                                         </table>
                                     </td>
-                                    <td></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -152,7 +150,7 @@
                                 <tr v-for="app in cancelled">
                                     <td>{{ app.client.client_name }}</td>
                                     <td>
-                                        <table class="table-responsive table table-bordered">
+                                        <table class="table-responsive table table-bordered" style="margin:0px;">
                                             <tbody>
                                             <tr v-for="item in app.items">
                                                 <td>{{ item.item_name }}</td>

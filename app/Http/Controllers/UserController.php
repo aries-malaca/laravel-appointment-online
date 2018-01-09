@@ -340,7 +340,7 @@ class UserController extends Controller{
             $user->password = bcrypt(12345);
             $user->gender = $request->input('gender');
             $user->user_address = $request->input('user_address');
-            $user->is_confirmed = 0;
+            $user->is_confirmed = 1;
             $user->is_active = 1;
             $user->is_agreed = 1;
             $user->device_data = '{}';

@@ -1,0 +1,59 @@
+[v-cloak]{
+    display:none;
+}
+nav, footer{
+    padding:0px 15px;
+    background-color: #f3a4e6;
+    color:white;
+}
+footer{
+    position:absolute;
+    bottom:0;
+    width:100%;
+}
+#slider{
+    padding: 50px 0px 0px 0px;
+}
+.brown-text{
+    color:brown;
+}
+.bold{
+    font-weight: bold;
+}
+.uppercase{
+    text-transform: uppercase;
+}
+.pending{
+    background-color: #e8b836;
+}
+.calling{
+    background-color: #cffdbc;
+}
+.serving{
+    display:block;
+    padding:20px;
+    background-color:brown;
+    width:100px;
+    text-align:center
+}
+.item{
+    color: #9b4e00;
+    height:80px;
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+}
+.bounce-enter-active {
+    animation: bounce-in .5s;
+}
+@keyframes bounce-in {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}

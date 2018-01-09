@@ -96,11 +96,11 @@ Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentControll
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
 Route::patch('/appointment/cancelAppointment', 'AppointmentController@cancelAppointment');
-Route::patch('/appointment/callAppointment', 'AppointmentController@callAppointment');
-Route::patch('/appointment/unCallAppointment', 'AppointmentController@unCallAppointment');
+Route::patch('/appointment/callAppointment', 'QueuingController@callAppointment');
+Route::patch('/appointment/unCallAppointment', 'QueuingController@unCallAppointment');
 Route::patch('/appointment/cancelItem', 'AppointmentController@cancelItem');
-Route::patch('/appointment/serveAppointment', 'AppointmentController@serveAppointment');
-Route::patch('/appointment/unServeAppointment', 'AppointmentController@unServeAppointment');
+Route::patch('/appointment/serveAppointment', 'QueuingController@serveAppointment');
+Route::patch('/appointment/unServeAppointment', 'QueuingController@unServeAppointment');
 Route::patch('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 
@@ -116,6 +116,8 @@ Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianContro
 
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
+Route::post('/premier/movePremier', 'PremierController@movePremier');
+Route::post('/premier/recheckPremier', 'PremierController@recheckPremier');
 Route::post('/premier/sendPremierVerification', 'PremierController@sendPremierVerification');
 Route::post('/premier/sendReviewRequest', 'PremierReviewController@sendReviewRequest');
 Route::post('/premier/exportExcel', 'PremierController@exportExcel');

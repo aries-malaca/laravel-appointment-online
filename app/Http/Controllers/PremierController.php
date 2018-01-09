@@ -73,6 +73,8 @@ class PremierController extends Controller{
                 if (!isset($premier))
                     $premier = new PremierLoyaltyCard;
 
+                $data = $request->input('type')=='New'?array("reason"=>""):array("reason"=>$request->input('reason'));
+
                 $premier->client_id = $api['user']['id'];
                 $premier->branch_id = $request->input('branch')['value'];
                 $premier->application_type = $request->input('type');
@@ -80,7 +82,7 @@ class PremierController extends Controller{
                 $premier->status = $amount ? 'approved' : 'denied';
                 $premier->reference_no = $boss_id[0];
                 $premier->remarks = $amount ? '' : 'Failed to reach the qualified amount';
-                $premier->plc_data = '{}';
+                $premier->plc_data = json_encode($data);
                 $premier->created_at = date('Y-m-d H:i:s');
                 $premier->save();
 
@@ -103,6 +105,8 @@ class PremierController extends Controller{
 
     function hasPendingApplication($client_id){
         $find = PremierLoyaltyCard::where('status', '<>','denied')
+                                    ->where('status', '<>','picked_up')
+                                    ->where('status', '<>','deleted')
                                     ->where('client_id', $client_id)->orderBy('created_at', 'DESC')->get()->first();
         if(isset($find['id']))
             return $find['status']=='approved'?'pending':$find['status'];
@@ -111,13 +115,13 @@ class PremierController extends Controller{
     }
 
     function isQualifiedForNew($client_id){
-        return PremierLoyaltyCard::where('status', '=','picked-up')
+        return PremierLoyaltyCard::where('status', '=','picked_up')
                 ->where('client_id', $client_id)
                 ->count() == 0;
     }
 
     function isQualifiedForReplacement($client_id){
-        return PremierLoyaltyCard::where('status', '=','picked-up')
+        return PremierLoyaltyCard::where('status', '=','picked_up')
                                 ->where('client_id', $client_id)
                                 ->count()>0;
     }
@@ -135,7 +139,6 @@ class PremierController extends Controller{
 
             foreach($transactions as $key=>$value)
                 $total += $value['net_amount'];
-
             return ($total >= $minimum ? $total:false);
         }
 
@@ -187,18 +190,6 @@ class PremierController extends Controller{
         return false;
     }
 
-    function updatePLC(Request $request){
-        $api = $this->authenticateAPI();
-
-        if($api['result'] === 'success'){
-
-
-            return response()->json(["result"=>"success"]);
-        }
-
-        return response()->json(["result"=>"failed"]);
-    }
-
     function exportExcel(Request $request){
         $time = time();
         $api = $this->authenticateAPI();
@@ -218,19 +209,21 @@ class PremierController extends Controller{
 
             Excel::create('PLC_' . $time, function($excel) use($premiers) {
                 $excel->sheet('Sheet1', function($sheet) use($premiers) {
-                    $sheet->row(1, array('BOSS ID', 'Client', 'Email', 'Contact', 'Birthdate', 'Address', 'Branch', 'Type', 'Status'));
+                    $sheet->row(1, array('BOSS ID', 'Client', 'Email', 'Contact', 'Birthdate', 'Address', 'Branch', 'Type', 'Replacement Reason', 'Status'));
 
                     foreach($premiers as $k=>$v){
+                        $data = json_decode($v['plc_data'],true);
                         $sheet->row($k+2,
                             array(
                                 $v['client']['user_data']->boss_id,
                                 $v['client']['first_name'].' '.$v['client']['last_name'],
                                 $v['client']['email'],
                                 $v['client']['user_mobile'],
-                                $v['client']['birth_date'],
+                                date('m/d/Y',strtotime($v['client']['birth_date'])),
                                 $v['client']['user_address'],
                                 $v['branch_name'],
                                 $v['application_type'],
+                                $data['reason'],
                                 $v['status']
                             )
                         );
@@ -238,6 +231,19 @@ class PremierController extends Controller{
                 });
             })->store('xlsx');
             return response()->json(["result"=>"success", "filename"=>'PLC_' . $time.'.xlsx']);
+        }
+
+        return response()->json(["result"=>"failed"]);
+    }
+
+    function movePremier(Request $request){
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+            PremierLoyaltyCard::whereIn('id', $request->input('selected'))
+                                ->update(["status"=>$request->input('move_to')]);
+            
+            return response()->json(["result"=>"success"]);
         }
 
         return response()->json(["result"=>"failed"]);

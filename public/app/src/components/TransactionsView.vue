@@ -102,8 +102,8 @@
         </div>
         <div class="col-md-4">
             <transaction-summary :transactions="transactions"></transaction-summary>
-            <div v-if="this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT !== undefined">
-                <div class="alert alert-success" v-if="user.is_client === 1 && net_amount >= this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT">
+            <div v-if="user.is_client === 1 && this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT !== undefined">
+                <div class="alert alert-success" v-if="net_amount >= this.configs.PLC_MINIMUM_TRANSACTIONS_AMOUNT">
                     <strong>Hi {{ client.username }}!</strong> You are qualified to apply for a <p>Premier Loyalty Card</p>
                     <br/>
                     <a class="btn btn-info btn-md" href="../../#/plc" >Apply Here</a>

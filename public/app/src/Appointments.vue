@@ -71,7 +71,7 @@
                     .then(function (response) {
                         u.active_appointments = [];
                         response.data.forEach(function(item){
-                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                            if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
                                 return false;
 
                             u.active_appointments.push(item);
@@ -89,7 +89,7 @@
                     .then(function (response) {
                         u.appointment_history = [];
                         response.data.forEach(function(item){
-                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                            if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
                                 return false;
 
                             u.appointment_history.push(item);

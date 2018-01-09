@@ -33,11 +33,17 @@
                                         <vue-select v-model="apply.branch" :options="branch_selection"></vue-select>
                                     </div>
                                     <div class="form-group">
-                                        <label>Application Type</label>
-                                        <select class="form-control" v-model="apply.type">
-                                            <option value="New">New</option>
-                                            <option value="Replacement">Replacement</option>
-                                        </select>
+                                        <label>Application Type:</label><br/>
+                                        <label>
+                                            <input type="radio" v-model="apply.type" value="New"/>New
+                                        </label>
+                                        <label>
+                                            <input type="radio" v-model="apply.type" value="Replacement"/>Replacement
+                                        </label>
+                                    </div>
+                                    <div class="form-group" v-if="apply.type==='Replacement'">
+                                        <label>Reason for Replacement:</label>
+                                        <textarea class="form-control" v-model="apply.reason" rows="2"></textarea>
                                     </div>
                                     <button class="btn btn-success btn-block" data-loading-text="Please Wait..." @click="applyPLC($event)">Submit</button>
                                 </div>
@@ -88,7 +94,8 @@
                 apply:{
                     branch:null,
                     type:'New',
-                    platform:'WEB'
+                    platform:'WEB',
+                    reason:''
                 },
                 plcTable:{
                     columns: [

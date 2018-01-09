@@ -163,9 +163,11 @@ class AppointmentController extends Controller{
             $technician = Technician::find($value['technician_id']);
             $appointments[$key]['branch_name'] = isset($branch)?$branch->branch_name:'N/A';
             $appointments[$key]['client_name'] = $client->username;
+            $appointments[$key]['client_shortname'] = explode(" ",$client->first_name)[0];
             $appointments[$key]['client_contact'] = $client->user_mobile;
             $appointments[$key]['client_gender'] = $client->gender;
             $appointments[$key]['technician_name'] = isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
+            $appointments[$key]['technician_shortname'] = isset($technician)?$technician->first_name:'N/A';
             $appointments[$key]['items'] = $this->getAppointmentItems($value['id']);
             $appointments[$key]['transaction_date_formatted'] = date('m/d/Y', strtotime($value['transaction_datetime']));
             $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
@@ -187,25 +189,6 @@ class AppointmentController extends Controller{
             return '<span class="badge badge-danger">'.$status.'</span>';
     }
 
-    public function callAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-                        ->update(['item_data'=>json_encode(['called'=>time()])]);
-        return response()->json(["result"=>"success"]);
-    }
-
-    public function serveAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['serve_time' => date('Y-m-d H:i'),
-                      'item_data' => json_encode(array())]);
-        return response()->json(["result"=>"success"]);
-    }
-
-    public function unServeAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['serve_time'=>null]);
-        return response()->json(["result"=>"success"]);
-    }
-
     public function completeAppointment(Request $request){
         $item = TransactionItem::find($request->input('item_id'));
         $item->complete_time = date('Y-m-d H:i');
@@ -213,12 +196,6 @@ class AppointmentController extends Controller{
         $item->save();
 
         $this->refreshStatus($item->transaction_id, 'completed');
-        return response()->json(["result"=>"success"]);
-    }
-
-    public function unCallAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['item_data'=>json_encode(['called'=>0])]);
         return response()->json(["result"=>"success"]);
     }
 
@@ -401,6 +378,5 @@ class AppointmentController extends Controller{
     }
 
     function sendNotification(Request $request){
-
     }
 }

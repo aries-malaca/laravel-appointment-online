@@ -151,6 +151,8 @@ Route::post('/promotion/addPromotion', 'PromotionController@addPromotion');
 Route::patch('/promotion/updatePromotion', 'PromotionController@updatePromotion');
 Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion');
 
+
+
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
@@ -179,4 +181,7 @@ Route::get('/mobile/getRequests/getAllPLCRequestAndApplication', 'MobileApiContr
 
 Route::get('/mobile/getClientTransactions/{clientid}', 'MobileApiController@getClientTransactions');
 Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTransactionAmount');
+
+//get appointment & events by start and end month
+Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
 

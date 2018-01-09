@@ -14,15 +14,17 @@ use App\Config;
 use App\ServicePackage;
 use App\PlcReviewRequest;
 use App\PremierLoyaltyCard;
+use App\Transaction;
+use App\TransactionItem;
+use App\Technician;
 use DateTime;
 use Validator;
 use Hash;
 use DB;
 use Mail;
 use JWTAuth;
-class MobileApiController extends Controller{
 
-    
+class MobileApiController extends Controller{
 
 	public function LoadData(){
 
@@ -680,6 +682,79 @@ class MobileApiController extends Controller{
             return response()->json($object_result);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+
+    //get Appointments & User Events(ex: Summer Vacation remind 3 days before the event)
+    public function getAppointmentsByMonth(Request $request){
+
+        $start_date     = $request->input('start_date');
+        $end_date       = $request->input('end_date');
+        $api            = $this->authenticateAPI();
+        $items_array    = array();
+        if($api['result'] === 'success') {
+            $client_id   = $api['user']['id'];
+            $appointments = Transaction::where('client_id', $client_id)
+                                        ->whereBetween('transaction_datetime', array($start_date, $end_date))->get();
+             foreach($appointments as $key => $value){
+                $branch 								= Branch::find($value['branch_id']);
+                $client 								= User::find($value['client_id']);
+                $technician 							= Technician::find($value['technician_id']);
+                $appointments[$key]['branch_name'] 		= isset($branch)?$branch->branch_name:'N/A';
+                $appointments[$key]['client_name'] 		= $client->username;
+                $appointments[$key]['client_contact'] 	= $client->user_mobile;
+                $appointments[$key]['client_gender'] 	= $client->gender;
+                $appointments[$key]['technician_name'] 	= isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
+                $appointments[$key]['items'] 			= $this->getAppointmentItems($value['id']);
+                $appointments[$key]['transaction_date_formatted'] = date('m/d/Y', strtotime($value['transaction_datetime']));
+                $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
+                $appointments[$key]['transaction_added_formatted']= date('m/d/Y h:i A', strtotime($value['created_at']));
+                $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
+                // $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
+                $appointments[$key]['waiver_data'] = null;
+            }
+            return response()->json($appointments);
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+    }
+
+     //get appointment Items
+    function getAppointmentItems($id){
+        
+        $items = TransactionItem::where('transaction_id', $id)->get()->toArray();
+        foreach($items as $key=>$value){
+            $items[$key]['item_data'] = json_decode($value['item_data']);
+            if($value['item_type'] === 'service'){
+                $service = Service::find($value['item_id']);
+                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
+
+                $service_image = "";
+                if($service->service_type_id !== 0){
+                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
+                }
+                else{
+                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
+                }
+
+                $items[$key]['item_name']       = $service_name;
+                $items[$key]['item_image']      = $service_image;
+                $items[$key]['item_duration']   = $service->service_minutes;
+                $items[$key]['item_info']['gender'] = $service->service_gender;
+            }
+            
+            else{
+                $product       = Product::find($value['item_id']);
+                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
+                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
+                $items[$key]['item_name']            = $product_name;
+                $items[$key]['item_info']['size']    = $product->product_size;
+                $items[$key]['item_info']['variant'] = $product->product_variant;
+                $items[$key]['item_image']           = $product_image;
+            }
+        }
+        return $items;
     }
 
 

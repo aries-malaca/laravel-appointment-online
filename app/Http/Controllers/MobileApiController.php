@@ -10,6 +10,7 @@ use App\Service;
 use App\Product;
 use App\ProductGroup;
 use App\Branch;
+use App\BranchSchedule;
 use App\Config;
 use App\ServicePackage;
 use App\PlcReviewRequest;
@@ -26,102 +27,229 @@ use JWTAuth;
 
 class MobileApiController extends Controller{
 
-	public function LoadData(){
+	public function LoadData(Request $request){
 
-		$response = array();
-		$today    = date('Y-m-d');
+		$response             = array();
+		$date_today           = date('Y-m-d H:i:s');
+        $version_banner       = (double)$request->segment(4);
+        $version_commercial   = (double)$request->segment(5);
+        $version_services     = (double)$request->segment(6);
+        $version_packages     = (double)$request->segment(7);
+        $version_products     = (double)$request->segment(8);
+        $version_branches     = (double)$request->segment(9);
 
-		$advertisement_query  = Config::where("config_name","=","APP_BANNER")
-    							  ->orderBy('created_at')
-                                  ->select('config_value as module_array','config_description as module_version')
-    							  ->get()
-                                  ->first();
-
-        $nav_query            = Config::where("config_name","=","APP_NAVIGATION_BAR")
-                                  ->orderBy('created_at')
-                                  ->select('config_value as module_array','config_description as module_version')
-                                  ->get()
-                                  ->first();
+        $arrayService       = array();
+        $arrayProduct       = array();
+        $arrayPackage       = array();
+        $arrayBanner        = array();
+        $arrayCommercial    = array();
+        $arrayBranch        = array();
 
 
-		$duration_male 		= "";
-		$duration_female 	= "";
-		$price_male 		= "";
-		$price_female 		= "";
-		$gender             = "";	
-		$serv = 1;		  
-		$service_array 		= array();
-		$product_array   	= array();
-        $package_array      = array();
-		$option = array();
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $ifValidToken = false;
+        }
 
-        $price_male       = "";
-        $price_female     = "";
-        $duration_male    = "";
-        $duration_female  = "";
+        if( (double)$this->getBannerVersion() > (double)$version_banner) {
 
-        $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
-                        ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                        ->select('services.*','service_name','package_name','service_description','service_picture')
-                        ->where('services.is_active', 1)
-                        ->where('services.service_type_id',"<>",0);
+            $version_banner = (double)$this->getBannerVersion();
+            $arrayBanner    = Config::where("config_name","=","APP_BANNER")
+                        ->orderBy('created_at')
+                        ->select('config_value as module_array','config_description as module_version')
+                        ->get()
+                        ->first();
+            json_encode($arrayBanner,true);
 
-        $services=$services->get()->toArray();
+        }
+        if( (double)$this->getDataVersions("APP_BRANCH_VERSION") > (double)$version_branches) {
+           
+            $version_branches = (double)$this->getDataVersions("APP_BRANCH_VERSION");
+            $arrayBranch = Branch::leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
+                ->where('branches.is_active', 1)
+                ->select('branches.id as id','branch_name','rooms_count','cluster_data','branch_address','branch_data','services','products', 'branch_contact','map_coordinates','branch_pictures','branch_email','branch_contact','branch_contact_person','rooms_count','payment_methods','welcome_message')
+                ->orderBy('branch_name', 'asc')
+                ->get()->toArray();
 
-        foreach($services as $key=>$value){
-            if($value['service_type_id'] === 0){
-                $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
-                $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
-                $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+            foreach($arrayBranch as $key => $value){
+
+                $arrayBranch[$key]['cluster_data']     = json_decode($value['cluster_data']);
+                $arrayBranch[$key]['services']         = json_decode($value['services']);
+                $arrayBranch[$key]['products']         = json_decode($value['products']);
+                $arrayBranch[$key]['branch_data']      = json_decode($value['branch_data']);
+                $arrayBranch[$key]['map_coordinates']  = json_decode($value['map_coordinates']);
+                $query_schedule                        = BranchSchedule::where('branch_id', $value['id'])
+                                                            ->select('date_start','date_end','schedule_data','schedule_type')
+                                                            ->orderBy('schedule_type')
+                                                            ->get()->toArray();
+                $array_sched = array();                                    
+                foreach($query_schedule as $k=>$v){
+                    
+                    $schedule_type  = $query_schedule[$k]['schedule_type'];
+                    $date_start     = $query_schedule[$k]['date_start'];
+                    $date_end       = $query_schedule[$k]['date_end'];
+                    if($schedule_type == "regular"){
+                        $query_schedule[$k]['schedule_data'] = json_decode($v['schedule_data']);
+                        $array_sched[] = $query_schedule[$k];
+                    }
+                    else{
+                        if(date($date_today) >= date($date_start) && date($date_today) <= date($date_end)){
+                            $query_schedule[$k]['schedule_data'] = json_decode($v['schedule_data']);
+                            $array_sched[] = $query_schedule[$k];
+                        }
+                    }
+                }
+                $arrayBranch[$key]['schedules']  = $array_sched;
             }
         }
-      
-      //packages
-        $data = ServicePackage::where('is_active', 1)->get()->toArray();
-        foreach ($data as $key=>$value){
-            $query  = Service::where('service_package_id','=',$data[$key]['id'])
-                            ->select('service_minutes','service_price','id as service_id')
-                            ->get()
-                            ->first();
-            $data[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
-            $data[$key]['service_duration'] = $query['service_minutes'];
-            $data[$key]['service_price']    = $query['service_price'];
-            $data[$key]['id_service']       = $query['service_id'];
-        } 
-
-
-		//papalitan mamaya
-		$product_query  =  DB::table('products')
-                                    ->leftJoin('product_groups','products.product_group_id','=','product_groups.id')
-                                    ->select('products.*','product_group_name','product_picture', 'product_description')
-                                    ->where('products.is_active', 1)
-                                    ->where('products.product_price', '>',"0")
-                                    ->get();
-        
-
-        foreach ($product_query as $rowProduct) {
-            $product_array[] = array(
-                            'id'                    => $rowProduct->id,
-                            'name'                  => $rowProduct->product_group_name,
-                            'size'                  => $rowProduct->product_size,
-                            'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
-                            'desc'                  => $rowProduct->product_description,
-                            'variant'               => $rowProduct->product_size,
-                            'updated_at'            => $rowProduct->updated_at,
-                            'price'                 => number_format($rowProduct->product_price,2)
-                                );
+        if( (double)$this->getDataVersions("APP_SERVICE_VERSION") > (double)$version_services) {
+    
+            $version_services   = (double)$this->getDataVersions("APP_SERVICE_VERSION");
+            $arrayService       = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
+                                    ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
+                                    ->select('services.*','service_name','package_name','service_description','service_picture')
+                                    ->where('services.is_active', 1)
+                                    ->where('services.service_type_id',"<>",0);
+            $arrayService       = $arrayService->get()->toArray();
+            foreach($arrayService as $key => $value){
+                if($value['service_type_id'] === 0){
+                    $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
+                    $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
+                    $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+                }
+            }
         }
+        if( (double)$this->getDataVersions("APP_PACKAGE_VERSION") > (double)$version_packages) {
         
-        $response['version_carousel']   = $advertisement_query['module_version'];
-        $response['version_navigation'] = $nav_query['module_version'];
-        $response['carousel']           = json_decode($advertisement_query['module_array'],true);
-        $response['navigation']         = json_decode($nav_query['module_array'],true);
-        $response['services']           = $services;
-        $response['package']            = $data;
-        $response['products']           = $product_array;
-        $response['date_today']         = $today;
+            $version_packages   = (double)$this->getDataVersions("APP_PACKAGE_VERSION");
+            $arrayPackage       = ServicePackage::where('is_active', 1)->get()->toArray();
+            foreach ($arrayPackage as $key => $value){
+                $query          = Service::where('service_package_id','=',$arrayPackage[$key]['id'])
+                                    ->select('service_minutes','service_price','id as service_id')
+                                    ->get()
+                                    ->first();
+                $arrayPackage[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
+                $arrayPackage[$key]['service_duration'] = $query['service_minutes'];
+                $arrayPackage[$key]['service_price']    = $query['service_price'];
+                $arrayPackage[$key]['id_service']       = $query['service_id'];
+            } 
+        }
+        if( (double)$this->getDataVersions("APP_PRODUCT_VERSION")  > (double)$version_products) {
+            
+            $version_products   = (double)$this->getDataVersions("APP_PRODUCT_VERSION");
+            $arrayProduct       =  DB::table('products')
+                    ->leftJoin('product_groups','products.product_group_id','=','product_groups.id')
+                    ->select('products.*','product_group_name','product_picture', 'product_description')
+                    ->where('products.is_active', 1)
+                    ->where('products.product_price', '>',"0")
+                    ->get();
+            foreach ($arrayProduct as $rowProduct) {
+                $arrayProduct[] = array(
+                                'id'                    => $rowProduct->id,
+                                'name'                  => $rowProduct->product_group_name,
+                                'size'                  => $rowProduct->product_size,
+                                'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
+                                'desc'                  => $rowProduct->product_description,
+                                'variant'               => $rowProduct->product_size,
+                                'updated_at'            => $rowProduct->updated_at,
+                                'price'                 => number_format($rowProduct->product_price,2)
+                                    );
+            }
+        }
+        if( (double)$this->getDataVersions("APP_COMMERCIAL_VERSION")  > (double)$version_commercial) {
+            $version_commercial   = (double)$this->getDataVersions("APP_COMMERCIAL_VERSION");
+               
+        }
+     
+    
+        // $response['version_carousel']   = $advertisement_query['module_version'];
+        // $response['version_navigation'] = $nav_query['module_version'];
+        $response['arrayBanner']             = $arrayBanner;
+        $response['arrayServices']           = $arrayService;
+        $response['arrayPackage']            = $arrayPackage;
+        $response['arrayProducts']           = $arrayProduct;
+        $response['arrayBranch']             = $arrayBranch;
+        $response['arrayCommercial']         = $arrayCommercial;
+        $response['versions']                = array(
+                            "version_banner"        => $version_banner,
+                            "version_branches"      => $version_branches,
+                            "version_commercial"    => $version_commercial,
+                            "version_services"      => $version_services,
+                            "version_packages"      => $version_packages,
+                            "version_products"      => $version_products,
+                                                );
+        // $response['compare_version_banner']      = $version_banner." - ".$this->getBannerVersion();
+
+        // $response['compare_version_commercial']  = $version_commercial." - ".$this->getDataVersions("APP_COMMERCIAL_VERSION");
+
+        // $response['compare_version_service']     = $version_services." - ".$this->getDataVersions("APP_SERVICE_VERSION");
+        // $response['compare_version_package']     = $version_packages." - ".$this->getDataVersions("APP_PACKAGE_VERSION");
+        // $response['compare_version_product']     = $version_products." - ".$this->getDataVersions("APP_PRODUCT_VERSION");
+        // $response['compare_version_branch']      = $version_branches." - ".$this->getDataVersions("APP_BRANCH_VERSION");
+        // $response['ifValid']                     = $ifValidToken;
+        return response()->json($response);
+
+
 		
-		return response()->json($response);
+
+  //       $nav_query            = Config::where("config_name","=","APP_NAVIGATION_BAR")
+  //                                 ->orderBy('created_at')
+  //                                 ->select('config_value as module_array','config_description as module_version')
+  //                                 ->get()
+  //                                 ->first();
+
+
+		// $duration_male 		= "";
+		// $duration_female 	= "";
+		// $price_male 		= "";
+		// $price_female 		= "";
+		// $gender             = "";	
+		// $serv = 1;		  
+		// $service_array 		= array();
+		// $product_array   	= array();
+  //       $package_array      = array();
+		// $option = array();
+
+  //       $price_male       = "";
+  //       $price_female     = "";
+  //       $duration_male    = "";
+  //       $duration_female  = "";
+
+  //       $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
+  //                       ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
+  //                       ->select('services.*','service_name','package_name','service_description','service_picture')
+  //                       ->where('services.is_active', 1)
+  //                       ->where('services.service_type_id',"<>",0);
+
+  //       $services=$services->get()->toArray();
+
+  //       foreach($services as $key=>$value){
+  //           if($value['service_type_id'] === 0){
+  //               $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
+  //               $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
+  //               $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+  //           }
+  //       }
+      
+  //     
+
+
+		
+        
+  //       $response['version_carousel']   = $advertisement_query['module_version'];
+  //       $response['version_navigation'] = $nav_query['module_version'];
+  //       $response['carousel']           = json_decode($advertisement_query['module_array'],true);
+  //       $response['navigation']         = json_decode($nav_query['module_array'],true);
+  //       $response['services']           = $services;
+  //       $response['package']            = $data;
+  //       $response['products']           = $product_array;
+  //       $response['date_today']         = $today;
+		
+		// return response()->json($response);
+
+
+
+
 	}
 
 	public function getUser(){
@@ -756,6 +884,26 @@ class MobileApiController extends Controller{
         }
         return $items;
     }
+
+    public function getBannerVersion(){
+
+        $query  = Config::where("config_name","=","APP_BANNER")
+                          ->orderBy('created_at')
+                          ->select('config_description')
+                          ->get()
+                          ->first();
+        return (double)$query['config_description'];
+    }
+
+    public function getDataVersions($type_name){
+
+        $query  = Config::where("config_name","=",$type_name)
+                          ->select('config_value')
+                          ->get()
+                          ->first();
+        return (double)$query['config_value'];
+    }
+
 
 
 

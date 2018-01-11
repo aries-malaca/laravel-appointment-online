@@ -160,8 +160,9 @@ Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion')
 // 192.168.1.225/api/user/getUsers?token=token_value
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
 
+//Load this every splashscreens
+Route::get('/mobile/getFirstLoadDetails/{version_banner}/{version_commercial}/{version_services}/{version_packages}/{version_products}/{version_branches}', 'MobileApiController@LoadData');
 
-Route::get('/mobile/getFirstLoadDetails', 'MobileApiController@LoadData');
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
 
 Route::patch('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');

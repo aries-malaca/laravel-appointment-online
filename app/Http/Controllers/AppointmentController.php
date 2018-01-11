@@ -15,7 +15,7 @@ use App\ProductGroup;
 
 class AppointmentController extends Controller{
     public function addAppointment(Request $request){
-        
+
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'client' => 'required',

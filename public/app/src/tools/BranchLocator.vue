@@ -58,10 +58,10 @@
                 markers:[],
                 infos:[],
                 filter_nearby:true,
-                toggle:false,
                 client:{},
                 default_branch:{},
-                current_window:false
+                current_window:false,
+                toggle:false,
             }
         },
         methods:{

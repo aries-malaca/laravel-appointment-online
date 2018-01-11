@@ -7,7 +7,7 @@ use Validator;
 
 class RegionController extends Controller{
     public function getRegions(){
-        return response()->json(Region::get());
+        return response()->json(Region::orderBy('region_order')->get());
     }
 
     public function addRegion(Request $request){

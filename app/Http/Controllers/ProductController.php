@@ -109,6 +109,7 @@ class ProductController extends Controller{
             $product = new ProductGroup;
             $product->product_group_name = $request->input('product_group_name');
             $product->product_description = $request->input('product_description');
+            $product->instructions = $request->input('instructions');
             $product->product_picture = 'no photo.jpg';
             $product->is_active = 1;
             $product->save();
@@ -131,6 +132,7 @@ class ProductController extends Controller{
 
             $product = ProductGroup::find($request->input('id'));
             $product->product_group_name = $request->input('product_group_name');
+            $product->instructions = $request->input('instructions');
             $product->product_description = $request->input('product_description');
             $product->is_active = 1;
             $product->save();

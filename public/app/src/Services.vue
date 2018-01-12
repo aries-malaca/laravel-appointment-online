@@ -300,10 +300,17 @@
                             <div class="col-md-7">
                                 <div class="form-group">
                                     <label class="control-label">Product Description</label>
-                                    <textarea v-model="newProductGroup.product_description" class="form-control"></textarea>
+                                    <textarea v-model="newProductGroup.product_description" rows="3" class="form-control"></textarea>
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="control-label">How To use</label>
+                                <textarea v-model="newProductGroup.instructions" rows="3" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <br/>
                         <div class="row" v-if="newProductGroup.id !=0">
                             <div class="col-md-12">
                                 <upload-form :token="token" input_id="product_file" form_id="product_form" category="product"
@@ -505,7 +512,8 @@
                     id:0,
                     product_group_name:'',
                     product_description:'',
-                    product_picture:''
+                    product_picture:'',
+                    instructions:''
                 };
                 $("#add-product-group-modal").modal("show");
                 try{
@@ -600,6 +608,7 @@
                     product_group_name:product.product_group_name,
                     product_description:product.product_description,
                     product_picture:product.product_picture,
+                    instructions:product.instructions,
                 };
                 $("#add-product-group-modal").modal("show");
                 try{

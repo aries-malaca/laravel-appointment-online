@@ -10,11 +10,11 @@ class ProductController extends Controller{
     public function getProducts(Request $request){
         if($request->segment(4)=='active')
             return response()->json(Product::leftJoin('product_groups','products.product_group_id','=','product_groups.id')
-                                    ->select('products.*','product_group_name','product_picture', 'product_description')
+                                    ->select('products.*','product_group_name','product_picture', 'product_description','instructions')
                                     ->where('products.is_active', 1)->get());
 
         return response()->json(Product::leftJoin('product_groups','products.product_group_id','=','product_groups.id')
-                                        ->select('products.*','product_group_name','product_picture', 'product_description')
+                                        ->select('products.*','product_group_name','product_picture', 'product_description','instructions')
                                         ->get());
     }
 

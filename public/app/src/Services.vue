@@ -476,7 +476,7 @@
                 .then(function (response) {
                     if(response.data.item_id !== undefined) {
                         if (type == 'product' && response.data.gender == null) {
-                            if(!confirm("Product has found in BOSS Server. Do you want to auto-ill fields?"))
+                            if(!confirm("Product has found in BOSS Server ("+ response.data.item_name +"). Do you want to auto-ill fields?"))
                                 return false;
 
                             u.newProduct.product_code = response.data.item_code;
@@ -487,7 +487,7 @@
                         }
 
                         if (type == 'service' && response.data.gender != null) {
-                            if(!confirm("Service has found in BOSS Server. Do you want to auto-ill fields?"))
+                            if(!confirm("Service has found in BOSS Server ("+ response.data.item_name +"). Do you want to auto-ill fields?"))
                                 return false;
 
                             u.newService.service_code = response.data.item_code;

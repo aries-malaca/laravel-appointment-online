@@ -19,6 +19,8 @@ class QueuingController extends Controller{
             return view('queuing.web', $data);
         elseif($request->segment(2) == 'radio')
             return view('queuing.radio', $data);
+        elseif($request->segment(2) == 'mobile')
+            return view('queuing.mobile', $data);
 
         return view('errors/404');
     }

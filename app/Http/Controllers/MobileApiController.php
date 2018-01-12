@@ -38,12 +38,12 @@ class MobileApiController extends Controller{
         $version_products     = (double)$request->segment(8);
         $version_branches     = (double)$request->segment(9);
 
-        $arrayService       = array();
-        $arrayProduct       = array();
-        $arrayPackage       = array();
-        $arrayBanner        = array();
-        $arrayCommercial    = array();
-        $arrayBranch        = array();
+        $arrayService         = array();
+        $arrayProduct         = array();
+        $arrayPackage         = array();
+        $arrayBanner          = array();
+        $arrayCommercial      = array();
+        $arrayBranch            = array();
 
 
         $api = $this->authenticateAPI();
@@ -55,12 +55,11 @@ class MobileApiController extends Controller{
 
             $version_banner = (double)$this->getBannerVersion();
             $arrayBanner    = Config::where("config_name","=","APP_BANNER")
-                        ->orderBy('created_at')
-                        ->select('config_value as module_array','config_description as module_version')
-                        ->get()
-                        ->first();
-            json_encode($arrayBanner,true);
-
+                                ->orderBy('created_at')
+                                ->select('config_value')
+                                ->get()
+                                ->first();
+            $arrayBanner   = json_decode($arrayBanner['config_value'],true);
         }
         if( (double)$this->getDataVersions("APP_BRANCH_VERSION") > (double)$version_branches) {
            
@@ -142,19 +141,20 @@ class MobileApiController extends Controller{
                     ->select('products.*','product_group_name','product_picture', 'product_description')
                     ->where('products.is_active', 1)
                     ->where('products.product_price', '>',"0")
-                    ->get();
-            foreach ($arrayProduct as $rowProduct) {
-                $arrayProduct[] = array(
-                                'id'                    => $rowProduct->id,
-                                'name'                  => $rowProduct->product_group_name,
-                                'size'                  => $rowProduct->product_size,
-                                'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
-                                'desc'                  => $rowProduct->product_description,
-                                'variant'               => $rowProduct->product_size,
-                                'updated_at'            => $rowProduct->updated_at,
-                                'price'                 => number_format($rowProduct->product_price,2)
-                                    );
-            }
+                    ->get()
+                    ->toArray();
+            // foreach ($arrayProduct as $rowProduct) {
+            //     $arrayProduct[] = array(
+            //                     'id'                    => $rowProduct->id,
+            //                     'name'                  => $rowProduct->product_group_name,
+            //                     'size'                  => $rowProduct->product_size,
+            //                     'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
+            //                     'desc'                  => $rowProduct->product_description,
+            //                     'variant'               => $rowProduct->product_size,
+            //                     'updated_at'            => $rowProduct->updated_at,
+            //                     'price'                 => number_format($rowProduct->product_price,2)
+            //                         );
+            // }
         }
         if( (double)$this->getDataVersions("APP_COMMERCIAL_VERSION")  > (double)$version_commercial) {
             $version_commercial   = (double)$this->getDataVersions("APP_COMMERCIAL_VERSION");
@@ -178,79 +178,21 @@ class MobileApiController extends Controller{
                             "version_packages"      => $version_packages,
                             "version_products"      => $version_products,
                                                 );
-        // $response['compare_version_banner']      = $version_banner." - ".$this->getBannerVersion();
-
-        // $response['compare_version_commercial']  = $version_commercial." - ".$this->getDataVersions("APP_COMMERCIAL_VERSION");
-
-        // $response['compare_version_service']     = $version_services." - ".$this->getDataVersions("APP_SERVICE_VERSION");
-        // $response['compare_version_package']     = $version_packages." - ".$this->getDataVersions("APP_PACKAGE_VERSION");
-        // $response['compare_version_product']     = $version_products." - ".$this->getDataVersions("APP_PRODUCT_VERSION");
-        // $response['compare_version_branch']      = $version_branches." - ".$this->getDataVersions("APP_BRANCH_VERSION");
-        // $response['ifValid']                     = $ifValidToken;
         return response()->json($response);
-
-
-		
-
-  //       $nav_query            = Config::where("config_name","=","APP_NAVIGATION_BAR")
-  //                                 ->orderBy('created_at')
-  //                                 ->select('config_value as module_array','config_description as module_version')
-  //                                 ->get()
-  //                                 ->first();
-
-
-		// $duration_male 		= "";
-		// $duration_female 	= "";
-		// $price_male 		= "";
-		// $price_female 		= "";
-		// $gender             = "";	
-		// $serv = 1;		  
-		// $service_array 		= array();
-		// $product_array   	= array();
-  //       $package_array      = array();
-		// $option = array();
-
-  //       $price_male       = "";
-  //       $price_female     = "";
-  //       $duration_male    = "";
-  //       $duration_female  = "";
-
-  //       $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
-  //                       ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-  //                       ->select('services.*','service_name','package_name','service_description','service_picture')
-  //                       ->where('services.is_active', 1)
-  //                       ->where('services.service_type_id',"<>",0);
-
-  //       $services=$services->get()->toArray();
-
-  //       foreach($services as $key=>$value){
-  //           if($value['service_type_id'] === 0){
-  //               $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
-  //               $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
-  //               $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
-  //           }
-  //       }
-      
-  //     
-
-
-		
-        
-  //       $response['version_carousel']   = $advertisement_query['module_version'];
-  //       $response['version_navigation'] = $nav_query['module_version'];
-  //       $response['carousel']           = json_decode($advertisement_query['module_array'],true);
-  //       $response['navigation']         = json_decode($nav_query['module_array'],true);
-  //       $response['services']           = $services;
-  //       $response['package']            = $data;
-  //       $response['products']           = $product_array;
-  //       $response['date_today']         = $today;
-		
-		// return response()->json($response);
-
-
-
-
 	}
+
+    public function getAppVersion(Request $request){
+
+        $app_version     = (double)$request->segment(3);
+        $array           = Config::where("config_name","=","APP_ANDROID_VERSION")
+                            ->orderBy('created_at')
+                            ->select('config_value as version')
+                            ->get()
+                            ->first();
+        $version         =  (double)$array['version'];   
+        $response['version'] = $version;              
+        return response()->json($response);
+    }
 
 	public function getUser(){
         $api = $this->authenticateAPI();

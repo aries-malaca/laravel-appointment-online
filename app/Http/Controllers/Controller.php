@@ -46,7 +46,6 @@ class Controller extends BaseController{
                 }
             }
         }
-
         return ["result"=>"failed","error"=>"token_not_found" ,"status_code"=>401];
     }
 

@@ -161,7 +161,7 @@ Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion')
 // String url = 192.168.1.225/api/user/getUsers?token=token_value
 
 //Load this every splashscreens
-Route::get('/mobile/getAppVersion/{version}', 'MobileApiController@getAppVersion');
+Route::get('/mobile/getAppVersion/{getVersionOffline}/{getVersionOnline}/{deviceType}/{deviceName}', 'MobileApiController@getAppVersion');
 Route::get('/mobile/getFirstLoadDetails/{version_banner}/{version_commercial}/{version_services}/{version_packages}/{version_products}/{version_branches}', 'MobileApiController@LoadData');
 
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
@@ -180,7 +180,7 @@ Route::patch('/mobile/updateTerms', 'MobileApiController@updateTerms');
 Route::get('/mobile/getPackageWithDescription/{flag}', 'MobileApiController@getPackageWithDescription');
 Route::get('/mobile/getServices/{flag}', 'MobileApiController@getServices');
 Route::get('/mobile/getServices/', 'MobileApiController@getServices');
-Route::get('/mobile/getPLCDetails/{clientid}/{ifAll}', 'PremierController@getPLCDetails');
+Route::get('/mobile/getPLCDetails/{ifAll}', 'PremierController@getPLCDetails');
 Route::get('/mobile/getRequests/getAllPLCRequestAndApplication', 'MobileApiController@getPLCAllLogs');
 
 Route::get('/mobile/getClientTransactions/{clientid}', 'MobileApiController@getClientTransactions');

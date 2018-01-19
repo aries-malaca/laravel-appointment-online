@@ -183,18 +183,36 @@ class MobileApiController extends Controller{
 
     public function getAppVersion(Request $request){
 
-        $app_version     = (double)$request->segment(3);
-        $array           = Config::where("config_name","=","APP_ANDROID_VERSION")
-                            ->orderBy('created_at')
-                            ->select('config_value as version')
-                            ->get()
-                            ->first();
-        $version         =  (double)$array['version'];   
-        $response['version'] = $version;              
+        $api                        = $this->authenticateAPI();
+        $isValidToken               = false;
+        $currentAppVersion          = $request->segment(4);
+        $currentOnlineVersion       = $request->segment(5);
+        $deviceType                 = $request->segment(6);
+        $deviceName                 = $request->segment(7);
+        $response                   = array();
+        $response['arrayProfile']   = array();
+
+        if($api['result'] === 'success'){
+            $isValidToken = true;
+            $response['arrayProfile'] = $api['user'];
+        }
+        //comment because I testing the play store version code
+        // $app_version     = (double)$request->segment(3);
+        // $array           = Config::where("config_name","=","APP_ANDROID_VERSION")
+        //                     ->orderBy('created_at')
+        //                     ->select('config_value as version')
+        //                     ->get()
+        //                     ->first();
+        // $version         =  (double)$array['version'];   
+        // $response['app_version']    = $version;
+        $response['isValidToken'] = $isValidToken;
         return response()->json($response);
+
+
     }
 
 	public function getUser(){
+        
         $api = $this->authenticateAPI();
         $response = array();
 
@@ -225,22 +243,23 @@ class MobileApiController extends Controller{
             // file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
 			// $total_discount		= "190";
 			// $total_transaction  = "5520";
-        	$response[] = array(
-        					"id" 				=> $rowUsers->id,
-        					"fname" 			=> ucfirst($rowUsers->first_name),
-        					"mname" 			=> ucfirst($rowUsers->middle_name),
-        					"lname" 			=> ucfirst($rowUsers->last_name),
-        					"address" 			=> ucwords($rowUsers->user_address),
-        					"bday" 				=> $bday->format("m/d/Y"),
-        					"mobile" 			=> $rowUsers->user_mobile,
-        					"email" 			=> $email,
-        					"cusgender" 		=> $rowUsers->gender,
-        					"branch" 			=> $rowUsers->branch,
-        					"image" 			=> str_replace(" ","%20",$rowUsers->user_picture),
-        					"terms" 			=> $rowUsers->is_agreed,
-        					"total_transaction" => number_format((int)($total_transaction),2),
-        					"total_discount" 	=> number_format((int)($total_discount),2),
-        						);
+            $response = $api['user'];
+        	// $response[] = array(
+        	// 				"id" 				=> $rowUsers->id,
+        	// 				"fname" 			=> ucfirst($rowUsers->first_name),
+        	// 				"mname" 			=> ucfirst($rowUsers->middle_name),
+        	// 				"lname" 			=> ucfirst($rowUsers->last_name),
+        	// 				"address" 			=> ucwords($rowUsers->user_address),
+        	// 				"bday" 				=> $bday->format("m/d/Y"),
+        	// 				"mobile" 			=> $rowUsers->user_mobile,
+        	// 				"email" 			=> $email,
+        	// 				"cusgender" 		=> $rowUsers->gender,
+        	// 				"branch" 			=> $rowUsers->branch,
+        	// 				"image" 			=> str_replace(" ","%20",$rowUsers->user_picture),
+        	// 				"terms" 			=> $rowUsers->is_agreed,
+        	// 				"total_transaction" => number_format((int)($total_transaction),2),
+        	// 				"total_discount" 	=> number_format((int)($total_discount),2),
+        	// 					);
 
             return response()->json($response,$api["status_code"]);
         }
@@ -353,6 +372,7 @@ class MobileApiController extends Controller{
     }
 
     public function uploadUserImage(Request $request){
+
     	$api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 
@@ -362,7 +382,21 @@ class MobileApiController extends Controller{
             $clientID   		= $request->input('upload_client_id');
             $image 				= $request->input('upload_image');
 
-            $filename = $clientID . '_' . time().'.jpg';
+            if($image === null)
+                return response()->json(["result"=>"failed","error"=>"No ID to be uploaded."], 400);
+
+            
+            list($type, $image) = explode(';',$image);
+            list(,$image)       = explode(',', $image);
+
+            if($type == 'data:image/jpeg')
+                $ext = 'jpg';
+            elseif($type == 'data:image/png')
+                $ext = 'png';
+            else
+                return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
+
+            $filename = $clientID . '_' . time().".".$ext;
             $image = base64_decode($image);
             file_put_contents(public_path('images/users/'). $filename, $image );
            
@@ -374,8 +408,9 @@ class MobileApiController extends Controller{
             $user->user_picture = $filename;
             $user->save();
 
-            return response()->json(["result"=>"success"],200);
+            return response()->json(["result"=>"success","imageDirectory" => $filename],200);
     	}
+        return response()->json(["result"=>"failed","error"=>"No "], 400);
 	}
 
 	public function registerUser(Request $request){
@@ -466,17 +501,20 @@ class MobileApiController extends Controller{
 
             $token    = JWTAuth::fromUser($user);
             $this->registerToken($clientID, $token,$device,$device_name);
-            $array_response         = array( 
-                            "result"        =>  "success",
-                            "isFacebook"    =>   true,
-                            "image"         =>  $filename,
-                            "token"         =>  $token,
-                            "client_id"     =>  $clientID
-                                );
-
-            $user    = User::find($clientID);
+            
+            $user     = User::find($clientID);
             $user->user_picture = $filename;   
             $user->save();
+
+            $array_response         = array( 
+                            "result"        =>  "success",
+                            "isFacebook"    =>  true,
+                            "image"         =>  $filename,
+                            "token"         =>  $token,
+                            "client_id"     =>  $clientID,
+                            "client_data"   =>  $user->toArray()
+                                );
+            
             
             return response()->json($array_response);
         }
@@ -567,9 +605,9 @@ class MobileApiController extends Controller{
         $branch_name        = ""; 
 
         $user_fb_login_query = User::where('user_data','LIKE', '%"facebook_id":"'.$facebook_id.'"%')
-                                 ->where('email','=',$email)
-                                 ->get()
-                                 ->first();
+                                    ->where('email','=',$email)
+                                    ->get()
+                                    ->first();
         if($email != ""){
             $user_fb_login_query  = User::where('email','=',$email)
                                   ->get()
@@ -589,37 +627,25 @@ class MobileApiController extends Controller{
             $client->last_login     = date('Y-m-d H:i:s');
             $client->is_confirmed   = 1;
             $client->save();
-            $query_branch = DB::table('branches')
-                                    ->where('id','=',$branch_id)
-                                    ->get()  
-                                    ->first();                                     
-            $branch_name  = $query_branch->branch_name;
-            $objResult = array(
-                        "clientID"              => $clientID,
-                        "first_name"            => $user_fb_login_query->first_name,
-                        "middle_name"           => $user_fb_login_query->middle_name,
-                        "last_name"             => $user_fb_login_query->last_name,
-                        "email"                 => $user_fb_login_query->email,
-                        "address"               => $user_fb_login_query->user_address,
-                        "gender"                => strtolower($user_fb_login_query->gender),
-                        "image"                 => $user_fb_login_query->user_picture,
-                        "birthday"              => $user_fb_login_query->birth_date,
-                        "mobile"                => $user_fb_login_query->user_mobile,
-                        "terms"                 => $user_fb_login_query->is_agreed,
-                        "branch_id"             => $branch_id,
-                        "branch_name"           => $branch_name,
-                        "total_transaction"     => "5500",
-                        "total_discount"        => "340",
-                        "token"                 => $token 
-                        );
+            $query_branch           = DB::table('branches')
+                                        ->where('id','=',$branch_id)
+                                        ->get()  
+                                        ->first();                                     
+            $branch_name    = $query_branch->branch_name;
+        
              return response()->json([
                         "result"        =>"success",
                         "isAlready"     => true,
-                        "objResult"     => $objResult
+                        "token"         => $token,
+                        "objResult"     => $user_fb_login_query
                     ]);
         }
         else{
-            return response()->json(['result'=>'success',"isAlready"=> false, "error" => "Email not found. Redirecting.."]);
+            return response()->json([
+                            "result"    =>" success",
+                            "isAlready" => false, 
+                            "objResult" => $user_fb_login_query,
+                            "error"     => "Email not found. Redirecting.."]);
         }
         return response()->json(['result'=>'failed', "error" => "Cannot proceed to login to facebook"],400);
     }

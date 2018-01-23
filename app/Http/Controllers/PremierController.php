@@ -8,7 +8,7 @@ use App\Branch;
 use Mail;
 use Validator;
 use Excel;
-
+use App\PlcReviewRequest;
 class PremierController extends Controller{
     function getPremiers(Request $request){
         if($request->segment(4) != 'all')
@@ -251,28 +251,52 @@ class PremierController extends Controller{
 
     //mobile - usage
     function getPLCDetails(Request $request){
-        $client_id  = $request->segment(4);
-        $ifAll      = $request->segment(5);
 
-        if ($ifAll == "false") {
-            $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get()->first();
-            if (isset($premiers['id'])) {
-                $branch = Branch::find($premiers['branch_id']);
-                $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
-                $premiers['branch_name'] = $branch_name;
-                $premiers['plc_data'] = json_decode($premiers['plc_data']);
-                $premiers['date_applied'] = date('m/d/Y', strtotime($premiers['created_at']));
+        $api = $this->authenticateAPI();
+        $ifAll      = $request->segment(4);
+        if($api['result'] === 'success'){
+            $client_id  = $api['user']['id'];
+            $response   = array();
+            if ($ifAll == "false") {
+                $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get()->first();
+                if (isset($premiers['id'])) {
+                    $branch = Branch::find($premiers['branch_id']);
+                    $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
+                    $premiers['branch_name'] = $branch_name;
+                    $premiers['plc_data'] = json_decode($premiers['plc_data']);
+                    $premiers['date_applied'] = date('m/d/Y', strtotime($premiers['created_at']));
+                }
+            } 
+            else {
+                $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get();
+                foreach ($premiers as $key => $value) {
+                    $branch = Branch::find($value['branch_id']);
+                    $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
+                    $premiers[$key]['branch_name'] = $branch_name;
+                    $premiers[$key]['plc_data'] = json_decode($value['plc_data']);
+                    $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+                }
             }
-        } else {
-            $premiers = PremierLoyaltyCard::where('client_id', '=', $client_id)->orderBy('created_at', 'DESC')->get();
-            foreach ($premiers as $key => $value) {
-                $branch = Branch::find($value['branch_id']);
-                $branch_name = isset($branch->id) ? $branch->branch_name : 'N/A';
-                $premiers[$key]['branch_name'] = $branch_name;
-                $premiers[$key]['plc_data'] = json_decode($value['plc_data']);
-                $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
+            $data = PlcReviewRequest::where('client_id', $client_id)->get()->toArray();
+            foreach($data as $key=>$value){
+                $client = User::find($value['client_id']);
+                $data[$key]['name'] = ($client->id?$client->username:'');
+                $data[$key]['status_html'] = '<span class="badge '.($value['status']=='pending'?'badge-info':'badge-success').'">'. $value['status'] .'</span>';
+                $user = User::find($value['updated_by_id']);
+                $data[$key]['updated_by'] =  (isset($user->id)?$user->username:'');
+                $data[$key]['processed_date_formatted'] =  isset($value['processed_date'])?date('m/d/Y',strtotime($value['processed_date'])):'';
             }
-        }
-        return response()->json($premiers);
+
+            $response["application"] = $premiers;
+            $response["request"]     = $data;
+            return response()->json($response);
+       }
+       return response()->json($api, $api["status_code"]);
     }
+
+
+
+
+
+
 }

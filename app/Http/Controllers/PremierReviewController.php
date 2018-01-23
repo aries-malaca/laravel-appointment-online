@@ -68,7 +68,6 @@ class PremierReviewController extends Controller{
                 $data[$key]['updated_by'] =  (isset($user->id)?$user->username:'');
                 $data[$key]['processed_date_formatted'] =  isset($value['processed_date'])?date('m/d/Y',strtotime($value['processed_date'])):'';
             }
-
             return response()->json($data);
         }
         return response()->json($api, $api["status_code"]);

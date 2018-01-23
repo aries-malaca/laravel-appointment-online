@@ -20,7 +20,110 @@ class PromotionController extends Controller{
         return response()->json($data);
     }
 
-    function addPromotion(){
+    function getPerks(){
+        return array();
+    }
 
+    function getSurveys(){
+        return array();
+    }
+
+    function addPromotion(Request $request){
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'title' => 'required|max:255',
+                'type' => 'required|in:promo,display',
+            ]);
+
+            $promo = new Promotion;
+            $promo->title = $request->input('title');
+            $promo->type = $request->input('type');
+            $promo->description = $request->input('description');
+            $promo->promo_picture = 'no photo.jpg';
+            $promo->date_start = $request->input('date_start');
+            $promo->date_end = $request->input('date_end');
+            $promo->branches = '[0]';
+            $promo->is_active = 1;
+            $promo->promotions_data = '{}';
+            $promo->posted_by_id = $api['user']['id'];
+            $promo->save();
+
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updatePromotion(Request $request){
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success'){
+            $validator = Validator::make($request->all(), [
+                'title' => 'required|max:255',
+                'type' => 'required|in:promo,display',
+            ]);
+
+            $promo = Promotion::find($request->input('id'));
+            $promo->title = $request->input('title');
+            $promo->type = $request->input('type');
+            $promo->description = $request->input('description');
+            $promo->date_start = $request->input('date_start');
+            $promo->date_end = $request->input('date_end');
+            $promo->branches = '[0]';
+            $promo->is_active = 1;
+            $promo->promotions_data = '{}';
+            $promo->posted_by_id = $api['user']['id'];
+            $promo->save();
+
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function addPerk(Request $request){
+
+    }
+
+    function addSurvey(Request $request){
+
+    }
+
+    public function uploadPicture(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            //valid extensions
+            $valid_ext = array('jpeg', 'gif', 'png', 'jpg');
+            //check if the file is submitted
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $ext = $file->getClientOriginalExtension();
+
+                //check if extension is valid
+                if (in_array($ext, $valid_ext)) {
+                    $timestamp = time().'.'.$ext ;
+                    $file->move('images/promotions/', $request->input('promo_id') . '_' . $timestamp);
+                    $promo = Promotion::find($request->input('promo_id'));
+
+                    if($promo->promo_picture != 'no photo.jpg')
+                        if(file_exists(public_path('/images/promotions/'.$promo->promo_picture)))
+                            unlink(public_path('/images/promotions/'.$promo->promo_picture));
+
+                    $promo->promo_picture = $request->input('promo_id') . '_' . $timestamp;
+                    $promo->save();
+                    return response()->json(["result"=>"success"],200);
+                }
+                return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
+            }
+            return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
+        }
+
+        return response()->json($api, $api["status_code"]);
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNewsFeedsTable extends Migration
+class CreateSurveysTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreateNewsFeedsTable extends Migration
      */
     public function up()
     {
-        Schema::create('news_feeds', function (Blueprint $table) {
+        Schema::create('surveys', function (Blueprint $table) {
             $table->increments('id');
-            $table->text('content');
-            $table->text('news_feed_data');
-            $table->string('content_type');
-            $table->integer('posted_by_id');
             $table->timestamps();
         });
     }
@@ -30,6 +26,6 @@ class CreateNewsFeedsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('news_feeds');
+        Schema::dropIfExists('surveys');
     }
 }

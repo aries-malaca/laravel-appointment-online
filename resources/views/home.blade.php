@@ -32,6 +32,8 @@
         <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile-2.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/pages/css/portfolio.min.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/bootstrap-summernote/summernote.css" rel="stylesheet" type="text/css" />
         <link rel="icon" type="image/png" href="favicon.png">
         <title>Laybare Online</title>
     </head>
@@ -70,6 +72,7 @@
     <script src="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-tabdrop/js/bootstrap-tabdrop.js" type="text/javascript"></script>
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
+    <script src="../../theme/global/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
     <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
@@ -77,6 +80,7 @@
     <script type="text/javascript" src="../../js/croppie.js"></script>
     <script type="text/javascript" src="../../js/signature_pad.js"></script>
     <script type="text/javascript" src="../../js/chat.js"></script>
+    <script src="../../theme/global/plugins/bootstrap-summernote/summernote.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
     <script src="../../theme/pages/scripts/components-bootstrap-switch.min.js" type="text/javascript"></script>

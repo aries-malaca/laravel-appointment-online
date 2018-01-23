@@ -406,15 +406,15 @@ class UserController extends Controller{
     public function destroyToken(Request $request){
         $user = User::find($request->input('user_id'));
         $tokens = json_decode($user->device_data, true);
-
+        $new_tokens = array();
         if(sizeof($tokens) == 0)
             $user->device_data = json_encode(array());
         else{
             foreach ($tokens as $t=>$v){
-                if($v['token'] == $request->input('token'))
-                    unset($tokens[$t]);
+                if($v['token']!= $request->input('token'))
+                    $new_tokens[] = $v;
             }
-            $user->device_data = json_encode($tokens);
+            $user->device_data = json_encode($new_tokens);
         }
         $user->save();
 

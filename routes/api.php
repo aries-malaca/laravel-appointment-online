@@ -149,10 +149,11 @@ Route::post('/career/deleteCareer', 'CareerController@deleteCareer');
 Route::patch('/career/moveCareer', 'CareerController@moveCareer');
 
 Route::get('/promotion/getPromotions', 'PromotionController@getPromotions');
+Route::get('/promotion/getPerks', 'PromotionController@getPerks');
 Route::post('/promotion/addPromotion', 'PromotionController@addPromotion');
 Route::patch('/promotion/updatePromotion', 'PromotionController@updatePromotion');
 Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion');
-
+Route::post('/promotion/uploadPicture', 'PromotionController@uploadPicture');
 
 
 //mobile

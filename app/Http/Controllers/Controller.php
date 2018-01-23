@@ -41,13 +41,28 @@ class Controller extends BaseController{
             foreach($tokens as $key=>$value){
                 if($parsed == $value['token']){
                     // token is valid and update the last activity
-                    User::where('id', $user['id'])->update(['last_activity'=>date('Y-m-d H:i')]);
+                    $this->updateToken($value['token'], $user);
                     return ["result"=>"success", "user"=>$user, "status_code"=>200];
                 }
             }
         }
 
         return ["result"=>"failed","error"=>"token_not_found" ,"status_code"=>401];
+    }
+
+    function updateToken($token, $user){
+        User::where('id', $user['id'])->update(['last_activity'=>date('Y-m-d H:i')]);
+
+        $u = User::find($user['id']);
+        $data = json_decode($u->device_data,true);
+        foreach($data as $key=>$value){
+            if($value['token'] == $token) {
+                $data[$key]['last_activity'] = date('Y-m-d H:i');
+                $u->device_data = json_encode($data);
+            }
+        }
+
+        $u->save();
     }
 
     public function getUserMenus($user){
@@ -95,6 +110,12 @@ class Controller extends BaseController{
         return $dash_str;
     }
 
+    /**
+     * @param $user_id
+     * @param $token
+     * @param string $type
+     * @param null $device_info
+     */
     public function registerToken($user_id, $token, $type='WEB', $device_info=null){
         if($type == 'WEB'){
             $device_info = $_SERVER['HTTP_USER_AGENT'];

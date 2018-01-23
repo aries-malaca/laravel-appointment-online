@@ -185,30 +185,52 @@ class MobileApiController extends Controller{
 
         $api                        = $this->authenticateAPI();
         $isValidToken               = false;
+        $app_version                = (double)$request->segment(3);
         $currentAppVersion          = $request->segment(4);
-        $currentOnlineVersion       = $request->segment(5);
         $deviceType                 = $request->segment(6);
         $deviceName                 = $request->segment(7);
+        $user_token                 = $_GET["token"];
         $response                   = array();
         $response['arrayProfile']   = array();
-
+        $ifUpdated                  = false;
         if($api['result'] === 'success'){
-            $isValidToken = true;
-            $response['arrayProfile'] = $api['user'];
+            $client_id      = $api['user']['id'];
+            $isValidToken   = true;
+            $user           = User::find($client_id);
+            $tokenResults   = json_decode($user->device_data, true);
+
+            for($x = 0; $x < count($tokenResults); $x++){
+                $fetchToken     = $tokenResults[$x]["token"];
+                $dateRegistered = $tokenResults[$x]["registered"];
+                if($fetchToken == $user_token){
+                    $tokenResults[$x]["token"]           = $user_token;
+                    $tokenResults[$x]["type"]            = $deviceType;
+                    $tokenResults[$x]["last_activity"]   = date('Y-m-d H:i');
+                    $tokenResults[$x]["device_info"]     = $deviceName;
+                    $tokenResults[$x]["registered"]      = $dateRegistered;
+                    $user->device_data               = json_encode($tokenResults);
+                    $user->save();
+                    break;
+                }
+                else{
+                    continue;
+                }
+            }
+            $response['arrayProfile']   = $api['user'];
         }
-        //comment because I testing the play store version code
-        // $app_version     = (double)$request->segment(3);
-        // $array           = Config::where("config_name","=","APP_ANDROID_VERSION")
-        //                     ->orderBy('created_at')
-        //                     ->select('config_value as version')
-        //                     ->get()
-        //                     ->first();
-        // $version         =  (double)$array['version'];   
-        // $response['app_version']    = $version;
-        $response['isValidToken'] = $isValidToken;
+
+        $array           = Config::where("config_name","=","APP_ANDROID_VERSION")
+                            ->orderBy('created_at')
+                            ->select('config_value as version')
+                            ->get()
+                            ->first();
+        $version                    = (double)$array['version']; 
+        if($version > $app_version){
+            $ifUpdated = true;
+        }  
+        $response['ifUpdated']      = $ifUpdated;
+        $response['isValidToken']   = $isValidToken;
         return response()->json($response);
-
-
     }
 
 	public function getUser(){

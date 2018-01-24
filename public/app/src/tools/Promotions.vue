@@ -72,13 +72,13 @@
                             <div class="col-md-4" v-if="newPromotion.type != 'display'">
                                 <div class="form-group">
                                     <label>Date Start</label>
-                                    <input type="text" v-model="newPromotion.date_start" class="form-control"/>
+                                    <input type="date" v-model="newPromotion.date_start" class="form-control"/>
                                 </div>
                             </div>
                             <div class="col-md-4" v-if="newPromotion.type != 'display'">
                                 <div class="form-group">
                                     <label>Date End</label>
-                                    <input type="text" v-model="newPromotion.date_end" class="form-control"/>
+                                    <input type="date" v-model="newPromotion.date_end" class="form-control"/>
                                 </div>
                             </div>
                         </div>

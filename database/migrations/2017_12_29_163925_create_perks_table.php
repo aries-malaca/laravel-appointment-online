@@ -14,7 +14,7 @@ class CreatePerksTable extends Migration
         Schema::create('perks', function (Blueprint $table) {
             $table->increments('id');
             $table->string('perk_name');
-            $table->text('perk_description');
+            $table->text('perk_description')->nullable();
             $table->string('perk_picture')->nullable();
             $table->text('perk_data');
             $table->integer('perk_order');

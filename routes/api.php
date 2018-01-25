@@ -152,7 +152,8 @@ Route::get('/promotion/getPromotions', 'PromotionController@getPromotions');
 Route::get('/promotion/getPerks', 'PromotionController@getPerks');
 Route::post('/promotion/addPromotion', 'PromotionController@addPromotion');
 Route::patch('/promotion/updatePromotion', 'PromotionController@updatePromotion');
-Route::post('/promotion/deletePromotion', 'PromotionController@deletePromotion');
+Route::post('/promotion/addPerk', 'PromotionController@addPerk');
+Route::patch('/promotion/updatePerk', 'PromotionController@updatePerk');
 Route::post('/promotion/uploadPicture', 'PromotionController@uploadPicture');
 
 

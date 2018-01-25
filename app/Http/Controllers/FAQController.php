@@ -52,7 +52,7 @@ class FAQController extends Controller{
         $data = Faq::orderBy('order')->get()->toArray();
 
         foreach($data as $key=>$value){
-            $data[$key]['answer']   = 'Answer: '. nl2br( $value['answer']);
+            $data[$key]['answer']   = nl2br( $value['answer']);
         }
         $response['questions'] = $data;
         $response['category']  = $this->getFAQCategory();

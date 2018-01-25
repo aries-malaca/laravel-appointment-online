@@ -6,7 +6,7 @@ import VueSocketio from 'vue-socket.io';
 Vue.config.productionTip = false;
 Vue.config.debug = true;
 Vue.config.devtools = true;
-Vue.use(VueSocketio, 'https://system.lay-bare.com:5000');
+Vue.use(VueSocketio, 'https://lbo-express.azurewebsites.net');
 new Vue({
     el: '#app',
     router,

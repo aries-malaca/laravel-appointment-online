@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Branch;
 use App\BranchCluster;
 use App\BranchSchedule;
+use App\Product;
+use App\ProductGroup;
 use Validator;
 use DateTime;
 use Storage;

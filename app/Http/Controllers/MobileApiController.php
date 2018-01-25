@@ -143,27 +143,12 @@ class MobileApiController extends Controller{
                     ->where('products.product_price', '>',"0")
                     ->get()
                     ->toArray();
-            // foreach ($arrayProduct as $rowProduct) {
-            //     $arrayProduct[] = array(
-            //                     'id'                    => $rowProduct->id,
-            //                     'name'                  => $rowProduct->product_group_name,
-            //                     'size'                  => $rowProduct->product_size,
-            //                     'image'                 => str_replace(" ","%20",$rowProduct->product_picture),
-            //                     'desc'                  => $rowProduct->product_description,
-            //                     'variant'               => $rowProduct->product_size,
-            //                     'updated_at'            => $rowProduct->updated_at,
-            //                     'price'                 => number_format($rowProduct->product_price,2)
-            //                         );
-            // }
         }
         if( (double)$this->getDataVersions("APP_COMMERCIAL_VERSION")  > (double)$version_commercial) {
             $version_commercial   = (double)$this->getDataVersions("APP_COMMERCIAL_VERSION");
                
         }
      
-    
-        // $response['version_carousel']   = $advertisement_query['module_version'];
-        // $response['version_navigation'] = $nav_query['module_version'];
         $response['arrayBanner']             = $arrayBanner;
         $response['arrayServices']           = $arrayService;
         $response['arrayPackage']            = $arrayPackage;
@@ -266,26 +251,9 @@ class MobileApiController extends Controller{
 			// $total_discount		= "190";
 			// $total_transaction  = "5520";
             $response = $api['user'];
-        	// $response[] = array(
-        	// 				"id" 				=> $rowUsers->id,
-        	// 				"fname" 			=> ucfirst($rowUsers->first_name),
-        	// 				"mname" 			=> ucfirst($rowUsers->middle_name),
-        	// 				"lname" 			=> ucfirst($rowUsers->last_name),
-        	// 				"address" 			=> ucwords($rowUsers->user_address),
-        	// 				"bday" 				=> $bday->format("m/d/Y"),
-        	// 				"mobile" 			=> $rowUsers->user_mobile,
-        	// 				"email" 			=> $email,
-        	// 				"cusgender" 		=> $rowUsers->gender,
-        	// 				"branch" 			=> $rowUsers->branch,
-        	// 				"image" 			=> str_replace(" ","%20",$rowUsers->user_picture),
-        	// 				"terms" 			=> $rowUsers->is_agreed,
-        	// 				"total_transaction" => number_format((int)($total_transaction),2),
-        	// 				"total_discount" 	=> number_format((int)($total_discount),2),
-        	// 					);
-
             return response()->json($response,$api["status_code"]);
         }
-        // return response()->json($api, $api["status_code"]);
+        return response()->json($api, $api["status_code"]);
     }
 
     public function updateHomeBranch(Request $request){
@@ -555,8 +523,6 @@ class MobileApiController extends Controller{
                 ];
 
         $validator = Validator::make($request->all(),$rule,$message);
-
-
         if ($validator->fails()) {
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
         }
@@ -564,18 +530,14 @@ class MobileApiController extends Controller{
         $email      = $request->input('verify_email');
         $bday       = new DateTime($request->input('verify_birth_date'));
         $birth_date = $bday->format("Y-m-d H:i:s");
-
-        $user = User::where('email', $email)
+        $user       = User::where('email', $email)
                             ->where('birth_date', 'LIKE',$birth_date.'%')
                             ->get()->first();
-
-
         if(!isset($user['id'])) {
             if($result = $this->selfMigrateClient($email,null, $birth_date) ){
                 $user = User::where('id', $result['id'])->get()->first();
             }
         }
-
         if(isset($user['id'])) {
             $generated = md5(rand(1,600));
             $user_data = json_decode($user['user_data'],true);
@@ -685,7 +647,7 @@ class MobileApiController extends Controller{
             return response()->json(['result'=>'success',"clientID" => $clientID]);
         }
         else{
-             // return response()->json($api, $api["status_code"]);
+             return response()->json($api, $api["status_code"]);
         }
     }
 
@@ -712,7 +674,7 @@ class MobileApiController extends Controller{
 
     public function getServices(Request $request){
         
-        if($request->segment(4)!=""){
+        if($request->segment(4)!= ""){
             $gender = $request->segment(4);
 
             $query  =  DB::table('services as a')

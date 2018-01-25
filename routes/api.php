@@ -190,3 +190,26 @@ Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTra
 //get appointment & events by start and end month
 Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
 
+
+
+
+
+
+//Kiosk Configuration (Lay Bare)
+Route::get('/kiosk/checkLoggedInToken', 'KioskController@checkLoggedInToken');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

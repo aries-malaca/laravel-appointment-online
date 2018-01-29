@@ -18,9 +18,11 @@
             <div class="portlet-body">
                 <div class="tab-content">
                     <div class="tab-pane active" id="branches">
-                        <button type="button" @click="showAddBranchModal" class="btn green-meadow">New Branch</button>
+                        <button type="button" v-if="gate(user.level_data.permissions, 'branches', 'add')" @click="showAddBranchModal" class="btn green-meadow">
+                            New Branch
+                        </button>
                         <br/><br/>
-                        <data-table :columns="branchTable.columns" :rows="branches" :paginate="true"
+                        <data-table :columns="branchTable.columns" :rows="filtered_branches" :paginate="true"
                             :onClick="branchTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
                     </div>
                     <div class="tab-pane" id="clusters">
@@ -596,7 +598,8 @@
                     XHRCatcher(error);
                     $btn.button('reset');
                 });
-            }
+            },
+            gate:gate
         },
         mounted:function(){
             this.$emit('update_title', this.title);
@@ -623,6 +626,12 @@
                     a.push({label:item.product_code, value:item.id});
                 });
                 return a;
+            },
+            filtered_branches:function(){
+                let u = this;
+                return this.branches.filter(function(branch){
+                    return (u.user.user_data.branches.indexOf(branch.id)  !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
+                });
             }
         }
     }

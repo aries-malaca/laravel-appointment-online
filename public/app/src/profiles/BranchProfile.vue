@@ -82,16 +82,21 @@
                                 </tbody>
                             </table>
                             <!--end row-->
-                            <button class="btn btn-info" v-if="with_back" @click="editBranch(branch)">Edit Branch</button>
-                            <button class="btn btn-success" @click="addPicture">Add Photo</button>
+
+                            <div v-if="with_back && gate(user.level_data.permissions, 'branches', 'update')">
+                                <button class="btn btn-info" @click="editBranch(branch)">Edit Branch</button>
+                                <button class="btn btn-success" @click="addPicture">Add Photo</button>
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-4" v-for="(pic,key) in pictures">
                                     <ul class="list-unstyled profile-nav" style="margin-top:5px">
                                         <li>
                                             <img v-bind:src="'images/branches/'+ pic" class="img-responsive pic-bordered" alt="" />
-                                            <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
-                                            <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
+                                            <div v-if="with_back &&  gate(user.level_data.permissions, 'branches', 'update')">
+                                                <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
+                                                <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
+                                            </div>
                                         </li>
                                     </ul>
                                 </div>
@@ -297,7 +302,8 @@
                         });
                     });
             },
-            moment:moment
+            moment:moment,
+            gate:gate
         },
         watch:{
             id:function(){

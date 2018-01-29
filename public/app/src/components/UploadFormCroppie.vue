@@ -74,7 +74,7 @@
                     let u = this;
                     this.croppie.result({
                         type:'canvas',
-                        size: {width:128, height:128},
+                        size: {width:200, height:200},
                         format: 'jpeg',
                     }).then(response=>{
                         axios({url:'/api/'+ this.category +'/uploadPicture?token='+this.token+'&'+this.param_url, method:'post', data:{image:response}})

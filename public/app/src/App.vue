@@ -45,7 +45,8 @@
         <!-- END FOOTER -->
         <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer;border-top-left-radius:20px;color:white;background-color: #91624f;">
             <strong><i class="icon icon-bubbles"></i>
-                Chat System
+                <span v-if="user.is_client === 0">Chat System</span>
+                <span v-else>Customer Service</span>
                 <span v-show="unseen_messages>0" class="badge badge-success">{{ unseen_messages }}</span>
             </strong>
         </div>

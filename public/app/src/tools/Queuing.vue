@@ -370,16 +370,18 @@
         },
         computed:{
             branch_selection:function(){
+                let u = this;
                 var a = [];
                 this.branches.forEach(function(item, i){
-                    a.push({
-                        label:item.branch_name,
-                        value:item.id,
-                        rooms:item.rooms_count,
-                        schedules:item.schedules,
-                        branch_data:item.branch_data,
-                        branch_address:item.branch_address,
-                    });
+                    if (u.user.user_data.branches.indexOf(item.id)  !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
+                        a.push({
+                            label:item.branch_name,
+                            value:item.id,
+                            rooms:item.rooms_count,
+                            schedules:item.schedules,
+                            branch_data:item.branch_data,
+                            branch_address:item.branch_address,
+                        });
                 });
                 return a;
             },

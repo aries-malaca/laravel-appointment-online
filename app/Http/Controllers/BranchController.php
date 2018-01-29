@@ -140,6 +140,8 @@ class BranchController extends Controller{
             $branch->is_active = 1;
             $branch->save();
 
+            $this->incrementConfigVersion('APP_BRANCH_VERSION');
+
             $schedule = new BranchSchedule;
             $schedule->branch_id = $branch->id;
             $schedule->date_start = date('Y-m-d');
@@ -206,6 +208,7 @@ class BranchController extends Controller{
             $branch->branch_data = json_encode($request->input('branch_data'));
             $branch->opening_date = date('Y-m-d',strtotime($request->input('opening_date')));
             $branch->save();
+            $this->incrementConfigVersion('APP_BRANCH_VERSION');
 
             return response()->json(["result"=>"success"]);
         }

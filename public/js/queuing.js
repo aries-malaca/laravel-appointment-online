@@ -1,4 +1,4 @@
-var socket = io.connect('https://system.lay-bare.com:5000');
+var socket = io.connect('https://lbo-express.azurewebsites.net');
 
 socket.on('refreshAppointments', function(data){
     if(Number(document.getElementById("branch_id").value) == data.branch_id){

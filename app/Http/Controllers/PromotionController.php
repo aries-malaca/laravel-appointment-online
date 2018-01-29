@@ -43,7 +43,21 @@ class PromotionController extends Controller{
             $validator = Validator::make($request->all(), [
                 'title' => 'required|max:255',
                 'type' => 'required|in:promo,display',
+                'branches' => 'required',
             ]);
+
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if(sizeof($request->input('branches')) == 0)
+                return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
+
+            $branches = array();
+            foreach($request->input('branches') as $value)
+                $branches[] = $value['value'];
+
+            if(in_array(0, $branches))
+                $branches = array(0);
 
             $promo = new Promotion;
             $promo->title = $request->input('title');
@@ -52,14 +66,11 @@ class PromotionController extends Controller{
             $promo->promo_picture = 'no photo.jpg';
             $promo->date_start = $request->input('date_start');
             $promo->date_end = $request->input('date_end');
-            $promo->branches = '[0]';
+            $promo->branches = json_encode($branches);
             $promo->is_active = 1;
             $promo->promotions_data = '{}';
             $promo->posted_by_id = $api['user']['id'];
             $promo->save();
-
-            if ($validator->fails())
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
             return response()->json(["result"=>"success"]);
         }
@@ -75,20 +86,30 @@ class PromotionController extends Controller{
                 'type' => 'required|in:promo,display',
             ]);
 
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if(sizeof($request->input('branches')) == 0)
+                return response()->json(['result'=>'failed','error'=>'Select at least 1 branch.'], 400);
+
+            $branches = array();
+            foreach($request->input('branches') as $value)
+                $branches[] = $value['value'];
+
+            if(in_array(0, $branches))
+                $branches = array(0);
+
             $promo = Promotion::find($request->input('id'));
             $promo->title = $request->input('title');
             $promo->type = $request->input('type');
             $promo->description = $request->input('description');
             $promo->date_start = $request->input('date_start');
             $promo->date_end = $request->input('date_end');
-            $promo->branches = '[0]';
+            $promo->branches = json_encode($branches);
             $promo->is_active = 1;
             $promo->promotions_data = '{}';
             $promo->posted_by_id = $api['user']['id'];
             $promo->save();
-
-            if ($validator->fails())
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
             return response()->json(["result"=>"success"]);
         }
@@ -104,6 +125,9 @@ class PromotionController extends Controller{
                 'perk_data.classname' => 'required',
             ]);
 
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
             $perk = new Perk;
             $perk->perk_name = $request->input('perk_name');
             $perk->perk_description = $request->input('perk_description');
@@ -111,9 +135,6 @@ class PromotionController extends Controller{
             $perk->perk_order = 0;
             $perk->perk_picture = 'no photo.jpg';
             $perk->save();
-
-            if ($validator->fails())
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
             return response()->json(["result"=>"success"]);
         }
@@ -129,14 +150,14 @@ class PromotionController extends Controller{
                 'perk_data.classname' => 'required',
             ]);
 
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
             $perk = Perk::find($request->input('id'));
             $perk->perk_name = $request->input('perk_name');
             $perk->perk_description = $request->input('perk_description');
             $perk->perk_data = json_encode($request->input('perk_data'));
             $perk->save();
-
-            if ($validator->fails())
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
             return response()->json(["result"=>"success"]);
         }

@@ -79,6 +79,7 @@
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>
     <script type="text/javascript" src="../../js/signature_pad.js"></script>
+    <script type="text/javascript" src="../../js/notify.js"></script>
     <script type="text/javascript" src="../../js/chat.js"></script>
     <script src="../../theme/global/plugins/bootstrap-summernote/summernote.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>

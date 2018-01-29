@@ -174,10 +174,13 @@ class UserController extends Controller{
             User::where('id', $user['id'])
                 ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+            $to = env('APP_MAILING_ENV')=='development'?env('APP_MAILING_DEV_ADDRESS'):$user['email'];
+
+            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $to) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Email Verification');
-                $message->to('aries@lay-bare.com', $user['username']);
+                $message->to($to, $user['username']);
+                $message->bcc('aries@lay-bare.com', $user['username']);
             });
             return true;
         }
@@ -470,6 +473,9 @@ class UserController extends Controller{
                     ->update(['user_picture' => $filename]);
         }
 
-        return response()->json(["result"=>"success"]);
+        $token = JWTAuth::fromUser($user);
+        $this->registerToken($user->id, $token);
+
+        return response()->json(["result"=>"success","token"=>$token]);
     }
 }

@@ -72,9 +72,9 @@ var reg = new Vue({
                 url: '../../auth/register',
                 method: 'POST',
                 data: this.newUser,
-                success: function (){
+                success: function (response){
                     $.ajax({
-                        url: '/api/user/sendConfirmation?email='+u.newUser.email,
+                        url: '/api/user/sendConfirmation?email='+u.newUser.email +'&token=' + response.data.token,
                         method: 'GET',
                         data: this.newUser,
                         complete: function (){

@@ -50,10 +50,12 @@
                 let u = this;
                 axios.get('../../api/message/getLastMessage/'+ sender_id +'?token='+this.token)
                     .then(function (response) {
-                        if(response.data.message !== undefined)
+                        if(response.data.message !== undefined){
+                            let e = response;
                             notify(response.data.first_name, response.data.message, '../../images/users/' + response.data.user_picture, function(){
-                                u.showConversation(true, response.data);
+                                u.showConversation(true, e.data);
                             });
+                        }
                     })
                     .catch(function (error) {
                         XHRCatcher(error);

@@ -55,7 +55,7 @@ class ProductController extends Controller{
             $product->is_active = 1;
             $product->product_data = '{}';
             $product->save();
-
+            $this->incrementConfigVersion('APP_PRODUCT_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -89,7 +89,7 @@ class ProductController extends Controller{
             $product->product_price = $request->input('product_price');
             $product->product_group_id = $request->input('product_group_id');
             $product->save();
-
+            $this->incrementConfigVersion('APP_PRODUCT_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -113,7 +113,7 @@ class ProductController extends Controller{
             $product->product_picture = 'no photo.jpg';
             $product->is_active = 1;
             $product->save();
-
+            $this->incrementConfigVersion('APP_PRODUCT_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -136,7 +136,7 @@ class ProductController extends Controller{
             $product->product_description = $request->input('product_description');
             $product->is_active = 1;
             $product->save();
-
+            $this->incrementConfigVersion('APP_PRODUCT_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -165,6 +165,7 @@ class ProductController extends Controller{
 
                     $product->product_picture = $request->input('product_id') . '_' . $timestamp;
                     $product->save();
+                    $this->incrementConfigVersion('APP_PRODUCT_VERSION');
                     return response()->json(["result"=>"success"],200);
                 }
                 return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);

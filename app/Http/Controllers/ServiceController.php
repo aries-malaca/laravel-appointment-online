@@ -68,7 +68,7 @@ class ServiceController extends Controller{
             $service->service_package_id = $request->input('service_package_id');
             $service->is_active = 1;
             $service->save();
-
+            $this->incrementConfigVersion('APP_SERVICE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -109,7 +109,7 @@ class ServiceController extends Controller{
             $service->service_type_id = $request->input('service_type_id');
             $service->service_package_id = $request->input('service_package_id');
             $service->save();
-
+            $this->incrementConfigVersion('APP_SERVICE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -139,7 +139,7 @@ class ServiceController extends Controller{
             $service->is_active = 1;
             $service->service_picture = 'no photo.jpg';
             $service->save();
-
+            $this->incrementConfigVersion('APP_SERVICE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -160,7 +160,7 @@ class ServiceController extends Controller{
             $service->service_name = $request->input('service_name');
             $service->service_description = $request->input('service_description');
             $service->save();
-
+            $this->incrementConfigVersion('APP_SERVICE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -188,6 +188,7 @@ class ServiceController extends Controller{
 
                     $service->service_picture = $request->input('service_id') . '_' . $timestamp;
                     $service->save();
+                    $this->incrementConfigVersion('APP_SERVICE_VERSION');
                     return response()->json(["result"=>"success"],200);
                 }
                 return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);
@@ -241,7 +242,7 @@ class ServiceController extends Controller{
             $service->package_services = json_encode($services);
             $service->is_active = 1;
             $service->save();
-
+            $this->incrementConfigVersion('APP_PACKAGE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -270,7 +271,7 @@ class ServiceController extends Controller{
             $service->package_name = $request->input('package_name');
             $service->package_services = json_encode($services);
             $service->save();
-
+            $this->incrementConfigVersion('APP_PACKAGE_VERSION');
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);

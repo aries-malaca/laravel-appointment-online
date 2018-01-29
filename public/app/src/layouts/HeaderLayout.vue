@@ -21,38 +21,6 @@
                 <div class="top-menu">
                     <ul class="nav navbar-nav pull-right">
                         <li class="separator hide"> </li>
-                        <!-- BEGIN INBOX DROPDOWN -->
-                        <!-- DOC: Apply "dropdown-dark" class after below "dropdown-extended" to change the dropdown styte -->
-                        <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar">
-                            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                                <i class="icon-envelope-open"></i>
-                                <span class="badge badge-danger"> 4 </span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="external">
-                                    <h3>You have
-                                        <span class="bold">7 New</span> Messages</h3>
-                                    <router-link to="/messages">view all</router-link>
-                                </li>
-                                <li>
-                                    <ul class="dropdown-menu-list scroller" style="height: 275px;" data-handle-color="#637283">
-                                        <li>
-                                            <a href="#">
-                                        <span class="photo">
-                                            <img src="/images/users/Registration.png" class="img-circle" alt=""> </span>
-                                                <span class="subject">
-                                            <span class="from"> Lisa Wong </span>
-                                            <span class="time">Just Now </span>
-                                        </span>
-                                                <span class="message"> Vivamus sed auctor nibh congue nibh. auctor nibh auctor nibh... </span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- END INBOX DROPDOWN -->
-                        <li class="separator hide"> </li>
                         <!-- BEGIN NOTIFICATION DROPDOWN -->
                         <!-- DOC: Apply "dropdown-dark" class after below "dropdown-extended" to change the dropdown styte -->
                         <!-- DOC: Apply "dropdown-hoverable" class after "dropdown" and remove data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to enable hover dropdown mode -->

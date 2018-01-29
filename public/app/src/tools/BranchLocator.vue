@@ -137,7 +137,7 @@
                             '<p>Address: '+ branch.branch_address +'<br/>' +
                             'Phone: '+ branch.branch_contact +'</p>' +
                             '<button class="btn btn-success btn-md" id="btn-book">Book Appointment</button> &nbsp' +
-                            '<button class="btn btn-info btn-md">View Queue</button>'
+                            '<a target="_blank" class="btn btn-info btn-md" href="../../queuing/web/'+ branch.id +'">View Queue</a>'
                         });
 
                         u.markers[x].addListener('click', function(){

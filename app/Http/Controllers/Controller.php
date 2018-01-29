@@ -167,7 +167,7 @@ class Controller extends BaseController{
             $user->level = 0;
             $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
                 "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
-                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:0 ) ));
+                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ) ));
             $user->device_data = '[]';
             $user->last_activity = date('Y-m-d H:i');
             $user->last_login = date('Y-m-d H:i');
@@ -239,5 +239,11 @@ class Controller extends BaseController{
             }
         }
         return false;
+    }
+
+    function incrementConfigVersion($config_name){
+        $config = Config::where('config_name', $config_name)->get()->first();
+        $config->config_value = number_format((float)$config->config_value + 0.1,1);
+        $config->save();
     }
 }

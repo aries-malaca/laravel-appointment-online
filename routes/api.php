@@ -194,10 +194,10 @@ Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmen
 
 
 
-
-
 //Kiosk Configuration (Lay Bare)
 Route::get('/kiosk/checkLoggedInToken', 'KioskController@checkLoggedInToken');
+Route::post('/kiosk/getClientRecords', 'KioskController@getClientRecords');
+
 
 
 

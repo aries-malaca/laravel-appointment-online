@@ -119,7 +119,7 @@
                                         <button class="btn btn-success btn-lg btn-block" @click="addItem()"> ADD TO LIST</button>
                                     </div>
                                 </div>
-                                <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll">
+                                <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll;min-height:400px">
                                     <table class="table-responsive table table-hover table-bordered" v-if="newTransaction.services.length>0">
                                         <thead>
                                             <tr>
@@ -397,6 +397,8 @@
                     if(confirm("Selected items will be discarded, do you want to go back?")){
                         this.newTransaction.services = [];
                         this.newTransaction.products = [];
+                        this.service = null;
+                        this.product = null;
                         return true;
                     }
                 }
@@ -409,12 +411,16 @@
                 if(this.disable_saving)
                     return false;
 
+                if(!confirm("Confirm appointment booking at " + this.newTransaction.branch.label +
+                        " ("+ this.newTransaction.services[0].start + ")?"))
+                    return false;
+
                 let u = this;
                 this.disable_saving = true;
                 axios({url:'/api/appointment/addAppointment?token=' + this.token, method:'post', data:this.newTransaction})
                     .then(function () {
                         u.$emit('get_appointments');
-                        toastr.success("Successfully booked.");
+                        toastr.success("Appointment successfully booked.");
                         u.disable_saving = false;
                         $("#booking-modal").modal("hide");
                         u.$socket.emit('refreshAppointments', u.newTransaction.branch.value, u.newTransaction.client.value);
@@ -548,6 +554,8 @@
                     branches.push({ label:this.branches[x].branch_name,
                                     value:this.branches[x].id,
                                     rooms:this.branches[x].rooms_count,
+                                    products:item.products,
+                                    services:item.services,
                                     schedules:this.branches[x].schedules,
                                     branch_data:this.branches[x].branch_data,
                                     branch_address:this.branches[x].branch_address
@@ -583,30 +591,32 @@
             product_selection:function(){
                 var products = [];
                 for(var x=0;x<this.products.length;x++){
-                    products.push({ label: this.products[x].name,
-                                    value: this.products[x].id,
-                                    price: this.products[x].product_price,
-                                    picture: this.products[x].product_picture,
-                                    description: this.products[x].product_description
-                    });
+                    if(this.newTransaction.branch.products.indexOf(this.products[x].id) !== -1)
+                        products.push({ label: this.products[x].name,
+                                        value: this.products[x].id,
+                                        price: this.products[x].product_price,
+                                        picture: this.products[x].product_picture,
+                                        description: this.products[x].product_description
+                        });
                 }
                 return products;
             },
             service_selection:function(){
                 var services = [];
                 for(var x=0;x<this.services.length;x++){
-                    if(this.newTransaction.client !== null){
-                        if(this.services[x].service_gender === this.newTransaction.client.gender){
-                            var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
-                            services.push({ label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
-                                value: this.services[x].id,
-                                price: this.services[x].service_price,
-                                minutes: this.services[x].service_minutes,
-                                picture: this.services[x].service_picture,
-                                description: this.services[x].service_description
-                            });
+                    if(this.newTransaction.branch.services.indexOf(this.services[x].id) !== -1)
+                        if(this.newTransaction.client !== null){
+                            if(this.services[x].service_gender === this.newTransaction.client.gender){
+                                var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
+                                services.push({ label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
+                                    value: this.services[x].id,
+                                    price: this.services[x].service_price,
+                                    minutes: this.services[x].service_minutes,
+                                    picture: this.services[x].service_picture,
+                                    description: this.services[x].service_description
+                                });
+                            }
                         }
-                    }
                 }
                 return services;
             },
@@ -681,6 +691,8 @@
                         value: this.default_branch.value,
                         label : this.default_branch.label,
                         rooms : this.default_branch.rooms,
+                        products : this.default_branch.products,
+                        services : this.default_branch.services,
                         schedules : this.default_branch.schedules,
                         branch_data : this.default_branch.branch_data,
                         branch_address:this.default_branch.branch_address

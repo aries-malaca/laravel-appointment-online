@@ -380,6 +380,8 @@
                             rooms:item.rooms_count,
                             schedules:item.schedules,
                             branch_data:item.branch_data,
+                            products:item.products,
+                            services:item.services,
                             branch_address:item.branch_address,
                         });
                 });

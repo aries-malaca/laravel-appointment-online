@@ -45,19 +45,12 @@
                         };
                         var geocoder = new google.maps.Geocoder;
                         geocoder.geocode({'location': u.geolocation}, function(results, status) {
-                            if (status === 'OK') {
+                            if (status === 'OK' && results.lat === undefined) {
                                 axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:results }})
                                     .then(function () {
-                                        console.log("Saved");
                                     });
                             }
                         });
-
-                        axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:u.geolocation }})
-                            .then(function () {
-                                console.log("Saved");
-                            });
-
                     });
                 }
             },1000);

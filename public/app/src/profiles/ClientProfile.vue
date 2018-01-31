@@ -252,7 +252,7 @@
                     </div>
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions">
-                        <transactions-view :client="client" :user="user" :configs="configs" :transactions="transactions"></transactions-view>
+                        <transactions-view :client="client" :user="user" :configs="configs" :transactions="transactions" :token="token"></transactions-view>
                     </div>
                     <!--end tab-pane-->
                 </div>

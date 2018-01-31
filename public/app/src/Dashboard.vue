@@ -46,14 +46,14 @@
                         var geocoder = new google.maps.Geocoder;
                         geocoder.geocode({'location': u.geolocation}, function(results, status) {
                             if (status === 'OK') {
-                                axios({url:'/api/user/saveLocation?token=' + u.token, method:'patch', data:{ geolocation:results }})
+                                axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:results }})
                                     .then(function () {
                                         console.log("Saved");
                                     });
                             }
                         });
 
-                        axios({url:'/api/user/saveLocation?token=' + u.token, method:'patch', data:{ geolocation:u.geolocation }})
+                        axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:u.geolocation }})
                             .then(function () {
                                 console.log("Saved");
                             });

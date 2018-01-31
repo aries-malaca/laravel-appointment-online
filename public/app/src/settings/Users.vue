@@ -229,7 +229,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/user/updateUser?token=' + this.token, 'patch', this.newUser, function(){
+                this.makeRequest('/api/user/updateUser?token=' + this.token, 'post', this.newUser, function(){
                     u.getUsers();
                     toastr.success("User updated successfully.");
                     $btn.button('reset');

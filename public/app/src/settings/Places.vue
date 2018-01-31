@@ -163,7 +163,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/region/updateRegion?token=' + this.token, 'patch', this.newRegion, function(){
+                this.makeRequest('/api/region/updateRegion?token=' + this.token, 'post', this.newRegion, function(){
                     u.getRegions();
                     toastr.success("Region updated successfully.");
                     $btn.button('reset');
@@ -178,7 +178,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/city/updateCity?token=' + this.token, 'patch', this.newCity, function(){
+                this.makeRequest('/api/city/updateCity?token=' + this.token, 'post', this.newCity, function(){
                     u.getCities();
                     toastr.success("City updated successfully.");
                     $btn.button('reset');

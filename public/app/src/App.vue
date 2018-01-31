@@ -107,7 +107,7 @@
             },
             logout:function(){
                 if(this.token !== undefined){
-                    axios.patch('/api/user/destroyToken', { token : this.token, user_id : this.user.id})
+                    axios.post('/api/user/destroyToken', { token : this.token, user_id : this.user.id})
                     .then(function () {
                         $.removeCookie('login_cookie');
                         window.location.href = '../../login';

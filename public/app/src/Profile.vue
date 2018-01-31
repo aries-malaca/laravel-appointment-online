@@ -232,7 +232,7 @@
 
                 SweetConfirmation("Are you sure you want to update?", function(){
                     $btn.button('loading');
-                    axios.patch('/api/user/updateProfile?token=' + u.token, u.profile)
+                    axios.post('/api/user/updateProfile?token=' + u.token, u.profile)
                         .then(function () {
                             u.getProfile();
                             toastr.success("Profile successfully updated.");
@@ -250,7 +250,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                axios.patch('/api/user/changePassword?token=' + this.token, this.change_password)
+                axios.post('/api/user/changePassword?token=' + this.token, this.change_password)
                 .then(function () {
                     u.getProfile();
                     toastr.success("Password successfully changed.");

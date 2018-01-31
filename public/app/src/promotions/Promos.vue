@@ -225,7 +225,7 @@
                 if(desc.context === undefined)
                     this.newPromotion.description = desc;
 
-                this.makeRequest('/api/promotion/updatePromotion?token=' + this.token, 'patch', this.newPromotion, function(){
+                this.makeRequest('/api/promotion/updatePromotion?token=' + this.token, 'post', this.newPromotion, function(){
                     u.getPromos();
                     toastr.success("Promo updated successfully.");
                     $btn.button('reset');

@@ -87,7 +87,7 @@
                     });
             },
             seenMessages:function(){
-                axios.patch('/api/message/seenMessages?token=' + this.token, {sender_id:this.partner.id})
+                axios.post('/api/message/seenMessages?token=' + this.token, {sender_id:this.partner.id})
                     .then(function () {
                     })
                     .catch(function (error) {

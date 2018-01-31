@@ -254,7 +254,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                this.makeRequest('/api/appointment/cancelItem?token=' + this.token, 'patch', this.cancel, function(){
+                this.makeRequest('/api/appointment/cancelItem?token=' + this.token, 'post', this.cancel, function(){
                     u.getAppointment();
                     toastr.success("Item successfully cancelled.");
                     u.$socket.emit('refreshAppointment', u.id);
@@ -272,7 +272,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
                 this.cancel.id = this.id;
-                this.makeRequest('/api/appointment/cancelAppointment?token=' + this.token, 'patch', this.cancel, function(){
+                this.makeRequest('/api/appointment/cancelAppointment?token=' + this.token, 'post', this.cancel, function(){
                         u.$socket.emit('refreshAppointment', u.id);
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
                         u.getAppointment();

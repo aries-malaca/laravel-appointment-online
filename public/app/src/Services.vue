@@ -550,7 +550,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/product/updateProduct?token=' + this.token, 'patch', this.newProduct, function(){
+                this.makeRequest('/api/product/updateProduct?token=' + this.token, 'post', this.newProduct, function(){
                     u.getProducts();
                     toastr.success("Product updated successfully.");
                     $btn.button('reset');
@@ -580,7 +580,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/product/updateProductGroup?token=' + this.token, 'patch', this.newProductGroup, function(){
+                this.makeRequest('/api/product/updateProductGroup?token=' + this.token, 'post', this.newProductGroup, function(){
                     u.getProductGroups();
                     toastr.success("Product Group updated successfully.");
                     $btn.button('reset');
@@ -649,7 +649,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/service/updateServiceType?token=' + this.token, 'patch', this.newServiceType, function(){
+                this.makeRequest('/api/service/updateServiceType?token=' + this.token, 'post', this.newServiceType, function(){
                     u.getServiceTypes();
                     toastr.success("Service Type updated successfully.");
                     $btn.button('reset');
@@ -715,7 +715,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/service/updateServicePackage?token=' + this.token, 'patch', this.newServicePackage, function(){
+                this.makeRequest('/api/service/updateServicePackage?token=' + this.token, 'post', this.newServicePackage, function(){
                     u.getServicePackages();
                     toastr.success("Service Package updated successfully.");
                     $btn.button('reset');
@@ -770,7 +770,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/service/updateService?token=' + this.token, 'patch', this.newService, function(){
+                this.makeRequest('/api/service/updateService?token=' + this.token, 'post', this.newService, function(){
                     u.getServices();
                     toastr.success("Service updated successfully.");
                     $btn.button('reset');

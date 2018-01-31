@@ -349,7 +349,7 @@
 
                 SweetConfirmation("Are you sure you want to update?", function(){
                     $btn.button('loading');
-                    axios.patch('/api/client/updateInfo?token=' + u.token, u.newClient)
+                    axios.post('/api/client/updateInfo?token=' + u.token, u.newClient)
                         .then(function () {
                             u.getClient();
                             u.$emit('refresh_client', u.newClient.id);
@@ -368,7 +368,7 @@
 
                 SweetConfirmation("Are you sure you want to change client's password?", function(){
                     $btn.button('loading');
-                    axios.patch('/api/client/changePassword?token=' + u.token, u.newClient)
+                    axios.post('/api/client/changePassword?token=' + u.token, u.newClient)
                         .then(function () {
                             u.getClient();
                             u.$emit('refresh_client', u.newClient.id);

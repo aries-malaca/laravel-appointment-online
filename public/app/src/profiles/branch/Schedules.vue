@@ -284,7 +284,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                axios.patch('/api/schedule/updateBranchSchedule?token=' + this.token, this.newSchedule)
+                axios.post('/api/schedule/updateBranchSchedule?token=' + this.token, this.newSchedule)
                     .then(function () {
                         u.$emit('refresh_branch');
                         $btn.button('reset');
@@ -319,7 +319,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                axios.patch('/api/schedule/deleteBranchSchedule?token=' + this.token, schedule)
+                axios.post('/api/schedule/deleteBranchSchedule?token=' + this.token, schedule)
                     .then(function () {
                         u.$emit('refresh_branch');
                         $btn.button('reset');

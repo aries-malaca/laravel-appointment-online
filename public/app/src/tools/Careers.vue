@@ -161,7 +161,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                this.makeRequest('/api/career/updateCareer?token='+ this.token, 'patch', this.newCareer, function(){
+                this.makeRequest('/api/career/updateCareer?token='+ this.token, 'post', this.newCareer, function(){
                     u.getCareers();
                     toastr.success("Successfully updated Career");
                     $btn.button('reset');
@@ -187,7 +187,7 @@
                 });
             },
             moveCareer:function(direction, career){
-                u.makeRequest('/api/faq/deleteCareer?token='+ u.token, 'patch', {id: career.id, direction: direction } , function(){
+                u.makeRequest('/api/faq/deleteCareer?token='+ u.token, 'post', {id: career.id, direction: direction } , function(){
                     u.getCareers();
                     toastr.success("Successfully moved Career");
                     $btn.button('reset');

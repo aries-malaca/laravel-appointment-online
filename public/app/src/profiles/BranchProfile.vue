@@ -258,7 +258,7 @@
                 }
                 if(confirm("Are you sure you want to delete this?")){
                     let u = this;
-                    axios.patch('/api/branch/removePicture?token=' + this.token, {branch_id:this.id, key: key})
+                    axios.post('/api/branch/removePicture?token=' + this.token, {branch_id:this.id, key: key})
                     .then(function (response) {
                         u.pictures.splice(key, 1);
                     })

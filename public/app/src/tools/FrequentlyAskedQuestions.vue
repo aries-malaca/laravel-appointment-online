@@ -126,7 +126,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                this.makeRequest('/api/faq/updateFAQ?token='+ this.token, 'patch', this.newFAQ, function(){
+                this.makeRequest('/api/faq/updateFAQ?token='+ this.token, 'post', this.newFAQ, function(){
                     u.getFAQs();
                     toastr.success("Successfully updated FAQ");
                     $btn.button('reset');
@@ -152,7 +152,7 @@
                 });
             },
             moveFAQ:function(direction, faq){
-                u.makeRequest('/api/faq/deleteFAQ?token='+ u.token, 'patch', {id: faq.id, direction: direction } , function(){
+                u.makeRequest('/api/faq/deleteFAQ?token='+ u.token, 'post', {id: faq.id, direction: direction } , function(){
                     u.getFAQs();
                     toastr.success("Successfully moved FAQ");
                     $btn.button('reset');

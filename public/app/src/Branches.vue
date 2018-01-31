@@ -488,7 +488,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/branch/updateCluster?token=' + this.token, 'patch', this.newCluster, function(){
+                this.makeRequest('/api/branch/updateCluster?token=' + this.token, 'post', this.newCluster, function(){
                     u.getClusters();
                     toastr.success("Cluster updated successfully.");
                     $btn.button('reset');
@@ -585,7 +585,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/branch/updateBranch?token=' + this.token, 'patch', this.newBranch, function(){
+                this.makeRequest('/api/branch/updateBranch?token=' + this.token, 'post', this.newBranch, function(){
                     u.getBranches();
                     u.view_id = 0;
                     setTimeout(function(){

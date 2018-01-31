@@ -278,7 +278,7 @@
             },
             emitCallItem:function(item_id){
                 let u = this;
-                axios({url:'/api/appointment/callAppointment?token=' + this.token, method:'patch', data:{item_id:item_id}})
+                axios({url:'/api/appointment/callAppointment?token=' + this.token, method:'post', data:{item_id:item_id}})
                     .then(function () {
                         u.$socket.emit('callItem', u.branch.value, item_id);
                         setTimeout(function(){
@@ -298,7 +298,7 @@
             },
             emitUnCallItem:function(item_id){
                 let u = this;
-                axios({url:'/api/appointment/unCallAppointment?token=' + this.token, method:'patch', data:{item_id:item_id}})
+                axios({url:'/api/appointment/unCallAppointment?token=' + this.token, method:'post', data:{item_id:item_id}})
                     .then(function () {
                         u.$socket.emit('refreshAppointments', u.branch.value);
                     })
@@ -308,7 +308,7 @@
             },
             emitServeItem:function(item_id){
                 let u = this;
-                axios({url:'/api/appointment/serveAppointment?token=' + this.token, method:'patch', data:{item_id:item_id}})
+                axios({url:'/api/appointment/serveAppointment?token=' + this.token, method:'post', data:{item_id:item_id}})
                     .then(function () {
                         u.$socket.emit('refreshAppointments', u.branch.value);
                     })
@@ -318,7 +318,7 @@
             },
             emitUnServeItem:function(item_id){
                 let u = this;
-                axios({url:'/api/appointment/unServeAppointment?token=' + this.token, method:'patch', data:{item_id:item_id}})
+                axios({url:'/api/appointment/unServeAppointment?token=' + this.token, method:'post', data:{item_id:item_id}})
                     .then(function () {
                         u.$socket.emit('refreshAppointments', u.branch.value);
                     })
@@ -328,7 +328,7 @@
             },
             emitCompleteItem:function(item){
                 let u = this;
-                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'patch', data:{item_id:item.id}})
+                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'post', data:{item_id:item.id}})
                     .then(function () {
                         u.$socket.emit('refreshAppointments', u.branch.value,item.client_id);
                     })

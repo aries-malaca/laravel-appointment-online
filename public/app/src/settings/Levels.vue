@@ -173,7 +173,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/user/updateUserLevel?token=' + this.token, 'patch', this.newUserLevel, function(){
+                this.makeRequest('/api/user/updateUserLevel?token=' + this.token, 'post', this.newUserLevel, function(){
                     u.getUserLevels();
                     toastr.success("User level updated successfully.");
                     $btn.button('reset');

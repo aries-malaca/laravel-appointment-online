@@ -148,7 +148,7 @@
                 let $btn = $(event.target);
                 $btn.button('loading');
 
-                this.makeRequest('/api/promotion/updatePerk?token=' + this.token, 'patch', this.newPerk, function(){
+                this.makeRequest('/api/promotion/updatePerk?token=' + this.token, 'post', this.newPerk, function(){
                     u.getPerks();
                     toastr.success("Perk updated successfully.");
                     $btn.button('reset');

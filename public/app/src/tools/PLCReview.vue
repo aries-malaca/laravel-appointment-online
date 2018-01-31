@@ -90,7 +90,7 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                axios({url:'/api/premier/completeRequest?token='+u.token, method:'patch', data:this.newRequest})
+                axios({url:'/api/premier/completeRequest?token='+u.token, method:'post', data:this.newRequest})
                     .then(function () {
                         u.getRequests();
                         toastr.success("Successfully updated.");

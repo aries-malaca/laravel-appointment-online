@@ -4,8 +4,9 @@
         <table class="table-responsive table table-hover table-bordered">
             <thead>
             <tr>
-                <th>Platform</th>
+                <th>Device</th>
                 <th>Last Activity</th>
+                <th>Address</th>
                 <th></th>
             </tr>
             </thead>
@@ -17,6 +18,9 @@
                     <span v-else>Currently In-use</span>
                 </td>
                 <td>
+                    {{ getAddress(device) }}
+                </td>
+                <td>
                     <button v-if="device.token != token" class="btn btn-xs btn-danger" @click="destroyToken(device.token)">Logout</button>
                 </td>
             </tr>
@@ -24,7 +28,6 @@
         </table>
     </div>
 </template>
-
 
 <script>
     export default {
@@ -49,6 +52,15 @@
                             XHRCatcher(error);
                         });
                 });
+            },
+            getAddress:function(device){
+                if(device.geolocation !== undefined)
+                    for(var x=0;x<device.geolocation.length;x++){
+                        if(device.geolocation[x].types.indexOf('locality') !== -1 )
+                            return device.geolocation[x].formatted_address;
+                    }
+
+                return 'Unknown';
             }
         }
     }

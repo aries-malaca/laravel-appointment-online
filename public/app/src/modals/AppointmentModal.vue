@@ -153,7 +153,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
-                        <a target="_blank" v-bind:href="'../../waiver/' + appointment.id" class="pull-left btn btn-success">View Waiver</a>
+                        <a target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
                         <button type="button" @click="closeModal" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>

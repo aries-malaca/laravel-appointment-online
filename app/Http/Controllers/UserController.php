@@ -478,4 +478,24 @@ class UserController extends Controller{
 
         return response()->json(["result"=>"success","token"=>$token]);
     }
+
+    function saveLocation(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+
+            $user = User::find($api['user']['id']);
+            $tokens = json_decode($user->device_data, true);
+
+            foreach($tokens as $key=>$value){
+                if(JWTAuth::getToken() == $value['token'])
+                    $tokens[$key]['geolocation'] = $request->input('geolocation');
+            }
+
+            $user->device_data = json_encode($tokens);
+            $user->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
 }

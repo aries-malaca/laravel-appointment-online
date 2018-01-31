@@ -34,6 +34,34 @@
         mounted:function(){
             this.$emit('update_title', this.title);
             this.$emit('update_user');
+
+            let u = this;
+            setTimeout(function(){
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        u.geolocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        var geocoder = new google.maps.Geocoder;
+                        geocoder.geocode({'location': u.geolocation}, function(results, status) {
+                            if (status === 'OK') {
+                                axios({url:'/api/user/saveLocation?token=' + u.token, method:'patch', data:{ geolocation:results }})
+                                    .then(function () {
+                                        console.log("Saved");
+                                    });
+                            }
+                        });
+
+                        axios({url:'/api/user/saveLocation?token=' + u.token, method:'patch', data:{ geolocation:u.geolocation }})
+                            .then(function () {
+                                console.log("Saved");
+                            });
+
+                    });
+                }
+            },1000);
+
         }
     }
 </script>

@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\BranchCluster;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\User;
@@ -63,10 +64,24 @@ class UserController extends Controller{
             $user_data = json_decode($api['user']['user_data'],true);
             if($api['user']['is_client'] == 1){
                 $b = Branch::find($user_data['home_branch']);
-                if(isset($b->id))
+
+                $services = [];
+                $products = [];
+
+                if(isset($b->id)){
+                    $cluster = BranchCluster::find($b->cluster_id);
                     $branch = $b->branch_name;
+
+                    if(isset($cluster->id)){
+                        $services = json_decode($cluster->services);
+                        $products = json_decode($cluster->products);
+                    }
+                }
+
                 else
                     $branch = 'N/A';
+
+
 
                 $plc_request = PlcReviewRequest::where('client_id', $api['user']['id'])
                                                 ->get()->first();
@@ -79,7 +94,9 @@ class UserController extends Controller{
                                 "rooms"=> isset($b->rooms_count)?$b->rooms_count:0,
                                 "schedules"=> BranchSchedule::where('branch_id', $b->id)
                                                             ->orderBy('schedule_type')
-                                                            ->get()->toArray()
+                                                            ->get()->toArray(),
+                                "services"=>$services,
+                                "products"=>$products,
                         ];
                 $api['user']['level_data'] = array();
             }

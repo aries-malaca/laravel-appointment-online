@@ -33,6 +33,7 @@ class UserLevelController extends Controller{
             $level->description = $request->input('description');
             $level->level_data = json_encode($request->input('level_data'));
             $level->is_active = 1;
+            $level->is_restricted = 1;
             $level->save();
 
             return response()->json(["result"=>"success"]);

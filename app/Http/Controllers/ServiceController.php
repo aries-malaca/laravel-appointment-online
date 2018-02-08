@@ -116,10 +116,12 @@ class ServiceController extends Controller{
     }
 
     public function getServiceTypes(Request $request){
-        if($request->segment(4)=='active')
-            return response()->json(ServiceType::where('is_active', 1)->get());
+        $data = ServiceType::get()->toArray();
 
-        return response()->json(ServiceType::get());
+        foreach($data as $key=>$value)
+            $data[$key]['service_type_data'] = json_decode($value['service_type_data']);
+
+        return response()->json($data);
     }
 
     public function addServiceType(Request $request){
@@ -213,6 +215,7 @@ class ServiceController extends Controller{
                             ->select('service_minutes')
                             ->get();
             $data[$key]['service_duration'] = $query;
+            $data[$key]['package_services'] = json_decode($value['package_services']);
         }
 
         return response()->json($data);

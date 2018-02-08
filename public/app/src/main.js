@@ -1,15 +1,19 @@
 import Vue from 'vue';
-import App from './App.vue';
+import App from './components/App.vue';
 import router from './router';
-import VueSocketio from 'vue-socket.io';
+import VueSocketIO from 'vue-socket.io';
+import {store} from './store/store';
 
 Vue.config.productionTip = false;
 Vue.config.debug = true;
 Vue.config.devtools = true;
-Vue.use(VueSocketio, 'https://lbo-express.azurewebsites.net');
+
+Vue.use(VueSocketIO, 'https://lbo-express.azurewebsites.net');
+
 new Vue({
     el: '#app',
     router,
+    store,
     template: '<App/>',
     components: { App }
 });

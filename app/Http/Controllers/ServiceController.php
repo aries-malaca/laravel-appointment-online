@@ -13,19 +13,30 @@ class ServiceController extends Controller{
     public function getServices(Request $request){
         $services = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                         ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                        ->select('services.*','service_name','package_name','service_description','service_picture');
-
-        if($request->segment(4)=='active')
-            $services = $services->where('services.is_active', 1);
-
-        $services=$services->get()->toArray();
+                        ->select('services.*','service_name','package_name','service_description','service_picture','service_type_data')
+                        ->get()->toArray();
 
         foreach($services as $key=>$value){
+            $services[$key]['service_type_data'] = json_decode($value['service_type_data']);
             if($value['service_type_id'] === 0){
                 $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
-                $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
-                $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+                $p = ServiceType::whereIn('id', json_decode($package_services));
+                $services[$key]['service_picture'] = $p->pluck('service_picture')->toArray();
+                $services[$key]['service_description'] = $p->pluck('service_name')->toArray();
+                $services[$key]['package_services'] = $p->pluck('id')->toArray();
+
+                $bulk_data = $services[$key]['package_services'];
+                $bulk = $p->get()->toArray();
+                foreach($bulk as $k=>$v){
+                    $parsed = json_decode($v['service_type_data']);
+                    if(sizeof($parsed->restricted) > 0)
+                        $bulk_data = array_merge($bulk_data, $parsed->restricted);
+                }
+                $services[$key]['service_type_data'] = array("restricted"=>$bulk_data);
             }
+            else
+                if(isset($services[$key]['service_type_data']->restricted))
+                    $services[$key]['service_type_data']->restricted[] = $value['service_type_id'];
         }
 
         return response()->json($services);
@@ -41,21 +52,17 @@ class ServiceController extends Controller{
                 'service_price' => 'required|numeric',
                 'service_minutes' => 'required|numeric'
             ]);
-            if ($validator->fails()) {
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if($request->input('service_type_id') == 0 && $request->input('service_package_id') == 0){
+            if($request->input('service_type_id') == 0 && $request->input('service_package_id') == 0)
                 return response()->json(['result'=>'failed','error'=>"Type and package should not be empty at the same time"], 400);
-            }
 
-            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0){
+            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0)
                 return response()->json(['result'=>'failed','error'=>"Cannot set package if the service type is selected."], 400);
-            }
 
-            if ($request->input('search_id') < 1) {
+            if ($request->input('search_id') < 1)
                 return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
-            }
 
             $service = new Service;
             $service->id = $request->input('search_id');
@@ -84,21 +91,17 @@ class ServiceController extends Controller{
                 'service_price' => 'required|numeric',
                 'service_minutes' => 'required|numeric'
             ]);
-            if ($validator->fails()) {
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if($request->input('service_type_id') == 0 && $request->input('service_package_id') == 0){
+            if($request->input('service_type_id') == 0 && $request->input('service_package_id') == 0)
                 return response()->json(['result'=>'failed','error'=>"Type and package should not be empty at the same time"], 400);
-            }
 
-            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0){
+            if($request->input('service_type_id') != 0 && $request->input('service_package_id') != 0)
                 return response()->json(['result'=>'failed','error'=>"Cannot set package if the service type is selected."], 400);
-            }
 
-            if ($request->input('search_id') < 1) {
+            if ($request->input('search_id') < 1)
                 return response()->json(['result'=>'failed','error'=>"Invalid ID"], 400);
-            }
 
             $service = Service::find($request->input('id'));
             $service->service_code = $request->input('service_code');
@@ -131,14 +134,20 @@ class ServiceController extends Controller{
                 'service_name' => 'required|max:255',
                 'service_description' => 'required',
             ]);
-            if ($validator->fails()) {
+
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
+
+            $restricted = [];
+            if($request->input('service_type_data')['restricted'] !== null)
+                foreach($request->input('service_type_data')['restricted'] as $key=>$value)
+                    $restricted[] = $value['value'];
 
             $service = new ServiceType;
             $service->service_name = $request->input('service_name');
             $service->service_description = $request->input('service_description');
             $service->is_active = 1;
+            $service->service_type_data = json_encode(array("restricted"=>in_array(0, $restricted)?[0]:$restricted));
             $service->service_picture = 'no photo.jpg';
             $service->save();
             $this->incrementConfigVersion('APP_SERVICE_VERSION');
@@ -154,12 +163,18 @@ class ServiceController extends Controller{
                 'service_name' => 'required|max:255',
                 'service_description' => 'required',
             ]);
-            if ($validator->fails()) {
+
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
+
+            $restricted = [];
+            if($request->input('service_type_data')['restricted'] !== null)
+                foreach($request->input('service_type_data')['restricted'] as $key=>$value)
+                    $restricted[] = $value['value'];
 
             $service = ServiceType::find($request->input('id'));
             $service->service_name = $request->input('service_name');
+            $service->service_type_data = json_encode(array("restricted"=>in_array(0, $restricted)?[0]:$restricted));
             $service->service_description = $request->input('service_description');
             $service->save();
             $this->incrementConfigVersion('APP_SERVICE_VERSION');
@@ -205,9 +220,8 @@ class ServiceController extends Controller{
     public function getServicePackages(Request $request){
         if($request->segment(4)=='active')
             $data = ServicePackage::where('is_active', 1)->get()->toArray();
-        else{
+        else
             $data = ServicePackage::get()->toArray();
-        }
 
         foreach ($data as $key=>$value){
             $data[$key]['service_list'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
@@ -227,18 +241,16 @@ class ServiceController extends Controller{
             $validator = Validator::make($request->all(), [
                 'package_name' => 'required|max:255|unique:service_packages,package_name'
             ]);
-            if ($validator->fails()) {
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if(sizeof($request->input('package_services')) < 2){
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if(sizeof($request->input('package_services')) < 2)
                 return response()->json(['result'=>'failed','error'=>'Select at least 2 services.'], 400);
-            }
 
             $services = array();
-            foreach($request->input('package_services') as $value){
+            foreach($request->input('package_services') as $value)
                 $services[] = $value['value'];
-            }
 
             $service = new ServicePackage;
             $service->package_name = $request->input('package_name');
@@ -257,18 +269,16 @@ class ServiceController extends Controller{
             $validator = Validator::make($request->all(), [
                 'package_name' => 'required|max:255|unique:service_packages,package_name,'. $request->input('id')
             ]);
-            if ($validator->fails()) {
-                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
-            if(sizeof($request->input('package_services')) < 2){
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if(sizeof($request->input('package_services')) < 2)
                 return response()->json(['result'=>'failed','error'=>'Select at least 2 services.'], 400);
-            }
 
             $services = array();
-            foreach($request->input('package_services') as $value){
+            foreach($request->input('package_services') as $value)
                 $services[] = $value['value'];
-            }
 
             $service = ServicePackage::find($request->input('id'));
             $service->package_name = $request->input('package_name');

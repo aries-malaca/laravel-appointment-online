@@ -110,6 +110,11 @@ Route::post('/schedule/updateBranchSchedule', 'BranchController@updateBranchSche
 Route::post('/schedule/addBranchSchedule', 'BranchController@addBranchSchedule');
 Route::post('/schedule/deleteBranchSchedule', 'BranchController@deleteBranchSchedule');
 
+Route::post('/schedule/updateTechnicianShift', 'BranchController@updateTechnicianShift');
+Route::get('/schedule/getTechnicianShifts/{branch}', 'BranchController@getTechnicianShifts');
+Route::post('/schedule/addTechnicianShift', 'BranchController@addTechnicianShift');
+Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicianShift');
+
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');

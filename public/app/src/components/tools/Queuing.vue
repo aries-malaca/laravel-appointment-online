@@ -188,8 +188,8 @@
 </template>
 
 <script>
-    import BookingModal from "../modals/BookingModal.vue";
-    import AppointmentModal from "../modals/AppointmentModal.vue";
+    import BookingModal from "../booking/BookingModal.vue";
+    import AppointmentModal from "../appointment/AppointmentModal.vue";
     import VueSelect from "vue-select"
     import UnauthorizedError from '../errors/UnauthorizedError.vue';
 

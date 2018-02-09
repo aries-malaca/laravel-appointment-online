@@ -162,8 +162,8 @@
 </template>
 
 <script>
-    import BookingModal from "../modals/BookingModal.vue";
-    import AppointmentModal from "../modals/AppointmentModal.vue";
+    import BookingModal from "../booking/BookingModal.vue";
+    import AppointmentModal from "../appointment/AppointmentModal.vue";
     export default {
         name: 'ClientDashboard',
         components:{ BookingModal, AppointmentModal },

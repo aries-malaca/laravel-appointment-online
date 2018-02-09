@@ -38,7 +38,7 @@
 </template>
 
 <script>
-    import BookingModal from "../modals/BookingModal.vue";
+    import BookingModal from "../booking/BookingModal.vue";
     import UnauthorizedError from '../errors/UnauthorizedError.vue';
 
     export default {

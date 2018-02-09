@@ -25,7 +25,7 @@ class ClientController extends Controller{
         $clients = $clients->get()->toArray();
         foreach($clients as $key=>$value){
             $clients[$key]['user_data'] = json_decode($value['user_data']);
-            $clients[$key]['picture_html_big'] = '<img class="img-responsive" style="width:80px" src="images/users/'. $value['user_picture'] .'" />';
+            $clients[$key]['picture_html_big'] = '<img class="img img-thumbnail" style="width:100px" src="images/users/'. $value['user_picture'] .'" />';
             $clients[$key]['picture_html'] = '<img class="img-circle" style="height:35px" src="images/users/'. $value['user_picture'] .'" />';
             $clients[$key]['gender_html'] = '<span class="badge badge-'. ($value['gender']=='male'?'success':'warning').'">'.  $value['gender'] .'</span>';
             $clients[$key]['name'] = $value['first_name'] .' '. $value['last_name'];

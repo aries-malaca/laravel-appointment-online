@@ -8,7 +8,11 @@ Vue.config.productionTip = false;
 Vue.config.debug = true;
 Vue.config.devtools = true;
 
-Vue.use(VueSocketIO, 'https://lbo-express.azurewebsites.net');
+//frontend configurations
+let client_socket = 'https://lbo-express.azurewebsites.net';
+//end frontend configurations
+
+Vue.use(VueSocketIO, client_socket);
 
 new Vue({
     el: '#app',

@@ -48,7 +48,7 @@
 <script>
     import UnauthorizedError from './errors/UnauthorizedError.vue';
     import DataTable from './tables/DataTable.vue';
-    import ClientProfile from './profiles/ClientProfile.vue';
+    import ClientProfile from './clients/profile/ClientProfile.vue';
 
     export default {
         name: 'Clients',

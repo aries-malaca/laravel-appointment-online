@@ -174,7 +174,7 @@
 
 <script>
     import VueSelect from "vue-select"
-    import UploadPictureModal from "./modals/UploadPictureModal.vue"
+    import UploadPictureModal from "./uploader/UploadPictureModal.vue"
     import MyDevicesTable from "./tables/MyDevicesTable.vue"
 
     export default {

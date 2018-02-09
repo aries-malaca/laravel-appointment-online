@@ -120,7 +120,7 @@
 
 <script>
     import TransactionSummary from './TransactionsSummary.vue';
-    import PremierReviewModal from '../modals/PremierReviewModal.vue';
+    import PremierReviewModal from '../plc/PremierReviewModal.vue';
 
     export default {
         name: 'TransactionsView',

@@ -40,7 +40,7 @@
             </div>
         </div>
         <!-- END FOOTER -->
-        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer;border-top-left-radius:20px;color:white;background-color: #91624f;">
+        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer;border-top-left-radius:20px;color:white;background-color: #91624f;" v-if="user !== null">
             <strong><i class="icon icon-bubbles"></i>
                 <span v-if="user.is_client === 0">Chat System</span>
                 <span v-else>Customer Service</span>
@@ -119,26 +119,6 @@
             let u = this;
             this.$store.commit('updateToken', $.cookie("login_cookie"));
             this.$store.dispatch('fetchAuthenticatedUser');
-            this.$store.dispatch('services/fetchServices');
-            this.$store.dispatch('branches/fetchBranches');
-            this.$store.dispatch('products/fetchProducts');
-            this.$store.dispatch('saveLocation');
-
-            setTimeout(function(){
-                if(u.user.is_client !== 1)
-                    return false;
-
-                if(u.configs.FETCH_BOSS_TRANSACTIONS === undefined && u.user.is_client === 1)
-                    return false;
-
-                axios.get(u.configs.FETCH_BOSS_TRANSACTIONS +""+ u.user.email)
-                    .then(function (response) {
-                        u.$store.commit('updateTransactions', response.data);
-                    })
-                    .catch(function (error) {
-                    });
-
-            },2000);
 
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
@@ -149,6 +129,28 @@
             };
 
             Notification.requestPermission();
+
+            setTimeout(function(){
+                if(u.user !== null){
+                    u.$store.dispatch('services/fetchServices');
+                    u.$store.dispatch('branches/fetchBranches');
+                    u.$store.dispatch('products/fetchProducts');
+                    u.$store.dispatch('saveLocation');
+
+                    if(u.user.is_client !== 1)
+                        return false;
+
+                    if(u.configs.FETCH_BOSS_TRANSACTIONS === undefined && u.user.is_client === 1)
+                        return false;
+
+                    axios.get(u.configs.FETCH_BOSS_TRANSACTIONS +""+ u.user.email)
+                        .then(function (response) {
+                            u.$store.commit('updateTransactions', response.data);
+                        })
+                        .catch(function (error) {
+                        });
+                }
+            },3000);
         },
         watch:{
             title(){

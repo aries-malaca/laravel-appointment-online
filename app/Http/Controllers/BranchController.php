@@ -1,13 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\BranchShift;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Branch;
 use App\BranchCluster;
 use App\BranchSchedule;
-use App\Product;
-use App\ProductGroup;
 use Validator;
 use DateTime;
 use Storage;
@@ -19,17 +18,21 @@ class BranchController extends Controller{
         $date_today = $today->format("Y-m-d H:i:s");
 
         $data = Branch::leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
+                        ->leftJoin('regions','branches.region_id','=','regions.id')
+                        ->leftJoin('cities','branches.city_id','=','cities.id')
                         ->select('branches.id as id','cluster_data','branches.*',
-                                        'services','products')
+                                        'services','products','cluster_name','city_name','region_name')
                         ->orderBy('branch_name', 'asc')
                         ->get()->toArray();
 
         foreach($data as $key=>$value){
 
             $data[$key]['cluster_data']     = json_decode($value['cluster_data']);
+            $data[$key]['branch_pictures']     = json_decode($value['branch_pictures']);
             $data[$key]['services']         = json_decode($value['services']);
             $data[$key]['products']         = json_decode($value['products']);
             $data[$key]['branch_data']      = json_decode($value['branch_data']);
+            $data[$key]['social_media_accounts']      = json_decode($value['social_media_accounts']);
             $data[$key]['map_coordinates']  = json_decode($value['map_coordinates']);
             $query_schedule                 = BranchSchedule::where('branch_id', $value['id'])
                                                 ->select('date_start','date_end','schedule_data','schedule_type')
@@ -376,6 +379,63 @@ class BranchController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             BranchSchedule::destroy($request->input('id'));
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function getTechnicianShifts(Request $request){
+        $data = BranchShift::where('branch_id', $request->segment(4))->get()->toArray();
+        foreach($data as $key=>$value)
+            $data[$key]['shift_data'] = json_decode($value['shift_data']);
+
+        return response()->json($data);
+    }
+
+    function addTechnicianShift(Request $request){
+        $api = $this->authenticateAPI();
+
+        $validator = Validator::make($request->all(), [
+            'shift_name'=>'required',
+            'shift_color'=>'required',
+            'shift_data'=>'required',
+            'branch_id'=>'required'
+        ]);
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        if($api['result'] === 'success') {
+            $shift = new BranchShift;
+            $shift->shift_name = $request->input('shift_name');
+            $shift->shift_color = $request->input('shift_color');
+            $shift->shift_data = json_encode($request->input('shift_data'));
+            $shift->branch_id = $request->input('branch_id');
+            $shift->save();
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updateTechnicianShift(Request $request){
+        $api = $this->authenticateAPI();
+
+        $validator = Validator::make($request->all(), [
+            'shift_name'=>'required',
+            'shift_color'=>'required',
+            'shift_data'=>'required',
+            'branch_id'=>'required',
+            'id'=>'required',
+        ]);
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        if($api['result'] === 'success') {
+            $shift = BranchShift::find($request->input('id'));
+            $shift->shift_name = $request->input('shift_name');
+            $shift->shift_color = $request->input('shift_color');
+            $shift->shift_data = json_encode($request->input('shift_data'));
+            $shift->branch_id = $request->input('branch_id');
+            $shift->save();
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);

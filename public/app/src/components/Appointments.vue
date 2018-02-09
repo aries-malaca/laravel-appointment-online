@@ -35,8 +35,8 @@
 </template>
 
 <script>
-    import BookingModal from "./modals/BookingModal.vue";
-    import AppointmentsTable from "./tables/AppointmentsTable.vue";
+    import BookingModal from "./booking/BookingModal.vue";
+    import AppointmentsTable from "./appointment/AppointmentsTable.vue";
 
     export default {
         name: 'Appointments',

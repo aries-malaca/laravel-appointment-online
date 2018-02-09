@@ -28,6 +28,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group" v-if="newServiceType.service_type_data !== undefined">
+                                    <label class="control-label">Restricted</label>
+                                    <vue-select multiple v-model="newServiceType.service_type_data.restricted" :options="service_selection">
+                                    </vue-select>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row" v-if="newServiceType.id != 0">
                             <div class="col-md-12">
                                 <upload-form input_id="service_file" form_id="service_form" category="service" :param_url="'service_id='+newServiceType.id"
@@ -52,10 +61,11 @@
 <script>
     import DataTable from '../tables/DataTable.vue';
     import UploadForm from '../uploader/UploadForm.vue';
+    import VueSelect from "vue-select"
 
     export default {
         name: 'ServiceTypes',
-        components:{ DataTable, UploadForm },
+        components:{ DataTable, UploadForm, VueSelect },
         data: function(){
             return {
                 serviceTypeTable:{
@@ -90,6 +100,9 @@
                     service_name:'',
                     service_description:'',
                     service_picture:'',
+                    service_type_data:{
+                        restricted:[]
+                    }
                 };
                 $("#add-service-type-modal").modal("show");
                 try{
@@ -130,20 +143,56 @@
                 });
             },
             viewServiceType:function(service_type){
+                let u = this;
+
                 this.newServiceType = {
                     id:service_type.id,
                     service_name:service_type.service_name,
                     service_description:service_type.service_description,
-                    service_picture:service_type.service_picture
+                    service_picture:service_type.service_picture,
+                    service_type_data:{
+                        restricted: service_type.service_type_data.restricted.map(function(item){
+                            return {
+                                value:item,
+                                label:u.getServiceName(item)
+                            }
+                        })
+                    }
                 };
+
                 $("#add-service-type-modal").modal("show");
                 try{
                     $("form")[0].reset();
                 }
                 catch(error){}
             },
+            getServiceName:function(id){
+                if(id===0)
+                    return 'ALL';
+
+                for(var x=0;x<this.types.length;x++){
+                    if(id === this.types[x].id)
+                        return this.types[x].service_name;
+                }
+                return 'Unknown';
+            }
         },
         computed:{
+            service_selection(){
+                let u = this;
+                let aa = [{
+                    label:'ALL',
+                    value:0
+                }];
+
+                return aa.concat(this.types.map(function(item){
+                    item.label = item.service_name;
+                    item.value = item.id;
+                    return item;
+                }).filter(function(item){
+                    return u.newServiceType.id===0 || u.newServiceType.id !== item.id
+                }));
+            },
             types(){
                 return this.$store.state.services.types.map(function(item){
                     item.service_picture_html = '<img src="images/services/'+item.service_picture+'" style="height:40px"/>';

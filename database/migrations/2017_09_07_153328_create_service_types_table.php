@@ -19,6 +19,7 @@ class CreateServiceTypesTable extends Migration
             $table->text('service_description');
             $table->string('service_picture');
             $table->integer('is_active');
+            $table->text('service_type_data');
             $table->timestamps();
         });
     }

@@ -7,7 +7,7 @@
         <meta content="Preview page of Metronic Admin Theme #4 for statistics, charts, recent events and reports" name="description" />
         <meta content="" name="author" />
         <!-- BEGIN GLOBAL MANDATORY STYLES -->
-        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -83,7 +83,7 @@
     <script type="text/javascript" src="../../js/chat.js"></script>
     <script src="../../theme/global/plugins/bootstrap-summernote/summernote.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+    <script src="//maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyDmPrbBOD0PuleW3DuILWpMwExxoKXeF8k&libraries=places"></script>
     <script src="../../theme/pages/scripts/components-bootstrap-switch.min.js" type="text/javascript"></script>
     <script src="../../app/dist/build.js?cache=<?=rand()?>"></script>
 </html>

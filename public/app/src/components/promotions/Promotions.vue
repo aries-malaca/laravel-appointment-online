@@ -1,0 +1,91 @@
+<template>
+    <div class="calendar">
+        <div class="portlet light">
+            <div class="portlet-title tabbable-line">
+                <div class="caption">
+                    <i class="icon-puzzle font-grey-gallery"></i>
+                    <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
+                </div>
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#promos" data-toggle="tab">Promos</a>
+                    </li>
+                    <li>
+                        <a href="#perks" data-toggle="tab">Perks</a>
+                    </li>
+                    <li>
+                        <a href="#surveys" data-toggle="tab">Surveys</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="portlet-body">
+                <div class="tab-content">
+                    <promos></promos>
+                    <perks></perks>
+                    <div class="tab-pane" id="surveys">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import Promos from './Promos.vue';
+    import Perks from './Perks.vue';
+
+    export default {
+        name: 'Promotions',
+        components:{ Promos, Perks },
+        data: function(){
+            return {
+                title: 'Promotions',
+                surveys:[],
+                surveyTable:{
+                    columns: [
+                        { label: 'Title', field: 'title', filterable: true },
+                    ],
+                    rowClicked: this.viewSurvey,
+                },
+            }
+        },
+        methods:{
+            makeRequest:function(url, method, data, success_callback, error_callback){
+                axios({url:url, method:method, data:data})
+                    .then(function () {
+                        success_callback();
+                    })
+                    .catch(function (error) {
+                        error_callback(error);
+                    });
+            },
+            getData:function(url, field){
+                let u = this;
+                axios.get(url)
+                    .then(function (response) {
+                        u[field] = [];
+                        response.data.forEach(function(item){
+                            u[field].push(item);
+                        });
+                    });
+            },
+            viewSurvey:function(survey){
+
+            },
+        },
+        mounted:function(){
+            this.$store.commit('updateTitle', 'Promotions');
+        },
+        computed:{
+            user(){
+                return this.$store.state.user;
+            },
+            token(){
+                return this.$store.state.token;
+            },
+            configs(){
+                return this.$store.state.configs;
+            },
+        }
+    }
+</script>

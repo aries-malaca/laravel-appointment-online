@@ -1,76 +1,59 @@
 <template>
     <div class="technicians">
-        <div class="portlet light" v-if="user.is_client !== 1">
-            <div class="portlet-title">
+        <div class="portlet light" v-show="view === false"  v-if="user.is_client !== 1">
+            <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase">
                         {{ title }}
                     </span>
                 </div>
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#technicians-list" data-toggle="tab">Technicians List</a>
+                    </li>
+                    <li>
+                        <a href="#scheduling" data-toggle="tab">Scheduling</a>
+                    </li>
+                </ul>
             </div>
             <div class="portlet-body">
-                <data-table
-                        :columns="technicianTable.columns"
-                        :rows="technicians"
-                        :paginate="true"
-                        :onClick="technicianTable.rowClicked"
-                        styleClass="table table-bordered table-hover table-striped"
-                />
+                <div class="tab-content">
+                    <technicians-list></technicians-list>
+                    <scheduling></scheduling>
+                </div>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
+        <technician-profile v-if="view" :with_back="true"></technician-profile>
     </div>
 </template>
 <script>
-    import DataTable from './tables/DataTable.vue';
     import UnauthorizedError from './errors/UnauthorizedError.vue';
+    import TechniciansList from './technicians/TechniciansList.vue';
+    import Scheduling from './technicians/Scheduling.vue';
+    import TechnicianProfile from './technicians/profile/TechnicianProfile.vue';
+
     export default {
         name: 'Technicians',
-        components:{ DataTable, UnauthorizedError },
+        components:{ TechniciansList, Scheduling, UnauthorizedError, TechnicianProfile },
         data: function(){
             return {
                 title: 'Technicians',
-                technicians:[],
-                technicianTable:{
-                    columns: [
-                        { label: 'Photo', field: 'picture_html', html:true },
-                        { label: 'Employee ID', field: 'employee_id',filterable:true},
-                        { label: 'Name', field: 'name', filterable: true},
-                        { label: 'Mobile', field: 'technician_data.mobile', filterable: true},
-                        { label: 'Address', field: 'technician_data.address', filterable: true},
-                        { label: 'Cluster', field: 'cluster_name', filterable: true},
-                    ],
-                    rowClicked: this.viewTechnician,
-                },
-            }
-        },
-        methods:{
-            getTechnicians:function(){
-                let u = this;
-                axios.get('/api/technician/getTechnicians')
-                    .then(function (response) {
-                        u.technicians = response.data;
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
-                    });
             }
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Technicians');
-            this.getTechnicians();
+            this.$store.commit('technicians/updateViewingTechnician', false);
+            this.$store.dispatch('technicians/fetchTechnicians');
         },
         computed:{
             user(){
                 return this.$store.state.user;
             },
-            token(){
-                return this.$store.state.token;
+            view(){
+                return this.$store.state.technicians.viewing_technician;
             },
-            configs(){
-                return this.$store.state.configs;
-            }
         }
     }
 </script>

@@ -52,8 +52,7 @@
             }
         },
         mounted:function(){
-            this.$emit('update_title', this.title);
-            this.$emit('update_user');
+            this.$store.commit('updateTitle', 'Control Panel');
         },
         computed:{
             user(){

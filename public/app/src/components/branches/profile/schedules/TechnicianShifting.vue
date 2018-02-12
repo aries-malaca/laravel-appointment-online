@@ -1,5 +1,5 @@
 <template>
-    <div id="shifting" class="tab-pane">
+    <div id="shifting" class="tab-pane" v-if="branch.cluster_data !==undefined">
         <div v-if="branch.cluster_data.ems_supported">
             <div class="alert alert-info">
                 Selected Branch is EMS Supported. Click here:
@@ -32,7 +32,8 @@
                             <td :style="'color:'+ shift.shift_color ">{{ shift.shift_color.toUpperCase() }}</td>
                             <td v-for="t in shift.shift_data">{{ t }}</td>
                             <td>
-                                <button class="btn btn-info btn-sm" @click="viewShift(shift)">Edit</button>
+                                <button class="btn btn-info btn-block" @click="viewShift(shift)">Edit</button>
+                                <button class="btn btn-danger btn-block" @click="deleteTechnicianShift(shift)">Delete</button>
                             </td>
                         </tr>
                     </tbody>
@@ -195,6 +196,21 @@
                         $btn.button('reset');
                         XHRCatcher(error);
                     });
+            },
+            deleteTechnicianShift:function(schedule){
+                let u = this;
+
+                SweetConfirmation("Are you sure you want to delete this shift?", function(){
+                    axios.post('/api/schedule/deleteTechnicianShift?token=' + u.token, schedule)
+                        .then(function () {
+                            u.getShifts();
+                            u.$emit('refresh_branch');
+                            toastr.success("Shift successfully deleted.");
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                        });
+                });
             },
             moment:moment,
         },

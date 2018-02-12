@@ -291,22 +291,17 @@
                     });
             },
             deleteBranchSchedule:function(schedule){
-                if(!confirm("Are you sure you want to delete this schedule?")){
-                    return false;
-                }
                 let u = this;
-                let $btn = $(event.target);
-                $btn.button('loading');
-                axios.post('/api/schedule/deleteBranchSchedule?token=' + this.token, schedule)
-                    .then(function () {
-                        u.$emit('refresh_branch');
-                        $btn.button('reset');
-                        toastr.success("Schedule successfully deleted.");
-                    })
-                    .catch(function (error) {
-                        $btn.button('reset');
-                        XHRCatcher(error);
-                    });
+                SweetConfirmation("Are you sure you want to delete this schedule?", function(){
+                    axios.post('/api/schedule/deleteBranchSchedule?token=' + u.token, schedule)
+                        .then(function () {
+                            u.$emit('refresh_branch');
+                            toastr.success("Schedule successfully deleted.");
+                        })
+                        .catch(function (error) {
+                            XHRCatcher(error);
+                        });
+                });
             },
             moment:moment
         },

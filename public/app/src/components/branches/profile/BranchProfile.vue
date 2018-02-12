@@ -1,8 +1,8 @@
 <template>
     <div>
         <div class="portlet mt-element-ribbon light portlet-fit bordered">
-            <a v-if="with_back && newBranch.branch_name !== undefined" @click="back" class="ribbon ribbon-left ribbon-shadow ribbon-round ribbon-border-dash-hor ribbon-color-danger uppercase">
-                Back
+            <a v-if="with_back && newBranch.branch_name !== undefined" @click="back" class="ribbon ribbon-left ribbon-shadow ribbon-round ribbon-border-dash-hor ribbon-color-success uppercase">
+                <i class="fa fa-arrow-circle-left"></i> Back
             </a>
             <div class="portlet-title tabbable-line" v-if="newBranch.branch_name !== undefined">
                 <div class="caption">
@@ -51,6 +51,10 @@
                                     <tr>
                                         <td> Classification: </td>
                                         <td> {{ newBranch.branch_classification }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td> Cluster: </td>
+                                        <td> {{ newBranch.cluster_name }} </td>
                                     </tr>
                                     <tr>
                                         <td> Contact No.: </td>
@@ -174,7 +178,7 @@
                     <!--end tab-pane-->
                 </div>
             </div>
-
+            <loading v-else></loading>
 
             <div v-for="(pic, key) in pictures">
                 <upload-picture-modal
@@ -199,11 +203,11 @@
     import Schedules from "./Schedules.vue";
     import Reviews from "./Reviews.vue";
     import BranchModal from "../BranchModal.vue";
-
+    import Loading from '../../etc/Loading.vue';
     export default {
         name: 'BranchProfile',
         props:['with_back'],
-        components:{ UploadPictureModal, AppointmentsTable, Schedules, Reviews, BranchModal },
+        components:{ UploadPictureModal, Loading, AppointmentsTable, Schedules, Reviews, BranchModal },
         data: function(){
            return {
                pictures:[],
@@ -246,10 +250,7 @@
                             },1000);
                             u.$store.commit('branches/updateViewingBranch', u.newBranch);
                         }
-                    }).catch(function(error){
-                    if(this.with_back)
-                        this.back();
-                });
+                    });
             },
             addPicture:function(){
                 this.pictures.push('no photo.jpg');

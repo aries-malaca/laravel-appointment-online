@@ -8,6 +8,7 @@
 <script>
     import BranchProfile from './BranchProfile.vue';
     import UnauthorizedError from '../../errors/UnauthorizedError.vue';
+
     export default {
         name: 'BranchProfileContainer',
         components:{ BranchProfile, UnauthorizedError },

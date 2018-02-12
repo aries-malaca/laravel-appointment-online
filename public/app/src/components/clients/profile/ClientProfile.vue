@@ -1,12 +1,12 @@
 <template>
     <div class="portlet mt-element-ribbon light portlet-fit bordered" v-if="show">
-        <a v-if="with_back" @click="back" class="ribbon ribbon-left ribbon-shadow ribbon-round ribbon-border-dash-hor ribbon-color-danger uppercase">
-            Back
+        <a v-if="with_back" @click="back" class="ribbon ribbon-left ribbon-shadow ribbon-round ribbon-border-dash-hor ribbon-color-success uppercase">
+            <i class="fa fa-arrow-circle-left"></i> Back
         </a>
         <div class="portlet-title tabbable-line" v-if="client.first_name !== undefined">
             <div class="caption">
                 &nbsp;
-                <span class="caption-subject bold font-grey-gallery uppercase"> {{ client.first_name }} {{ client.last_name }} </span>
+                <span class="caption-subject bold font-grey-gallery uppercase">{{ client.first_name }} {{ client.last_name }} </span>
             </div>
             <ul class="nav nav-tabs">
                 <li class="active">
@@ -119,7 +119,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
-                                                    :token="token" :configs="configs" :user="user" @get_appointments="getAppointments"/>
+                                                    @get_appointments="getAppointments"/>
                             </div>
                         </div>
                     </div>
@@ -241,7 +241,7 @@
                                                     @get_appointments="getAppointments" :appointments="active_appointments"/>
                                         </div>
                                         <div id="inactive" class="tab-pane">
-                                            <appointments-table :paginate="true" :hide_client="true" :configs="configs"
+                                            <appointments-table :paginate="true" :hide_client="true"
                                                     @get_appointments="getAppointmentHistory" :appointments="appointment_history"/>
                                         </div>
                                     </div>
@@ -459,9 +459,6 @@
             },
             products_availed_total:function(){
                 return 500;
-            },
-            user(){
-                return this.$store.state.user;
             },
             token(){
                 return this.$store.state.token;

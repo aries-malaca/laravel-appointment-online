@@ -119,6 +119,10 @@
             let u = this;
             this.$store.commit('updateToken', $.cookie("login_cookie"));
             this.$store.dispatch('fetchAuthenticatedUser');
+            u.$store.dispatch('services/fetchServices');
+            u.$store.dispatch('branches/fetchBranches');
+            u.$store.dispatch('products/fetchProducts');
+            u.$store.dispatch('technicians/fetchTechnicians');
 
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
@@ -132,9 +136,6 @@
 
             setTimeout(function(){
                 if(u.user !== null){
-                    u.$store.dispatch('services/fetchServices');
-                    u.$store.dispatch('branches/fetchBranches');
-                    u.$store.dispatch('products/fetchProducts');
                     u.$store.dispatch('saveLocation');
 
                     if(u.user.is_client !== 1)

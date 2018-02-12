@@ -73,7 +73,7 @@ class BranchController extends Controller{
         $data = Branch::leftJoin('regions','branches.region_id','=','regions.id')
                         ->leftJoin('cities','branches.city_id','=','cities.id')
                         ->leftJoin('branch_clusters','branches.cluster_id','=','branch_clusters.id')
-                        ->select('branches.*','region_name','city_name','cluster_data')
+                        ->select('branches.*','region_name','city_name','cluster_data','cluster_name')
                         ->where('branches.id',$request->segment(4))
                         ->get()->first()->toArray();
 
@@ -436,6 +436,15 @@ class BranchController extends Controller{
             $shift->shift_data = json_encode($request->input('shift_data'));
             $shift->branch_id = $request->input('branch_id');
             $shift->save();
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function deleteTechnicianShift(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            BranchShift::destroy($request->input('id'));
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);

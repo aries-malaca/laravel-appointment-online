@@ -51,14 +51,16 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label">Services</label>
                                     <vue-select multiple v-model="newCluster.services" :options="service_selection">
                                     </vue-select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label">Products</label>
                                     <vue-select multiple v-model="newCluster.products" :options="product_selection">
@@ -222,8 +224,9 @@
                 });
             },
             product_selection:function(){
+                let u = this;
                 return this.products.map(function(item){
-                    item.label = item.product_code;
+                    item.label = u.getProductName(item.id);
                     item.value = item.id;
                     return item;
                 });

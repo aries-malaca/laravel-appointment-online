@@ -20,6 +20,7 @@ import Queuing from './components/tools/Queuing.vue';
 import Reports from './components/Reports.vue';
 import Services from './components/Services.vue';
 import Technicians from './components/Technicians.vue';
+import TechnicianProfileContainer from './components/technicians/profile/TechnicianProfileContainer.vue';
 import Transactions from './components/Transactions.vue';
 import Testimonials from './components/tools/Testimonials.vue';
 import BranchLocator from './components/tools/BranchLocator.vue';
@@ -130,6 +131,11 @@ export default new Router({
             path: '/technicians',
             name: 'Technicians',
             component: Technicians
+        },
+        {
+            path: '/technicians/:id',
+            name: 'Technician Profile',
+            component: TechnicianProfileContainer
         },
         {
             path: '/transactions',

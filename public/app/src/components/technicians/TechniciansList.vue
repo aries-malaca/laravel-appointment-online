@@ -9,34 +9,15 @@
             :onClick="technicianTable.rowClicked"
             styleClass="table table-bordered table-hover table-striped"
         />
-
-        <div class="modal fade" id="add-technician-modal" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                        <h4 class="modal-title">Add Technician</h4>
-                    </div>
-                    <div class="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                        <button type="button" @click="addTechnician($event)" data-loading-text="Saving..." class="btn green">Save</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-        <!-- /.modal -->
+        <technician-modal v-if="!technician" operation="add"></technician-modal>
     </div>
 </template>
 <script>
     import DataTable from '../tables/DataTable.vue';
+    import TechnicianModal from './TechnicianModal.vue';
     export default {
         name: 'TechniciansList',
-        components:{ DataTable },
+        components:{ DataTable, TechnicianModal },
         data: function(){
             return {
                 technicianTable:{
@@ -50,7 +31,6 @@
                     ],
                     rowClicked: this.viewTechnician,
                 },
-                newTechnician:{}
             }
         },
         methods:{
@@ -66,7 +46,14 @@
                 return this.$store.state.token;
             },
             technicians(){
-                return this.$store.state.technicians.technicians;
+                return this.$store.state.technicians.technicians.map((technician)=>{
+                    technician.picture_html = '<img class="img-circle" style="height:35px" src="images/technicians/'+ technician.technician_picture +'" />';
+                    technician.name = technician.first_name + ' ' + technician.last_name;
+                    return technician;
+                });
+            },
+            technician(){
+                return this.$store.state.technicians.viewing_technician;
             }
         }
     }

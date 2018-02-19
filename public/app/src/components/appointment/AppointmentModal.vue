@@ -8,7 +8,7 @@
                         <h4 class="modal-title">Appointment Details</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
+                        <div class="row" v-if="appointment.id !== undefined">
                             <div class="col-md-4">
                                 <table class="table table-hover table-light" v-if="appointment.id !== undefined && user.id !== undefined">
                                     <tbody>
@@ -150,11 +150,12 @@
                                 </div>
                             </div>
                         </div>
+                        <loading v-else></loading>
                     </div>
                     <div class="modal-footer">
                         <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
                         <a target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
-                        <button type="button" @click="closeModal" class="btn dark btn-outline">Close</button>
+                        <button type="button" data-dismiss="modal" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>
             </div>
@@ -194,9 +195,11 @@
 </template>
 
 <script>
+    import Loading from '../etc/Loading.vue';
     export default {
         name: 'AppointmentModal',
         props:[ 'id'],
+        components:{ Loading },
         data: function(){
             return {
                 cancel:{},
@@ -223,6 +226,7 @@
         },
         methods:{
             getAppointment:function(){
+                this.appointment = {};
                 let u = this;
                 if(this.id !== undefined)
                     axios.get('/api/appointment/getAppointment/' + this.id)
@@ -288,9 +292,6 @@
                         XHRCatcher(error);
                         $btn.button('reset');
                     });
-            },
-            closeModal:function(){
-                this.$emit('close_modal');
             },
             moment:moment
         },

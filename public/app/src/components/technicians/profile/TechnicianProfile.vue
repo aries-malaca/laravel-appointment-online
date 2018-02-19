@@ -25,49 +25,76 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="info">
                         <div class="row">
-                            <div class="col-md-8 profile-info">
-
+                            <div class="col-md-3">
+                                <ul class="list-unstyled profile-nav">
+                                    <li>
+                                        <img v-bind:src="'images/technicians/'+technician.technician_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
+                                    </li>
+                                </ul>
                             </div>
-                            <div class="col-md-4">
-                                <div class="portlet sale-summary">
-                                    <div class="portlet-title">
-                                        <div class="caption font-red sbold"> Today's Transaction Summary </div>
-                                        <div class="tools">
-                                            <a class="reload" href="javascript:;"> </a>
-                                        </div>
-                                    </div>
-                                    <div class="portlet-body">
-                                        <ul class="list-unstyled">
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-12 profile-info" v-if="technician.technician_data !== undefined">
+                                        <h1 class="font-green sbold uppercase">{{ technician.first_name }} {{ technician.last_name }}</h1>
+                                        <ul class="list-inline">
                                             <li>
-                                                <span class="sale-info"> PRODUCTS AVAILED </span>
-                                                <span class="sale-num"> 2377 </span>
+                                                <i class="fa fa-map-marker"></i> {{ technician.technician_data.address }}
                                             </li>
                                             <li>
-                                                <span class="sale-info"> SERVICES AVAILED </span>
-                                                <span class="sale-num"> 2377 </span>
+                                                <i class="fa fa-gift"></i> {{ moment(technician.technician_data.birth_date).format("MMMM D, YYYY") }}
                                             </li>
                                             <li>
-                                                <span class="sale-info"> TOTAL SALES </span>
-                                                <span class="sale-num"> 2377 </span>
+                                                <i class="fa fa-phone"></i> {{ technician.technician_data.mobile }}
+                                            </li>
+                                            <li v-if="technician.technician_data.gender == 'female'">
+                                                <i class="fa fa-female"></i> Female
+                                            </li>
+                                            <li v-else>
+                                                <i class="fa fa-male"></i> Male
                                             </li>
                                         </ul>
+
+                                        <table class="table table-hover table-light">
+                                            <tbody>
+                                                <tr>
+                                                    <td> Employee ID: </td>
+                                                    <td> {{ technician.employee_id }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> Position: </td>
+                                                    <td> {{ technician.technician_data.position_name }} </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td> Cluster:</td>
+                                                    <td> {{ technician.cluster_name }} </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button type="button" @click="showEditModal" class="btn green-meadow">Edit Info</button>
                                     </div>
                                 </div>
                             </div>
-                            <!--end col-md-4-->
                         </div>
                     </div>
+                    <schedules></schedules>
+                    <reviews></reviews>
                 </div>
             </div>
         </div>
-
+        <technician-modal v-if="technician" operation="add"></technician-modal>
     </div>
 </template>
 
 <script>
+    import Reviews from './Reviews.vue';
+    import Schedules from './Schedules.vue';
+    import TechnicianModal from '../TechnicianModal.vue';
+
     export default {
         name: 'TechnicianProfile',
         props: ['with_back'],
+        components:{ Reviews, Schedules, TechnicianModal },
         data: function(){
             return {
             }
@@ -75,10 +102,11 @@
         methods:{
             back:function(){
                 this.$store.commit('technicians/updateViewingTechnician', false);
-            }
-        },
-        mounted:function(){
-
+            },
+            showEditModal(){
+                $("#add-technician-modal").modal("show");
+            },
+            moment:moment
         },
         computed:{
             user(){

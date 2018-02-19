@@ -1,5 +1,5 @@
 <template>
-    <div class="loading">Loading&#8230;</div>
+    <div class="loading2">Loading&#8230;</div>
 </template>
 <script>
     export default {
@@ -8,7 +8,7 @@
 </script>
 <style>
     /* Absolute Center Spinner */
-    .loading {
+    .loading2 {
         position: fixed;
         z-index: 999;
         height: 2em;
@@ -21,7 +21,7 @@
     }
 
     /* Transparent Overlay */
-    .loading:before {
+    .loading2:before {
         content: '';
         display: block;
         position: fixed;
@@ -33,7 +33,7 @@
     }
 
     /* :not(:required) hides these rules from IE9 and below */
-    .loading:not(:required) {
+    .loading2:not(:required) {
         /* hide "loading..." text */
         font: 0/0 a;
         color: transparent;
@@ -42,7 +42,7 @@
         border: 0;
     }
 
-    .loading:not(:required):after {
+    .loading2:not(:required):after {
         content: '';
         display: block;
         font-size: 10px;

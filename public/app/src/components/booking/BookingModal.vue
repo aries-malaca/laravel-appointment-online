@@ -722,6 +722,7 @@
                 }
             },
             toggle:function(){
+                this.service = null;
                 var allowance = (this.configs!==undefined)?Number(this.configs.SERVICE_TIME_ALLOWANCE):0;
                 this.clients = [];
                 this.newTransaction={

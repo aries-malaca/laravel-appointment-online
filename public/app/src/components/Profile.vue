@@ -256,10 +256,13 @@
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'My Profile');
-            this.getProfile();
             this.getUserLevels();
-
             let u = this;
+
+            this.$store.dispatch('fetchAuthenticatedUser').then(function(){
+                u.getProfile();
+            });
+
             $("#autocomplete").change(function(event){
                 setTimeout(function(){
                     u.profile.user_address = event.target.value;

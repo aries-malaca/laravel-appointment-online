@@ -14,17 +14,23 @@
             </div>
             <div class="portlet-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <div class="form-group">
-                            <div class="col-xs-3">
-                                <h4 style="text-align:right">Branch:</h4>
+                            <div class="col-sm-2">
+                                <h4 style="text-align:left">Branch:</h4>
                             </div>
-                            <div class="col-xs-9">
+                            <div class="col-sm-5">
                                 <vue-select v-model="branch" :options="branch_selection"></vue-select>
+                            </div>
+                            <div class="col-sm-1">
+                                <h4 style="text-align:right">Date:</h4>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="date" v-model="date" class="form-control"/>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="row" v-if="branch !== null">
                             <div class="col-md-6">
                                 <button v-if="gate(user.level_data.permissions, 'queuing', 'book')" @click="toggle = !toggle"
@@ -66,33 +72,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="app in queued">
+                                    <tr v-for="app in queued" >
                                         <td>{{ app.client.client_name }}</td>
                                         <td>
                                             <table class="table-responsive table table-bordered" style="margin:0px;">
                                                 <tbody>
-                                                    <tr v-for="item in app.items" v-bind:style="'background-color:'+ (isOnCall(item)||isOnServe(item)? (isOnCall(item)?'#aaffaa':'#ffccff'):'')">
+                                                    <tr v-for="item in app.items">
                                                         <td>{{ item.item_name }}</td>
-                                                        <td>{{ item.technician_name }}</td>
-                                                        <td>{{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}</td>
-                                                        <td>
+                                                        <td style="width:20%">{{ item.technician_name }}</td>
+                                                        <td style="width:20%">
+                                                            {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
+                                                        </td>
+                                                        <td style="width:8%">
+                                                            {{ item.platform.toUpperCase() }}
+                                                        </td>
+                                                        <td style="width:12%">
                                                             <span class="badge badge-info">RESERVED</span>
                                                         </td>
-                                                        <td>
-                                                            <button class="btn btn-xs btn-warning" @click="viewAppointment(item.transaction_id)">View</button>
-                                                            <button class="btn btn-xs btn-danger" @click="emitUnCallItem(item.id)" v-if="isOnCall(item)">Uncall</button>
-                                                            <button class="btn btn-xs btn-success" @click="emitCallItem(item.id)"  v-if="!isOnCall(item) && !isOnServe(item)">Call</button>
-
-                                                            <button class="btn btn-xs purple" @click="emitServeItem(item.id)" v-if="isOnCall(item)">Serve</button>
-                                                            <button class="btn btn-xs btn-danger" @click="emitUnServeItem(item.id)" v-if="isOnServe(item)">Unserve</button>
-
-                                                            <button class="btn btn-xs btn-info" @click="emitCompleteItem(item)" v-if="isOnServe(item)">Complete</button>
+                                                        <td style="width:12%">
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <button class="btn btn-sm btn-block purple" @click="emitServeItem(item.id)" v-if="isOnCall(app)">Serve</button>
+                                                                    <button class="btn btn-sm btn-block btn-danger" @click="emitUnServeItem(item.id)" v-if="isOnServe(item)">Unserve</button>
+                                                                    <button class="btn btn-sm btn-block btn-info" @click="emitCompleteItem(item)" v-if="isOnServe(item)">Complete</button>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </td>
-                                        <td></td>
+                                        <td style="width:100px;">
+                                            <button class="btn btn-sm btn-block btn-success" @click="emitCallItem(app.items[0].id)"  v-if="!isOnCall(app)">Call</button>
+                                            <button class="btn btn-sm btn-block btn-warning" @click="viewAppointment(app.transaction_id)">View</button>
+                                            <button class="btn btn-sm btn-block btn-danger" @click="emitUnCallItem(app.items[0].id)" v-if="isOnCall(app)">Uncall</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -203,7 +217,8 @@
                 appointments:[],
                 toggle:false,
                 show:false,
-                display_id:undefined
+                display_id:undefined,
+                date:moment().format("YYYY-MM-DD")
             }
         },
         methods:{
@@ -222,7 +237,7 @@
                     return false;
 
                 let u = this;
-                let url = '/api/appointment/getAppointments/queue/'+this.branch.value+'/queue';
+                let url = '/api/appointment/getAppointments/queue/'+this.branch.value+'/'+ this.date;
 
                 this.title = 'Queuing ' + (this.branch!== null? '(' + this.branch.label + ')':'');
 
@@ -243,6 +258,7 @@
                         data.push({
                             client:this.clients[x],
                             items: items,
+                            transaction_id:items[0].transaction_id
                         });
                 }
                 return data;
@@ -255,6 +271,7 @@
                             if(status === this.appointments[x].items[y].item_status && this.appointments[x].items[y].item_type ==='service'){
                                 this.appointments[x].items[y].technician_name = this.appointments[x].technician_name;
                                 this.appointments[x].items[y].client_id = this.appointments[x].client_id;
+                                this.appointments[x].items[y].platform = this.appointments[x].platform;
                                 data.push(this.appointments[x].items[y]);
                             }
                         }
@@ -328,11 +345,17 @@
                 }
                 return false;
             },
-            isOnCall:function(item){
-                return (Number(moment().format('X'))- item.item_data.called)<60 && !this.isOnServe(item);
+            isOnCall:function(app){
+                for(var x=0;x<app.items.length;x++){
+                    if( (Number(moment().format("X")) - app.items[x].item_data.called) <= 60 ){
+                        return true;
+                    }
+                }
+
+                return false;
             },
             isOnServe:function(item){
-                return item.serve_time !== null;
+
             },
             gate:gate,
             moment:moment
@@ -404,6 +427,9 @@
         },
         watch:{
             branch:function(){
+                this.getAppointments();
+            },
+            date:function(){
                 this.getAppointments();
             }
         }

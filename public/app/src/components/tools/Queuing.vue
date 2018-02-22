@@ -424,16 +424,6 @@
                         });
                 }
             },
-            emitCompleteItem:function(item){
-                let u = this;
-                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'post', data:{item_id:item.id}})
-                    .then(function () {
-                        u.$socket.emit('refreshAppointments', u.branch.value,item.client_id);
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
-                    });
-            },
             inArray:function(clients, id){
                 for(var x=0;x<clients.length;x++){
                     if(clients[x].client_id === id)
@@ -499,7 +489,6 @@
                         clients.push({
                             client_id:this.appointments[x].client_id,
                             client_name:this.appointments[x].client_name,
-                            serve_time:this.appointments[x].serve_time,
                         });
                 }
                 return clients;

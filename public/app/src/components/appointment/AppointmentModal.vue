@@ -140,29 +140,36 @@
                                     </div>
                                 </div>
 
-                                <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1">
+                                <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1 && appointment.acknowledgement_data !== null">
                                     <hr/>
                                     <h4>Complete This Appointment</h4>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="card">
-                                                <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                                <img v-if="appointment.acknowledgement_data.signature !== undefined" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
                                                 <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
                                                 <div class="container2" style="text-align:center">
                                                     <h5><b>{{ appointment.client_name }}</b></h5>
                                                     <p>Client's Signature</p>
                                                 </div>
-                                            </div>
+                                            </div><br/>
+                                            <i v-if="acknowledgement_signing"><i class="fa fa-pencil"></i> Client is signing...</i>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Select Device:</label>
-                                                <select class="form-control">
-                                                    <option value="1">Device 1</option>
-                                                    <option value="2">Device 2</option>
+                                                <select v-model="device" class="form-control" :disabled="acknowledgement_connection">
+                                                    <option value="1ssg2362346sd">Acer001</option>
+                                                    <option value="2dsgds3262346">Acer002</option>
                                                 </select>
                                             </div>
-                                            <button class="btn btn-success btn-block">Launch Acknowledgement Form</button>
+
+                                            <div class="alert alert-info" v-if="acknowledgement_connection">
+                                                Device has received the appointment data, Waiting for acknowledgement. {{ acknowledgement_timer }}
+                                            </div>
+
+                                            <button class="btn btn-info btn-block" @click="emitSendData()">Launch Acknowledgement Form</button>
+                                            <button class="btn btn-success btn-block" @click="emitCompleteAppointment()">Complete Appointment</button>
                                         </div>
                                     </div>
                                 </div>
@@ -223,6 +230,11 @@
             return {
                 cancel:{},
                 appointment:{},
+                device:'',
+                t:null,
+                acknowledgement_timer:0,
+                acknowledgement_connection:false,
+                acknowledgement_signing:false,
                 reasons:{
                     service:[
                         'Hair Length',
@@ -296,6 +308,18 @@
                         $btn.button('reset');
                     });
             },
+            emitCompleteAppointment:function(){
+                let u = this;
+                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'post', data:{appointment:this.appointment}})
+                    .then(function () {
+                        u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+                        u.$socket.emit('refreshAppointment', u.appointment.id);
+                        u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
             cancelAppointment:function(){
                 let u = this;
                 let $btn = $(event.target);
@@ -316,6 +340,14 @@
                         XHRCatcher(error);
                         $btn.button('reset');
                     });
+            },
+            emitSendData(){
+                if(this.device === ''){
+                    toastr.error("Please select device first.");
+                    return false;
+                }
+
+                this.$socket.emit('sendAppointmentData', this.appointment, this.device);
             },
             moment:moment
         },
@@ -363,6 +395,47 @@
             this.$options.sockets.refreshAppointment = function(id){
                 if(id === this.id)
                     u.getAppointment();
+            };
+            this.$options.sockets.receivedAppointmentData = function(data){
+                if(data.appointment_id === u.appointment.id){
+                    u.acknowledgement_timer = 20;
+
+                    if(u.acknowledgement_timer > 0 && u.acknowledgement_connection)
+                        return;
+
+                    u.acknowledgement_connection = true;
+
+                    u.t = setInterval(function(){
+                        u.acknowledgement_timer --;
+                        if(u.acknowledgement_timer === 0){
+                            u.acknowledgement_connection = false;
+                            clearInterval(u.t);
+                            u.$socket.emit('signingTimeout', u.appointment.id, u.device);
+                        }
+                    },1000);
+                }
+            };
+            this.$options.sockets.startSigning = function(data){
+                if(data.appointment_id === u.appointment.id){
+                    u.acknowledgement_signing = true;
+                }
+            };
+            this.$options.sockets.stopSigning = function(data){
+                if(data.appointment_id === u.appointment.id){
+                    u.acknowledgement_signing = false;
+                }
+            };
+            this.$options.sockets.cancelSigning = function(data){
+                if(data.appointment_id === u.appointment.id){
+                    u.acknowledgement_signing = false;
+                    u.acknowledgement_connection = false;
+                }
+            };
+            this.$options.sockets.sendSignature = function(data){
+                if(data.appointment_id === u.appointment.id){
+                    u.acknowledgement_data.signature = data.signature;
+                    u.$socket.emit('receivedSignature', u.appointment.id);
+                }
             };
         }
     }

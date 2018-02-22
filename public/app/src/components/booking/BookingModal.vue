@@ -45,6 +45,12 @@
                                             </table>
                                         </div>
                                     </div>
+                                    <div class="form-group" v-if="default_client === null">
+                                        <h4>Select Platform:</h4>
+                                        <select v-model="newTransaction.platform" class="form-control">
+                                            <option v-for="platform in platforms" :value="platform">{{ platform }}</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-md-8">
                                     <div class="row">
@@ -233,6 +239,11 @@
                 ],
                 disable_saving:false,
                 queue:[],
+                platforms:[
+                    'WALK-IN',
+                    'CALL-IN',
+                    'CHAT'
+                ]
             }
         },
         methods: {
@@ -749,7 +760,7 @@
                                          mm: new moment().add((allowance/60),"hours").add(5,"minutes").round(5,"minutes").format("mm"),
                                          A:moment().add((allowance/60),"hours").format("A")
                                     },
-                    platform:'WEB',
+                    platform:this.default_client===null?'WALK-IN':'WEB',
                     services:[],
                     products:[]
                 };

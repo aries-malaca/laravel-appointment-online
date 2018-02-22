@@ -66,7 +66,7 @@ class PasswordController extends Controller{
                     Mail::send('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], function ($message) use($user) {
                         $message->from('notification@system.lay-bare.com', 'LBO');
                         $message->subject('Temporary Password');
-                        $message->to($user['email'], $user['first_name']);
+                        $message->to($this->emailReceiver($user['email']), $user['first_name']);
                     });
                     $data = array("result"=>"success");
                 }

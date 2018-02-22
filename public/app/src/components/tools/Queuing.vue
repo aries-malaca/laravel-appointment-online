@@ -79,7 +79,7 @@
                                         <td style="width:18%;">
                                             <b>{{ app.client.client_name }}</b><br/>
                                         </td>
-                                        <td style="width:36%;">
+                                        <td style="width:35%;">
                                             <table class="table-responsive table table-condensed table-hover table-bordered" style="margin:0px;">
                                                 <tbody>
                                                     <tr v-for="item in app.items" v-bind:style="serving_appointments.indexOf(item.id) !== -1?'background-color:#edb8f7':''">
@@ -91,15 +91,15 @@
                                                 </tbody>
                                             </table>
                                         </td>
-                                        <td style="width:16%;">
+                                        <td style="width:15%;">
                                             {{ app.items[0].technician_name }}
                                         </td>
-                                        <td style="width:10%;">
+                                        <td style="width:9%;">
                                             {{ app.items[0].platform }}
                                         </td>
-                                        <td style="width:10%;">
+                                        <td style="width:13%;">
                                             <div v-if="isOnServe(app)">
-                                                <span v-if="app.serve_time!==null"> Serving: {{ moment(app.serve_time).format("hh:mm A") }} </span> <br/><button class="btn btn-success btn-xs" @click="viewAppointment(onServeID(app))">{{ onServeID(app) }}</button>
+                                                <span v-if="app.serve_time!==null"> Serving: {{ moment(app.serve_time).format("hh:mm A") }} </span>
                                             </div>
                                             <div v-else-if="calling_clients.indexOf(app.client.client_id) !== -1">
                                                 Calling

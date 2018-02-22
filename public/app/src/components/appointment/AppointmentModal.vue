@@ -140,30 +140,33 @@
                                     </div>
                                 </div>
 
-                                <hr/>
-                                <h4>Complete This Appointment</h4>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="card">
-                                            <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
-                                            <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
-                                            <div class="container2" style="text-align:center">
-                                                <h5><b>{{ appointment.client_name }}</b></h5>
-                                                <p>Client's Signature</p>
+                                <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1">
+                                    <hr/>
+                                    <h4>Complete This Appointment</h4>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                                <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                                <div class="container2" style="text-align:center">
+                                                    <h5><b>{{ appointment.client_name }}</b></h5>
+                                                    <p>Client's Signature</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Select Device:</label>
-                                            <select class="form-control">
-                                                <option value="1">Device 1</option>
-                                                <option value="2">Device 2</option>
-                                            </select>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Select Device:</label>
+                                                <select class="form-control">
+                                                    <option value="1">Device 1</option>
+                                                    <option value="2">Device 2</option>
+                                                </select>
+                                            </div>
+                                            <button class="btn btn-success btn-block">Launch Acknowledgement Form</button>
                                         </div>
-                                        <button class="btn btn-success btn-block">Launch Acknowledgement Form</button>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                         <loading v-else></loading>

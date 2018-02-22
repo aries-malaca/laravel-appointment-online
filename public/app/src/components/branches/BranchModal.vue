@@ -152,7 +152,7 @@
                         </div>
                     </div>
                     <div class="row" v-if="newBranch.branch_data !== undefined">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label class="control-label">Establishment Type</label>
                                 <select class="form-control" v-model="newBranch.branch_data.type">
@@ -161,7 +161,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4" v-if="newBranch.branch_data.type === 'stand-alone'">
+                        <div class="col-md-3" v-if="newBranch.branch_data.type === 'stand-alone'">
                             <div class="form-group">
                                 <label class="control-label">Extension Minutes</label>
                                 <input type="number" class="form-control" v-model="newBranch.branch_data.extension_minutes" />

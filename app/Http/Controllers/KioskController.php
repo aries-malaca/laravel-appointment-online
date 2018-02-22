@@ -448,6 +448,7 @@ class KioskController extends Controller{
         $today      = date("Y-m-d");  
         $response   = array();  
         $queryQueue = Transaction::where('transaction_status', "reserved")
+                        ->leftJoin('users', 'users.id', '=', 'transactions.client_id')
                         ->where('branch_id', $branch_id)
                         ->whereBetween('transaction_datetime', array($today." 00:00:00", $today." 23:59:00"))
                         ->orderBy('transaction_datetime','asc')
@@ -457,7 +458,10 @@ class KioskController extends Controller{
             
 
             $service_duration       = 0;
+            $full_name              = $value['first_name']." ".$value['last_name'];
             $transaction_id         = $value['id'];
+            $transaction_type       = $value['transaction_type'];
+            $platform               = $value['platform'];
             $reference_no           = $value['reference_no'];
             $technician_id          = $value['technician_id'];
             $client_id              = $value['client_id'];
@@ -465,8 +469,10 @@ class KioskController extends Controller{
             $waiver_data            = json_decode($value['waiver_data'],true);
             $booked_at              = $value['transaction_datetime'];
             $ifClientSigned         = "";
+
             if($waiver_data['signature'] == null && ($booked_at != "APP")){
                 $ifClientSigned = false;
+
             }
             else{
                 $ifClientSigned = true;
@@ -491,7 +497,10 @@ class KioskController extends Controller{
                 }
             }
             $response[] = array(
+                    "full_name"             => $full_name,
                     "client_id"             => $client_id,
+                    "transaction_type"      => $transaction_type,
+                    "platform"              => $platform,
                     "transaction_datetime"  => $transaction_datetime,
                     "transaction_id"        => $transaction_id,
                     "reference_no"          => $reference_no,
@@ -500,7 +509,8 @@ class KioskController extends Controller{
                     "ifClientSignedWaiver"  => $ifClientSigned
                             );
         }
-        return response()->json($response);    
+        return response()->json($response); 
+
     }
 
     public function addAppointments(Request $request){

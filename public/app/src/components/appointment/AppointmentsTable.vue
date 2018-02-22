@@ -8,7 +8,7 @@
             styleClass="table table-bordered table-hover table-striped"
         />
 
-        <appointment-modal @refresh_list="refreshList" @close_modal="closeModal" :id="display_appointment.id"></appointment-modal>
+        <appointment-modal @refresh_list="refreshList" :id="display_appointment.id"></appointment-modal>
     </div>
 </template>
 
@@ -43,10 +43,6 @@
                 setTimeout(function(){
                     $("#appointment-modal-" + appointment.id).modal("show");
                 },200);
-            },
-            closeModal:function(){
-                $("#appointment-modal-" + this.display_appointment.id).modal("hide");
-                this.display_appointment = {};
             },
             refreshList:function(){
                 this.$emit('get_appointments');

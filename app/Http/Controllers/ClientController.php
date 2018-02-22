@@ -22,7 +22,9 @@ class ClientController extends Controller{
                     ->orWhere('user_address', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('user_mobile', 'LIKE', '%' . $keyword . '%');
         });
-        $clients = $clients->get()->toArray();
+        $clients = $clients
+                    ->orderBy('first_name')
+                    ->get()->toArray();
         foreach($clients as $key=>$value){
             $clients[$key]['user_data'] = json_decode($value['user_data']);
             $clients[$key]['picture_html_big'] = '<img class="img img-thumbnail" style="width:100px" src="images/users/'. $value['user_picture'] .'" />';
@@ -98,9 +100,5 @@ class ClientController extends Controller{
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
-    }
-
-    public function updateSettings(){
-
     }
 }

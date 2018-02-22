@@ -1,5 +1,5 @@
 <template>
-    <div id="shifting" class="tab-pane" v-if="branch.cluster_data !==undefined">
+    <div id="shifting" class="tab-pane" v-if="branch.cluster_data !== null && branch.cluster_data !== undefined">
         <div v-if="branch.cluster_data.ems_supported">
             <div class="alert alert-info">
                 Selected Branch is EMS Supported. Click here:

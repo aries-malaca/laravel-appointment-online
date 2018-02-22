@@ -19,7 +19,9 @@ export const store = new Vuex.Store({
         configs:null,
         transactions:false,
         menus:[],
-        title: 'App'
+        title: 'App',
+        queuing_technicians:[],
+        serving:[]
     },
     actions:{
         fetchAuthenticatedUser(context){
@@ -70,6 +72,12 @@ export const store = new Vuex.Store({
         },
         updateTitle(state, title){
             state.title = title;
+        },
+        updateQueuingTechnicians(state, technicians){
+            state.queuing_technicians = technicians;
+        },
+        updateServing(state, serving){
+            state.serving = serving;
         }
     }
 });

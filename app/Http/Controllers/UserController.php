@@ -11,7 +11,6 @@ use App\PlcReviewRequest;
 use JWTAuth;
 use Validator;
 use Hash;
-use ImageOptimizer;
 use Facebook\Facebook;
 use Mail;
 
@@ -129,7 +128,6 @@ class UserController extends Controller{
     public function updateProfile(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
-            ImageOptimizer::optimize(public_path('images/users/' . $api['user']['user_picture']));
 
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|max:255',

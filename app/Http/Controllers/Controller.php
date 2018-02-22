@@ -246,4 +246,11 @@ class Controller extends BaseController{
         $config->config_value = number_format((float)$config->config_value + 0.1,1);
         $config->save();
     }
+
+    function emailReceiver($email){
+        if(env('APP_MAILING_ENV')==='development')
+            return env('APP_MAILING_DEV_ADDRESS');
+
+        return $email;
+    }
 }

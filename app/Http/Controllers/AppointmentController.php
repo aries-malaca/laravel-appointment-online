@@ -123,6 +123,7 @@ class AppointmentController extends Controller{
             $appointment['transaction_time_formatted'] = date('h:i A', strtotime($appointment['transaction_datetime']));
             $appointment['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($appointment['created_at']));
             $appointment['transaction_data'] = json_decode($appointment['transaction_data']);
+            $appointment['acknowledgement_data'] = json_decode($appointment['acknowledgement_data']);
             $appointment['status_formatted'] = $this->formatStatus($appointment['transaction_status']);
             return response()->json($appointment);
         }
@@ -280,7 +281,10 @@ class AppointmentController extends Controller{
             $this->arrangeServiceTimes($item->transaction_id, $item->id);
             $this->refreshStatus($item->transaction_id, 'cancelled');
 
-            return response()->json(["result"=>"success"], 200);
+            return response()->json(["result"=>"success","items_length"=>TransactionItem::where('transaction_id', $item->transaction_id)
+                                                                                        ->where('item_status','reserved')
+                                                                                        ->where('item_type','service')
+                                                                                        ->count()], 200);
         }
         return response()->json($api, $api["status_code"]);
     }

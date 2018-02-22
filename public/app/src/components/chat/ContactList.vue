@@ -111,16 +111,11 @@
         watch:{
             user:function(){
                 let u = this;
-                this.getContactList();
 
                 this.$options.sockets.newMessage = function(data){
                     if(data.recipient_id===u.user.id){
                         u.refreshContactBadge(data.sender_id);
                     }
-                };
-
-                this.$options.sockets.refreshContacts = function(data){
-                    u.getContactList();
                 };
             },
             show_search:function(){

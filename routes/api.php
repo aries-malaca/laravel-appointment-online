@@ -35,8 +35,6 @@ Route::get('/client/searchClients', 'ClientController@searchClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
-Route::post('/client/updateSettings', 'ClientController@updateSettings');
-
 
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
@@ -96,8 +94,6 @@ Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentControll
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
 Route::post('/appointment/cancelAppointment', 'AppointmentController@cancelAppointment');
-Route::post('/appointment/callAppointment', 'QueuingController@callAppointment');
-Route::post('/appointment/unCallAppointment', 'QueuingController@unCallAppointment');
 Route::post('/appointment/cancelItem', 'AppointmentController@cancelItem');
 Route::post('/appointment/serveAppointment', 'QueuingController@serveAppointment');
 Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppointment');

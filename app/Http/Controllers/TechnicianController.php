@@ -10,15 +10,13 @@ use DB;
 use DateTime;
 class TechnicianController extends Controller{
     function getTechnicians(){
-        $data = Technician::get()->toArray();
+        $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
+                            ->select('cluster_name', 'technicians.*')
+                            ->orderBy('first_name')
+                            ->get()->toArray();
         foreach($data as $key=>$value){
-            $cluster = BranchCluster::find($value['cluster_id']);
             $data[$key]['technician_data'] = json_decode($value['technician_data']);
-            $data[$key]['name'] = $value['first_name'] .' ' . $value['last_name'];
-            $data[$key]['cluster_name'] = isset($cluster->id)?$cluster->cluster_name:'';
-            $data[$key]['picture_html'] = '<img class="img-circle" style="height:35px" src="images/technicians/'. $data[$key]['technician_picture'] .'" />';
         }
-
         return response()->json($data);
     }
 
@@ -108,7 +106,6 @@ class TechnicianController extends Controller{
                                             "sched_appointment_start"    => $converted_start->format("H:i"),
                                             "sched_appointment_end"      => $converted_end->format("H:i")
                                                 );
-
                }                         
                                         
                 if($e['schedule'] != '00:00') {

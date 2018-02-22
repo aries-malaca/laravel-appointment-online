@@ -189,12 +189,10 @@ class UserController extends Controller{
             User::where('id', $user['id'])
                 ->update(['user_data'=> json_encode($user_data)]);
 
-            $to = env('APP_MAILING_ENV')=='development'?env('APP_MAILING_DEV_ADDRESS'):$user['email'];
-
-            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $to) {
+            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Email Verification');
-                $message->to($to, $user['username']);
+                $message->to($this->emailReceiver($user['email']), $user['username']);
                 $message->bcc('aries@lay-bare.com', $user['username']);
             });
             return true;

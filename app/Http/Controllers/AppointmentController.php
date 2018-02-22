@@ -126,6 +126,7 @@ class AppointmentController extends Controller{
             $appointment['transaction_data'] = json_decode($appointment['transaction_data']);
             $appointment['acknowledgement_data'] = json_decode($appointment['acknowledgement_data']);
             $appointment['status_formatted'] = $this->formatStatus($appointment['transaction_status']);
+            $appointment['waiver_data'] = null;
             return response()->json($appointment);
         }
         return response()->json(false);
@@ -162,6 +163,7 @@ class AppointmentController extends Controller{
             $client = User::find($value['client_id']);
             $technician = Technician::find($value['technician_id']);
             $appointments[$key]['branch_name'] = isset($branch)?$branch->branch_name:'N/A';
+
             $appointments[$key]['client_name'] = $client->username;
             $appointments[$key]['client_shortname'] = explode(" ",$client->first_name)[0];
             $appointments[$key]['client_contact'] = $client->user_mobile;
@@ -173,6 +175,7 @@ class AppointmentController extends Controller{
             $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
             $appointments[$key]['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($value['created_at']));
             $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
+            $appointments[$key]['serve_time'] = $value['serve_time'];
             $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
             $appointments[$key]['waiver_data'] = null;
 
@@ -191,12 +194,11 @@ class AppointmentController extends Controller{
     }
 
     public function completeAppointment(Request $request){
-        $item = TransactionItem::find($request->input('item_id'));
-        $item->complete_time = date('Y-m-d H:i');
-        $item->item_status = 'completed';
-        $item->save();
+        TransactionItem::where('transaction_id', $request->input('appointment')['id'])
+                        ->where('item_status', 'reserved')
+                        ->update(['item_status'=>'completed']);
 
-        $this->refreshStatus($item->transaction_id, 'completed');
+        $this->refreshStatus($request->input('appointment')['id'], 'completed', json_encode( $request->input('appointment')['acknowledgement_data']) );
         return response()->json(["result"=>"success"]);
     }
 
@@ -290,7 +292,7 @@ class AppointmentController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    function refreshStatus($id, $status){
+    function refreshStatus($id, $status, $acknowledgement_json=null){
         $items = TransactionItem::where('transaction_id', $id)
                                 ->pluck('item_status')->toArray();
         $has_reserved = false;
@@ -306,7 +308,11 @@ class AppointmentController extends Controller{
             Transaction::where('id', $id)->update(["transaction_status" => 'expired']);
 
         if(!$has_reserved)
-            Transaction::where('id', $id)->update(["transaction_status" => $status]);
+            if($acknowledgement_json===null)
+                Transaction::where('id', $id)->update(["transaction_status" => $status]);
+            else
+                Transaction::where('id', $id)
+                    ->update(["transaction_status" => $status, 'acknowledgement_data'=>$acknowledgement_json ]);
     }
 
     function arrangeServiceTimes($transaction_id, $item_id){

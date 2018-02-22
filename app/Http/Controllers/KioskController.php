@@ -8,10 +8,13 @@ use App\Branch;
 use App\BranchCluster;
 use App\PlcReviewRequest;
 use App\BranchController;
+use App\Config;
 use JWTAuth;
 use Validator;
 use Hash;
 use ImageOptimizer;
+use App\Transaction;
+use App\TransactionItem;
 use Facebook\Facebook;
 use App\Service;
 use App\ServiceType;
@@ -108,11 +111,16 @@ class KioskController extends Controller{
                         $arrayWaiver = WaiverQuestion::get()->toArray();
 				        foreach($arrayWaiver as $key=>$value){
 				            $arrayWaiver[$key]['question_data'] = json_decode($value['question_data']);
-				        }                             
+				        }                     
+                        $queryWallpaper = Config::where("config_name","=","KIOSK_MAIN_IMAGE")
+                                                ->select("config_value")
+                                                ->get()->first();
+
                         $response['services'] 	= $arrayServiceQuery;
                         $response['products'] 	= $arrayProductQuery;
                         $response["branches"] 	= $branchQuery;
                         $response["waivers"] 	= $arrayWaiver;
+                        $response['wallpaper']  = $queryWallpaper->config_value;
                         $response["user"]     	= $u;
                         $response['token']    	= $token; 
                         return response()->json($response);
@@ -126,30 +134,102 @@ class KioskController extends Controller{
         return response()->json(["result"=>"failed","error"=>"Sorry, user credentials doesn't exist!"],400);
     }
 
+    public function loginClient(Request $request){
+        
+        $arraySelfResult        = array();
+        $validator  = Validator::make($request->all(), [
+            'email'     => 'required|max:255',
+            'password'  => 'required|max:255',
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        
+        $email      = $request->input("email");
+        $password   = $request->input("password");
+
+        $u = User::where('email', $email)->get()->first();
+
+        if(isset($u['id'])){
+
+            // if($u['is_active'] == 0)
+            //     return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
+            if($u["level"] != 0){
+                return response()->json(["result"=>"failed","error"=>"Sorry, your acount is restricted. Please contact branch supervisor for details"],400);
+            }
+            if(Hash::check($password, $u['password'])){
+                $token       = JWTAuth::fromUser(User::find($u['id']));
+                $arraySelfResult = array(
+                       "clientid"           => "",
+                        "cusid"             => $u["id"],
+                        "client_user_id"    => 0,
+                        "full_name"         => $u["username"],
+                        "client_gender"     => $u["gender"],
+                        "client_bdate"      => $u["birth_date"],
+                        "premier_branch"    => "0",
+                        "client_mobile"     => $u["user_mobile"],
+                        "client_profile"    => $u["user_picture"],
+                        "client_email"      => $u["email"],
+                        "client_fname"      => $u["first_name"],
+                        "client_lname"      => $u["last_name"],
+                        );
+                return response()->json($arraySelfResult);
+            }
+            return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
+        }
+        return response()->json(["result"=>"failed","error"=>"User not found."],400);
+    }
+
+
     public function checkLoggedInToken(){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
-           return response()->json(["data"=>$api["user"], "result"=>'success']);
+            $queryWallpaper = Config::where("config_name","=","KIOSK_MAIN_IMAGE")
+                                    ->select("config_value")
+                                    ->get()->first();
+           return response()->json(["data"=>$api["user"], "result"=>'success',"wallpaper"=> $queryWallpaper->config_value]);
         }
         return response()->json($api, $api["status_code"]);
     }
 
     public function getClientRecords(Request $request){
 
-        $first_name  = $request->input("first_name");
-        $last_name   = $request->input("last_name");
-        $bday        = $request->input("bday");
-        $contact     = $request->input("contact");
-        $email       = $request->input("email");
-        $gender      = $request->input("gender");
-        $branch_id   = $request->input("branch_id");
-        $ifSearch    = $request->input("ifSearch");
-        $arrayClientResult              = array();
-        $response                       = array();    
-        $arraySelfResult                = array();
+        $first_name         = $request->input("first_name");
+        $last_name          = $request->input("last_name");
+        $bday               = $request->input("bday");
+        $contact            = $request->input("contact");
+        $email              = $request->input("email");
+        $gender             = $request->input("gender");
+        $branch_id          = $request->input("branch_id");
+        $ifSearch           = $request->input("ifSearch");
+        $response           = array();  
+        $arrayClientResult  = array();
+        $arraySelfResult    = array();
+        
         if($email != null){
             $queryUser   = DB::table("users")
-                            ->Where("email",$email)
+                            ->where('first_name', 'LIKE','%'.$first_name.'%')
+                            ->where('last_name', 'LIKE','%'.$last_name.'%')
+                            ->where("email",$email)
+                            ->where('level',"=","0")
+                            ->get()
+                            ->toArray();
+        }
+        else if($contact != null){
+            $queryUser   = DB::table("users")
+                            ->where('first_name', 'LIKE','%'.$first_name.'%')
+                            ->where('last_name', 'LIKE','%'.$last_name.'%')
+                            ->where("user_mobile",$contact)
+                            ->where('level',"=","0")
+                            ->get()
+                            ->toArray();
+        }
+        else if($bday != null){
+           $queryUser   = DB::table("users")
+                            ->where('first_name', 'LIKE','%'.$first_name.'%')
+                            ->where('last_name', 'LIKE','%'.$last_name.'%')
+                            ->where('level',"=","0")
+                            ->where("birth_date",$bday." 00:00:00")
                             ->get()
                             ->toArray();
         }
@@ -159,10 +239,8 @@ class KioskController extends Controller{
                             ->where('last_name', 'LIKE','%'.$last_name.'%')
                             ->where('level',"=","0")
                             ->where("birth_date",$bday." 00:00:00")
-                            ->where(function ($query) use($bday,$email,$contact){
-                                $query->orWhere("email",$email)
-                                      ->orWhere("user_mobile",$contact);
-                            })
+                            ->where("user_mobile",$contact)
+                            ->where("email",$email)
                             ->get()
                             ->toArray();
         }
@@ -184,10 +262,10 @@ class KioskController extends Controller{
                             );
             }
             $response["user_data_fetch"] = $arrayClientResult;
-            $response["user_self_data"]  = $arraySelfResult;
             return response()->json($response);
         }
         else{
+          
             $getdata = http_build_query(
                 array(
                     'lname'    => $last_name,
@@ -206,33 +284,46 @@ class KioskController extends Controller{
             $context   = stream_context_create($opts);
             $queryBoss = file_get_contents("https://boss.lay-bare.com/laybare-online/get-client-profile-silk.php?".$getdata);
             $queryBoss = json_decode($queryBoss,true);
+            
             if(count($queryBoss) > 0){
+                foreach ($queryBoss as $key => $value) {
+
+                    $boss_id        = $value["clientid"];
+                    $boss_fullname  = $value["full_name"];
+                    $boss_gender    = lcfirst($value["client_gender"]);
+                    $boss_premier   = $value["premier_branch"];
+                    $boss_bday      = $value["client_bdate"];
+                    $boss_email     = $value["client_email"];
+                    $boss_fname     = $value["client_fname"];
+                    $boss_lname     = $value["client_lname"];
+                    $boss_mobile    = $value["client_mobile"];
                 
-                if($ifSearch == "false"){
+                    //save user from boss
                     $user               = new User;
-                    $user->first_name   = $first_name;
+                    $user->first_name   = $boss_fname;
                     $user->middle_name  = "";
-                    $user->last_name    = $last_name;
-                    $user->username     = $first_name .' ' . $last_name;
-                    $user->user_mobile  = $contact;
-                    $user->email        = $email;
+                    $user->last_name    = $boss_lname;
+                    $user->username     = $boss_fullname;
+                    $user->user_mobile  = $boss_mobile;
+                    $user->gender       = $boss_gender;
+                    $user->email        = $boss_email;
                     $user->password     = bcrypt(12345);
-                    $user->gender       = $gender;
                     $user->user_address = "";
                     $user->is_confirmed = 0;
                     $user->is_active    = 0;
                     $user->is_agreed    = 0;
+                    $user->is_client    = 1;
                     $user->device_data  = '{}';
-                    $user->birth_date   = $bday;
-                    $user->user_picture = 'no photo ' . $gender.'.jpg';
+                    $user->birth_date   = $bday." 00:00:00";
+                    $user->user_picture = 'no photo ' . $boss_gender.'.jpg';
                     $user->level        = 0;
-                    $user->is_client    = 0;
                     $user->user_data    = json_encode(array(
                                             "home_branch"    => $branch_id,
-                                            "premier_status" => 0
+                                            "premier_status" => 0,
+                                            "boss_id"        => $boss_id
                                             ));
                     $user->save();
-                    $user_self_data = array(
+                    $user_self_data[] = array(
                                 "clientid"          => "",
                                 "cusid"             => $user->id,
                                 "client_user_id"    => "",
@@ -246,15 +337,12 @@ class KioskController extends Controller{
                                 "client_fname"      => $user->first_name,
                                 "client_lname"      => $user->last_name
                             );
-                    $response["user_data_fetch"]    =  $arrayClientResult;
-                    $response["user_self_data"]     =  $user_self_data;
-                }
-                
-                return response()->json($response);   
+                    $response["user_data_fetch"]    = $user_self_data;
+                    return response()->json($response);   
+                }  
             }
             else{
                 $response["user_data_fetch"] =  $queryBoss;
-                $response["user_self_data"]  =  $arraySelfResult;
                 return response()->json($response);
             }
         }  
@@ -273,49 +361,267 @@ class KioskController extends Controller{
         $arrayClientResult              = array();
         $response                       = array();    
         $arraySelfResult                = array();
+        $countExist  = 0;
 
-        $user               = new User;
-        $user->first_name   = $first_name;
-        $user->middle_name  = "";
-        $user->last_name    = $last_name;
-        $user->username     = $first_name .' ' . $last_name;
-        $user->user_mobile  = $contact;
-        $user->email        = $email;
-        $user->password     = bcrypt(12345);
-        $user->gender       = $gender;
-        $user->user_address = "";
-        $user->is_confirmed = 0;
-        $user->is_active    = 0;
-        $user->is_agreed    = 0;
-        $user->device_data  = '{}';
-        $user->birth_date   = $bday;
-        $user->user_picture = 'no photo ' . $gender.'.jpg';
-        $user->level        = 0;
-        $user->is_client    = 0;
-        $user->user_data    = json_encode(array(
-                                "home_branch"    => $branch_id,
-                                "premier_status" => 0
-                                ));
-        $user->save();
-        $user_self_data = array(
-                    "clientid"          => "",
-                    "cusid"             => $user->id,
-                    "client_user_id"    => "",
-                    "full_name"         => $user->username,
-                    "client_gender"     => $user->gender,
-                    "client_bdate"      => $user->birth_date,
-                    "premier_branch"    => "0",
-                    "client_mobile"     => $user->user_mobile,
-                    "client_profile"    => $user->user_picture,
-                    "client_email"      => $user->email,
-                    "client_fname"      => $user->first_name,
-                    "client_lname"      => $user->last_name
-                );
-        $response["user_data_fetch"]    =  $arrayClientResult;
-        $response["user_self_data"]     =  $user_self_data;
+        $queryCheckIfUserExistByBday    = DB::table("users")
+                                            ->where('first_name', 'LIKE','%'.$first_name.'%')
+                                            ->where('last_name', 'LIKE','%'.$last_name.'%')
+                                            ->where("birth_date",$bday." 00:00:00")
+                                            ->where('level',"=","0")
+                                            ->get()
+                                            ->toArray();
+        if(count($queryCheckIfUserExistByBday) > 0){
+            $countExist+=1;
+        }
+        if($email != null){
+            $queryCheckIfUserExistByEmail   = DB::table("users")
+                                            ->where("email",$email)
+                                            ->get()
+                                            ->toArray();
+            if(count($queryCheckIfUserExistByEmail) > 0){
+                $countExist+=1;
+            }                                
+        }
+        if($contact != null){
+            $queryCheckIfUserExistByContact  = DB::table("users")
+                                            ->where("user_mobile",$contact)
+                                            ->where('level',"=","0")
+                                            ->get()
+                                            ->toArray();
+            if(count($queryCheckIfUserExistByContact) > 0){
+                $countExist+=1;
+            }                                
+        }
 
-        return response()->json($response);   
+        if($countExist > 0){
+            return response()->json(["result"=>"failed","error"=>"Sorry, credentials is already exist. Please contact Branch Receptionist / Supervisor to search your account"],400);      
+        }
+        else{
+
+            $user               = new User;
+            $user->first_name   = $first_name;
+            $user->middle_name  = "";
+            $user->last_name    = $last_name;
+            $user->username     = $first_name .' ' . $last_name;
+            $user->user_mobile  = $contact;
+            $user->email        = $email;
+            $user->password     = bcrypt(12345);
+            $user->gender       = $gender;
+            $user->user_address = "";
+            $user->is_confirmed = 0;
+            $user->is_active    = 0;
+            $user->is_agreed    = 0;
+            $user->level        = 0;
+            $user->is_client    = 1;
+            $user->device_data  = '{}';
+            $user->birth_date   = $bday;
+            $user->user_picture = 'no photo ' . $gender.'.jpg';
+            $user->user_data    = json_encode(array(
+                                    "home_branch"    => $branch_id,
+                                    "premier_status" => 0
+                                    ));
+            $user->save();
+            $user_self_data = array(
+                        "clientid"          => "",
+                        "cusid"             => $user->id,
+                        "client_user_id"    => "",
+                        "full_name"         => $user->username,
+                        "client_gender"     => $user->gender,
+                        "client_bdate"      => $user->birth_date,
+                        "premier_branch"    => "0",
+                        "client_mobile"     => $user->user_mobile,
+                        "client_profile"    => $user->user_picture,
+                        "client_email"      => $user->email,
+                        "client_fname"      => $user->first_name,
+                        "client_lname"      => $user->last_name
+                    );
+            $response["user_data_fetch"]    =  $arrayClientResult;
+            $response["user_self_data"]     =  $user_self_data;
+
+            return response()->json($response);   
+        }
     }
+
+    public function getTodaysQueue(Request $request){
+
+        $branch_id  = $request->segment(4);
+        $today      = date("Y-m-d");  
+        $response   = array();  
+        $queryQueue = Transaction::where('transaction_status', "reserved")
+                        ->where('branch_id', $branch_id)
+                        ->whereBetween('transaction_datetime', array($today." 00:00:00", $today." 23:59:00"))
+                        ->orderBy('transaction_datetime','asc')
+                        ->get();
+
+        foreach($queryQueue as $key => $value){
+            
+
+            $service_duration       = 0;
+            $transaction_id         = $value['id'];
+            $reference_no           = $value['reference_no'];
+            $technician_id          = $value['technician_id'];
+            $client_id              = $value['client_id'];
+            $transaction_datetime   = $value['transaction_datetime'];
+            $waiver_data            = json_decode($value['waiver_data'],true);
+            $booked_at              = $value['transaction_datetime'];
+            $ifClientSigned         = "";
+            if($waiver_data['signature'] == null && ($booked_at != "APP")){
+                $ifClientSigned = false;
+            }
+            else{
+                $ifClientSigned = true;
+            }
+
+            $items                  = TransactionItem::where('transaction_id', $transaction_id)
+                                                ->where("item_status","=","reserved")
+                                                ->get()->toArray();
+            foreach($items as $keys => $values){
+               
+                $start_time     = $values['book_start_time'];
+                $end_time       = $values['book_end_time'];
+                if($values['item_type'] === 'service'){
+                    $service_id      = $values["item_id"];
+                    $serviceQuery    = Service::where("id",$service_id)
+                                            ->select("service_minutes")
+                                            ->get()->first();
+                    $service_duration   += $serviceQuery["service_minutes"];                        
+                }
+                else{
+                    continue;
+                }
+            }
+            $response[] = array(
+                    "client_id"             => $client_id,
+                    "transaction_datetime"  => $transaction_datetime,
+                    "transaction_id"        => $transaction_id,
+                    "reference_no"          => $reference_no,
+                    "technician_id"         => $technician_id,
+                    "total_duration"        => $service_duration,
+                    "ifClientSignedWaiver"  => $ifClientSigned
+                            );
+        }
+        return response()->json($response);    
+    }
+
+    public function addAppointments(Request $request){
+        
+        $validator = Validator::make($request->all(), [
+            'branch'            => 'required',
+            'client'            => 'required',
+            'transaction_date'  => 'required',
+            'services'          => 'required',
+            'platform'          => 'required',
+            'transaction_type'  => 'required',
+            // 'waiver_data.signature' =>'required'
+        ]);
+    
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            $objectClient       = $request->input("client");
+            $objectBranch       = $request->input("branch");
+            $arrayServices      = $request->input("services");
+            $arrayProducts      = $request->input("products");
+            $arrayWaiver        = $request->input('waiver_data');
+           
+            $transaction_type   = $request->input('transaction_type');
+            $platform           = $request->input('platform');
+        
+
+            $branch_id          = $objectBranch["value"];
+            $full_name          = $objectClient["label"];
+            $client_id          = $objectClient["value"];
+            $reference_no       = $this->generateReferenceNo($branch_id);
+
+
+            $appointment                        = new Transaction;
+            $appointment->reference_no          = $reference_no;
+            $appointment->branch_id             = $branch_id;
+            $appointment->client_id             = $client_id;
+            $appointment->transaction_datetime  = date('Y-m-d H:i:s',strtotime( $this->getFirstServiceTime($arrayServices)));
+            $appointment->transaction_status    = 'reserved';
+            $appointment->platform              = $platform;
+            $appointment->booked_by_name        = $full_name;
+            $appointment->booked_by_id          = $client_id ;
+            $appointment->booked_by_type        = "client";
+            $appointment->transaction_data      = '{}';
+            $appointment->waiver_data           = json_encode($arrayWaiver);
+            $appointment->transaction_type      = $transaction_type;
+            $appointment->technician_id         = 0;
+            $appointment->save();
+
+            foreach($arrayServices as $key=>$value){
+                $item                   = new TransactionItem;
+                $item->transaction_id   = $appointment->id;
+                $item->item_id          = $value['id'];
+                $item->item_type        = 'service';
+                $item->amount           = $value['price'];
+                $item->quantity         = 1;
+                $item->book_start_time  = date('Y-m-d H:i:s', strtotime($value['start']));
+                $item->book_end_time    = date('Y-m-d H:i:s', strtotime($value['end']));
+                $item->item_status      = 'reserved';
+                $item->item_data        = '{}';
+                $item->save();
+            }
+
+            foreach($arrayProducts as $key=>$value){
+                $item = new TransactionItem;
+                $item->transaction_id   = $appointment->id;
+                $item->item_id          = $value['id'];
+                $item->item_type        = 'product';
+                $item->amount           = $value['price'];
+                $item->quantity         = $value['quantity'];
+                $item->item_status      = 'reserved';
+                $item->item_data        = '{}';
+                $item->save();
+            }
+            return response()->json(["result"=>"success"],200);   
+       
+        // return response()->json($api, $api["status_code"]);
+    }
+
+    public function verifyUserSettings(Request $request){
+        
+        $myPassword     = $request->input("password");
+        $api            = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $accountPassword = $api["user"]["password"];
+            if(Hash::check($myPassword, $accountPassword)){
+                return response()->json(['result'=>'success','data'=>"Successfully found"],200);      
+            }
+           return response()->json(['result'=>'failed','error'=>"Sorry, the password is incorrect."], 400);
+        }
+        return response()->json(['result'=>'failed','error'=>"Sorry, no user found. "], 401);
+    }
+
+
+
+    function generateReferenceNo($branch_id){
+        //branch code year series
+        $year = date('Y');
+        $branch_code = Branch::find($branch_id)->branch_code;
+
+        $last = Transaction::where('reference_no', 'LIKE', $branch_code.'-'.$year.'-%')
+                                ->orderBy('id','DESC')
+                                ->get()->first();
+        if(isset($last['id'])){
+            $reference_no = $last['reference_no'];
+            $str = explode("-", $reference_no);
+            return $branch_code . '-' . $year . '-' . str_pad(($str[2]+1), 8,"0",STR_PAD_LEFT);
+        }
+        return $branch_code . '-' . $year . '-' . str_pad(1, 8,"0",STR_PAD_LEFT);
+    }
+
+    function getFirstServiceTime($services){
+        foreach($services as $key => $value){
+            if($key === 0)
+                return $value['start'];
+        }
+        return '00:00:00';
+    }
+
+
+
 
 }
 

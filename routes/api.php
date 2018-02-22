@@ -197,13 +197,18 @@ Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTra
 Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
 
 
-
+//queuing(short version)
+Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
 
 //Kiosk Configuration (Lay Bare)
 Route::get('/kiosk/checkLoggedInToken', 'KioskController@checkLoggedInToken');
 Route::post('/kiosk/getClientRecords', 'KioskController@getClientRecords');
-
-
+Route::post('/kiosk/addAppointments', 'KioskController@addAppointments');
+Route::post('/kiosk/loginClient', 'KioskController@loginClient');
+Route::post('/kiosk/loginClient', 'KioskController@loginClient');
+Route::post('/kiosk/saveNewUser', 'KioskController@saveNewUser');
+//authenticate settings
+Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings');
 
 
 

@@ -94,8 +94,6 @@ Route::get('/appointment/getAppointments/{by}/{id}/{flag}', 'AppointmentControll
 Route::get('/appointment/getAppointment/{id}', 'AppointmentController@getAppointment');
 Route::post('/appointment/addAppointment', 'AppointmentController@addAppointment');
 Route::post('/appointment/cancelAppointment', 'AppointmentController@cancelAppointment');
-Route::post('/appointment/callAppointment', 'QueuingController@callAppointment');
-Route::post('/appointment/unCallAppointment', 'QueuingController@unCallAppointment');
 Route::post('/appointment/cancelItem', 'AppointmentController@cancelItem');
 Route::post('/appointment/serveAppointment', 'QueuingController@serveAppointment');
 Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppointment');

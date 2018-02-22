@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\TransactionItem;
 use App\Branch;
+use App\Transaction;
+use Validator;
 
 class QueuingController extends Controller{
 
@@ -25,28 +25,26 @@ class QueuingController extends Controller{
         return view('errors/404');
     }
 
-    public function callAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['item_data'=>json_encode(['called'=>time()])]);
-        return response()->json(["result"=>"success"]);
-    }
-
     public function serveAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['serve_time' => date('Y-m-d H:i'),
-                'item_data' => json_encode(array())]);
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|not_in:0',
+            'technician_id' => 'required|numeric|not_in:0'
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        Transaction::where('id', $request->input('id'))
+                    ->update(['serve_time'=>date('Y-m-d H:i'),'technician_id'=>$request->input('technician_id')]);
+
         return response()->json(["result"=>"success"]);
     }
 
     public function unServeAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['serve_time'=>null]);
-        return response()->json(["result"=>"success"]);
-    }
 
-    public function unCallAppointment(Request $request){
-        TransactionItem::where('id', $request->input('item_id'))
-            ->update(['item_data'=>json_encode(['called'=>0])]);
+        Transaction::where('id', $request->input('id'))
+                    ->update(['serve_time'=>null]);
+
         return response()->json(["result"=>"success"]);
     }
 }

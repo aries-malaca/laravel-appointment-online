@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-bind:id="'appointment-modal-'+ id " class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-full">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
@@ -30,7 +30,6 @@
                                         <td>
                                             <span class="badge badge-success" v-if="appointment.client_gender==='male'">MALE</span>
                                             <span class="badge badge-warning" v-if="appointment.client_gender==='female'">FEMALE</span>
-
                                         </td>
                                     </tr>
                                     <tr>
@@ -80,8 +79,6 @@
                                             <tr>
                                                 <th>Service</th>
                                                 <th>Time Booked</th>
-                                                <th>Time Served</th>
-                                                <th>Time Completed</th>
                                                 <th>Price</th>
                                                 <th>Status</th>
                                                 <th></th>
@@ -93,12 +90,6 @@
                                                 <td>
                                                     <span>{{ moment(service.book_start_time).format("hh:mm A") }} - </span>
                                                     <span>{{ moment(service.book_end_time).format("hh:mm A") }}</span>
-                                                </td>
-                                                <td>
-                                                    <span v-if="service.serve_time!==null">{{ moment(service.serve_time).format("hh:mm A") }}</span>
-                                                </td>
-                                                <td>
-                                                    <span v-if="service.complete_time!==null">{{ moment(service.complete_time).format("hh:mm A") }}</span>
                                                 </td>
                                                 <td>{{ service.amount.toFixed(2) }}</td>
                                                 <td>
@@ -146,6 +137,31 @@
                                             </tr>
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+
+                                <hr/>
+                                <h4>Complete This Appointment</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                            <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                            <div class="container2" style="text-align:center">
+                                                <h5><b>{{ appointment.client_name }}</b></h5>
+                                                <p>Client's Signature</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Select Device:</label>
+                                            <select class="form-control">
+                                                <option value="1">Device 1</option>
+                                                <option value="2">Device 2</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-success btn-block">Launch Acknowledgement Form</button>
                                     </div>
                                 </div>
                             </div>
@@ -258,20 +274,24 @@
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                this.makeRequest('/api/appointment/cancelItem?token=' + this.token, 'post', this.cancel, function(){
-                    u.getAppointment();
 
-                    toastr.success("Item successfully cancelled.");
-                    u.$socket.emit('refreshAppointment', u.id);
-                    u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+                axios({url:'/api/appointment/cancelItem?token=' + this.token, method:'post', data:this.cancel})
+                    .then(function (response) {
+                        if(response.data.items_length === 0)
+                            u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
 
-                    $btn.button('reset');
-                    $("#cancel-item-modal-"+u.id).modal('hide');
-                },
-                function(error){
-                    XHRCatcher(error);
-                    $btn.button('reset');
-                });
+                        toastr.success("Item successfully cancelled.");
+                        u.$socket.emit('refreshAppointment', u.id);
+                        u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+
+                        $btn.button('reset');
+                        $("#cancel-item-modal-"+u.id).modal('hide');
+                        u.getAppointment();
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                        $btn.button('reset');
+                    });
             },
             cancelAppointment:function(){
                 let u = this;
@@ -282,6 +302,7 @@
 
                 this.makeRequest('/api/appointment/cancelAppointment?token=' + this.token, 'post', this.cancel, function(){
                         u.$socket.emit('refreshAppointment', u.id);
+                        u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
                         u.getAppointment();
                         toastr.success("Appointment successfully cancelled.");
@@ -317,7 +338,17 @@
             },
             token(){
                 return this.$store.state.token;
-            }
+            },
+            title(){
+                return this.$store.state.title;
+            },
+            serving_appointments(){
+                var ids = [];
+                for(var x=0;x<this.$store.state.serving.length;x++)
+                    ids.push(this.$store.state.serving[x].appointment_id);
+
+                return ids;
+            },
         },
         watch:{
             id:function(){
@@ -333,3 +364,18 @@
         }
     }
 </script>
+<style>
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        width: 100%;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+
+    .container2 {
+        padding: 2px 16px;
+    }
+</style>

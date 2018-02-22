@@ -232,7 +232,6 @@
                             { label: 'Waiver',  slot: 'page3' }
                 ],
                 disable_saving:false,
-                technicians:[],
                 queue:[],
             }
         },
@@ -440,7 +439,7 @@
                 let u =this;
                 axios.get('/api/technician/getBranchTechnicians/'+this.newTransaction.branch.value+'/'+this.newTransaction.transaction_date)
                 .then(function (response) {
-                    u.technicians = response.data;
+                    u.$store.commit('updateQueuingTechnicians',response.data);
                 });
             },
             getQueue:function(){
@@ -586,11 +585,11 @@
             technician_selection:function(){
                 this.newTransaction.technician = null;
                 var technicians=[];
-                for(var x=0;x<this.technicians.length;x++){
-                    technicians.push({   label:this.technicians[x].name,
-                                        value:this.technicians[x].id,
-                                        schedule:this.technicians[x].schedule,
-                                        employee_id:this.technicians[x].employee_id,
+                for(var x=0;x<this.$store.state.queuing_technicians.length;x++){
+                    technicians.push({   label:this.$store.state.queuing_technicians[x].name,
+                                        value:this.$store.state.queuing_technicians[x].id,
+                                        schedule:this.$store.state.queuing_technicians[x].schedule,
+                                        employee_id:this.$store.state.queuing_technicians[x].employee_id,
                                         attendance:false,
                     });
                 }

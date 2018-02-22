@@ -109,7 +109,9 @@ class AppointmentController extends Controller{
     }
 
     public function getAppointment(Request $request){
-        $appointment = Transaction::where('id', $request->segment(4))->get()->first();
+        $appointment = Transaction::where('id', $request->segment(4))
+                        ->get()->first();
+
         if(isset($appointment['id'])){
             $branch = Branch::find($appointment['branch_id']);
             $client = User::find($appointment['client_id']);
@@ -198,7 +200,11 @@ class AppointmentController extends Controller{
                         ->where('item_status', 'reserved')
                         ->update(['item_status'=>'completed']);
 
-        $this->refreshStatus($request->input('appointment')['id'], 'completed', json_encode( $request->input('appointment')['acknowledgement_data']) );
+        Transaction::where('id', $request->input('appointment')['id'])
+                    ->update(['transaction_status'=>'completed',
+                                'acknowledgement_data'=>json_encode( $request->input('appointment')['acknowledgement_data']),
+                                'complete_time'=> date('Y-m-d H:i:s')]);
+
         return response()->json(["result"=>"success"]);
     }
 
@@ -292,7 +298,7 @@ class AppointmentController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    function refreshStatus($id, $status, $acknowledgement_json=null){
+    function refreshStatus($id, $status){
         $items = TransactionItem::where('transaction_id', $id)
                                 ->pluck('item_status')->toArray();
         $has_reserved = false;
@@ -308,11 +314,7 @@ class AppointmentController extends Controller{
             Transaction::where('id', $id)->update(["transaction_status" => 'expired']);
 
         if(!$has_reserved)
-            if($acknowledgement_json===null)
-                Transaction::where('id', $id)->update(["transaction_status" => $status]);
-            else
-                Transaction::where('id', $id)
-                    ->update(["transaction_status" => $status, 'acknowledgement_data'=>$acknowledgement_json ]);
+            Transaction::where('id', $id)->update(["transaction_status" => $status]);
     }
 
     function arrangeServiceTimes($transaction_id, $item_id){

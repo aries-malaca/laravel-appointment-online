@@ -44,9 +44,12 @@
                     </div>
                 </div>
                 <div class="tabbable-line" v-if="branch !== null">
-                    <ul class="nav nav-tabs ">
+                    <ul class="nav nav-tabs">
                         <li class="active">
-                            <a href="#queued" data-toggle="tab" aria-expanded="true"> Queued </a>
+                            <a href="#queued" data-toggle="tab" aria-expanded="true">
+                                Queued
+                                <span class="badge badge-success" v-if="queued.length > 0"> {{ queued.length }} </span>
+                            </a>
                         </li>
                         <li class="">
                             <a href="#completed" data-toggle="tab" aria-expanded="false"> Completed </a>
@@ -61,10 +64,11 @@
                     <div class="tab-content">
                         <div class="tab-pane active" id="queued">
                             <div class="alert alert-info" v-if="queued.length===0">
-                                No Queued Appointment for Today,
+                                No Queued Appointment for Today.
                             </div>
-                            <table style="min-width:600px" class="table-responsive table-condensed table table-bordered" v-else>
-                                <thead>
+                            <div style="min-width:400px;overflow:scroll" v-else>
+                                <table  class="table-responsive table-condensed table table-bordered" >
+                                    <thead>
                                     <tr>
                                         <th>Client</th>
                                         <th>Services</th>
@@ -73,8 +77,8 @@
                                         <th>Status</th>
                                         <th></th>
                                     </tr>
-                                </thead>
-                                <tbody>
+                                    </thead>
+                                    <tbody>
                                     <tr v-for="app in queued" v-bind:style="calling_clients.indexOf(app.client.client_id) !== -1?'background-color:#daffce': isOnServe(app)?'background-color:#e6bae8':''">
                                         <td style="width:18%;">
                                             <b>{{ app.client.client_name }}</b><br/>
@@ -82,12 +86,12 @@
                                         <td style="width:35%;">
                                             <table class="table-responsive table table-condensed table-hover table-bordered" style="margin:0px;">
                                                 <tbody>
-                                                    <tr v-for="item in app.items" v-bind:style="serving_appointments.indexOf(item.id) !== -1?'background-color:#edb8f7':''">
-                                                        <td style="width:45%;">{{ item.item_name }}</td>
-                                                        <td style="width:55%;">
-                                                            Booked: {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
-                                                        </td>
-                                                    </tr>
+                                                <tr style="cursor: pointer;" @click="viewAppointment(item.transaction_id)" v-for="item in app.items">
+                                                    <td style="width:45%;"> {{ item.item_name }}</td>
+                                                    <td style="width:55%;">
+                                                        Booked: {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
+                                                    </td>
+                                                </tr>
                                                 </tbody>
                                             </table>
                                         </td>
@@ -120,47 +124,59 @@
                                             </div>
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="tab-pane" id="completed">
                             <div class="alert alert-info" v-if="completed.length===0">
-                                No Completed Appointment for Today,
+                                No Completed Appointment for Today.
                             </div>
-                            <table class="table-responsive table table-hover table-bordered" v-else>
-                                <thead>
-                                <tr>
-                                    <th>Client</th>
-                                    <th>Services</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="app in completed">
-                                    <td>{{ app.client.client_name }}</td>
-                                    <td>
-                                        <table class="table-responsive table table-bordered" style="margin:0px;">
-                                            <tbody>
-                                                <tr v-for="item in app.items">
-                                                    <td>{{ item.item_name }}</td>
-                                                    <td>{{ item.technician_name }}</td>
-                                                    <td>
-                                                        {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-success">Completed</span>
-                                                    </td>
-                                                    <td>Served: {{ moment(item.serve_time).format("hh:mm A") }}</td>
-                                                    <td>Completed: {{ moment(item.complete_time).format("hh:mm A") }}</td>
-                                                    <td>
-                                                        <button class="btn btn-xs btn-warning" @click="viewAppointment(item.transaction_id)">View</button>
+                            <div style="min-width:400px;overflow:scroll" v-else>
+                                <table  class="table-responsive table-condensed table table-bordered" >
+                                    <thead>
+                                    <tr>
+                                        <th>Client</th>
+                                        <th>Services</th>
+                                        <th>Technician</th>
+                                        <th>Platform</th>
+                                        <th>Serve Time</th>
+                                        <th>Complete Time</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="app in completed">
+                                        <td style="width:25%;">
+                                            <b>{{ app.client.client_name }}</b><br/>
+                                        </td>
+                                        <td style="width:38%;">
+                                            <table class="table-responsive table table-condensed table-hover table-bordered" style="margin:0px;">
+                                                <tbody>
+                                                <tr style="cursor: pointer;" @click="viewAppointment(item.transaction_id)" v-for="item in app.items">
+                                                    <td style="width:45%;"> {{ item.item_name }}</td>
+                                                    <td style="width:55%;">
+                                                        Booked: {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
                                                     </td>
                                                 </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td style="width:20%;">
+                                            {{ app.items[0].technician_name }}
+                                        </td>
+                                        <td style="width:17%;">
+                                            {{ app.items[0].platform }}
+                                        </td>
+                                        <td style="width:17%;">
+                                            {{ app.items[0].platform }}
+                                        </td>
+                                        <td style="width:17%;">
+                                            {{ app.items[0].platform }}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="tab-pane" id="cancelled">
                             <div class="alert alert-info" v-if="cancelled.length===0">
@@ -239,6 +255,26 @@
                                 </div>
                             </div>
                         </div>
+                        <h4>Services</h4>
+                        <table class="table-responsive table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Time Booked</th>
+                                <th>Price</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="service in display_services">
+                                <td>{{ service.item_name }}</td>
+                                <td>
+                                    <span>{{ moment(service.book_start_time).format("hh:mm A") }} - </span>
+                                    <span>{{ moment(service.book_end_time).format("hh:mm A") }}</span>
+                                </td>
+                                <td>{{ service.amount.toFixed(2) }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success btn-block" @click="emitServe">Confirm</button>
@@ -537,6 +573,16 @@
             },
             technicians(){
                 return this.$store.state.queuing_technicians;
+            },
+            display_services(){
+                var services = [];
+                for(var x=0;x<this.queued.length;x++){
+                    for(var y=0;y<this.queued[x].items.length;y++){
+                        if(this.queued[x].items[y].transaction_id === this.selected_appointment_id && this.queued[x].items[y].item_type === 'service' )
+                            services.push(this.queued[x].items[y]);
+                    }
+                }
+                return services;
             }
         },
         watch:{

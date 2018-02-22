@@ -9,7 +9,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row" v-if="appointment.id !== undefined">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <table class="table table-hover table-light" v-if="appointment.id !== undefined && user.id !== undefined">
                                     <tbody>
                                     <tr>
@@ -67,10 +67,18 @@
                                         <td> Status: </td>
                                         <td v-html="appointment.status_formatted"></td>
                                     </tr>
+                                    <tr v-if="appointment.serve_time !== null">
+                                        <td> Served Time: </td>
+                                        <td> {{ moment(appointment.serve_time).format("hh:mm A") }} </td>
+                                    </tr>
+                                    <tr v-if="appointment.complete_time !== null">
+                                        <td> Completed Time: </td>
+                                        <td> {{ moment(appointment.complete_time).format("hh:mm A") }} </td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-7">
                                 <div class="row" v-if="services.length>0">
                                     <div class="col-md-12">
                                         <h4>Services</h4>
@@ -98,7 +106,8 @@
                                                     <span class="badge badge-danger" v-else>{{ service.item_status }}</span>
                                                 </td>
                                                 <td>
-                                                    <span v-if="service.item_status==='cancelled'"> Reason: {{ service.item_data.cancel_reason }} </span>
+                                                    <span :title="'By ' + service.item_data.cancel_by_name +', ' + moment(service.item_data.cancel_datetime).format('MM/DD/YYYY hh:mm A')"
+                                                          class="badge badge-danger" v-if="service.item_status==='cancelled'"> Reason: {{ service.item_data.cancel_reason }} </span>
                                                     <button v-if="service.item_status==='reserved'" @click="showCancelItemModal(service)" class="btn btn-danger btn-xs">Cancel</button>
                                                 </td>
                                             </tr>
@@ -140,8 +149,8 @@
                                     </div>
                                 </div>
 
+                                <hr/>
                                 <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1 && appointment.acknowledgement_data !== null">
-                                    <hr/>
                                     <h4>Complete This Appointment</h4>
                                     <div class="row">
                                         <div class="col-md-6">
@@ -150,14 +159,14 @@
                                                 <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
                                                 <div class="container2" style="text-align:center">
                                                     <h5><b>{{ appointment.client_name }}</b></h5>
-                                                    <p>Client's Signature</p>
+                                                    <span>Client's Signature</span>
                                                 </div>
                                             </div><br/>
                                             <i v-if="acknowledgement_signing"><i class="fa fa-pencil"></i> Client is signing...</i>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>Select Device:</label>
+                                                <label>Select Device for Acknowledgement:</label>
                                                 <select v-model="device" class="form-control" :disabled="acknowledgement_connection">
                                                     <option value="1ssg2362346sd">Acer001</option>
                                                     <option value="2dsgds3262346">Acer002</option>
@@ -168,12 +177,31 @@
                                                 Device has received the appointment data, Waiting for acknowledgement. {{ acknowledgement_timer }}
                                             </div>
 
-                                            <button class="btn btn-info btn-block" @click="emitSendData()">Launch Acknowledgement Form</button>
-                                            <button class="btn btn-success btn-block" @click="emitCompleteAppointment()">Complete Appointment</button>
+                                            <div v-if="!acknowledgement_connection">
+                                                <button class="btn btn-info btn-block" @click="emitSendData()">Send To Device</button>
+                                                <button class="btn btn-success btn-block" @click="emitCompleteAppointment()">Complete Appointment</button>
+                                            </div>
+                                            <div v-else>
+                                                <button class="btn btn-danger btn-block" @click="cancelSigning()">Cancel Signing</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <div v-if="appointment.transaction_status === 'completed'" class="row">
+                                    <div class="col-md-6">
+                                        <h4>Acknowledgement</h4>
+                                        <div class="card">
+                                            <img v-if="appointment.acknowledgement_data.signature !== undefined" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                            <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                            <div class="container2" style="text-align:center">
+                                                <h5><b>{{ appointment.client_name }}</b></h5>
+                                                <span>Client's Signature</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6"></div>
+                                </div>
                             </div>
                         </div>
                         <loading v-else></loading>
@@ -349,6 +377,11 @@
 
                 this.$socket.emit('sendAppointmentData', this.appointment, this.device);
             },
+            cancelSigning(){
+                this.acknowledgement_connection = false;
+                clearInterval(this.t);
+                this.$socket.emit('signingTimeout', this.appointment.id, this.device);
+            },
             moment:moment
         },
         computed:{
@@ -408,9 +441,7 @@
                     u.t = setInterval(function(){
                         u.acknowledgement_timer --;
                         if(u.acknowledgement_timer === 0){
-                            u.acknowledgement_connection = false;
-                            clearInterval(u.t);
-                            u.$socket.emit('signingTimeout', u.appointment.id, u.device);
+                            u.cancelSigning();
                         }
                     },1000);
                 }

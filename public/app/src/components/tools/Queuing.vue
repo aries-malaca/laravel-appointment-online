@@ -380,6 +380,7 @@
                                 this.appointments[x].items[y].technician_id = this.appointments[x].technician_id;
                                 this.appointments[x].items[y].client_id = this.appointments[x].client_id;
                                 this.appointments[x].items[y].platform = this.appointments[x].platform;
+                                this.appointments[x].items[y].transaction_datetime = this.appointments[x].transaction_datetime;
                                 data.push(this.appointments[x].items[y]);
                             }
                         }
@@ -530,7 +531,9 @@
                 return clients;
             },
             queued:function(){
-                return this.groupedItems('reserved')
+                return this.groupedItems('reserved').sort((a, b)=>{
+                    return ( Number(moment(a.items[0].transaction_datetime).format("X")) > Number(moment(b.items[0].transaction_datetime).format("X")) ? 1: -1);
+                });
             },
             completed:function(){
                 return this.groupedItems('completed')

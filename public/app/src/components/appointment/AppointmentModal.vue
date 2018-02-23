@@ -136,7 +136,7 @@
                                                 <td>{{ product.quantity }}</td>
                                                 <td>{{ (product.quantity * product.amount).toFixed(2) }}</td>
                                                 <td>
-                                                    <span class="badge badge-success" v-if="product.item_status=='served'">SERVED</span>
+                                                    <span class="badge badge-success" v-if="product.item_status=='completed'">SERVED</span>
                                                     <span class="badge badge-info" v-else-if="product.item_status=='reserved'">RESERVED</span>
                                                     <span class="badge badge-danger" v-else>{{ product.item_status }}</span>
                                                 </td>
@@ -167,7 +167,7 @@
                                                 </div>
                                             </div><br/>
                                             <i v-if="acknowledgement_signing"><i class="fa fa-pencil"></i> Client is signing...</i>
-                                            <i v-if="acknowledgement_connection && signing_finished"><i class="fa fa-check"></i> Client Finished Signing</i>
+                                            <i v-if="signing_finished"><i class="fa fa-check"></i> Client Finished Signing</i>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group"  v-if="queuing_branch.kiosk_data.length>0">
@@ -200,7 +200,7 @@
                                     <div class="col-md-6">
                                         <h4>Acknowledgement</h4>
                                         <div class="card">
-                                            <img v-if="appointment.acknowledgement_data.signature !== undefined" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                            <img v-if="appointment.acknowledgement_data.signature !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
                                             <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
                                             <div class="container2" style="text-align:center">
                                                 <h5><b>{{ appointment.client_name }}</b></h5>
@@ -271,7 +271,7 @@
                 acknowledgement_timer:0,
                 acknowledgement_connection:false,
                 acknowledgement_signing:false,
-                signing_finished:true,
+                signing_finished:false,
                 reasons:{
                     service:[
                         'Hair Length',
@@ -399,6 +399,7 @@
             },
             cancelSigning(){
                 this.acknowledgement_connection = false;
+                this.acknowledgement_signing = false;
                 clearInterval(this.t);
                 this.$socket.emit('signingTimeout', this.appointment.id, this.device);
             },
@@ -429,6 +430,9 @@
             },
             title(){
                 return this.$store.state.title;
+            },
+            configs(){
+                return this.$store.state.configs;
             },
             serving_appointments(){
                 var ids = [];
@@ -464,7 +468,7 @@
                         return false;
                     }
 
-                    u.acknowledgement_timer = 20;
+                    u.acknowledgement_timer = u.configs.ACKNOWLEDGEMENT_TIMEOUT;
 
                     if(u.acknowledgement_timer > 0 && u.acknowledgement_connection)
                         return;
@@ -496,13 +500,13 @@
                 if(data === u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = false;
                     u.acknowledgement_connection = false;
-                    u.acknowledgement_connection = false;
                     u.appointment.acknowledgement_data.signature = null;
                 }
             };
             this.$options.sockets.finishSigning = function(data){
                 if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
                     u.signing_finished = true;
+                    u.acknowledgement_signing = false;
                     u.appointment.acknowledgement_data.signature = data.signature;
                     u.acknowledgement_connection = false
                 }

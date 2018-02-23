@@ -355,7 +355,10 @@ class AppointmentController extends Controller{
     }
 
     function getAppointmentItems($id){
-        $items = TransactionItem::where('transaction_id', $id)->get()->toArray();
+        $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+                                ->where('transaction_id', $id)
+                                ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
+                                ->get()->toArray();
         foreach($items as $key=>$value){
             $items[$key]['item_data'] = json_decode($value['item_data']);
             if($value['item_type'] === 'service'){

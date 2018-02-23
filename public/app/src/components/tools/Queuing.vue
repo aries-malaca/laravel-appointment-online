@@ -103,7 +103,7 @@
                                         </td>
                                         <td style="width:13%;">
                                             <div v-if="isOnServe(app)">
-                                                <span v-if="app.serve_time!==null"> Serving: {{ moment(app.serve_time).format("hh:mm A") }} </span>
+                                                <span v-if="app.serve_time!==null"> Serving: {{ moment(app.items[0].serve_time).format("hh:mm A") }} </span>
                                             </div>
                                             <div v-else-if="calling_clients.indexOf(app.client.client_id) !== -1">
                                                 Calling
@@ -354,7 +354,6 @@
                         data.push({
                             client:this.clients[x],
                             items: items,
-                            serve_time:this.clients[x].serve_time,
                         });
                 }
                 return data;

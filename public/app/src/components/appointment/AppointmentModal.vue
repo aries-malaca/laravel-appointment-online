@@ -170,11 +170,14 @@
                                             <i v-if="acknowledgement_connection && signing_finished"><i class="fa fa-check"></i> Client Finished Signing</i>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-group">
+                                            <div class="form-group"  v-if="queuing_branch.kiosk_data.length>0">
                                                 <label>Select Device for Acknowledgement:</label>
                                                 <select v-model="device" class="form-control" :disabled="acknowledgement_connection">
                                                     <option v-for="kiosk in queuing_branch.kiosk_data" :value="kiosk.serial_no">{{ kiosk.alias }}</option>
                                                 </select>
+                                            </div>
+                                            <div v-else class="alert alert-warning">
+                                                No Kiosk available for this branch.
                                             </div>
 
                                             <div class="alert alert-info" v-if="acknowledgement_connection">
@@ -182,8 +185,9 @@
                                             </div>
 
                                             <div v-if="!acknowledgement_connection">
-                                                <button class="btn btn-info btn-block" @click="emitSendData()">Send To Device</button>
+                                                <button class="btn btn-info btn-block" @click="emitSendData()" v-if="queuing_branch.kiosk_data.length>0">Send To Device</button>
                                                 <button class="btn btn-success btn-block" @click="emitCompleteAppointment()">Complete Appointment</button>
+                                                <button class="btn btn-block btn-warning" @click="emitRefreshKiosk()" v-if="queuing_branch.kiosk_data.length>0">Refresh Kiosk</button>
                                             </div>
                                             <div v-else>
                                                 <button class="btn btn-danger btn-block" @click="cancelSigning()">Cancel Signing</button>
@@ -390,6 +394,9 @@
                         toastr.error("Device is Offline.");
                 },2000)
             },
+            emitRefreshKiosk(){
+                this.$socket.emit('refreshKiosk', this.device);
+            },
             cancelSigning(){
                 this.acknowledgement_connection = false;
                 clearInterval(this.t);
@@ -437,6 +444,10 @@
         watch:{
             id:function(){
                 this.getAppointment();
+            },
+            'queuing_branch.value':function(){
+                if(this.queuing_branch.kiosk_data.length>0)
+                    this.device = this.queuing_branch.kiosk_data[0].serial_no;
             }
         },
         mounted:function(){
@@ -447,6 +458,12 @@
             };
             this.$options.sockets.receiveAppointmentData = function(data){
                 if(data.appointment.id === u.appointment.id){
+
+                    if(!data.accepted){
+                        toastr.error("Other person currently Booking an appointment in Kiosk, please try again later.");
+                        return false;
+                    }
+
                     u.acknowledgement_timer = 20;
 
                     if(u.acknowledgement_timer > 0 && u.acknowledgement_connection)
@@ -464,7 +481,7 @@
                 }
             };
             this.$options.sockets.startSigning = function(data){
-                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
+                if(data=== u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = true;
                     u.signing_finished = false;
                 }
@@ -476,9 +493,11 @@
                 }
             };
             this.$options.sockets.cancelSigning = function(data){
-                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
+                if(data === u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = false;
                     u.acknowledgement_connection = false;
+                    u.acknowledgement_connection = false;
+                    u.appointment.acknowledgement_data.signature = null;
                 }
             };
             this.$options.sockets.finishSigning = function(data){

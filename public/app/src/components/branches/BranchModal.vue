@@ -134,38 +134,76 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-7">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Directions</label>
+                                        <textarea rows="2" class="form-control" v-model="newBranch.directions"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Welcome Message</label>
+                                        <textarea rows="2" class="form-control" v-model="newBranch.welcome_message"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Opening Date</label>
+                                        <input type="date" class="form-control" v-model="newBranch.opening_date" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4" v-if="newBranch.branch_data !== undefined">
+                                    <div class="form-group">
+                                        <label class="control-label">Establishment Type</label>
+                                        <select class="form-control" v-model="newBranch.branch_data.type">
+                                            <option value="stand-alone">Stand Alone</option>
+                                            <option value="mall">Mall</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" v-if="newBranch.branch_data !== undefined">
+                                    <div class="form-group">
+                                        <label class="control-label" v-if="newBranch.branch_data.type === 'stand-alone'">Extension Minutes</label>
+                                        <input type="number" class="form-control" v-if="newBranch.branch_data.type === 'stand-alone'"
+                                               v-model="newBranch.branch_data.extension_minutes" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-5">
-                            <label class="control-label">Directions</label>
-                            <textarea rows="2" class="form-control" v-model="newBranch.directions"></textarea>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="control-label">Welcome Message</label>
-                                <textarea rows="2" class="form-control" v-model="newBranch.welcome_message"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Opening Date</label>
-                                <input type="date" class="form-control" v-model="newBranch.opening_date" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" v-if="newBranch.branch_data !== undefined">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Establishment Type</label>
-                                <select class="form-control" v-model="newBranch.branch_data.type">
-                                    <option value="stand-alone">Stand Alone</option>
-                                    <option value="mall">Mall</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3" v-if="newBranch.branch_data.type === 'stand-alone'">
-                            <div class="form-group">
-                                <label class="control-label">Extension Minutes</label>
-                                <input type="number" class="form-control" v-model="newBranch.branch_data.extension_minutes" />
-                            </div>
+                            <h4>Branch Kiosks <button class="btn btn-info" @click="addKioskItem">+</button></h4>
+                            <table class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Alias</th>
+                                        <th>Serial</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="kiosk,key in newBranch.kiosk_data">
+                                        <td>
+                                            <input v-if="!kiosk.registered" type="text" class="form-control" v-model="newBranch.kiosk_data[key].alias"/>
+                                            <span v-else>{{ kiosk.alias }}</span>
+                                        </td>
+                                        <td>
+                                            <input v-if="!kiosk.registered" type="text" class="form-control" v-model="newBranch.kiosk_data[key].serial_no"/>
+                                            <span v-else>{{ kiosk.serial_no }}</span>
+                                        </td>
+                                        <td>
+                                            <div v-if="!kiosk.registered" >
+                                                <button class="btn btn-success btn-xs" @click="emitRegister(kiosk)"><i class="fa fa-check"></i></button>
+                                                <button class="btn btn-danger btn-xs" @click="removeKioskItem(key)"><i class="fa fa-close"></i></button>
+                                            </div>
+                                            <button v-else @click="emitUnregister(kiosk)" class="btn btn-danger btn-xs"><i class="fa fa-close"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -209,16 +247,59 @@
                     payment_methods:'',
                     welcome_message:'',
                     branch_pictures:[],
+                    kiosk_data:[],
                     cluster_id:0,
                     branch_data:{
                         ems_id:0,
                         type:'stand-alone',
                         extension_minutes:60
-                    }
-                }
+                    },
+                },
+                verifying:false,
+                verifying_serial:null,
             }
         },
         methods: {
+            addKioskItem(){
+                this.newBranch.kiosk_data.push({
+                    alias:'',
+                    serial_no:'',
+                    registered:false
+                });
+            },
+            removeKioskItem(key){
+                this.newBranch.kiosk_data.splice(key, 1);
+            },
+            emitRegister(kiosk){
+                let u = this;
+
+                this.$socket.emit('checkSerial',kiosk);
+                this.verifying = true;
+                this.verifying_serial = kiosk.serial_no;
+
+                setTimeout(()=>{
+                    if(u.verifying)
+                        toastr.error("Verification error, device with serial:  " + kiosk.serial_no + " not online.");
+                },2000)
+            },
+            emitUnregister(kiosk){
+                let x = confirm("Are you sure you want to unregister device?");
+                if(!x)
+                    return false;
+
+                let u = this;
+                kiosk.branch_id = this.newBranch.id;
+
+                axios({url: '/api/branch/unregisterKiosk?token=' + u.token , method:'post', data:kiosk})
+                    .then(function () {
+                        toastr.success("Successfully unregistered kiosk.");
+                        u.$socket.emit('unregisterSerial',kiosk);
+                        u.getBranch();
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
             getBranch(){
                 let u = this;
                 axios.get('/api/branch/getBranch/' + this.branch.id)
@@ -333,6 +414,27 @@
                 return this.$store.state.branches.regions;
             }
         },
+        mounted(){
+            let u = this;
+            this.$options.sockets.verifiedSerial = function(data){
+                data.kiosk.branch_id = u.newBranch.id;
+                if(u.verifying_serial === data.kiosk.serial_no){
+                    u.verifying = false;
+
+                    if(data.result){
+                        axios({url: '/api/branch/registerKiosk?token=' + u.token , method:'post', data:data.kiosk})
+                            .then(function () {
+                                toastr.success("Successfully registered kiosk.");
+                                u.getBranch();
+                                u.$socket.emit('registerSerial', data.kiosk);
+                            })
+                            .catch(function (error) {
+                                XHRCatcher(error);
+                            });
+                    }
+                }
+            };
+        },
         watch:{
             branch(){
                 if(this.operation === 'edit'){
@@ -342,3 +444,10 @@
         }
     }
 </script>
+<style>
+    @media (min-width: 992px){
+        .modal-lg {
+            width: 958px;
+        }
+    }
+</style>

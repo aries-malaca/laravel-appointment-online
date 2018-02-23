@@ -32,6 +32,7 @@ class BranchController extends Controller{
             $data[$key]['services']         = json_decode($value['services']);
             $data[$key]['products']         = json_decode($value['products']);
             $data[$key]['branch_data']      = json_decode($value['branch_data']);
+            $data[$key]['kiosk_data']      = json_decode($value['kiosk_data']);
             $data[$key]['social_media_accounts']      = json_decode($value['social_media_accounts']);
             $data[$key]['map_coordinates']  = json_decode($value['map_coordinates']);
             $query_schedule                 = BranchSchedule::where('branch_id', $value['id'])
@@ -82,6 +83,7 @@ class BranchController extends Controller{
         $data['map_coordinates'] = json_decode($data['map_coordinates']);
         $data['social_media_accounts'] = json_decode($data['social_media_accounts']);
         $data['cluster_data'] = json_decode($data['cluster_data']);
+        $data['kiosk_data'] = json_decode($data['kiosk_data']);
         $data['schedules'] = BranchSchedule::where('branch_id', $request->segment(4))
                                             ->orderBy('schedule_type')
                                             ->get()->toArray();
@@ -133,6 +135,7 @@ class BranchController extends Controller{
             $branch->social_media_accounts = json_encode($request->input('social_media_accounts'));
             $branch->map_coordinates = json_encode($request->input('map_coordinates'));
             $branch->branch_pictures = json_encode(array());
+            $branch->kiosk_data = json_encode(array());
             $branch->directions = $request->input('directions');
             $branch->welcome_message = $request->input('welcome_message');
             $branch->branch_data = json_encode($request->input('branch_data'));
@@ -445,6 +448,57 @@ class BranchController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             BranchShift::destroy($request->input('id'));
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function registerKiosk(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+
+            $find = Branch::where('kiosk_data', 'LIKE', '%'. $request->input('serial_no') .'%')
+                ->count();
+
+            if($find > 0)
+                return response()->json(["result"=>"failed", "error"=>"Serial already taken."], 400);
+
+            $branch = Branch::find($request->input('branch_id'));
+
+            $kiosk_data = json_decode($branch->kiosk_data,true);
+            $kiosk_data[] = array("alias"=> $request->input('alias'),
+                                  "serial_no"=>$request->input('serial_no'),
+                                  "registered"=>true);
+
+            Branch::where('id',$request->input('branch_id'))
+                    ->update(['kiosk_data'=> json_encode($kiosk_data)]);
+
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function unregisterKiosk(Request $request){
+
+
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+
+            $branch = Branch::find($request->input('branch_id'));
+            $kiosks = json_decode($branch->kiosk_data, true);
+
+            $new_kiosks = array();
+            if(sizeof($kiosks) == 0)
+                $branch->kiosk_data = json_encode(array());
+            else{
+                foreach ($kiosks as $t=>$v){
+                    if($v['serial_no'] != $request->input('serial_no'))
+                        $new_kiosks[] = $v;
+                }
+                $branch->kiosk_data = json_encode($new_kiosks);
+            }
+            $branch->save();
+
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);

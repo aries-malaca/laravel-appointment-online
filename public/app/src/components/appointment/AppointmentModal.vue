@@ -155,21 +155,25 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="card">
-                                                <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
-                                                <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                                <img v-if="appointment.acknowledgement_data === null" :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                                <div v-else>
+                                                    <img v-if="appointment.acknowledgement_data.signature !== undefined && appointment.acknowledgement_data.signature !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                                    <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
+                                                </div>
+
                                                 <div class="container2" style="text-align:center">
                                                     <h5><b>{{ appointment.client_name }}</b></h5>
                                                     <span>Client's Signature</span>
                                                 </div>
                                             </div><br/>
                                             <i v-if="acknowledgement_signing"><i class="fa fa-pencil"></i> Client is signing...</i>
+                                            <i v-if="acknowledgement_connection && signing_finished"><i class="fa fa-check"></i> Client Finished Signing</i>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Select Device for Acknowledgement:</label>
                                                 <select v-model="device" class="form-control" :disabled="acknowledgement_connection">
-                                                    <option value="1ssg2362346sd">Acer001</option>
-                                                    <option value="2dsgds3262346">Acer002</option>
+                                                    <option v-for="kiosk in queuing_branch.kiosk_data" :value="kiosk.serial_no">{{ kiosk.alias }}</option>
                                                 </select>
                                             </div>
 
@@ -263,6 +267,7 @@
                 acknowledgement_timer:0,
                 acknowledgement_connection:false,
                 acknowledgement_signing:false,
+                signing_finished:true,
                 reasons:{
                     service:[
                         'Hair Length',
@@ -343,6 +348,7 @@
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
                         u.$socket.emit('refreshAppointment', u.appointment.id);
                         u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
+                        u.$socket.emit('completeAppointment', u.appointment);
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -370,12 +376,19 @@
                     });
             },
             emitSendData(){
+                let u = this;
                 if(this.device === ''){
                     toastr.error("Please select device first.");
                     return false;
                 }
 
+                this.appointment.acknowledgement_data.signature = null;
                 this.$socket.emit('sendAppointmentData', this.appointment, this.device);
+
+                setTimeout(()=>{
+                    if(!u.acknowledgement_connection)
+                        toastr.error("Device is Offline.");
+                },2000)
             },
             cancelSigning(){
                 this.acknowledgement_connection = false;
@@ -417,6 +430,9 @@
 
                 return ids;
             },
+            queuing_branch(){
+                return this.$store.state.queuing_branch;
+            }
         },
         watch:{
             id:function(){
@@ -429,14 +445,15 @@
                 if(id === this.id)
                     u.getAppointment();
             };
-            this.$options.sockets.receivedAppointmentData = function(data){
-                if(data.appointment_id === u.appointment.id){
+            this.$options.sockets.receiveAppointmentData = function(data){
+                if(data.appointment.id === u.appointment.id){
                     u.acknowledgement_timer = 20;
 
                     if(u.acknowledgement_timer > 0 && u.acknowledgement_connection)
                         return;
 
                     u.acknowledgement_connection = true;
+                    u.signing_finished = false;
 
                     u.t = setInterval(function(){
                         u.acknowledgement_timer --;
@@ -447,25 +464,28 @@
                 }
             };
             this.$options.sockets.startSigning = function(data){
-                if(data.appointment_id === u.appointment.id){
+                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = true;
+                    u.signing_finished = false;
                 }
             };
             this.$options.sockets.stopSigning = function(data){
-                if(data.appointment_id === u.appointment.id){
+                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = false;
+                    u.appointment.acknowledgement_data.signature = data.signature;
                 }
             };
             this.$options.sockets.cancelSigning = function(data){
-                if(data.appointment_id === u.appointment.id){
+                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
                     u.acknowledgement_signing = false;
                     u.acknowledgement_connection = false;
                 }
             };
-            this.$options.sockets.sendSignature = function(data){
-                if(data.appointment_id === u.appointment.id){
-                    u.acknowledgement_data.signature = data.signature;
-                    u.$socket.emit('receivedSignature', u.appointment.id);
+            this.$options.sockets.finishSigning = function(data){
+                if(data.appointment_id === u.appointment.id && u.acknowledgement_connection){
+                    u.signing_finished = true;
+                    u.appointment.acknowledgement_data.signature = data.signature;
+                    u.acknowledgement_connection = false
                 }
             };
         }

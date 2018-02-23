@@ -150,12 +150,12 @@
                                 </div>
 
                                 <hr/>
-                                <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1 && appointment.acknowledgement_data !== null">
+                                <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1">
                                     <h4>Complete This Appointment</h4>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="card">
-                                                <img v-if="appointment.acknowledgement_data.signature !== undefined" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
+                                                <img v-if="appointment.acknowledgement_data !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
                                                 <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
                                                 <div class="container2" style="text-align:center">
                                                     <h5><b>{{ appointment.client_name }}</b></h5>

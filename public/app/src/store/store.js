@@ -21,7 +21,9 @@ export const store = new Vuex.Store({
         menus:[],
         title: 'App',
         queuing_technicians:[],
-        serving:[]
+        serving:[],
+        queuing_branch:null,
+        queuing_date:moment().format("YYYY-MM-DD")
     },
     actions:{
         fetchAuthenticatedUser(context){
@@ -55,6 +57,12 @@ export const store = new Vuex.Store({
         }
     },
     mutations:{
+        updateQueuingBranch(state, queuing_branch){
+            state.queuing_branch = queuing_branch;
+        },
+        updateQueuingDate(state, queuing_date){
+            state.queuing_date = queuing_date;
+        },
         updateTransactions(state, transactions){
             state.transactions = transactions;
         },

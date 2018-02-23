@@ -50,6 +50,8 @@ Route::post('/branch/updateBranch', 'BranchController@updateBranch');
 Route::get('/branch/getClusters', 'BranchController@getClusters');
 Route::post('/branch/addCluster', 'BranchController@addCluster');
 Route::post('/branch/updateCluster', 'BranchController@updateCluster');
+Route::post('/branch/registerKiosk', 'BranchController@registerKiosk');
+Route::post('/branch/unregisterKiosk', 'BranchController@unregisterKiosk');
 
 Route::get('/region/getRegions', 'RegionController@getRegions');
 Route::post('/region/addRegion', 'RegionController@addRegion');

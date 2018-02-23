@@ -46,7 +46,7 @@ class AppointmentController extends Controller{
             $appointment->booked_by_id = $api['user']['id'];
             $appointment->booked_by_type = $api['user']['is_client'] === 1 ? 'client':'admin';
             $appointment->transaction_data = '{}';
-            $appointment->acknowledgement_data = '{}';
+            $appointment->acknowledgement_data = json_encode(array("signature"=>null));
             $appointment->waiver_data = json_encode($request->input('waiver_data'));
             $appointment->transaction_type = $request->input('transaction_type')  ;
             $appointment->technician_id = $request->input('technician') !== null ? $request->input('technician')['value']:0;

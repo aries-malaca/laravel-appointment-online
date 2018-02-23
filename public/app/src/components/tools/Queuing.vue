@@ -20,13 +20,13 @@
                                 <h4 style="text-align:left">Branch:</h4>
                             </div>
                             <div class="col-sm-5">
-                                <vue-select v-model="branch" :options="branch_selection"></vue-select>
+                                <vue-select v-model="b" :options="branch_selection"></vue-select>
                             </div>
                             <div class="col-sm-1">
                                 <h4 style="text-align:right">Date:</h4>
                             </div>
                             <div class="col-sm-4">
-                                <input type="date" v-model="date" class="form-control"/>
+                                <input type="date" v-model="c" class="form-control"/>
                             </div>
                         </div>
                     </div>
@@ -140,38 +140,38 @@
                                         <th>Services</th>
                                         <th>Technician</th>
                                         <th>Platform</th>
-                                        <th>Serve Time</th>
-                                        <th>Complete Time</th>
+                                        <th>Served</th>
+                                        <th>Completed</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr v-for="app in completed">
-                                        <td style="width:25%;">
+                                        <td style="width:18%;">
                                             <b>{{ app.client.client_name }}</b><br/>
                                         </td>
-                                        <td style="width:38%;">
+                                        <td style="width:34%;">
                                             <table class="table-responsive table table-condensed table-hover table-bordered" style="margin:0px;">
                                                 <tbody>
                                                 <tr style="cursor: pointer;" @click="viewAppointment(item.transaction_id)" v-for="item in app.items">
-                                                    <td style="width:45%;"> {{ item.item_name }}</td>
-                                                    <td style="width:55%;">
+                                                    <td style="width:42%;"> {{ item.item_name }}</td>
+                                                    <td style="width:58%;">
                                                         Booked: {{ moment(item.book_start_time).format("hh:mm A") }} - {{ moment(item.book_end_time).format("hh:mm A") }}
                                                     </td>
                                                 </tr>
                                                 </tbody>
                                             </table>
                                         </td>
-                                        <td style="width:20%;">
+                                        <td style="width:18%;">
                                             {{ app.items[0].technician_name }}
                                         </td>
-                                        <td style="width:17%;">
+                                        <td style="width:10%;">
                                             {{ app.items[0].platform }}
                                         </td>
-                                        <td style="width:17%;">
-                                            {{ app.items[0].platform }}
+                                        <td style="width:10%;">
+                                            {{  moment(app.items[0].serve_time).format("hh:mm A") }}
                                         </td>
-                                        <td style="width:17%;">
-                                            {{ app.items[0].platform }}
+                                        <td style="width:10%;">
+                                            {{ moment(app.items[0].complete_time).format("hh:mm A") }}
                                         </td>
                                     </tr>
                                     </tbody>
@@ -300,21 +300,24 @@
         data: function(){
             return {
                 title: 'Queuing',
-                branch:null,
                 appointments:[],
                 toggle:false,
                 show:false,
                 display_id:undefined,
-                date:moment().format("YYYY-MM-DD"),
                 hasPendingCallback:false,
                 calling:[],
                 serving:[],
                 selected_technician:undefined,
                 selected_appointment_id:undefined,
-                selected_client:undefined
+                selected_client:undefined,
+                b:null,
+                c:null,
             }
         },
         methods:{
+            changeDate(value){
+                this.$store.commit('updateQueuingDate', value);
+            },
             viewAppointment:function(id) {
                 this.display_id = id;
                 setTimeout(function(){
@@ -488,6 +491,11 @@
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Queuing');
+            let v = this.$store.state.queuing_branch;
+            let w = this.$store.state.queuing_date;
+
+            this.b = v;
+            this.c = w;
 
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){
@@ -499,6 +507,11 @@
                     u.refresh();
                 }
             };
+
+            if(this.b !== null && this.c !== null){
+                this.getAppointments();
+                this.refresh();
+            }
         },
         computed:{
             branch_selection:function(){
@@ -515,6 +528,7 @@
                             products:item.products,
                             services:item.services,
                             branch_address:item.branch_address,
+                            kiosk_data:item.kiosk_data,
                         });
                 });
                 return a;
@@ -586,6 +600,12 @@
                     }
                 }
                 return services;
+            },
+            branch(){
+                return this.$store.state.queuing_branch;
+            },
+            date(){
+                return this.$store.state.queuing_date;
             }
         },
         watch:{
@@ -595,6 +615,12 @@
             },
             date:function(){
                 this.getAppointments();
+            },
+            b(){
+                this.$store.commit('updateQueuingBranch', this.b);
+            },
+            c(){
+                this.$store.commit('updateQueuingDate', this.c);
             }
         }
     }

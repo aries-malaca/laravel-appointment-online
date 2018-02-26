@@ -137,10 +137,6 @@
             setTimeout(function(){
                 if(u.user !== null){
 
-                    u.$options.sockets.identifyYourself = function(){
-                        u.$socket.emit('identifyYourself', {id: u.user });
-                    };
-
                     u.$store.dispatch('saveLocation');
 
                     if(u.user.is_client !== 1)

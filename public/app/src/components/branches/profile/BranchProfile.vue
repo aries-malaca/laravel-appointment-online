@@ -193,12 +193,14 @@
             </div>
         </div>
         <branch-modal operation="edit" @refreshBranch="getBranch"></branch-modal>
+        <appointment-modal @refresh_list="refreshList"></appointment-modal>
     </div>
 
 </template>
 
 <script>
     import UploadPictureModal from "../../uploader/UploadPictureModalSmall.vue";
+    import AppointmentModal from "../../appointment/AppointmentModal.vue";
     import AppointmentsTable from "../../appointment/AppointmentsTable.vue";
     import Schedules from "./Schedules.vue";
     import Reviews from "./Reviews.vue";
@@ -207,7 +209,7 @@
     export default {
         name: 'BranchProfile',
         props:['with_back'],
-        components:{ UploadPictureModal, Loading, AppointmentsTable, Schedules, Reviews, BranchModal },
+        components:{ UploadPictureModal, Loading, AppointmentsTable, Schedules, Reviews, BranchModal, AppointmentModal },
         data: function(){
            return {
                pictures:[],
@@ -223,6 +225,10 @@
             refreshBranch:function(){
                 u.$socket.emit('refreshModel', 'branches');
                 this.getBranch();
+            },
+            refreshList(){
+                this.getAppointments();
+                this.getAppointmentHistory();
             },
             getBranch:function(){
                 let u = this;

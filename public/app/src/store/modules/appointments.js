@@ -4,6 +4,7 @@ export const appointments = {
     state: {
         active_appointments: [],
         appointment_history: [],
+        viewing_id:0,
     },
     actions:{
 
@@ -14,6 +15,12 @@ export const appointments = {
     mutations:{
         updateActiveAppointments(state, appointments){
             state.active_appointments = appointments;
+        },
+        updateViewingID(state, id){
+            state.viewing_id = id;
+        },
+        updateAppointmentHistory(state, appointments){
+            state.appointment_history = appointments;
         },
     }
 };

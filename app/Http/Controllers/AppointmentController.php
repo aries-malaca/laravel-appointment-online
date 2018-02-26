@@ -203,7 +203,9 @@ class AppointmentController extends Controller{
         Transaction::where('id', $request->input('appointment')['id'])
                     ->update(['transaction_status'=>'completed',
                                 'acknowledgement_data'=>json_encode( $request->input('appointment')['acknowledgement_data']),
-                                'complete_time'=> date('Y-m-d H:i:s')]);
+                                'complete_time'=> date('Y-m-d H:i:s'),
+                                'review_status'=> 'pending'
+                            ]);
 
         return response()->json(["result"=>"success"]);
     }

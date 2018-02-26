@@ -271,6 +271,8 @@
                 </upload-picture-modal>
             </div>
         </div>
+        <appointment-modal @refresh_list="refreshList"></appointment-modal>
+
         <loading v-if="newClient.first_name===undefined && show"></loading>
     </div>
 
@@ -279,6 +281,7 @@
 <script>
     import UploadPictureModal from "../../uploader/UploadPictureModal.vue";
     import AppointmentsTable from "../../appointment/AppointmentsTable.vue";
+    import AppointmentModal from "../../appointment/AppointmentModal.vue";
     import MyDevicesTable from "../../tables/MyDevicesTable.vue";
     import TransactionsView from "../../transactions/TransactionsView.vue";
     import VueSelect from "vue-select"
@@ -287,7 +290,7 @@
     export default {
         name: 'ClientProfile',
         props: ['with_back','id','show'],
-        components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable, TransactionsView, Loading},
+        components:{ UploadPictureModal, AppointmentsTable, VueSelect, MyDevicesTable, TransactionsView, Loading, AppointmentModal },
         data: function(){
             return {
                 client:{},
@@ -333,6 +336,10 @@
             refreshClient:function(){
                 this.$emit('refresh_client');
                 this.getClient();
+            },
+            refreshList(){
+                this.getAppointments();
+                this.getAppointmentHistory();
             },
             moment:moment,
             showUploadModal:function () {

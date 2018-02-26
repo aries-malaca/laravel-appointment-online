@@ -4,6 +4,7 @@ import {services} from './modules/services';
 import {branches} from './modules/branches';
 import {products} from './modules/products';
 import {technicians} from './modules/technicians';
+import {appointments} from './modules/appointments';
 
 Vue.use(Vuex);
 export const store = new Vuex.Store({
@@ -12,6 +13,7 @@ export const store = new Vuex.Store({
         branches,
         products,
         technicians,
+        appointments
     },
     state: {
         token: undefined,

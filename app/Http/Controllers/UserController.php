@@ -206,6 +206,11 @@ class UserController extends Controller{
 
         if(isset($user['id'])){
             $user_data = json_decode($user['user_data'], true);
+
+            if(!isset($user_data['verify_key']))
+                return view('errors.404');
+
+
             if($user_data['verify_key'] == $request->input('key')){
                 $diff = time() - $user_data['verify_expiration'];
                 if($diff < 300){

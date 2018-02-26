@@ -157,7 +157,7 @@
         <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"
                        :branches="branches"/>
 
-        <appointment-modal @refresh_list="refreshList" @close_modal="closeModal" :user="user" :token="token" :id="display_appointment.id"></appointment-modal>
+        <appointment-modal @refresh_list="refreshList"></appointment-modal>
     </div>
 </template>
 
@@ -170,7 +170,6 @@
         data: function(){
             return {
                 display_appointment:{},
-                active_appointments:[],
                 client:{},
                 toggle:false,
                 branch_visited:['Aguirre','Bicutan','Orlando'],
@@ -188,24 +187,20 @@
 
                 axios.get(url)
                     .then(function (response) {
-                        u.active_appointments = [];
+                        var active_appointments = [];
                         response.data.forEach(function(item){
                             if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
                                 return false;
 
-                            u.active_appointments.push(item);
+                            active_appointments.push(item);
                         });
+                        u.$store.commit('appointments/updateActiveAppointments', active_appointments);
                     });
             },
             viewAppointment:function(appointment) {
                 this.display_appointment = appointment;
-                setTimeout(function(){
-                    $("#appointment-modal-" + appointment.id).modal("show");
-                },200);
-            },
-            closeModal:function(){
-                $("#appointment-modal-" + this.display_appointment.id).modal("hide");
-                this.display_appointment = {};
+                this.$store.commit('appointments/updateViewingID', appointment.id);
+                $("#appointment-modal").modal("show");
             },
             refreshList:function(){
                 this.getAppointments();
@@ -237,6 +232,7 @@
             this.$options.sockets.refreshAppointments = function(data){
                 if(data.client_id !== u.user.id)
                     return false;
+
                 u.getAppointments();
             };
         },
@@ -252,6 +248,9 @@
             },
             branches(){
                 return this.$store.getters['branches/activeBranches'];
+            },
+            active_appointments(){
+                return this.$store.state.appointments.active_appointments;
             }
         }
     }

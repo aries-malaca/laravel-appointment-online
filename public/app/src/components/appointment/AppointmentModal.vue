@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div v-bind:id="'appointment-modal-'+ id " class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
+        <div id="appointment-modal" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <button type="button" class="close" @click="closeModal()" aria-hidden="true"></button>
                         <h4 class="modal-title">Appointment Details</h4>
                     </div>
                     <div class="modal-body">
@@ -217,7 +217,7 @@
                     <div class="modal-footer">
                         <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
                         <a target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
-                        <button type="button" data-dismiss="modal" class="btn dark btn-outline">Close</button>
+                        <button type="button" @click="closeModal()" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>
             </div>
@@ -260,7 +260,6 @@
     import Loading from '../etc/Loading.vue';
     export default {
         name: 'AppointmentModal',
-        props:[ 'id'],
         components:{ Loading },
         data: function(){
             return {
@@ -293,6 +292,10 @@
             }
         },
         methods:{
+            closeModal(){
+                this.$store.commit('appointments/updateViewingID', undefined);
+                $("#appointment-modal").modal("hide");
+            },
             getAppointment:function(){
                 this.appointment = {};
                 let u = this;
@@ -312,6 +315,7 @@
                     reason_text:''
                 };
                 $("#cancel-item-modal-"+this.id).modal("show");
+
             },
             makeRequest:function(url, method, data, success_callback, error_callback){
                 axios({url:url, method:method, data:data})
@@ -443,6 +447,9 @@
             },
             queuing_branch(){
                 return this.$store.state.queuing_branch;
+            },
+            id(){
+                return this.$store.state.appointments.viewing_id;
             }
         },
         watch:{

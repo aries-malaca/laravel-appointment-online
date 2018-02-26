@@ -224,7 +224,6 @@
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
-        <appointment-modal @refresh_list="getAppointments" @close_modal="closeModal" :id="display_id"></appointment-modal>
 
         <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true" :queued="queued"
                :default_branch="branch" :default_client="null" :lock_client="false" />
@@ -285,6 +284,7 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
+        <appointment-modal @refresh_list="refreshList"></appointment-modal>
     </div>
 </template>
 
@@ -320,12 +320,12 @@
             },
             viewAppointment:function(id) {
                 this.display_id = id;
-                setTimeout(function(){
-                    $("#appointment-modal-" + id).modal("show");
-                },200);
+                this.$store.commit('appointments/updateViewingID', id);
+                $("#appointment-modal").modal("show");
             },
             closeModal:function(){
-                $("#appointment-modal-" + this.display_id).modal("hide");
+                this.$store.commit('appointments/updateViewingID', undefined);
+                $("#appointment-modal").modal("hide");
                 this.display_id = undefined;
             },
             getAppointments:function(){
@@ -477,6 +477,9 @@
                         u.calling = response.data.calling;
                         u.$store.commit('updateServing',response.data.serving);
                     });
+            },
+            refreshList(){
+              this.getAppointments();
             },
             isOnServe(appointment){
                 for(var x=0;x<appointment.items.length;x++){

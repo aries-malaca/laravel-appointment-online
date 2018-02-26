@@ -7,18 +7,15 @@
             :onClick="appointmentTable.rowClicked"
             styleClass="table table-bordered table-hover table-striped"
         />
-
-        <appointment-modal @refresh_list="refreshList" :id="display_appointment.id"></appointment-modal>
     </div>
 </template>
 
 <script>
     import DataTable from '../tables/DataTable.vue';
-    import AppointmentModal from './AppointmentModal.vue';
 
     export default {
         name: 'ActiveAppointments',
-        components:{ DataTable, AppointmentModal },
+        components:{ DataTable },
         props:['appointments', 'hide_client', 'hide_branch','paginate'],
         data: function(){
             return {
@@ -40,12 +37,8 @@
         methods:{
             viewAppointment:function(appointment) {
                 this.display_appointment = appointment;
-                setTimeout(function(){
-                    $("#appointment-modal-" + appointment.id).modal("show");
-                },200);
-            },
-            refreshList:function(){
-                this.$emit('get_appointments');
+                this.$store.commit('appointments/updateViewingID', appointment.id);
+                $("#appointment-modal").modal("show");
             }
         }
     }

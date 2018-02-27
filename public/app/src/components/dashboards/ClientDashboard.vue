@@ -54,7 +54,15 @@
                                 <div class="name" style="text-align:center"> Personal Calendar </div>
                             </div>
                         </a>
-                        <div class="tile bg-green" @click="toggle = !toggle" >
+                        <div class="tile bg-green" @click="(toggle = !toggle)" v-if="needsToAcknowledge === undefined">
+                            <div class="tile-body">
+                                <i class="fa fa-send-o"></i>
+                            </div>
+                            <div class="tile-object">
+                                <div class="name" style="text-align:center"> Book Appointment </div>
+                            </div>
+                        </div>
+                        <div class="tile bg-green" v-else @click="acknowledgeModal">
                             <div class="tile-body">
                                 <i class="fa fa-send-o"></i>
                             </div>
@@ -178,6 +186,10 @@
             }
         },
         methods:{
+            acknowledgeModal:function() {
+                this.$store.commit('appointments/updateViewingID',this.needsToAcknowledge.id);
+                $("#appointment-modal").modal("show");
+            },
             getAppointments:function(){
                 let u = this;
                 var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/active';
@@ -197,6 +209,26 @@
                         u.$store.commit('appointments/updateActiveAppointments', active_appointments);
                     });
             },
+            getAppointmentHistory:function(){
+                let u = this;
+
+                var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/inactive';
+
+                if(this.user.is_client !== 1)
+                    url = '/api/appointment/getAppointments/all/all/inactive';
+
+                axios.get(url)
+                    .then(function (response) {
+                        var appointments = [];
+                        response.data.forEach(function(item){
+                            if(u.user.is_client !== 1 && u.user.user_data.branches.indexOf(item.branch_id) === -1)
+                                return false;
+
+                            appointments.push(item);
+                        });
+                        u.$store.commit('appointments/updateAppointmentHistory', appointments);
+                    });
+            },
             viewAppointment:function(appointment) {
                 this.display_appointment = appointment;
                 this.$store.commit('appointments/updateViewingID', appointment.id);
@@ -204,6 +236,7 @@
             },
             refreshList:function(){
                 this.getAppointments();
+                this.getAppointmentHistory();
             }
         },
         watch:{
@@ -227,6 +260,7 @@
             };
 
             this.getAppointments();
+            this.getAppointmentHistory();
             let u = this;
 
             this.$options.sockets.refreshAppointments = function(data){
@@ -234,6 +268,7 @@
                     return false;
 
                 u.getAppointments();
+                u.getAppointmentHistory();
             };
         },
         computed:{
@@ -251,6 +286,12 @@
             },
             active_appointments(){
                 return this.$store.state.appointments.active_appointments;
+            },
+            appointment_history(){
+                return this.$store.state.appointments.appointment_history;
+            },
+            needsToAcknowledge(){
+                return this.$store.getters['appointments/needsToAcknowledge'];
             }
         }
     }

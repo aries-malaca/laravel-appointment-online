@@ -8,6 +8,12 @@
                         <h4 class="modal-title">Appointment Details</h4>
                     </div>
                     <div class="modal-body">
+                        <div v-if="needsToAcknowledge!==undefined && appointment.id !== undefined">
+                            <div class="alert alert-warning" v-if="needsToAcknowledge.id===appointment.id && user.is_client === 1">
+                                <strong>Attention! </strong>
+                                You need to acknowledge this transaction to book another transaction.
+                            </div>
+                        </div>
                         <div class="row" v-if="appointment.id !== undefined">
                             <div class="col-md-5">
                                 <table class="table table-hover table-light" v-if="appointment.id !== undefined && user.id !== undefined">
@@ -44,12 +50,8 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td> Date: </td>
-                                        <td> {{ appointment.transaction_date_formatted }} </td>
-                                    </tr>
-                                    <tr>
-                                        <td> Time: </td>
-                                        <td> {{ appointment.transaction_time_formatted }} </td>
+                                        <td> Appointment: </td>
+                                        <td> {{ appointment.transaction_date_formatted }} {{ appointment.transaction_time_formatted }}</td>
                                     </tr>
                                     <tr>
                                         <td> Technician: </td>
@@ -68,12 +70,11 @@
                                         <td v-html="appointment.status_formatted"></td>
                                     </tr>
                                     <tr v-if="appointment.serve_time !== null">
-                                        <td> Served Time: </td>
-                                        <td> {{ moment(appointment.serve_time).format("hh:mm A") }} </td>
-                                    </tr>
-                                    <tr v-if="appointment.complete_time !== null">
-                                        <td> Completed Time: </td>
-                                        <td> {{ moment(appointment.complete_time).format("hh:mm A") }} </td>
+                                        <td> Served: </td>
+                                        <td>
+                                            {{ moment(appointment.serve_time).format("hh:mm A") }}
+                                            <span v-if="appointment.complete_time !== null"> - {{ moment(appointment.complete_time).format("hh:mm A") }}</span>
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -150,10 +151,11 @@
                                 </div>
 
                                 <hr/>
+
                                 <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1">
-                                    <h4>Complete This Appointment</h4>
+                                    <h4 style="text-align:center">Complete Appointment</h4>
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-5">
                                             <div class="card">
                                                 <img v-if="appointment.acknowledgement_data === null" :src="'/images/white.png'" alt="Avatar" style="width:100%" />
                                                 <div v-else>
@@ -169,7 +171,7 @@
                                             <i v-if="acknowledgement_signing"><i class="fa fa-pencil"></i> Client is signing...</i>
                                             <i v-if="signing_finished"><i class="fa fa-check"></i> Client Finished Signing</i>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-7">
                                             <div class="form-group"  v-if="queuing_branch.kiosk_data.length>0">
                                                 <label>Select Device for Acknowledgement:</label>
                                                 <select v-model="device" class="form-control" :disabled="acknowledgement_connection">
@@ -197,8 +199,8 @@
                                 </div>
 
                                 <div v-if="appointment.transaction_status === 'completed'" class="row">
-                                    <div class="col-md-6">
-                                        <h4>Acknowledgement</h4>
+                                    <div class="col-md-5">
+                                        <h4 style="text-align:center">Acknowledgement</h4>
                                         <div class="card">
                                             <img v-if="appointment.acknowledgement_data.signature !== null" :src="appointment.acknowledgement_data.signature" alt="Avatar" style="width:100%" />
                                             <img v-else :src="'/images/white.png'" alt="Avatar" style="width:100%" />
@@ -207,16 +209,63 @@
                                                 <span>Client's Signature</span>
                                             </div>
                                         </div>
+                                        <div v-if="appointment.acknowledgement_data.signature === null && user.id === appointment.client_id" >
+                                            <br/>
+                                            <small>I acknowledge this transaction.</small><br/>
+                                            <button class="btn btn-info btn-xs btn-block" @click="acknowledgeAppointment">Proceed</button>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6"></div>
+                                    <div class="col-md-7" v-if="appointment.acknowledgement_data.signature !== null">
+                                        <h4 style="text-align:center">Feedback</h4>
+                                        <star-rating :item-size="30"
+                                                     inactive-color="#e4eadb"
+                                                     active-color="#67d21e"
+                                                     :read-only="appointment.client_id !== user.id"
+                                                     :increment="1"
+                                                     text-class="starer"
+                                                     v-model=" review.rating"/>
+                                        <div v-if="review_writing && user.id === appointment.client_id">
+                                            <textarea class="form-control" v-model="review.feedback" rows="5"></textarea>
+                                            <button class="btn btn-info btn-sm pull-right" style="margin-top:10px;" @click="submitReview">Submit Review</button>
+                                            <button class="btn btn-warning btn-sm pull-right" style="margin-top:10px; margin-right: 5px;" @click="cancelEditing">Cancel</button>
+                                            <br/>
+                                        </div>
+                                        <div v-else>
+                                            <div class="alert alert-info" v-if="appointment.review_date===null">
+                                                No feedback for this Transaction. <br/>
+                                                <a style="text-decoration: underline" v-if="user.id === appointment.client_id" @click="editReview">Write a review</a>
+                                            </div>
+                                            <div class="mt-comments" v-else>
+                                                <div class="mt-comment">
+                                                    <div class="mt-comment-img">
+                                                        <img style="height:40px" :src="'../../images/users/' + appointment.client_picture"> </div>
+                                                    <div class="mt-comment-body">
+                                                        <div class="mt-comment-info">
+                                                            <span class="mt-comment-author">{{ appointment.client_name }}</span>
+                                                            <span class="mt-comment-date">{{ moment(appointment.review_date).format("MM/DD/YYYY hh:mm A") }}</span>
+                                                        </div>
+                                                        <div class="mt-comment-text">
+                                                            {{ appointment.feedback }}
+                                                        </div>
+                                                        <div class="mt-comment-details">
+                                                            <ul class="mt-comment-actions" v-if="!review_writing && user.id === appointment.client_id">
+                                                                <li>
+                                                                    <a @click="editReview">Quick Edit</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <loading v-else></loading>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" v-if="appointment.waiver_data !== undefined">
                         <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
-                        <a target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
+                        <a v-if="appointment.waiver_data.signature !== null" target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
                         <button type="button" @click="closeModal()" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>
@@ -257,10 +306,11 @@
 </template>
 
 <script>
-    import Loading from '../etc/Loading.vue';
+    import { StarRating } from 'vue-rate-it';
+
     export default {
         name: 'AppointmentModal',
-        components:{ Loading },
+        components:{ StarRating },
         data: function(){
             return {
                 cancel:{},
@@ -288,13 +338,20 @@
                     item_name:'',
                     reason:0,
                     reason_text:''
-                }
+                },
+                review:{
+                    appointment_id:0,
+                    rating:0,
+                    feedback:''
+                },
+                review_writing:false
             }
         },
         methods:{
             closeModal(){
                 this.$store.commit('appointments/updateViewingID', undefined);
                 $("#appointment-modal").modal("hide");
+                this.review_writing = false;
             },
             getAppointment:function(){
                 this.appointment = {};
@@ -302,8 +359,10 @@
                 if(this.id !== undefined)
                     axios.get('/api/appointment/getAppointment/' + this.id)
                         .then(function (response) {
-                            if(response.data)
+                            if(response.data) {
                                 u.appointment = response.data;
+                                u.review.rating = response.data.rating;
+                            }
                          });
             },
             showCancelItemModal:function(item){
@@ -342,7 +401,6 @@
 
                         $btn.button('reset');
                         $("#cancel-item-modal-"+u.id).modal('hide');
-                        u.getAppointment();
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -351,7 +409,7 @@
             },
             emitCompleteAppointment:function(){
                 let u = this;
-                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'post', data:{appointment:this.appointment}})
+                axios({url:'/api/appointment/completeAppointment?token=' + this.token, method:'post', data:this.appointment})
                     .then(function () {
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
                         u.$socket.emit('refreshAppointment', u.appointment.id);
@@ -373,7 +431,6 @@
                         u.$socket.emit('refreshAppointment', u.id);
                         u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
                         u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
-                        u.getAppointment();
                         toastr.success("Appointment successfully cancelled.");
                         $btn.button('reset');
                         $("#cancel-item-modal-"+u.id).modal('hide');
@@ -406,6 +463,41 @@
                 this.acknowledgement_signing = false;
                 clearInterval(this.t);
                 this.$socket.emit('signingTimeout', this.appointment.id, this.device);
+            },
+            acknowledgeAppointment(){
+                let u = this;
+                axios({url:'/api/appointment/acknowledgeAppointment?token=' + this.token, method:'post', data:this.appointment})
+                    .then(function () {
+                        u.$socket.emit('refreshAppointment', u.appointment.id);
+                        u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+                        toastr.success("Successfully acknowledged the transaction.");
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
+            editReview(){
+                this.review = {
+                    rating: this.appointment.rating,
+                    feedback: this.appointment.feedback,
+                    appointment_id: this.appointment.id
+                };
+                this.review_writing = true;
+            },
+            cancelEditing(){
+                this.review_writing = false;
+            },
+            submitReview(){
+                let u = this;
+                axios({url:'/api/review/submitReview?token=' + this.token, method:'post', data:this.review})
+                    .then(function () {
+                        u.$socket.emit('refreshAppointment', u.appointment.id);
+                        toastr.success("Successfully submitted the feedback.");
+                        u.review_writing = false;
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             },
             moment:moment
         },
@@ -450,6 +542,9 @@
             },
             id(){
                 return this.$store.state.appointments.viewing_id;
+            },
+            needsToAcknowledge(){
+                return this.$store.getters['appointments/needsToAcknowledge'];
             }
         },
         watch:{
@@ -534,5 +629,13 @@
 
     .container2 {
         padding: 2px 16px;
+    }
+
+    .starer{
+        color: #67d21e;
+        font-size: 38px;
+    }
+    .vue-rate-it-rating{
+        margin-left: 20px;
     }
 </style>

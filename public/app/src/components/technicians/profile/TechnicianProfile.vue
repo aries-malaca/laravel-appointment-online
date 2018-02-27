@@ -4,10 +4,10 @@
             <a v-if="with_back && technician.first_name !== undefined" @click="back" class="ribbon ribbon-left ribbon-shadow ribbon-round ribbon-border-dash-hor ribbon-color-success uppercase">
                 <i class="fa fa-arrow-circle-left"></i> Back
             </a>
-            <div class="portlet-title tabbable-line" v-if="technician.first_name !== undefined">
+            <div class="portlet-title tabbable-line" v-if="newTechnician.first_name !== undefined">
                 <div class="caption">
                     &nbsp;
-                    <span class="caption-subject bold font-grey-gallery uppercase"> {{ technician.first_name }} {{ technician.last_name }} </span>
+                    <span class="caption-subject bold font-grey-gallery uppercase"> {{ newTechnician.first_name }} {{ newTechnician.last_name }} </span>
                 </div>
                 <ul class="nav nav-tabs">
                     <li class="active">
@@ -21,32 +21,32 @@
                     </li>
                 </ul>
             </div>
-            <div class="portlet-body profile" v-if="technician.first_name !== undefined">
+            <div class="portlet-body profile" v-if="newTechnician.first_name !== undefined">
                 <div class="tab-content">
                     <div class="tab-pane active" id="info">
                         <div class="row">
                             <div class="col-md-3">
                                 <ul class="list-unstyled profile-nav">
                                     <li>
-                                        <img v-bind:src="'images/technicians/'+technician.technician_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
+                                        <img v-bind:src="'images/technicians/'+newTechnician.technician_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
                                     </li>
                                 </ul>
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
-                                    <div class="col-md-12 profile-info" v-if="technician.technician_data !== undefined">
-                                        <h1 class="font-green sbold uppercase">{{ technician.first_name }} {{ technician.last_name }}</h1>
+                                    <div class="col-md-12 profile-info" v-if="newTechnician.technician_data !== undefined">
+                                        <h1 class="font-green sbold uppercase">{{ newTechnician.first_name }} {{ newTechnician.last_name }}</h1>
                                         <ul class="list-inline">
                                             <li>
-                                                <i class="fa fa-map-marker"></i> {{ technician.technician_data.address }}
+                                                <i class="fa fa-map-marker"></i> {{ newTechnician.technician_data.address }}
                                             </li>
                                             <li>
-                                                <i class="fa fa-gift"></i> {{ moment(technician.technician_data.birth_date).format("MMMM D, YYYY") }}
+                                                <i class="fa fa-gift"></i> {{ moment(newTechnician.technician_data.birth_date).format("MMMM D, YYYY") }}
                                             </li>
                                             <li>
-                                                <i class="fa fa-phone"></i> {{ technician.technician_data.mobile }}
+                                                <i class="fa fa-phone"></i> {{ newTechnician.technician_data.mobile }}
                                             </li>
-                                            <li v-if="technician.technician_data.gender == 'female'">
+                                            <li v-if="newTechnician.technician_data.gender == 'female'">
                                                 <i class="fa fa-female"></i> Female
                                             </li>
                                             <li v-else>
@@ -58,16 +58,16 @@
                                             <tbody>
                                                 <tr>
                                                     <td> Employee ID: </td>
-                                                    <td> {{ technician.employee_id }} </td>
+                                                    <td> {{ newTechnician.employee_id }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td> Position: </td>
-                                                    <td> {{ technician.technician_data.position_name }} </td>
+                                                    <td> {{ newTechnician.technician_data.position_name }} </td>
                                                 </tr>
 
                                                 <tr>
                                                     <td> Cluster:</td>
-                                                    <td> {{ technician.cluster_name }} </td>
+                                                    <td> {{ newTechnician.cluster_name }} </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -81,6 +81,7 @@
                     <reviews></reviews>
                 </div>
             </div>
+            <loading v-else></loading>
         </div>
         <technician-modal v-if="technician" operation="add"></technician-modal>
     </div>
@@ -90,16 +91,28 @@
     import Reviews from './Reviews.vue';
     import Schedules from './Schedules.vue';
     import TechnicianModal from '../TechnicianModal.vue';
+    import Loading from '../../etc/Loading.vue';
 
     export default {
         name: 'TechnicianProfile',
+
         props: ['with_back'],
-        components:{ Reviews, Schedules, TechnicianModal },
+        components:{ Reviews, Schedules, TechnicianModal, Loading },
         data: function(){
             return {
+                newTechnician:{}
             }
         },
         methods:{
+            getTechnician:function(){
+                let u = this;
+
+                axios.get('/api/technician/getTechnician/' + this.technician.id)
+                    .then(function (response) {
+                        if(response.data.id !== undefined)
+                            u.newTechnician = response.data;
+                    });
+            },
             back:function(){
                 this.$store.commit('technicians/updateViewingTechnician', false);
             },
@@ -107,6 +120,11 @@
                 $("#add-technician-modal").modal("show");
             },
             moment:moment
+        },
+        watch:{
+            'technician.id'(){
+                this.getTechnician();
+            }
         },
         computed:{
             user(){
@@ -118,6 +136,9 @@
             technician(){
                 return this.$store.state.technicians.viewing_technician;
             }
+        },
+        mounted(){
+            this.getTechnician();
         }
     }
 </script>

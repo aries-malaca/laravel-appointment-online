@@ -47,7 +47,7 @@ class AppointmentController extends Controller{
             $appointment->booked_by_type = $api['user']['is_client'] === 1 ? 'client':'admin';
             $appointment->transaction_data = '{}';
             $appointment->acknowledgement_data = json_encode(array("signature"=>null));
-            $appointment->waiver_data = json_encode($request->input('waiver_data'));
+            $appointment->waiver_data = $api['user']['is_client'] == 1 ? json_encode($request->input('waiver_data')): '{"signature":null}';
             $appointment->transaction_type = $request->input('transaction_type')  ;
             $appointment->technician_id = $request->input('technician') !== null ? $request->input('technician')['value']:0;
             $appointment->save();
@@ -109,8 +109,10 @@ class AppointmentController extends Controller{
     }
 
     public function getAppointment(Request $request){
-        $appointment = Transaction::where('id', $request->segment(4))
-                        ->get()->first();
+        $appointment = Transaction::leftJoin('reviews', 'reviews.transaction_id','=','transactions.id')
+                                ->where('transactions.id', $request->segment(4))
+                                ->select('rating', 'feedback', 'transactions.*', 'reviews.created_at as review_date', 'review_status')
+                                ->get()->first();
 
         if(isset($appointment['id'])){
             $branch = Branch::find($appointment['branch_id']);
@@ -120,6 +122,7 @@ class AppointmentController extends Controller{
             $appointment['client_name'] = $client->username;
             $appointment['client_contact'] = $client->user_mobile;
             $appointment['client_gender'] = $client->gender;
+            $appointment['client_picture'] = $client->user_picture;
             $appointment['technician_name'] = isset($technician)?$technician->first_name .' '. $technician->last_name :'N/A';
             $appointment['items'] = $this->getAppointmentItems($appointment['id']);
             $appointment['transaction_date_formatted'] = date('m/d/Y', strtotime($appointment['transaction_datetime']));
@@ -128,7 +131,11 @@ class AppointmentController extends Controller{
             $appointment['transaction_data'] = json_decode($appointment['transaction_data']);
             $appointment['acknowledgement_data'] = json_decode($appointment['acknowledgement_data']);
             $appointment['status_formatted'] = $this->formatStatus($appointment['transaction_status']);
-            $appointment['waiver_data'] = null;
+            $appointment['waiver_data'] = json_decode($appointment['waiver_data']);
+
+            if($appointment['rating'] === null)
+                $appointment['rating'] = 0;
+
             return response()->json($appointment);
         }
         return response()->json(false);
@@ -177,10 +184,10 @@ class AppointmentController extends Controller{
             $appointments[$key]['transaction_time_formatted'] = date('h:i A', strtotime($value['transaction_datetime']));
             $appointments[$key]['transaction_added_formatted'] = date('m/d/Y h:i A', strtotime($value['created_at']));
             $appointments[$key]['transaction_data'] = json_decode($value['transaction_data']);
+            $appointments[$key]['acknowledgement_data'] = json_decode($value['acknowledgement_data']);
             $appointments[$key]['serve_time'] = $value['serve_time'];
             $appointments[$key]['status_formatted'] = $this->formatStatus($value['transaction_status']);
             $appointments[$key]['waiver_data'] = null;
-
         }
 
         return response()->json($appointments);
@@ -196,15 +203,14 @@ class AppointmentController extends Controller{
     }
 
     public function completeAppointment(Request $request){
-        TransactionItem::where('transaction_id', $request->input('appointment')['id'])
+        TransactionItem::where('transaction_id', $request->input('id'))
                         ->where('item_status', 'reserved')
                         ->update(['item_status'=>'completed']);
 
-        Transaction::where('id', $request->input('appointment')['id'])
+        Transaction::where('id', $request->input('id'))
                     ->update(['transaction_status'=>'completed',
-                                'acknowledgement_data'=>json_encode( $request->input('appointment')['acknowledgement_data']),
-                                'complete_time'=> date('Y-m-d H:i:s'),
-                                'review_status'=> 'pending'
+                                'acknowledgement_data'=>json_encode( $request->input('acknowledgement_data')),
+                                'complete_time'=> date('Y-m-d H:i:s')
                             ]);
 
         return response()->json(["result"=>"success"]);
@@ -367,13 +373,10 @@ class AppointmentController extends Controller{
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
 
-                $service_image = "";
-                if($service->service_type_id !== 0){
+                if($service->service_type_id !== 0)
                     $service_image = ServiceType::find($service->service_type_id)->service_picture;
-                }
-                else{
+                else
                     $service_image  = ServicePackage::find($service->service_package_id)->package_image;
-                }
 
                 $items[$key]['item_name']       = $service_name;
                 $items[$key]['item_image']      = $service_image;
@@ -394,6 +397,23 @@ class AppointmentController extends Controller{
         return $items;
     }
 
+    function acknowledgeAppointment(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $appointment = Transaction::find($request->input('id'));
+            $waiver_data = json_decode($appointment->waiver_data);
+            $acknowledgement_data = json_decode($appointment->acknowledgement_data);
+            $acknowledgement_data->signature = isset($waiver_data->signature)?$waiver_data->signature:null;
+            $appointment->acknowledgement_data = json_encode($acknowledgement_data);
+            $appointment->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
     function sendNotification(Request $request){
+
     }
 }

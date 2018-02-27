@@ -27,18 +27,18 @@ class BranchController extends Controller{
 
         foreach($data as $key=>$value){
 
-            $data[$key]['cluster_data']     = json_decode($value['cluster_data']);
-            $data[$key]['branch_pictures']     = json_decode($value['branch_pictures']);
-            $data[$key]['services']         = json_decode($value['services']);
-            $data[$key]['products']         = json_decode($value['products']);
-            $data[$key]['branch_data']      = json_decode($value['branch_data']);
-            $data[$key]['kiosk_data']      = json_decode($value['kiosk_data']);
-            $data[$key]['social_media_accounts']      = json_decode($value['social_media_accounts']);
-            $data[$key]['map_coordinates']  = json_decode($value['map_coordinates']);
-            $query_schedule                 = BranchSchedule::where('branch_id', $value['id'])
-                                                ->select('date_start','date_end','schedule_data','schedule_type')
-                                                ->orderBy('schedule_type')
-                                                ->get()->toArray();
+            $data[$key]['cluster_data']             = json_decode($value['cluster_data']);
+            $data[$key]['branch_pictures']          = json_decode($value['branch_pictures']);
+            $data[$key]['services']                 = json_decode($value['services']);
+            $data[$key]['products']                 = json_decode($value['products']);
+            $data[$key]['branch_data']              = json_decode($value['branch_data']);
+            $data[$key]['kiosk_data']               = json_decode($value['kiosk_data']);
+            $data[$key]['social_media_accounts']    = json_decode($value['social_media_accounts']);
+            $data[$key]['map_coordinates']          = json_decode($value['map_coordinates']);
+            $query_schedule                         = BranchSchedule::where('branch_id', $value['id'])
+                                                        ->select('date_start','date_end','schedule_data','schedule_type')
+                                                        ->orderBy('schedule_type')
+                                                        ->get()->toArray();
             $array_sched = array();
             foreach($query_schedule as $k=>$v){
 

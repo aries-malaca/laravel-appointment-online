@@ -207,6 +207,9 @@ Route::post('/kiosk/loginClient', 'KioskController@loginClient');
 Route::post('/kiosk/saveNewUser', 'KioskController@saveNewUser');
 //authenticate settings
 Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings');
+Route::post('/kiosk/checkDeviceIfRegistered', 'KioskController@checkDeviceIfRegistered');
+Route::post('/kiosk/searchClient', 'KioskController@searchClient');
+
 
 
 

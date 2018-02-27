@@ -447,6 +447,7 @@ class KioskController extends Controller{
         $branch_id  = $request->segment(4);
         $today      = date("Y-m-d");  
         $response   = array();  
+        $service_duration       = 0;
         $queryQueue = Transaction::where('transaction_status', "reserved")
                         ->leftJoin('users', 'users.id', '=', 'transactions.client_id')
                         ->where('branch_id', $branch_id)
@@ -457,7 +458,7 @@ class KioskController extends Controller{
         foreach($queryQueue as $key => $value){
             
 
-            $service_duration       = 0;
+           
             $full_name              = $value['first_name']." ".$value['last_name'];
             $transaction_id         = $value['id'];
             $transaction_type       = $value['transaction_type'];
@@ -470,7 +471,7 @@ class KioskController extends Controller{
             $booked_at              = $value['transaction_datetime'];
             $ifClientSigned         = "";
 
-            if($waiver_data['signature'] == null && ($booked_at != "APP")){
+            if($waiver_data == null){
                 $ifClientSigned = false;
 
             }
@@ -590,6 +591,9 @@ class KioskController extends Controller{
         // return response()->json($api, $api["status_code"]);
     }
 
+
+
+
     public function verifyUserSettings(Request $request){
         
         $myPassword     = $request->input("password");
@@ -602,6 +606,87 @@ class KioskController extends Controller{
            return response()->json(['result'=>'failed','error'=>"Sorry, the password is incorrect."], 400);
         }
         return response()->json(['result'=>'failed','error'=>"Sorry, no user found. "], 401);
+    }
+
+
+    public function checkDeviceIfRegistered(Request $request){
+        
+        $serial_no      = $request->input("serial_no");
+        $keyword        = '"serial_no":"'.$serial_no.'"';
+        $querySerial    = Branch::where("kiosk_data",'LIKE', '%' . $keyword . '%')
+                            ->select("id","branch_name")
+                            ->get()->toArray();
+        return response()->json(['result'=>'success','data'=>$querySerial],200);  
+
+
+        // $api            = $this->authenticateAPI();
+        // if($api['result'] === 'success'){
+        //     $accountPassword = $api["user"]["password"];
+        //     if(Hash::check($myPassword, $accountPassword)){
+        //         return response()->json(['result'=>'success','data'=>"Successfully found"],200);      
+        //     }
+        //    return response()->json(['result'=>'failed','error'=>"Sorry, the password is incorrect."], 400);
+        // }
+        // return response()->json(['result'=>'failed','error'=>"Sorry, no user found. "], 401);
+    }
+
+    public function searchClient(Request $request){
+        // Request $request
+        $client_name = $request->input("client_name");
+        $branch_id   = $request->input("branch_id");
+        $response    = array();
+        $client_name = "Michael";
+        $today       = date("Y-m-d");
+        // $queryUser   = DB::table("users as a")     
+                    
+        $queryUser = Transaction::join('users','transactions.client_id','=','users.id')
+                        ->where('users.is_client', 1)
+                        ->where("users.username","LIKE",'%'.$client_name.'%')
+                        ->where("transactions.transaction_datetime","LIKE", $today.'%')
+                        ->where("transactions.transaction_status","=","reserved")
+                        ->select('users.id as client_id','users.email','users.gender','users.username as full_name','users.birth_date','users.user_mobile','users.user_picture','users.email','transactions.id as transaction_id','transactions.reference_no','transactions.platform','transactions.waiver_data')
+                        ->orderBy('transactions.transaction_datetime', 'asc')
+                        ->get()->toArray();
+        foreach ($queryUser as $key => $value) {
+
+              $objectWaiver = json_decode($value["waiver_data"]);
+              $ifWaiverSigned = false;
+              if($objectWaiver->signature == null){
+                    $ifWaiverSigned = false;
+              }
+              else{
+                    $ifWaiverSigned = true;
+              }
+              $response[] = array(
+                        "transaction_id"    => $value["transaction_id"],
+                        "client_id"         => $value["client_id"],
+                        "client_user_id"    => 0,
+                        "full_name"         => $value["full_name"],
+                        "client_gender"     => $value["gender"],
+                        "client_bdate"      => $value["birth_date"],
+                        "premier_branch"    => "0",
+                        "client_mobile"     => $value["user_mobile"],
+                        "client_profile"    => $value["user_picture"],
+                        "client_email"      => $value["email"],
+                        "platform"          => $value["platform"],
+                        "reference_no"      => $value["reference_no"],
+                        "ifWaiverSigned"    => $ifWaiverSigned,
+                        "waiver_data"       => $objectWaiver,
+                        );  
+        }                
+        // $queryUser = $queryUser->where(function($query) use ($client_name){
+        //     $query->where('first_name', 'LIKE', '%' . $client_name . '%')
+        //             ->orWhere('middle_name', 'LIKE', '%' . $client_name . '%')
+        //             ->orWhere('last_name', 'LIKE', '%' . $client_name . '%')
+        //             ->orWhere('email', 'LIKE', '%' . $client_name . '%')
+        //             ->orWhere('user_address', 'LIKE', '%' . $client_name . '%')
+        //             ->orWhere('user_mobile', 'LIKE', '%' . $client_name . '%');
+        // });
+        // $queryUser = $queryUser
+        //                 ->orderBy('first_name')
+        //                 ->get()->toArray();
+
+        return response()->json($response,200);   
     }
 
 

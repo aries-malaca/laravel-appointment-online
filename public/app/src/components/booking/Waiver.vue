@@ -1,7 +1,8 @@
 <template>
-    <div style="height:400px;overflow:scroll">
-        <table class="table-bordered table-hover table">
-            <tbody>
+    <div>
+        <div style="height:400px;overflow:scroll" v-if="user.is_client===1">
+            <table class="table-bordered table-hover table">
+                <tbody>
                 <tr v-for="question,key in waiver.questions">
                     <td>
                         <p style="margin:0px 0px 5px">{{ question.question }}</p>
@@ -67,8 +68,12 @@
                         </div>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-info" v-else>
+            <b>Note:</b> Waiver will be signed by client.
+        </div>
     </div>
 </template>
 <script>
@@ -169,6 +174,11 @@
                 }
                 u.waiver.signature = signaturePad.toDataURL();
             });
+        },
+        computed:{
+            user(){
+                return this.$store.state.user;
+            }
         },
         watch:{
             questions:function(){

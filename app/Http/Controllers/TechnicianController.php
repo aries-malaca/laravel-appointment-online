@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Review;
 use Illuminate\Http\Request;
 use App\Technician;
 use App\TechnicianSchedule;
@@ -17,6 +18,17 @@ class TechnicianController extends Controller{
         foreach($data as $key=>$value){
             $data[$key]['technician_data'] = json_decode($value['technician_data']);
         }
+        return response()->json($data);
+    }
+
+    function getTechnician(Request $request){
+        $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
+                            ->where('technicians.id', $request->segment(4))
+                            ->select('cluster_name', 'technicians.*')
+                            ->orderBy('first_name')
+                            ->get()->first();
+        if(isset($data['technician_data'] ))
+            $data['technician_data'] = json_decode($data['technician_data']);
         return response()->json($data);
     }
 

@@ -6,7 +6,12 @@
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
                 </div> &nbsp;
-                <button v-if="user.is_client == 1" @click="toggle = !toggle" type="button" class="btn green-meadow">Book Now</button>
+
+                <span v-if="user.is_client == 1">
+                    <button @click="toggle = !toggle" v-if="needsToAcknowledge === undefined " type="button" class="btn green-meadow">Book Now</button>
+                    <button @click="acknowledgeModal" v-else type="button" class="btn green-meadow">Book Now</button>
+                </span>
+
                 <ul class="nav nav-tabs">
                     <li class="active">
                         <a href="#active-appointments" data-toggle="tab">Active Appointments</a>
@@ -52,6 +57,10 @@
             }
         },
         methods:{
+            acknowledgeModal:function() {
+                this.$store.commit('appointments/updateViewingID',this.needsToAcknowledge.id);
+                $("#appointment-modal").modal("show");
+            },
             getAppointments:function(){
                 let u = this;
 
@@ -129,6 +138,9 @@
             },
             appointment_history(){
                 return this.$store.state.appointments.appointment_history;
+            },
+            needsToAcknowledge(){
+                return this.$store.getters['appointments/needsToAcknowledge'];
             }
         },
         watch:{

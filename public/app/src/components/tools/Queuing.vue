@@ -284,7 +284,7 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-        <appointment-modal @refresh_list="refreshList"></appointment-modal>
+        <appointment-modal v-if="b!==null" @refresh_list="refreshList"></appointment-modal>
     </div>
 </template>
 
@@ -612,8 +612,10 @@
         },
         watch:{
             branch:function(){
-                this.getAppointments();
-                this.refresh();
+                if(this.branch !== null){
+                    this.getAppointments();
+                    this.refresh();
+                }
             },
             date:function(){
                 this.getAppointments();

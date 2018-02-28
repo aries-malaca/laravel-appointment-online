@@ -10,7 +10,7 @@ class ReviewController extends Controller{
         if($request->segment(4)=='branch')
             $data = $data->where('branch_id', $request->segment(5));
         elseif($request->segment(4) == 'technician')
-            $data = $data->where('branch_id', $request->segment(5));
+            $data = $data->where('technician_id', $request->segment(5));
 
         $data = $data->select('branch_id', 'technician_id', 'reviews.*')
                         ->orderBy('rating', 'DESC')

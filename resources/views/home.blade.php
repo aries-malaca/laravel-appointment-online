@@ -74,7 +74,7 @@
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>

@@ -34,7 +34,7 @@
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
-                                    <div class="col-md-12 profile-info" v-if="newTechnician.technician_data !== undefined">
+                                    <div class="col-md-8 profile-info" v-if="newTechnician.technician_data !== undefined">
                                         <h1 class="font-green sbold uppercase">{{ newTechnician.first_name }} {{ newTechnician.last_name }}</h1>
                                         <ul class="list-inline">
                                             <li>
@@ -71,8 +71,22 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                        <button type="button" @click="showEditModal" class="btn green-meadow">Edit Info</button>
+                                        <button type="button" v-if="newTechnician.cluster_data.ems_supported !== true" @click="showEditModal" class="btn green-meadow">Edit Info</button>
+                                        <button type="button" v-else @click="updateFromEMS($event)" class="btn btn-info">Update from EMS</button>
                                     </div>
+                                    <div class="col-md-4">
+                                        <div v-if="!isNaN(averageRating)">
+                                            <h4>Technician Rating</h4>
+                                            <star-rating :item-size="30"
+                                                         inactive-color="#e4eadb"
+                                                         active-color="#67d21e"
+                                                         :read-only="true"
+                                                         :increment="0.1"
+                                                         text-class="starer"
+                                                         v-model="averageRating"/>
+                                        </div>
+                                    </div>
+                                    <!--end col-md-4-->
                                 </div>
                             </div>
                         </div>
@@ -83,7 +97,7 @@
             </div>
             <loading v-else></loading>
         </div>
-        <technician-modal v-if="technician" operation="add"></technician-modal>
+        <technician-modal v-if="technician" operation="edit" @refreshTechnician="getTechnician"></technician-modal>
     </div>
 </template>
 
@@ -92,12 +106,13 @@
     import Schedules from './Schedules.vue';
     import TechnicianModal from '../TechnicianModal.vue';
     import Loading from '../../etc/Loading.vue';
+    import { StarRating } from 'vue-rate-it';
 
     export default {
         name: 'TechnicianProfile',
 
         props: ['with_back'],
-        components:{ Reviews, Schedules, TechnicianModal, Loading },
+        components:{ Reviews, Schedules, TechnicianModal, StarRating, Loading },
         data: function(){
             return {
                 newTechnician:{}
@@ -109,15 +124,22 @@
 
                 axios.get('/api/technician/getTechnician/' + this.technician.id)
                     .then(function (response) {
-                        if(response.data.id !== undefined)
+                        if(response.data.id !== undefined){
                             u.newTechnician = response.data;
+                            u.$store.commit('technicians/updateViewingTechnician', response.data);
+                        }
                     });
             },
             back:function(){
                 this.$store.commit('technicians/updateViewingTechnician', false);
+                this.$store.commit('technicians/updateEditingTechnician', false);
             },
             showEditModal(){
                 $("#add-technician-modal").modal("show");
+                this.$store.commit('technicians/updateEditingTechnician', this.newTechnician);
+            },
+            updateFromEMS(event){
+
             },
             moment:moment
         },
@@ -135,6 +157,9 @@
             },
             technician(){
                 return this.$store.state.technicians.viewing_technician;
+            },
+            averageRating(){
+                return this.$store.getters['technicians/averageRating'];
             }
         },
         mounted(){
@@ -142,3 +167,9 @@
         }
     }
 </script>
+<style>
+    .starer{
+        color: #67d21e;
+        font-size: 32px;
+    }
+</style>

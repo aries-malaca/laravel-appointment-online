@@ -306,10 +306,7 @@
                                     default:
                                         //text value lets test starts with
                                         return this.collect(row, col.field)
-                                            .toLowerCase()
-                                            .startsWith(
-                                                (this.columnFilters[col.field]).toLowerCase()
-                                            );
+                                            .toLowerCase().indexOf(this.columnFilters[col.field].toLowerCase()) !== -1;
                                 }
                             });
                         }

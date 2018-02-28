@@ -4,7 +4,8 @@ export const technicians = {
     state: {
         technicians: [],
         viewing_technician:false,
-        editing_technician:false
+        editing_technician:false,
+        reviews:[],
     },
     actions:{
         fetchTechnicians(context){
@@ -14,15 +15,27 @@ export const technicians = {
                 })
         }
     },
+    getters:{
+        averageRating(state){
+            var r = 0;
+            for(var x=0;x<state.reviews.length;x++)
+                r += state.reviews[x].rating;
+
+            return r/state.reviews.length;
+        }
+    },
     mutations:{
         updateTechnicians(state, technicians){
             state.technicians = technicians;
         },
-        updateEditingTechnician(state, branch){
-            state.editing_branch = branch;
+        updateEditingTechnician(state, technician){
+            state.editing_technician = technician;
         },
         updateViewingTechnician(state, technician){
             state.viewing_technician = technician;
+        },
+        updateReviews(state, reviews){
+            state.reviews = reviews;
         }
     }
 };

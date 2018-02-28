@@ -1,6 +1,5 @@
 <?php
 namespace App\Http\Controllers;
-use App\Review;
 use Illuminate\Http\Request;
 use App\Technician;
 use App\TechnicianSchedule;
@@ -9,6 +8,8 @@ use App\Branch;
 use App\BranchCluster;
 use DB;
 use DateTime;
+use Validator;
+
 class TechnicianController extends Controller{
     function getTechnicians(){
         $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
@@ -24,11 +25,13 @@ class TechnicianController extends Controller{
     function getTechnician(Request $request){
         $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
                             ->where('technicians.id', $request->segment(4))
-                            ->select('cluster_name', 'technicians.*')
+                            ->select('cluster_name', 'technicians.*', 'cluster_data')
                             ->orderBy('first_name')
                             ->get()->first();
-        if(isset($data['technician_data'] ))
+        if(isset($data['technician_data'] )) {
             $data['technician_data'] = json_decode($data['technician_data']);
+            $data['cluster_data'] = json_decode($data['cluster_data']);
+        }
         return response()->json($data);
     }
 
@@ -160,7 +163,6 @@ class TechnicianController extends Controller{
     }
 
     function compareExtract($list, $data, $i){
-
         foreach($list as $key=>$value ) {
             if ($value['id'] == $data['technician_id']) {
                 if ($value['type'] == 'SINGLE')
@@ -198,4 +200,71 @@ class TechnicianController extends Controller{
             }
         }
     }
+
+    function addTechnician(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'first_name'=>'required|max:255',
+                'last_name'=>'required|max:255',
+                'cluster_id'=>'required|not_in:0|numeric',
+                'employee_id'=>'required|max:255|unique:technicians,employee_id',
+                'technician_data.gender'=>'required|in:male,female',
+                'technician_data.birth_date'=>'required',
+                'technician_data.civil_status'=>'required|in:single,married',
+            ]);
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            $technician = new Technician;
+            $technician->first_name = $request->input('first_name');
+            $technician->last_name = $request->input('last_name');
+            $technician->middle_name = $request->input('middle_name');
+            $technician->cluster_id = $request->input('cluster_id');
+            $technician->employee_id = $request->input('employee_id');
+            $technician->technician_status = $request->input('technician_status');
+            $technician->is_active = 1;
+            $technician->technician_picture = 'no photo ' . $request->input('technician_data')['gender'] . '.jpg';
+            $technician->technician_data = json_encode($request->input('technician_data'));
+            $technician->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updateTechnician(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'first_name'=>'required|max:255',
+                'last_name'=>'required|max:255',
+                'cluster_id'=>'required|not_in:0|numeric',
+                'employee_id'=>'required|max:255|unique:technicians,employee_id,' . $request->input('id'),
+                'technician_data.gender'=>'required|in:male,female',
+                'technician_data.birth_date'=>'required',
+                'technician_data.civil_status'=>'required|in:single,married',
+            ]);
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            $technician = Technician::find($request->input('id'));
+            $technician->first_name = $request->input('first_name');
+            $technician->last_name = $request->input('last_name');
+            $technician->middle_name = $request->input('middle_name');
+            $technician->cluster_id = $request->input('cluster_id');
+            $technician->employee_id = $request->input('employee_id');
+            $technician->technician_status = $request->input('technician_status');
+            $technician->is_active = 1;
+            $technician->technician_picture = 'no photo ' . $request->input('technician_data')['gender'] . '.jpg';
+            $technician->technician_data = json_encode($request->input('technician_data'));
+            $technician->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
 }

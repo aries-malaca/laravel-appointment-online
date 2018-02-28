@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Transaction;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -252,5 +253,23 @@ class Controller extends BaseController{
             return env('APP_MAILING_DEV_ADDRESS');
 
         return $email;
+    }
+
+    function getLastSignature($client_id){
+        $transaction = Transaction::where('client_id', $client_id)
+                                    ->where('acknowledgement_data', 'LIKE', '%"signature":"data:%')
+                                    ->get()->first();
+
+        if(isset($transaction['id']))
+            return json_decode($transaction['acknowledgement_data'])->signature;
+
+        $transaction = Transaction::where('client_id', $client_id)
+                                    ->where('waiver_data', 'LIKE', '%"signature":"data:%')
+                                    ->get()->first();
+
+        if(isset($transaction['id']))
+            return json_decode($transaction['waiver_data'])->signature;
+
+        return null;
     }
 }

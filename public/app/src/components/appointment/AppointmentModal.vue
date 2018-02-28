@@ -215,44 +215,42 @@
                                             <button class="btn btn-info btn-xs btn-block" @click="acknowledgeAppointment">Proceed</button>
                                         </div>
                                     </div>
-                                    <div class="col-md-7" v-if="appointment.acknowledgement_data.signature !== null">
-                                        <h4 style="text-align:center">Feedback</h4>
-                                        <star-rating :item-size="30"
-                                                     inactive-color="#e4eadb"
-                                                     active-color="#67d21e"
-                                                     :read-only="appointment.client_id !== user.id"
-                                                     :increment="1"
-                                                     text-class="starer"
-                                                     v-model=" review.rating"/>
-                                        <div v-if="review_writing && user.id === appointment.client_id">
-                                            <textarea class="form-control" v-model="review.feedback" rows="5"></textarea>
-                                            <button class="btn btn-info btn-sm pull-right" style="margin-top:10px;" @click="submitReview">Submit Review</button>
-                                            <button class="btn btn-warning btn-sm pull-right" style="margin-top:10px; margin-right: 5px;" @click="cancelEditing">Cancel</button>
-                                            <br/>
-                                        </div>
-                                        <div v-else>
-                                            <div class="alert alert-info" v-if="appointment.review_date===null">
-                                                No feedback for this Transaction. <br/>
-                                                <a style="text-decoration: underline" v-if="user.id === appointment.client_id" @click="editReview">Write a review</a>
+                                    <div class="col-md-7" v-if="appointment.acknowledgement_data !== null">
+                                        <div v-if="appointment.acknowledgement_data.signature !== null ">
+                                            <h4 style="text-align:center">Feedback</h4>
+                                            <star-rating :item-size="30"
+                                                         inactive-color="#e4eadb"
+                                                         active-color="#67d21e"
+                                                         :read-only="appointment.client_id !== user.id || !review_writing"
+                                                         :increment="1"
+                                                         text-class="starer"
+                                                         v-model=" review.rating"/>
+                                            <div v-if="review_writing && user.id === appointment.client_id">
+                                                <textarea class="form-control" v-model="review.feedback" rows="5"></textarea>
+                                                <button class="btn btn-info btn-xs pull-right" style="margin-top:10px;" @click="submitReview">Submit Review</button>
+                                                <button class="btn btn-warning btn-xs pull-right" style="margin-top:10px; margin-right: 5px;" @click="cancelEditing">Cancel</button>
+                                                <br/>
                                             </div>
-                                            <div class="mt-comments" v-else>
-                                                <div class="mt-comment">
-                                                    <div class="mt-comment-img">
-                                                        <img style="height:40px" :src="'../../images/users/' + appointment.client_picture"> </div>
-                                                    <div class="mt-comment-body">
-                                                        <div class="mt-comment-info">
-                                                            <span class="mt-comment-author">{{ appointment.client_name }}</span>
-                                                            <span class="mt-comment-date">{{ moment(appointment.review_date).format("MM/DD/YYYY hh:mm A") }}</span>
-                                                        </div>
-                                                        <div class="mt-comment-text">
-                                                            {{ appointment.feedback }}
-                                                        </div>
-                                                        <div class="mt-comment-details">
-                                                            <ul class="mt-comment-actions" v-if="!review_writing && user.id === appointment.client_id">
-                                                                <li>
-                                                                    <a @click="editReview">Quick Edit</a>
-                                                                </li>
-                                                            </ul>
+                                            <div v-else>
+                                                <div class="alert alert-info" v-if="appointment.review_date===null">
+                                                    No feedback for this Transaction. <br/>
+                                                    <a style="text-decoration: underline" v-if="user.id === appointment.client_id" @click="editReview">Write a review</a>
+                                                </div>
+                                                <div class="mt-comments" v-else>
+                                                    <div class="mt-comment">
+                                                        <div class="mt-comment-img">
+                                                            <img style="height:48px" :src="'../../images/users/' + appointment.client_picture"> </div>
+                                                        <div class="mt-comment-body">
+                                                            <div class="mt-comment-info">
+                                                                <span class="mt-comment-author">{{ appointment.client_name }}</span>
+                                                                <span class="mt-comment-date">{{ moment(appointment.review_date).format("MM/DD/YYYY hh:mm A") }}</span>
+                                                            </div>
+                                                            <div class="mt-comment-text">
+                                                                {{ appointment.feedback }}
+                                                            </div>
+                                                            <div class="mt-comment-details" v-if="!review_writing && user.id === appointment.client_id">
+                                                                <a class="btn btn-info btn-xs" @click="editReview">Quick Edit</a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -321,6 +319,7 @@
                 acknowledgement_connection:false,
                 acknowledgement_signing:false,
                 signing_finished:false,
+                signing_accepted:true,
                 reasons:{
                     service:[
                         'Hair Length',
@@ -374,7 +373,6 @@
                     reason_text:''
                 };
                 $("#cancel-item-modal-"+this.id).modal("show");
-
             },
             makeRequest:function(url, method, data, success_callback, error_callback){
                 axios({url:url, method:method, data:data})
@@ -415,6 +413,7 @@
                         u.$socket.emit('refreshAppointment', u.appointment.id);
                         u.$socket.emit('unserveClient', u.appointment.branch_id, u.appointment.client_id);
                         u.$socket.emit('completeAppointment', u.appointment);
+                        toastr.success("Appointment successfully completed.");
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -442,6 +441,7 @@
             },
             emitSendData(){
                 let u = this;
+                this.signing_accepted = true;
                 if(this.device === ''){
                     toastr.error("Please select device first.");
                     return false;
@@ -451,9 +451,9 @@
                 this.$socket.emit('sendAppointmentData', this.appointment, this.device);
 
                 setTimeout(()=>{
-                    if(!u.acknowledgement_connection)
+                    if(!u.acknowledgement_connection && u.signing_accepted)
                         toastr.error("Device is Offline.");
-                },2000)
+                },3000)
             },
             emitRefreshKiosk(){
                 this.$socket.emit('refreshKiosk', this.device);
@@ -461,6 +461,7 @@
             cancelSigning(){
                 this.acknowledgement_connection = false;
                 this.acknowledgement_signing = false;
+                this.signing_accepted = false;
                 clearInterval(this.t);
                 this.$socket.emit('signingTimeout', this.appointment.id, this.device);
             },
@@ -566,6 +567,7 @@
                 if(data.appointment.id === u.appointment.id){
 
                     if(!data.accepted){
+                        u.signing_accepted = false;
                         toastr.error("Other person currently Booking an appointment in Kiosk, please try again later.");
                         return false;
                     }
@@ -580,9 +582,9 @@
 
                     u.t = setInterval(function(){
                         u.acknowledgement_timer --;
-                        if(u.acknowledgement_timer === 0){
+                        if(u.acknowledgement_timer === 0)
                             u.cancelSigning();
-                        }
+
                     },1000);
                 }
             };
@@ -633,9 +635,6 @@
 
     .starer{
         color: #67d21e;
-        font-size: 38px;
-    }
-    .vue-rate-it-rating{
-        margin-left: 20px;
+        font-size: 32px;
     }
 </style>

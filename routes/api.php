@@ -118,6 +118,8 @@ Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
+Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
+Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
 
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');

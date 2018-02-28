@@ -8,7 +8,6 @@
         name: 'Reviews',
         data(){
             return{
-                reviews:[]
             };
         },
         methods:{
@@ -16,7 +15,7 @@
                 let u = this;
                 axios.get('/api/review/getReviews/branch/'+ this.branch.id)
                     .then(function (response) {
-                        u.reviews = response.data;
+                        u.$store.commit('branches/updateReviews', response.data);
                     });
             }
         },

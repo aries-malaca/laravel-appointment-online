@@ -8,6 +8,7 @@ export const branches = {
         cities:[],
         regions:[],
         clusters:[],
+        reviews:[],
     },
     actions:{
         fetchBranches(context){
@@ -40,6 +41,13 @@ export const branches = {
             return state.branches.filter(function(item){
                 return item.is_active === 1;
             });
+        },
+        averageRating(state){
+            var r = 0;
+            for(var x=0;x<state.reviews.length;x++)
+                r += state.reviews[x].rating;
+
+            return r/state.reviews.length;
         }
     },
     mutations:{
@@ -60,6 +68,9 @@ export const branches = {
         },
         updateViewingBranch(state, branch){
             state.viewing_branch = branch;
+        },
+        updateReviews(state, reviews){
+            state.reviews = reviews;
         }
     }
 };

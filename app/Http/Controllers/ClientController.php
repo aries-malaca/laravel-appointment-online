@@ -69,6 +69,7 @@ class ClientController extends Controller{
             $client->first_name = $request->input('first_name');
             $client->middle_name = $request->input('middle_name');
             $client->last_name = $request->input('last_name');
+            $client->username = $request->input('first_name') .' '.$request->input('last_name');
             $client->user_address = $request->input('user_address');
             $client->user_mobile = $request->input('user_mobile');
             $client->birth_date = $request->input('birth_date');

@@ -15,7 +15,6 @@ use App\ProductGroup;
 
 class AppointmentController extends Controller{
     public function addAppointment(Request $request){
-
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'client' => 'required',
@@ -33,6 +32,11 @@ class AppointmentController extends Controller{
 
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
+
+            if($this->hasPendingAppointment($request->input('client')['value']))
+                return response()->json(['result'=>'failed','error'=> $api['user']['is_client'] === 1? 'You':'Client'.
+                                                    ' already have pending appointment.'], 400);
+
             $client_id = $api['user']['is_client'] === 1 ?  $client_id = $api['user']['id'] : $request->input('client')['value'];
 
             $appointment = new Transaction;
@@ -80,6 +84,12 @@ class AppointmentController extends Controller{
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function hasPendingAppointment($client_id){
+        return Transaction::where('client_id', $client_id)
+                            ->where('transaction_status', 'reserved')
+                            ->count() > 2;
     }
 
     function generateReferenceNo($branch_id){
@@ -403,7 +413,7 @@ class AppointmentController extends Controller{
             $appointment = Transaction::find($request->input('id'));
             $waiver_data = json_decode($appointment->waiver_data);
             $acknowledgement_data = json_decode($appointment->acknowledgement_data);
-            $acknowledgement_data->signature = isset($waiver_data->signature)?$waiver_data->signature:null;
+            $acknowledgement_data->signature = isset($waiver_data->signature)?$waiver_data->signature:$this->getLastSignature($api['user']['id']);
             $appointment->acknowledgement_data = json_encode($acknowledgement_data);
             $appointment->save();
 

@@ -130,6 +130,10 @@
                     u.$store.dispatch('services/fetchServices');
                 if(data.model === 'branches')
                     u.$store.dispatch('branches/fetchBranches');
+                if(data.model === 'products')
+                    u.$store.dispatch('products/fetchProducts');
+                if(data.model === 'technicians')
+                    u.$store.dispatch('technicians/fetchTechnicians');
             };
 
             Notification.requestPermission();

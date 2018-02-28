@@ -109,36 +109,23 @@
 
                             </div>
                             <div class="col-md-4">
-                                <div class="portlet sale-summary">
-                                    <div class="portlet-title">
-                                        <div class="caption font-red sbold"> Today's Transaction Summary </div>
-                                        <div class="tools">
-                                            <a class="reload" href="javascript:;"> </a>
-                                        </div>
-                                    </div>
-                                    <div class="portlet-body">
-                                        <ul class="list-unstyled">
-                                            <li>
-                                                <span class="sale-info"> PRODUCTS AVAILED </span>
-                                                <span class="sale-num"> 2377 </span>
-                                            </li>
-                                            <li>
-                                                <span class="sale-info"> SERVICES AVAILED </span>
-                                                <span class="sale-num"> 2377 </span>
-                                            </li>
-                                            <li>
-                                                <span class="sale-info"> TOTAL SALES </span>
-                                                <span class="sale-num"> 2377 </span>
-                                            </li>
-                                        </ul>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div id="map-single"></div>
-                                            </div>
-                                        </div>
-                                        <div class="alert alert-info">Directions: {{ newBranch.directions}} </div>
+                                <div v-if="!isNaN(averageRating)">
+                                    <h4>Branch Rating</h4>
+                                    <star-rating :item-size="25"
+                                                 inactive-color="#e4eadb"
+                                                 active-color="#67d21e"
+                                                 :read-only="true"
+                                                 :increment="0.1"
+                                                 text-class="starer"
+                                                 v-model="averageRating"/>
+                                </div>
+                                <h4>Map</h4>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="map-single"></div>
                                     </div>
                                 </div>
+                                <div class="alert alert-info">Directions: {{ newBranch.directions}} </div>
                             </div>
                             <!--end col-md-4-->
                         </div>
@@ -206,10 +193,12 @@
     import Reviews from "./Reviews.vue";
     import BranchModal from "../BranchModal.vue";
     import Loading from '../../etc/Loading.vue';
+    import { StarRating } from 'vue-rate-it';
+
     export default {
         name: 'BranchProfile',
         props:['with_back'],
-        components:{ UploadPictureModal, Loading, AppointmentsTable, Schedules, Reviews, BranchModal, AppointmentModal },
+        components:{ UploadPictureModal, Loading, AppointmentsTable, Schedules, Reviews, BranchModal, AppointmentModal, StarRating },
         data: function(){
            return {
                pictures:[],
@@ -361,6 +350,9 @@
             },
             branch(){
                 return this.$store.state.branches.viewing_branch;
+            },
+            averageRating(){
+                return this.$store.getters['branches/averageRating'];
             }
         }
     }
@@ -371,5 +363,9 @@
         margin:5px;
         height:250px;
         width:100%;
+    }
+    .starer{
+        color: #67d21e;
+        font-size: 32px;
     }
 </style>

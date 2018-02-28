@@ -371,7 +371,6 @@
                     $btn.button('reset');
                     $("#add-branch-modal").modal('hide');
                     u.$socket.emit('refreshModel', 'branches');
-                    u.getBranch();
                 },function(error){
                     XHRCatcher(error);
                     $btn.button('reset');

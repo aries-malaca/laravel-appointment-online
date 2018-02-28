@@ -1,5 +1,4 @@
 var XHRCatcher = function(error){
-    console.log(error);
     if(error.status === 500){
         if(error.response !== undefined){
             toastr.error(error.response.statusText);

@@ -558,6 +558,7 @@ class KioskController extends Controller{
             $appointment->transaction_data      = '{}';
             $appointment->waiver_data           = json_encode($arrayWaiver);
             $appointment->transaction_type      = $transaction_type;
+            $appointment->acknowledgement_data  = '{"signature":null}';
             $appointment->technician_id         = 0;
             $appointment->save();
 
@@ -617,29 +618,19 @@ class KioskController extends Controller{
                             ->select("id","branch_name")
                             ->get()->toArray();
         return response()->json(['result'=>'success','data'=>$querySerial],200);  
-
-
-        // $api            = $this->authenticateAPI();
-        // if($api['result'] === 'success'){
-        //     $accountPassword = $api["user"]["password"];
-        //     if(Hash::check($myPassword, $accountPassword)){
-        //         return response()->json(['result'=>'success','data'=>"Successfully found"],200);      
-        //     }
-        //    return response()->json(['result'=>'failed','error'=>"Sorry, the password is incorrect."], 400);
-        // }
-        // return response()->json(['result'=>'failed','error'=>"Sorry, no user found. "], 401);
     }
 
     public function searchClient(Request $request){
         // Request $request
         $client_name = $request->input("client_name");
         $branch_id   = $request->input("branch_id");
+        // $client_name = "Sherwin Fajardo";
+        // $branch_id   = 10;
         $response    = array();
-        $client_name = "Michael";
         $today       = date("Y-m-d");
-        // $queryUser   = DB::table("users as a")     
-                    
-        $queryUser = Transaction::join('users','transactions.client_id','=','users.id')
+        // $queryUser   = DB::table("users as a")
+        $queryUser = Transaction::leftjoin('users','transactions.client_id','=','users.id')
+                        
                         ->where('users.is_client', 1)
                         ->where("users.username","LIKE",'%'.$client_name.'%')
                         ->where("transactions.transaction_datetime","LIKE", $today.'%')
@@ -649,44 +640,54 @@ class KioskController extends Controller{
                         ->get()->toArray();
         foreach ($queryUser as $key => $value) {
 
-              $objectWaiver = json_decode($value["waiver_data"]);
-              $ifWaiverSigned = false;
-              if($objectWaiver->signature == null){
-                    $ifWaiverSigned = false;
-              }
-              else{
-                    $ifWaiverSigned = true;
-              }
-              $response[] = array(
-                        "transaction_id"    => $value["transaction_id"],
-                        "client_id"         => $value["client_id"],
-                        "client_user_id"    => 0,
-                        "full_name"         => $value["full_name"],
-                        "client_gender"     => $value["gender"],
-                        "client_bdate"      => $value["birth_date"],
-                        "premier_branch"    => "0",
-                        "client_mobile"     => $value["user_mobile"],
-                        "client_profile"    => $value["user_picture"],
-                        "client_email"      => $value["email"],
-                        "platform"          => $value["platform"],
-                        "reference_no"      => $value["reference_no"],
-                        "ifWaiverSigned"    => $ifWaiverSigned,
-                        "waiver_data"       => $objectWaiver,
+            $transaction_id = $value["transaction_id"];
+            $objectWaiver   = json_decode($value["waiver_data"]);
+            $ifWaiverSigned = false;
+            $arrayItems[]     = array();
+            if($objectWaiver->signature == null){
+                $ifWaiverSigned = false;
+            }
+            else{
+                $ifWaiverSigned = true;
+            }
+            $queryItems = TransactionItem::where("transaction_id",$transaction_id)
+                            ->where("item_status","reserved")
+                            ->select("item_id")
+                            ->get()->pluck("item_id")->toArray();
+            $response[] = array(
+                    "transaction_id"    => $value["transaction_id"],
+                    "client_id"         => $value["client_id"],
+                    "client_user_id"    => 0,
+                    "full_name"         => $value["full_name"],
+                    "client_gender"     => $value["gender"],
+                    "client_bdate"      => $value["birth_date"],
+                    "premier_branch"    => "0",
+                    "client_mobile"     => $value["user_mobile"],
+                    "client_profile"    => $value["user_picture"],
+                    "client_email"      => $value["email"],
+                    "platform"          => $value["platform"],
+                    "reference_no"      => $value["reference_no"],
+                    "ifWaiverSigned"    => $ifWaiverSigned,
+                    "waiver_data"       => $objectWaiver,
+                    "items"             => $queryItems
                         );  
         }                
-        // $queryUser = $queryUser->where(function($query) use ($client_name){
-        //     $query->where('first_name', 'LIKE', '%' . $client_name . '%')
-        //             ->orWhere('middle_name', 'LIKE', '%' . $client_name . '%')
-        //             ->orWhere('last_name', 'LIKE', '%' . $client_name . '%')
-        //             ->orWhere('email', 'LIKE', '%' . $client_name . '%')
-        //             ->orWhere('user_address', 'LIKE', '%' . $client_name . '%')
-        //             ->orWhere('user_mobile', 'LIKE', '%' . $client_name . '%');
-        // });
-        // $queryUser = $queryUser
-        //                 ->orderBy('first_name')
-        //                 ->get()->toArray();
-
         return response()->json($response,200);   
+    }
+
+    public function addWalkinWaiver(Request $request){
+
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            // $client_id      = $request->input("client_id");
+            $transaction_id = $request->input("transaction_id");
+            $objectWaiver   = $request->input("object_waiver");
+            $appointment                        = Transaction::find($transaction_id);
+            $appointment->waiver_data           = json_encode($objectWaiver);
+            $appointment->save();
+            return response()->json(['result'=>'success','data'=>"Waiver is successfully saved! Please wait to be called. "],200); 
+        }
+        return response()->json($api, $api["status_code"]);
     }
 
 

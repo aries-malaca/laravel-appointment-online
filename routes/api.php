@@ -101,6 +101,7 @@ Route::post('/appointment/serveAppointment', 'QueuingController@serveAppointment
 Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppointment');
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
+Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -114,6 +115,7 @@ Route::post('/schedule/addTechnicianShift', 'BranchController@addTechnicianShift
 Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicianShift');
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
+Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
@@ -160,6 +162,11 @@ Route::post('/promotion/updatePromotion', 'PromotionController@updatePromotion')
 Route::post('/promotion/addPerk', 'PromotionController@addPerk');
 Route::post('/promotion/updatePerk', 'PromotionController@updatePerk');
 Route::post('/promotion/uploadPicture', 'PromotionController@uploadPicture');
+
+
+Route::get('/review/getReviews/{by}/{id}', 'ReviewController@getReviews');
+Route::get('/review/getReview/{id}', 'ReviewController@getReview');
+Route::post('/review/submitReview', 'ReviewController@submitReview');
 
 
 //mobile
@@ -211,7 +218,7 @@ Route::post('/kiosk/saveNewUser', 'KioskController@saveNewUser');
 Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings');
 Route::post('/kiosk/checkDeviceIfRegistered', 'KioskController@checkDeviceIfRegistered');
 Route::post('/kiosk/searchClient', 'KioskController@searchClient');
-Route::post('/kiosk/addWaiver', 'KioskController@addWalkinWaiver');
+
 
 
 

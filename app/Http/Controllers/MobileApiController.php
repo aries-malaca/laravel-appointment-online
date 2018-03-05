@@ -812,8 +812,7 @@ class MobileApiController extends Controller{
             foreach ($queryBranchSchedule as $key => $value) {
                 $date_start     = $value["date_start"];
                 $date_end       = $value["date_end"];
-                $schedule_type  = $value["schedule_type"];
-
+                $schedule_type  = $value["schedule_type"];  
                 if($schedule_type == "regular"){
                     $arrayBranch[] = $value;
                 }

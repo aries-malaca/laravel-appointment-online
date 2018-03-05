@@ -116,8 +116,6 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
-Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
-Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
 
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
@@ -195,13 +193,14 @@ Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTra
 
 //get appointment & events by start and end month
 Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
-
+//get branch schedules
+Route::get('/mobile/getBranchSchedules/{branch_id}/{date}', 'MobileApiController@getBranchSchedules');
 
 //queuing(short version)
 Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
 
 //Kiosk Configuration (Lay Bare)
-Route::get('/kiosk/checkLoggedInToken', 'KioskController@checkLoggedInToken');
+Route::get('/kiosk/checkLoggedInToken/{branch_id}', 'KioskController@checkLoggedInToken');
 Route::post('/kiosk/getClientRecords', 'KioskController@getClientRecords');
 Route::post('/kiosk/addAppointments', 'KioskController@addAppointments');
 Route::post('/kiosk/loginClient', 'KioskController@loginClient');

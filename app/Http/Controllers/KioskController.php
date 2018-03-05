@@ -14,6 +14,7 @@ use Validator;
 use Hash;
 use ImageOptimizer;
 use App\Transaction;
+use App\BranchSchedule;
 use App\TransactionItem;
 use Facebook\Facebook;
 use App\Service;
@@ -30,12 +31,15 @@ class KioskController extends Controller{
 
     public function login(Request $request){
 
-        $response = array();
-        $validator = Validator::make($request->all(), [
+        $date_today = date("Y-m-d");
+        $dayOfWeek  = idate("w",strtotime($date_today));
+        $response   = array();
+        $validator  = Validator::make($request->all(), [
             'email'     => 'required|max:255',
             'password'  => 'required|max:255',
         ]);
 
+        $serial_no              = $request['device_serial'];
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
@@ -53,6 +57,7 @@ class KioskController extends Controller{
                     return response()->json(["result"=>"failed","error"=>"Sorry, your account is not available in Kiosk System."],400);
                 }
                 else{
+
                     $decodeUserData         = json_decode($u['user_data'],true);
                     $branch_id1             = $decodeUserData['branches'];
                     $branch_id              = $branch_id1[0];
@@ -64,66 +69,102 @@ class KioskController extends Controller{
                        return response()->json(["result"=>"failed","error"=>"Your home branch is not yet set. Please contact our IT Staff @itdev@lay-bare.com to set your home branch. "],400);
                     }
                     else{
-                         if($request->input('device') === null){
-                            $this->registerToken($u['id'], $token);
-                        }
-                        else{
-                            $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
-                        }
-                        $branchQuery            = Branch::where("id",$branch_id)->get()->first();
-                        $cluster_id             = $branchQuery["cluster_id"];
-                        $clusterQuery           = BranchCluster::where("id",$cluster_id)->get()->first();
-                        $arrayServiceQuery      = Service::whereIn("id",json_decode($clusterQuery["services"],true))
-                                                    ->get()
-                                                    ->toArray();
-                        foreach($arrayServiceQuery as $key => $value){
-                            $service_package_id = $value["service_package_id"];
-                            $service_type_id    = $value["service_type_id"];
-                            $service_id         = $value["id"];
-                            if($service_package_id == 0){
-                                $query = ServiceType::where("id",$service_type_id)->select("service_name","service_description","service_picture")->get() ->first();
-                                $arrayServiceQuery[$key]["service_name"]        = $query["service_name"];
-                                $arrayServiceQuery[$key]["service_description"] = $query["service_description"];
-                                $arrayServiceQuery[$key]["service_picture"]     = "services/".$query["service_picture"];
+
+                        $branchQuery    = Branch::where("id",$branch_id)->get()->first();   
+                        $arrayKiosk     = json_decode($branchQuery["kiosk_data"],true);
+
+                        if($this->validateIfDeviceIsRegistered($arrayKiosk,$serial_no) == true){
+ 
+                            $cluster_id             = $branchQuery["cluster_id"];
+                            $clusterQuery           = BranchCluster::where("id",$cluster_id)->get()->first();
+                            $arrayServiceQuery      = Service::whereIn("id",json_decode($clusterQuery["services"],true))->get()->toArray();
+                            
+
+                            if($request->input('device') === null){
+                                $this->registerToken($u['id'], $token);
                             }
                             else{
-                                $service_description = "";
-                                $query = ServicePackage::where("id",$service_package_id)->select("package_name as service_name","package_image as service_picture","package_services")->get()->first();
-                                $service_description = implode(', ',ServiceType::whereIn('id', json_decode($query['package_services']))->pluck('service_name')->toArray());
-                                $arrayServiceQuery[$key]["service_name"]        = $query["service_name"];
-                                $arrayServiceQuery[$key]["package_services"]    = json_decode($query['package_services']);
-                                $arrayServiceQuery[$key]["service_description"] = $service_description;
-                                $arrayServiceQuery[$key]["service_picture"]     = "services/".$query["service_picture"];                                                
+                                $this->registerToken($u['id'], $token, $request->input('device'), $request->input('device_info'));
                             }
-                        }
-                        $arrayProductQuery =  Product::whereIn("id",json_decode($clusterQuery["products"],true))->get()->toArray();
-                        foreach($arrayProductQuery as $key => $value){  
-                            $product_group_id  = $value["product_group_id"];
-                            $query             = ProductGroup::where("id",$product_group_id)
-                                                        ->select("product_group_name","product_description","product_picture")
-                                                        ->get()
-                                                        ->first();
-                            $arrayProductQuery[$key]["product_name"]        = $query["product_group_name"];
-                            $arrayProductQuery[$key]["product_description"] = $query["product_description"];
-                            $arrayProductQuery[$key]["product_picture"]     = "products/".$query["product_picture"];                                                    
-                        }
+                           
+                            foreach($arrayServiceQuery as $key => $value){
+                                $service_package_id = $value["service_package_id"];
+                                $service_type_id    = $value["service_type_id"];
+                                $service_id         = $value["id"];
+                                if($service_package_id == 0){
+                                    $query = ServiceType::where("id",$service_type_id)->select("service_name","service_description","service_picture")->get() ->first();
+                                    $arrayServiceQuery[$key]["service_name"]        = $query["service_name"];
+                                    $arrayServiceQuery[$key]["service_description"] = $query["service_description"];
+                                    $arrayServiceQuery[$key]["service_picture"]     = "services/".$query["service_picture"];
+                                }
+                                else{
+                                    $service_description = "";
+                                    $query = ServicePackage::where("id",$service_package_id)->select("package_name as service_name","package_image as service_picture","package_services")->get()->first();
+                                    $service_description = implode(', ',ServiceType::whereIn('id', json_decode($query['package_services']))->pluck('service_name')->toArray());
+                                    $arrayServiceQuery[$key]["service_name"]        = $query["service_name"];
+                                    $arrayServiceQuery[$key]["package_services"]    = json_decode($query['package_services']);
+                                    $arrayServiceQuery[$key]["service_description"] = $service_description;
+                                    $arrayServiceQuery[$key]["service_picture"]     = "services/".$query["service_picture"];                                                
+                                }
+                            }
+                            $arrayProductQuery =  Product::whereIn("id",json_decode($clusterQuery["products"],true))->get()->toArray();
+                            foreach($arrayProductQuery as $key => $value){  
+                                $product_group_id  = $value["product_group_id"];
+                                $query             = ProductGroup::where("id",$product_group_id)
+                                                            ->select("product_group_name","product_description","product_picture")
+                                                            ->get()
+                                                            ->first();
+                                $arrayProductQuery[$key]["product_name"]        = $query["product_group_name"];
+                                $arrayProductQuery[$key]["product_description"] = $query["product_description"];
+                                $arrayProductQuery[$key]["product_picture"]     = "products/".$query["product_picture"];                                                    
+                            }
 
-                        $arrayWaiver = WaiverQuestion::get()->toArray();
-				        foreach($arrayWaiver as $key=>$value){
-				            $arrayWaiver[$key]['question_data'] = json_decode($value['question_data']);
-				        }                     
-                        $queryWallpaper = Config::where("config_name","=","KIOSK_MAIN_IMAGE")
-                                                ->select("config_value")
-                                                ->get()->first();
+                            $arrayWaiver = WaiverQuestion::get()->toArray();
+                            foreach($arrayWaiver as $key=>$value){
+                                $arrayWaiver[$key]['question_data'] = json_decode($value['question_data']);
+                            }                     
+                            
+                            $querySchedule  = BranchSchedule::where("branch_id",$branch_id)->orderBy("id","desc")->get()->toArray();
 
-                        $response['services'] 	= $arrayServiceQuery;
-                        $response['products'] 	= $arrayProductQuery;
-                        $response["branches"] 	= $branchQuery;
-                        $response["waivers"] 	= $arrayWaiver;
-                        $response['wallpaper']  = $queryWallpaper->config_value;
-                        $response["user"]     	= $u;
-                        $response['token']    	= $token; 
-                        return response()->json($response);
+                            foreach($querySchedule as $key => $value) {
+                                $schedule_type  = $value["schedule_type"];
+                                $date_start     = $value["date_start"];
+                                $date_end       = $value["date_end"];
+                                $arraySchedData = json_decode($value['schedule_data']);
+
+                                if($schedule_type == "regular"){
+                                    $arraySchedule = array(
+                                                    "start" => $date_today." ".$arraySchedData[$dayOfWeek]->start,
+                                                    "end"   => $date_today." ".$arraySchedData[$dayOfWeek]->end,
+                                                    "type"  => $schedule_type,
+                                                        );
+                                    break;
+                                }
+                                else{
+                                   if(strtotime(date($date_today)) >= strtotime(date($date_start)) && strtotime(date($date_today)) <= strtotime(date($date_end))){
+                                        $arraySchedule   = array(
+                                                    "start" => $date_today." ".$arraySchedData[$dayOfWeek]->start,
+                                                    "end"   => $date_today." ".$arraySchedData[$dayOfWeek]->end,
+                                                    "type"  => $schedule_type,
+                                                        );
+                                        break;
+                                    }
+                                }
+                            }
+                            $response['services']        = $arrayServiceQuery;
+                            $response['products']        = $arrayProductQuery;
+                            $response["branches"]        = $branchQuery;
+                            $response["waivers"]         = $arrayWaiver;
+                            $response['branch_schedules']= $arraySchedule;
+                            $response["user"]            = $u;
+                            $response['token']           = $token; 
+                            return response()->json($response);
+
+                        }   
+                        else{
+                            return response()->json(["result"=>"failed","error" => "Sorry, this device is not registered to your Account & Branch. Please see your Kiosk device details at Lay Bare Online.\n\nDashboard->Branches->Edit Branch->Branch Kiosks\n\nCheck the serial code & Alias"],400);
+                            // return response()->json(["result"=>"failed","error"=>"Sorry, credentials is already exist. Please contact Branch Receptionist / Supervisor to search your account"],400); 
+                        }
                     }
                 }
             }
@@ -181,13 +222,46 @@ class KioskController extends Controller{
     }
 
 
-    public function checkLoggedInToken(){
-        $api = $this->authenticateAPI();
+    public function checkLoggedInToken(Request $request){
+        
+        $date_today     = date("Y-m-d");
+        $dayOfWeek      = idate("w",strtotime($date_today));
+        $branch_id      = $request->segment(4);
+        $api            = $this->authenticateAPI();
+        $arraySchedule  = array();
         if($api['result'] === 'success'){
-            $queryWallpaper = Config::where("config_name","=","KIOSK_MAIN_IMAGE")
-                                    ->select("config_value")
-                                    ->get()->first();
-           return response()->json(["data"=>$api["user"], "result"=>'success',"wallpaper"=> $queryWallpaper->config_value]);
+        
+            $querySchedule  = BranchSchedule::where("branch_id",$branch_id)->orderBy("id","desc")->get()->toArray();
+            foreach($querySchedule as $key => $value) {
+                $schedule_type  = $value["schedule_type"];
+                $date_start     = $value["date_start"];
+                $date_end       = $value["date_end"];
+                $arraySchedData = json_decode($value['schedule_data']);
+
+                if($schedule_type == "regular"){
+                    $arraySchedule = array(
+                                    "start" => $date_today." ".$arraySchedData[$dayOfWeek]->start,
+                                    "end"   => $date_today." ".$arraySchedData[$dayOfWeek]->end,
+                                    "type"  => $schedule_type,
+                                        );
+                    break;
+                }
+                else{
+                   if(strtotime(date($date_today)) >= strtotime(date($date_start)) && strtotime(date($date_today)) <= strtotime(date($date_end))){
+                        $arraySchedule   = array(
+                                    "start" => $date_today." ".$arraySchedData[$dayOfWeek]->start,
+                                    "end"   => $date_today." ".$arraySchedData[$dayOfWeek]->end,
+                                    "type"  => $schedule_type,
+                                        );
+                        break;
+                    }
+                }
+            }                            
+           return response()->json([
+                            "data"              => $api["user"],
+                            "branch_schedules"  => $arraySchedule, 
+                            "result"            => 'success'
+                        ]);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -549,7 +623,7 @@ class KioskController extends Controller{
             $appointment->reference_no          = $reference_no;
             $appointment->branch_id             = $branch_id;
             $appointment->client_id             = $client_id;
-            $appointment->transaction_datetime  = date('Y-m-d H:i:s',strtotime( $this->getFirstServiceTime($arrayServices)));
+            $appointment->transaction_datetime  = date('Y-m-d H:i:s',strtotime($this->getFirstServiceTime($arrayServices)));
             $appointment->transaction_status    = 'reserved';
             $appointment->platform              = $platform;
             $appointment->booked_by_name        = $full_name;
@@ -709,13 +783,23 @@ class KioskController extends Controller{
     }
 
     function getFirstServiceTime($services){
+
         foreach($services as $key => $value){
             if($key === 0)
                 return $value['start'];
         }
-        return '00:00:00';
+        return date('Y-m-d') . ' 00:00:00';
     }
 
+    public function validateIfDeviceIsRegistered($arrayKiosk,$serial_no){
+        foreach ($arrayKiosk as $key => $valKiosk) {
+            $branchSerial = $valKiosk["serial_no"];
+            if($branchSerial == $serial_no){
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 

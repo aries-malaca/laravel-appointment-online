@@ -18,6 +18,7 @@ use App\PremierLoyaltyCard;
 use App\Transaction;
 use App\TransactionItem;
 use App\Technician;
+use App\TechnicianSchedule;
 use DateTime;
 use Validator;
 use Hash;
@@ -92,7 +93,7 @@ class MobileApiController extends Controller{
                         $array_sched[] = $query_schedule[$k];
                     }
                     else{
-                        if(date($date_today) >= date($date_start) && date($date_today) <= date($date_end)){
+                         if(strtotime(date($date_today)) >= strtotime(date($date_start)) && strtotime(date($date_today)) <= strtotime(date($date_end))){
                             $query_schedule[$k]['schedule_data'] = json_decode($v['schedule_data']);
                             $array_sched[] = $query_schedule[$k];
                         }
@@ -118,7 +119,7 @@ class MobileApiController extends Controller{
                 }
             }
         }
-        if( (double)$this->getDataVersions("APP_PACKAGE_VERSION") > (double)$version_packages) {
+        if((double)$this->getDataVersions("APP_PACKAGE_VERSION") > (double)$version_packages) {
         
             $version_packages   = (double)$this->getDataVersions("APP_PACKAGE_VERSION");
             $arrayPackage       = ServicePackage::where('is_active', 1)->get()->toArray();
@@ -146,7 +147,6 @@ class MobileApiController extends Controller{
         }
         if( (double)$this->getDataVersions("APP_COMMERCIAL_VERSION")  > (double)$version_commercial) {
             $version_commercial   = (double)$this->getDataVersions("APP_COMMERCIAL_VERSION");
-               
         }
      
         $response['arrayBanner']             = $arrayBanner;
@@ -799,6 +799,133 @@ class MobileApiController extends Controller{
             return response()->json($api, $api["status_code"]);
         }
     }
+
+    public function getBranchSchedules(Request $request){
+        $branch_id      = $request->segment(4);
+        $app_reserved   = $request->segment(5);
+        $response       = array();
+        $arrayBranch  = array();
+        $queryBranchSchedule = BranchSchedule::where("branch_id",$branch_id)
+                                ->orderBy('created_at','desc')->get()->toArray();    
+        $technicians         = $this->getScheduledTechnicians($branch_id, $app_reserved);
+        if($queryBranchSchedule){
+            foreach ($queryBranchSchedule as $key => $value) {
+                $date_start     = $value["date_start"];
+                $date_end       = $value["date_end"];
+                $schedule_type  = $value["schedule_type"];
+
+                if($schedule_type == "regular"){
+                    $arrayBranch[] = $value;
+                }
+                if(strtotime($app_reserved) >= strtotime($date_start) && strtotime($app_reserved) <= strtotime($date_start) && $schedule_type != "regular"){
+                    $arrayBranch[] = $value;
+                }
+            }
+            $response["branch"]     =   $arrayBranch;
+            $response["technician"] =   $technicians;
+            return response()->json($response);
+        }
+        else{
+            return response()->json(["result"=>"failed","error"=>"Failed to load"],400);
+        }
+    }
+
+
+    //get Technician Schedule    
+    function getScheduledTechnicians($branch, $date){
+        $technicians = array();
+
+        $find = TechnicianSchedule::where('branch_id', $branch)
+                                    ->where('date_start','<=', $date)
+                                    ->where('date_end','>=', $date .' 23:59:59')
+                                    ->get()->toArray();
+
+        foreach($find as $key=>$value){
+            if($e = $this->compareExtract($technicians, $value, idate('w', strtotime($date)))){
+                $tech               = Technician::find($value['technician_id']);
+                $name               = $tech->first_name .' ' . $tech->last_name;
+                $tech_id            = $value['technician_id'];
+                $transaction_status = "reserved";
+                $array_reserved_sched     = array();
+
+                $getAppointment = DB::table("transaction_items as a")
+                                        ->leftJoin("transactions as b","a.transaction_id","=","b.id")
+                                        ->where("b.technician_id","=",$tech_id)
+                                        ->where("b.transaction_datetime",'<=',$date.' 23:59:59')
+                                        ->where("b.transaction_status","=",$transaction_status)
+                                        ->where("a.item_status","=",$transaction_status)
+                                        ->where("a.item_type","=","service")
+                                        ->select("a.book_start_time","a.book_end_time")
+                                        ->get();
+
+               foreach ($getAppointment as $key) {
+                    $converted_start = new DateTime($key->book_start_time);
+                    $converted_end   = new DateTime($key->book_end_time);
+                    
+                    $array_reserved_sched[] = array(
+                                            "sched_appointment_start"    => $converted_start->format("H:i"),
+                                            "sched_appointment_end"      => $converted_end->format("H:i")
+                                                );
+               }                         
+                                        
+                if($e['schedule'] != '00:00') {
+                    $object = array(
+                        "employee_id" => $tech['employee_id'],
+                        "id" => $tech_id,
+                        "schedule" =>
+                            array("start" => $e['schedule'],
+                                "end" => date("H:i", strtotime(date('Y-m-d ') . ' ' . $e['schedule']) + 32400),
+                            ),
+                        "name" => $name,
+                        "type" => $e['type'],
+                        "appointment" => $array_reserved_sched
+                    );
+
+                    $found_key = $this->findRangeSchedule($technicians, $tech_id, $e['type']);
+
+                    if ($found_key === false)
+                        $technicians[] = $object;
+                    else
+                        $technicians[$found_key] = $object;
+                }
+
+            }
+        }
+
+        return $technicians;
+    }
+
+    function findRangeSchedule($array, $tech_id, $type){
+        foreach($array as $key=>$value){
+            if($tech_id === $value['id']){
+                if($value['type']==='RANGE' && $type === 'SINGLE')
+                    return $key;
+                elseif($value['type']==='RANGE')
+                    return $key;
+            }
+        }
+        return false;
+    }
+
+    function compareExtract($list, $data, $i){
+        foreach($list as $key=>$value ) {
+            if ($value['id'] == $data['technician_id']) {
+                if ($value['type'] == 'SINGLE')
+                    return false;
+                else
+                    if ($data['schedule_type'] == 'RANGE')
+                        return false;
+            }
+        }
+
+        $schedule = json_decode($data['schedule_data']);
+
+        return is_array($schedule)?array("schedule"=>$schedule[$i],"type"=>"RANGE"): array("schedule"=>$schedule,"type"=>"SINGLE");
+    }
+
+
+
+
 
      //get appointment Items
     function getAppointmentItems($id){

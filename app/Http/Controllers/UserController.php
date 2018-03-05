@@ -84,6 +84,15 @@ class UserController extends Controller{
 
                 $plc_request = PlcReviewRequest::where('client_id', $api['user']['id'])
                                                 ->get()->first();
+
+                $eee = BranchSchedule::where('branch_id', $b->id)
+                                    ->orderBy('schedule_type')
+                                    ->get()->toArray();
+
+                foreach($eee as $key=>$value)
+                    $eee[$key]['schedule_data'] = json_decode($value['schedule_data']);
+
+
                 $api['user']['review_request'] = isset($plc_request['id'])?$plc_request['status']:false;
                 $api['user']['branch'] = [
                                 "value"=>$user_data['home_branch'],
@@ -91,9 +100,9 @@ class UserController extends Controller{
                                 "branch_data"=> json_decode($b['branch_data']),
                                 "branch_address"=> $b['branch_address'],
                                 "rooms"=> isset($b->rooms_count)?$b->rooms_count:0,
-                                "schedules"=> BranchSchedule::where('branch_id', $b->id)
-                                                            ->orderBy('schedule_type')
-                                                            ->get()->toArray(),
+                                "schedules"=> $eee,
+                                "schedules_original"=> $eee,
+
                                 "services"=>$services,
                                 "products"=>$products,
                         ];

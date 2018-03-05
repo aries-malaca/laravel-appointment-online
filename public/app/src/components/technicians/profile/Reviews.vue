@@ -1,5 +1,13 @@
 <template>
-    <div class="tab-pane active" id="reviews">
+    <div class="tab-pane" id="reviews">
+        <div class="row">
+            <div class="col-md-3">
+
+            </div>
+            <div class="col-md-9">
+
+            </div>
+        </div>
     </div>
 </template>
 <script>

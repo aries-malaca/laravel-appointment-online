@@ -126,6 +126,13 @@
                                     </div>
                                 </div>
                                 <div class="alert alert-info">Directions: {{ newBranch.directions}} </div>
+                                <div v-if="technicians.length>0">
+                                    <b>Technicians: </b>
+                                    <ul>
+                                        <li v-for="technician in technicians">{{ technician.name }} </li>
+                                    </ul>
+                                </div>
+                                <h4></h4>
                             </div>
                             <!--end col-md-4-->
                         </div>
@@ -204,7 +211,8 @@
                pictures:[],
                appointment_history:[],
                active_appointments:[],
-               newBranch:{}
+               newBranch:{},
+               technicians:[]
            }
         },
         methods:{
@@ -245,6 +253,13 @@
                             },1000);
                             u.$store.commit('branches/updateViewingBranch', u.newBranch);
                         }
+                    });
+            },
+            getTechnicians:function(){
+                let u = this;
+                axios.get('/api/technician/getBranchTechnicians/'+this.branch.id + '/' + moment().format("YYYY-MM-DD"))
+                    .then(function (response) {
+                        u.technicians = response.data;
                     });
             },
             addPicture:function(){
@@ -329,6 +344,7 @@
                 this.getAppointments();
                 this.getAppointmentHistory();
                 this.getBranch();
+                this.getTechnicians();
             }
 
             this.$options.sockets.refreshAppointments = function(data){
@@ -361,7 +377,7 @@
 <style>
     #map-single{
         margin:5px;
-        height:250px;
+        height:200px;
         width:100%;
     }
     .starer{

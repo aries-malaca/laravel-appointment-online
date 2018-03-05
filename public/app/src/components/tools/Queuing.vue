@@ -525,7 +525,7 @@
                             label:item.branch_name,
                             value:item.id,
                             rooms:item.rooms_count,
-                            schedules:item.schedules,
+                            schedules:item.schedules_original,
                             branch_data:item.branch_data,
                             products:item.products,
                             services:item.services,

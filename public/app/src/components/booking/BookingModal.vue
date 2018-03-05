@@ -574,7 +574,7 @@
                                     rooms:this.branches[x].rooms_count,
                                     products:this.branches[x].products,
                                     services:this.branches[x].services,
-                                    schedules:this.branches[x].schedules,
+                                    schedules:this.branches[x].schedules_original,
                                     branch_data:this.branches[x].branch_data,
                                     branch_address:this.branches[x].branch_address
                                  });

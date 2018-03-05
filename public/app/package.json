@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "0.16.2",
+    "babel-plugin-transform-runtime": "^6.0.0",
     "croppie": "^2.5.0",
     "vm-editor": "^0.1.6",
     "vue": "^2.5.13",
@@ -24,8 +25,7 @@
     "vue2-google-maps": "^0.8.2",
     "vue2-timepicker": "^0.1.4",
     "vuejs-datepicker": "^0.9.14",
-    "vuex": "^3.0.1",
-    "babel-plugin-transform-runtime": "^6.0.0"
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.0.0",

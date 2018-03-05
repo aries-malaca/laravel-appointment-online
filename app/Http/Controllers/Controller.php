@@ -270,6 +270,6 @@ class Controller extends BaseController{
         if(isset($transaction['id']))
             return json_decode($transaction['waiver_data'])->signature;
 
-        return null;
+        return 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('images/na.png')));
     }
 }

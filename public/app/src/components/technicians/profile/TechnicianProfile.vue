@@ -11,13 +11,13 @@
                 </div>
                 <ul class="nav nav-tabs">
                     <li class="active">
-                        <a href="#info" data-toggle="tab">Technician Info</a>
+                        <a href="#info" @click="tab=1" data-toggle="tab">Technician Info</a>
                     </li>
                     <li>
-                        <a href="#schedules" data-toggle="tab">Schedules</a>
+                        <a href="#schedules" @click="tab=2" data-toggle="tab">Schedules</a>
                     </li>
                     <li>
-                        <a href="#reviews" data-toggle="tab">Reviews</a>
+                        <a href="#reviews" @click="tab=3" data-toggle="tab">Reviews</a>
                     </li>
                 </ul>
             </div>
@@ -64,10 +64,13 @@
                                                     <td> Position: </td>
                                                     <td> {{ newTechnician.technician_data.position_name }} </td>
                                                 </tr>
-
                                                 <tr>
-                                                    <td> Cluster:</td>
+                                                    <td> Cluster: </td>
                                                     <td> {{ newTechnician.cluster_name }} </td>
+                                                </tr>
+                                                <tr v-if="newTechnician.branch">
+                                                    <td> Current Branch: </td>
+                                                    <td> {{ newTechnician.branch.branch_name }} </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -91,7 +94,7 @@
                             </div>
                         </div>
                     </div>
-                    <schedules></schedules>
+                    <schedules :tab="tab"></schedules>
                     <reviews></reviews>
                 </div>
             </div>
@@ -115,7 +118,8 @@
         components:{ Reviews, Schedules, TechnicianModal, StarRating, Loading },
         data: function(){
             return {
-                newTechnician:{}
+                newTechnician:{},
+                tab:1
             }
         },
         methods:{

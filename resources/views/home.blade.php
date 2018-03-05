@@ -24,12 +24,11 @@
         <link href="../../theme/layouts/layout4/css/themes/lbo.css" rel="stylesheet" type="text/css" id="style_color" />
         <link href="../../css/custom.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
-
+        <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/socicon/socicon.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
-        <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile-2.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap-sweetalert/sweetalert.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/portfolio.min.css" rel="stylesheet" type="text/css" />
@@ -49,6 +48,7 @@
     <![endif]-->
     <!-- BEGIN CORE PLUGINS -->
     <script src="../../theme/global/plugins/jquery.min.js" type="text/javascript"></script>
+    <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/js.cookie.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
@@ -73,6 +73,7 @@
     <script src="../../theme/global/plugins/bootstrap-tabdrop/js/bootstrap-tabdrop.js" type="text/javascript"></script>
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js" type="text/javascript"></script>
+    <script src="../../theme/global/plugins/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>

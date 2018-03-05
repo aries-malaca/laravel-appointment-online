@@ -28,6 +28,7 @@
                         { label: 'Mobile', field: 'technician_data.mobile', filterable: true},
                         { label: 'Address', field: 'technician_data.address', filterable: true},
                         { label: 'Cluster', field: 'cluster_name', filterable: true},
+                        { label: 'Branch', field: 'branch_name', filterable: true},
                     ],
                     rowClicked: this.viewTechnician,
                 },
@@ -49,6 +50,8 @@
                 return this.$store.state.technicians.technicians.map((technician)=>{
                     technician.picture_html = '<img class="img-circle" style="height:35px" src="images/technicians/'+ technician.technician_picture +'" />';
                     technician.name = technician.first_name + ' ' + technician.last_name;
+                    technician.branch_name = technician.branch ?  technician.branch.branch_name : 'N/A';
+
                     return technician;
                 });
             },

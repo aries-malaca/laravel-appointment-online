@@ -36,9 +36,9 @@ class BranchController extends Controller{
             $data[$key]['social_media_accounts']    = json_decode($value['social_media_accounts']);
             $data[$key]['map_coordinates']          = json_decode($value['map_coordinates']);
             $query_schedule                         = BranchSchedule::where('branch_id', $value['id'])
-                                                        ->select('date_start','date_end','schedule_data','schedule_type')
-                                                        ->orderBy('schedule_type')
-                                                        ->get()->toArray();
+                                                                    ->select('date_start','date_end','schedule_data','schedule_type')
+                                                                    ->orderBy('schedule_type')
+                                                                    ->get()->toArray();
             $array_sched = array();
             foreach($query_schedule as $k=>$v){
 
@@ -57,6 +57,7 @@ class BranchController extends Controller{
                 }
             }
             $data[$key]['schedules']  = $array_sched;
+            $data[$key]['schedules_original']  = $query_schedule;
         }
         return response()->json($data);
     }

@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\BranchShift;
 use Illuminate\Http\Request;
 use App\Technician;
 use App\TechnicianSchedule;
@@ -13,24 +14,26 @@ use Validator;
 class TechnicianController extends Controller{
     function getTechnicians(){
         $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
-                            ->select('cluster_name', 'technicians.*')
-                            ->orderBy('first_name')
-                            ->get()->toArray();
+            ->select('cluster_name', 'technicians.*')
+            ->orderBy('first_name')
+            ->get()->toArray();
         foreach($data as $key=>$value){
             $data[$key]['technician_data'] = json_decode($value['technician_data']);
+            $data[$key]['branch'] = $this->getCurrentBranch($value['id'], date('Y-m-d'));
         }
         return response()->json($data);
     }
 
     function getTechnician(Request $request){
         $data = Technician::leftJoin('branch_clusters', 'technicians.cluster_id', '=', 'branch_clusters.id')
-                            ->where('technicians.id', $request->segment(4))
-                            ->select('cluster_name', 'technicians.*', 'cluster_data')
-                            ->orderBy('first_name')
-                            ->get()->first();
+            ->where('technicians.id', $request->segment(4))
+            ->select('cluster_name', 'technicians.*', 'cluster_data')
+            ->orderBy('first_name')
+            ->get()->first();
         if(isset($data['technician_data'] )) {
             $data['technician_data'] = json_decode($data['technician_data']);
             $data['cluster_data'] = json_decode($data['cluster_data']);
+            $data['branch'] = $this->getCurrentBranch($data['id'], date('Y-m-d'));
         }
         return response()->json($data);
     }
@@ -82,19 +85,34 @@ class TechnicianController extends Controller{
         return response()->json(["result"=>"success"]);
     }
 
+    function getCurrentBranch($id, $date){
+        $data = TechnicianSchedule::leftJoin('branches','technician_schedules.branch_id','=','branches.id')
+            ->where('date_start', '<=', $date)
+            ->where('date_end','>=', $date)
+            ->where('technician_id', $id)
+            ->orderBy('schedule_type','DESC')
+            ->select('branch_name', 'branches.id')
+            ->get()->first();
+
+        if(isset($data))
+            return $data;
+
+        return false;
+    }
+
     function getBranchTechnicians(Request $request){
         $technicians = $this->getScheduledTechnicians($request->segment(4), $request->segment(5)); //branch, date
         return response()->json($technicians);
     }
-    
+
     function getScheduledTechnicians($branch, $date){
         $technicians = array();
 
         $find = TechnicianSchedule::where('branch_id', $branch)
-                                    ->where('date_start','<=', $date)
-                                    ->where('date_end','>=', $date .' 23:59:59')
-                                    ->orderBy('schedule_type', 'DESC')
-                                    ->get()->toArray();
+            ->where('date_start','<=', $date)
+            ->where('date_end','>=', $date .' 23:59:59')
+            ->orderBy('schedule_type', 'DESC')
+            ->get()->toArray();
 
         foreach($find as $key=>$value){
             if($e = $this->compareExtract($technicians, $value, idate('w', strtotime($date)))){
@@ -105,25 +123,25 @@ class TechnicianController extends Controller{
                 $array_reserved_sched     = array();
 
                 $getAppointment = DB::table("transaction_items as a")
-                                        ->leftJoin("transactions as b","a.transaction_id","=","b.id")
-                                        ->where("b.technician_id","=",$tech_id)
-                                        ->where("b.transaction_datetime",'<=',$date.' 23:59:59')
-                                        ->where("b.transaction_status","=",$transaction_status)
-                                        ->where("a.item_status","=",$transaction_status)
-                                        ->where("a.item_type","=","service")
-                                        ->select("a.book_start_time","a.book_end_time")
-                                        ->get();
+                    ->leftJoin("transactions as b","a.transaction_id","=","b.id")
+                    ->where("b.technician_id","=",$tech_id)
+                    ->where("b.transaction_datetime",'<=',$date.' 23:59:59')
+                    ->where("b.transaction_status","=",$transaction_status)
+                    ->where("a.item_status","=",$transaction_status)
+                    ->where("a.item_type","=","service")
+                    ->select("a.book_start_time","a.book_end_time")
+                    ->get();
 
-               foreach ($getAppointment as $key) {
+                foreach ($getAppointment as $key) {
                     $converted_start = new DateTime($key->book_start_time);
                     $converted_end   = new DateTime($key->book_end_time);
-                    
+
                     $array_reserved_sched[] = array(
-                                            "sched_appointment_start"    => $converted_start->format("H:i"),
-                                            "sched_appointment_end"      => $converted_end->format("H:i")
-                                                );
-               }                         
-                                        
+                        "sched_appointment_start"    => $converted_start->format("H:i"),
+                        "sched_appointment_end"      => $converted_end->format("H:i")
+                    );
+                }
+
                 if($e['schedule'] != '00:00') {
                     $object = array(
                         "employee_id" => $tech['employee_id'],
@@ -267,23 +285,23 @@ class TechnicianController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
- function getSchedules(Request $request){
+    function getSchedules(Request $request){
         $schedules = TechnicianSchedule::leftJoin('branches', 'technician_schedules.branch_id', '=', 'branches.id')
-                                        ->where('technician_id', $request->segment(4))
-                                        ->where(function($query){
-                                            $query->where('date_start', '>=', date('Y-m-d'))
-                                                    ->orWhere('schedule_type', 'RANGE');
-                                        })
-                                        ->select('technician_schedules.*', 'branch_name')
-                                        ->orderBy('schedule_type')
-                                        ->get()->toArray();
+            ->where('technician_id', $request->segment(4))
+            ->where(function($query){
+                $query->where('date_start', '>=', date('Y-m-d'))
+                    ->orWhere('schedule_type', 'RANGE');
+            })
+            ->select('technician_schedules.*', 'branch_name')
+            ->orderBy('schedule_type')
+            ->get()->toArray();
 
         foreach($schedules as $key=>$value){
             $schedules[$key]['schedule_data'] = json_decode($value['schedule_data']);
             $schedules[$key]['shifts'] = BranchShift::where('branch_id', $value['branch_id'])
-                                                        ->select('shift_color','shift_data')
-                                                        ->get()
-                                                        ->toArray();
+                ->select('shift_color','shift_data')
+                ->get()
+                ->toArray();
         }
 
         return response()->json($schedules);
@@ -388,9 +406,9 @@ class TechnicianController extends Controller{
             }
 
             TechnicianSchedule::where('technician_id', $request->input('technician_id'))
-                                        ->where('schedule_type', 'SINGLE')
-                                        ->where('date_start', 'LIKE',  $request->input('date') . '%')
-                                        ->delete();
+                ->where('schedule_type', 'SINGLE')
+                ->where('date_start', 'LIKE',  $request->input('date') . '%')
+                ->delete();
 
             $schedule = new TechnicianSchedule;
             $schedule->technician_id = $request->input('technician_id');
@@ -419,9 +437,9 @@ class TechnicianController extends Controller{
 
     function hasConflictRange($start, $end, $id, $except=0){
         $schedules = TechnicianSchedule::where('technician_id', $id)
-                                        ->where('id','<>' , $except)
-                                        ->where('schedule_type', 'RANGE')
-                                        ->get()->toArray();
+            ->where('id','<>' , $except)
+            ->where('schedule_type', 'RANGE')
+            ->get()->toArray();
 
         foreach($schedules as $key=>$value){
             if((strtotime($value['date_start']) <= strtotime($start) AND strtotime($value['date_end']) >= strtotime($start) ) OR

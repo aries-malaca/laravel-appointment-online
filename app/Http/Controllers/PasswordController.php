@@ -30,6 +30,8 @@ class PasswordController extends Controller{
             }
         }
 
+        $email = $this->emailReceiver($user['email']);
+
         if(isset($user['id'])) {
             $generated = md5(rand(1,600));
             $user_data = json_decode($user['user_data'],true);
@@ -38,10 +40,10 @@ class PasswordController extends Controller{
             User::where('id', $user['id'])
                         ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+            Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $email) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Password Reset');
-                $message->to($user['email'], $user['first_name']);
+                $message->to($email, $user['first_name']);
             });
 
             return response()->json(["result"=>"success"]);
@@ -61,12 +63,14 @@ class PasswordController extends Controller{
             if($user_data['reset_password_key'] == $request->input('key')){
                 $diff = time() - $user_data['reset_password_expiration'];
                 if($diff < 300){
+                    $email = $this->emailReceiver($user['email']);
+
                     User::where('id', $user['id'])
                         ->update(['password'=>bcrypt($temporary_password)]);
-                    Mail::send('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], function ($message) use($user) {
+                    Mail::send('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], function ($message) use($user,$email) {
                         $message->from('notification@system.lay-bare.com', 'LBO');
                         $message->subject('Temporary Password');
-                        $message->to($this->emailReceiver($user['email']), $user['first_name']);
+                        $message->to($email, $user['first_name']);
                     });
                     $data = array("result"=>"success");
                 }

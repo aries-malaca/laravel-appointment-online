@@ -1,6 +1,6 @@
 <template>
     <div class="page-quick-sidebar-wrapper" data-close-on-body-click="false" style="border-left:solid 1px #91624f">
-        <a href="javascript:;" @click="show_conversation=false" class="page-quick-sidebar-toggler">
+        <a href="javascript:;" @click="toggleChat" class="page-quick-sidebar-toggler">
             <i class="icon-login"></i>
         </a>
         <div class="page-quick-sidebar">
@@ -45,6 +45,9 @@
             },
             configs(){
                 return this.$store.state.configs;
+            },
+            chat_visibility(){
+                return this.$store.state.chat.is_visible;
             }
         },
         data:function(){
@@ -56,6 +59,9 @@
             }
         },
         methods:{
+            toggleChat(){
+                this.$store.commit('chat/toggleVisibility');
+            },
             notifyMe:function(sender_id){
                 let u = this;
                 axios.get('../../api/message/getLastMessage/'+ sender_id +'?token='+this.token)

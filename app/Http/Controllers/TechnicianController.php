@@ -111,6 +111,7 @@ class TechnicianController extends Controller{
         $find = TechnicianSchedule::where('branch_id', $branch)
                                     ->where('date_start','<=', $date)
                                     ->where('date_end','>=', $date .' 23:59:59')
+                                    ->orderBy('schedule_type', 'DESC')
                                     ->get()->toArray();
 
         foreach($find as $key=>$value){
@@ -161,7 +162,6 @@ class TechnicianController extends Controller{
                     else
                         $technicians[$found_key] = $object;
                 }
-
             }
         }
 
@@ -416,7 +416,7 @@ class TechnicianController extends Controller{
             $schedule->schedule_type = 'SINGLE';
             $schedule->schedule_data = json_encode($d);
             $schedule->date_start = $request->input('date');
-            $schedule->date_end = $request->input('date');
+            $schedule->date_end = date('Y-m-d H:i:s', strtotime($request->input('date') .' 23:59:59' ));
             $schedule->save();
 
             return response()->json(['result'=>'success']);

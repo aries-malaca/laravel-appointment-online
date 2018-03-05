@@ -190,6 +190,7 @@ class UserController extends Controller{
 
     public function dispatchConfirmation($email){
         $user = User::where('email', $email)->get()->first();
+        $email = $this->emailReceiver($user['email']);
         if(isset($user['id'])){
             $generated = md5(rand(1,600));
             $user_data = json_decode($user['user_data'],true);
@@ -198,10 +199,10 @@ class UserController extends Controller{
             User::where('id', $user['id'])
                 ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $email) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Email Verification');
-                $message->to($this->emailReceiver($user['email']), $user['username']);
+                $message->to($email, $user['username']);
                 $message->bcc('aries@lay-bare.com', $user['username']);
             });
             return true;

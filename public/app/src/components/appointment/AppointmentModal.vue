@@ -198,7 +198,7 @@
                                     </div>
                                 </div>
 
-                                <div v-if="appointment.transaction_status === 'completed'" class="row">
+                                <div v-if="appointment.transaction_status !== 'reserved' && appointment.transaction_status !== 'expired'" class="row">
                                     <div class="col-md-5">
                                         <h4 style="text-align:center">Acknowledgement</h4>
                                         <div class="card">

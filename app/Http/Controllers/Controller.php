@@ -249,6 +249,7 @@ class Controller extends BaseController{
     }
 
     function emailReceiver($email){
+
         if(env('APP_MAILING_ENV')==='development')
             return env('APP_MAILING_DEV_ADDRESS');
 

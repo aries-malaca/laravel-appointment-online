@@ -172,17 +172,18 @@ class PremierController extends Controller{
                 User::where('email', $email)
                     ->update(["user_data" => json_encode($user_data)]);
             }
+            $email = $this->emailReceiver($user['email']);
 
-            Mail::send('email.plc_application', ["user"=>$user, "data"=>$data], function ($message) use($user) {
+            Mail::send('email.plc_application', ["user"=>$user, "data"=>$data], function ($message) use($user, $email) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Premier Loyalty Card Application');
-                $message->to($this->emailReceiver($user['email']), $user['username']);
+                $message->to($email, $user['username']);
             });
 
-            Mail::send('email.plc_result', ["user"=>$user, "result"=>$result], function ($message) use($user) {
+            Mail::send('email.plc_result', ["user"=>$user, "result"=>$result], function ($message) use($user, $email) {
                 $message->from('notification@system.lay-bare.com', 'LBO');
                 $message->subject('Premier Loyalty Card Application');
-                $message->to($this->emailReceiver($user['email']), $user['username']);
+                $message->to($email, $user['username']);
             });
 
             return true;

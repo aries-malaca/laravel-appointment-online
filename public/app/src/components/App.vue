@@ -28,7 +28,7 @@
             </div>
             <!-- END CONTENT -->
             <!-- BEGIN QUICK SIDEBAR -->
-                <chat-layout @refreshUnseen="refreshUnseen"></chat-layout>
+                <chat-layout></chat-layout>
             <!-- END QUICK SIDEBAR -->
         </div>
         <!-- END CONTAINER -->
@@ -40,7 +40,7 @@
             </div>
         </div>
         <!-- END FOOTER -->
-        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer;border-top-left-radius:20px;color:white;background-color: #91624f;" v-if="user !== null">
+        <div class="chat-toggler quick-sidebar-toggler" style="cursor: pointer;border-top-left-radius:20px;color:white;background-color: #91624f;" v-if="user !== null" @click="toggleChat">
             <strong><i class="icon icon-bubbles"></i>
                 <span v-if="user.is_client === 0">Chat System</span>
                 <span v-else>Customer Service</span>
@@ -74,9 +74,15 @@
             },
             title(){
                 return this.$store.state.title;
+            },
+            chat_visibility(){
+                return this.$store.state.chat.is_visible;
             }
         },
         methods:{
+            toggleChat(){
+              this.$store.commit('chat/toggleVisibility');
+            },
             refreshUnseen:function(count){
                 this.unseen_messages = count;
             },
@@ -161,6 +167,9 @@
         watch:{
             title(){
                 document.title = 'LAY-BARE Online | '+ this.title;
+            },
+            chat_visibility(){
+                $("body").toggleClass("page-quick-sidebar-open");
             }
         }
     }

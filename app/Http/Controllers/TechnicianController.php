@@ -93,6 +93,7 @@ class TechnicianController extends Controller{
         $find = TechnicianSchedule::where('branch_id', $branch)
                                     ->where('date_start','<=', $date)
                                     ->where('date_end','>=', $date .' 23:59:59')
+                                    ->orderBy('schedule_type', 'DESC')
                                     ->get()->toArray();
 
         foreach($find as $key=>$value){
@@ -143,7 +144,6 @@ class TechnicianController extends Controller{
                     else
                         $technicians[$found_key] = $object;
                 }
-
             }
         }
 
@@ -265,6 +265,172 @@ class TechnicianController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
+    }
+
+ function getSchedules(Request $request){
+        $schedules = TechnicianSchedule::leftJoin('branches', 'technician_schedules.branch_id', '=', 'branches.id')
+                                        ->where('technician_id', $request->segment(4))
+                                        ->where(function($query){
+                                            $query->where('date_start', '>=', date('Y-m-d'))
+                                                    ->orWhere('schedule_type', 'RANGE');
+                                        })
+                                        ->select('technician_schedules.*', 'branch_name')
+                                        ->orderBy('schedule_type')
+                                        ->get()->toArray();
+
+        foreach($schedules as $key=>$value){
+            $schedules[$key]['schedule_data'] = json_decode($value['schedule_data']);
+            $schedules[$key]['shifts'] = BranchShift::where('branch_id', $value['branch_id'])
+                                                        ->select('shift_color','shift_data')
+                                                        ->get()
+                                                        ->toArray();
+        }
+
+        return response()->json($schedules);
+    }
+
+    function addRegularSchedule(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'branch_id'=>'required|not_in:0|numeric',
+                'technician_id'=>'required|not_in:0|numeric',
+                'date_start'=>'required',
+                'date_end'=>'required',
+                'schedule_data'=>'required'
+            ]);
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if ($request->input('date_start') === $request->input('date_end'))
+                return response()->json(['result'=>'failed','error'=>'Regular schedule requires at least 2 days coverage.'], 400);
+
+            if($this->hasConflictRange($request->input('date_start'), $request->input('date_end'), $request->input('technician_id')))
+                return response()->json(['result'=>'failed','error'=>"Selected date range conflicts with existing schedule."], 400);
+
+            $schedule = new TechnicianSchedule;
+            $schedule->technician_id = $request->input('technician_id');
+            $schedule->branch_id = $request->input('branch_id');
+            $schedule->date_start = $request->input('date_start');
+            $schedule->date_end = $request->input('date_end');
+            $schedule->schedule_type = $request->input('schedule_type');
+            $schedule->schedule_data = json_encode($request->input('schedule_data'));
+            $schedule->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updateRegularSchedule(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'branch_id'=>'required|not_in:0|numeric',
+                'technician_id'=>'required|not_in:0|numeric',
+                'date_start'=>'required',
+                'date_end'=>'required',
+                'schedule_data'=>'required'
+            ]);
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            if ($request->input('date_start') === $request->input('date_end'))
+                return response()->json(['result'=>'failed','error'=>'Regular schedule requires at least 2 days coverage.'], 400);
+
+            if($this->hasConflictRange($request->input('date_start'), $request->input('date_end'), $request->input('technician_id'), $request->input('id')))
+                return response()->json(['result'=>'failed','error'=>"Selected date range conflicts with existing schedule."], 400);
+
+            $schedule = TechnicianSchedule::find($request->input('id'));
+            $schedule->technician_id = $request->input('technician_id');
+            $schedule->branch_id = $request->input('branch_id');
+            $schedule->date_start = $request->input('date_start');
+            $schedule->date_end = $request->input('date_end');
+            $schedule->schedule_type = $request->input('schedule_type');
+            $schedule->schedule_data = json_encode($request->input('schedule_data'));
+            $schedule->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function addSingleSchedule(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+
+            if((time()-86400) > strtotime($request->input('date')) )
+                return response()->json(['result'=>'failed', 'error'=>'Unable to set schedule for past dates.'], 400);
+
+            $index = idate('w', strtotime($request->input('date')));
+
+            if($request->input('id') === null){
+                $shift = BranchShift::find($request->input('shift_id'));
+
+                if(!isset($shift->id) && $request->input('shift_id') !== 0)
+                    return response()->json(['result'=>'failed', 'error'=>'Shift not exists.'], 400);
+                else{
+                    if($request->input('shift_id') === 0){
+                        $d = '00:00';
+                        $branch = $request->input('branch_id');
+                    }
+                    else{
+                        $d = json_decode($shift->shift_data)[$index];
+                        $branch = $shift->branch_id;
+                    }
+                }
+            }
+            else{
+                $d = $request->input('time');
+                $branch = $request->input('branch_id');
+            }
+
+            TechnicianSchedule::where('technician_id', $request->input('technician_id'))
+                                        ->where('schedule_type', 'SINGLE')
+                                        ->where('date_start', 'LIKE',  $request->input('date') . '%')
+                                        ->delete();
+
+            $schedule = new TechnicianSchedule;
+            $schedule->technician_id = $request->input('technician_id');
+            $schedule->branch_id = $branch;
+            $schedule->schedule_type = 'SINGLE';
+            $schedule->schedule_data = json_encode($d);
+            $schedule->date_start = $request->input('date');
+            $schedule->date_end = date('Y-m-d H:i:s', strtotime($request->input('date') .' 23:59:59' ));
+            $schedule->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function deleteSchedule(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            TechnicianSchedule::destroy($request->input('id'));
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function hasConflictRange($start, $end, $id, $except=0){
+        $schedules = TechnicianSchedule::where('technician_id', $id)
+                                        ->where('id','<>' , $except)
+                                        ->where('schedule_type', 'RANGE')
+                                        ->get()->toArray();
+
+        foreach($schedules as $key=>$value){
+            if((strtotime($value['date_start']) <= strtotime($start) AND strtotime($value['date_end']) >= strtotime($start) ) OR
+                (strtotime($value['date_start']) <= strtotime($end) AND strtotime($value['date_end']) >= strtotime($end)) OR
+                (strtotime($value['date_start']) >= strtotime($start)AND strtotime($value['date_end']) <= strtotime($end)))
+                return true;
+        }
+
+        return false;
     }
 
 }

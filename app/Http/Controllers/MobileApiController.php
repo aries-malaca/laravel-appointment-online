@@ -801,32 +801,59 @@ class MobileApiController extends Controller{
     }
 
     public function getBranchSchedules(Request $request){
-        $branch_id      = $request->segment(4);
-        $app_reserved   = $request->segment(5);
-        $response       = array();
-        $arrayBranch  = array();
-        $queryBranchSchedule = BranchSchedule::where("branch_id",$branch_id)
-                                ->orderBy('created_at','desc')->get()->toArray();    
+
+        $branch_id              = $request->segment(4);
+        $app_reserved           = $request->segment(5);
+        $response               = array();
+        $arrayBranch            = array();
+        $arrayTransaction       = array();
+        $queryBranchSchedule    = BranchSchedule::where("branch_id",$branch_id)
+                                ->orderBy('created_at','desc')->get()->toArray();                            
         $technicians         = $this->getScheduledTechnicians($branch_id, $app_reserved);
-        if($queryBranchSchedule){
-            foreach ($queryBranchSchedule as $key => $value) {
-                $date_start     = $value["date_start"];
-                $date_end       = $value["date_end"];
-                $schedule_type  = $value["schedule_type"];  
-                if($schedule_type == "regular"){
-                    $arrayBranch[] = $value;
-                }
-                if(strtotime($app_reserved) >= strtotime($date_start) && strtotime($app_reserved) <= strtotime($date_start) && $schedule_type != "regular"){
-                    $arrayBranch[] = $value;
-                }
+         foreach ($queryBranchSchedule as $key => $value) {
+            $date_start     = $value["date_start"];
+            $date_end       = $value["date_end"];
+            $schedule_type  = $value["schedule_type"];  
+            if($schedule_type == "regular"){
+                $arrayBranch[] = $value;
             }
-            $response["branch"]     =   $arrayBranch;
-            $response["technician"] =   $technicians;
-            return response()->json($response);
+            if(strtotime($app_reserved) >= strtotime($date_start) && strtotime($app_reserved) <= strtotime($date_start) && $schedule_type != "regular"){
+                $arrayBranch[] = $value;
+            }
+        }   
+        $arrayQueuing        = Transaction::where("transaction_datetime","LIKE",$app_reserved.'%')
+                                ->where("transaction_status","reserved")
+                                ->where("branch_id",$branch_id)
+                                ->select("transaction_datetime","id")
+                                ->get()->toArray();
+        foreach ($arrayQueuing as $key => $value) {
+            $transaction_id         = $value["id"]; 
+            $transaction_datetime   = $value["transaction_datetime"];
+            $queryItems             = TransactionItem::leftJoin("services","transactions.item_id","=","services.id")
+                                        ->where("transaction_id",$transaction_id)
+                                        ->where("item_status","reserved")
+                                        ->select("services.service_minutes")
+                                        ->get()->toArray();
+            $duration = 0;                    
+            foreach ($queryItems as $key1 => $value1) {
+                $duration+=$value1["service_minutes"];
+            }
+            $arrayTransaction[] = array(
+                                "transaction_datetime" => $transaction_datetime,
+                                "duration"             => $duration
+                                    );
         }
-        else{
-            return response()->json(["result"=>"failed","error"=>"Failed to load"],400);
-        }
+
+        $response["branch"]         =   $arrayBranch;
+        $response["technician"]     =   $technicians;
+        $response["transactions"]   =   $arrayTransaction;
+        return response()->json($response);
+        // if($queryBranchSchedule){
+
+        // }
+        // else{
+        //     return response()->json(["result"=>"failed","error"=>"Failed to load"],400);
+        // }
     }
 
 

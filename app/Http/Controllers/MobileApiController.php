@@ -829,9 +829,9 @@ class MobileApiController extends Controller{
         foreach ($arrayQueuing as $key => $value) {
             $transaction_id         = $value["id"]; 
             $transaction_datetime   = $value["transaction_datetime"];
-            $queryItems             = TransactionItem::leftJoin("services","transactions.item_id","=","services.id")
-                                        ->where("transaction_id",$transaction_id)
-                                        ->where("item_status","reserved")
+            $queryItems             = TransactionItem::leftJoin("services","transaction_items.item_id","=","services.id")
+                                        ->where("transaction_items.transaction_id",$transaction_id)
+                                        ->where("transaction_items.item_status","reserved")
                                         ->select("services.service_minutes")
                                         ->get()->toArray();
             $duration = 0;                    

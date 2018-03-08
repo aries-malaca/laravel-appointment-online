@@ -521,29 +521,30 @@ class KioskController extends Controller{
         $branch_id  = $request->segment(4);
         $today      = date("Y-m-d");  
         $response   = array();  
-        $service_duration       = 0;
+       
         $queryQueue = Transaction::where('transaction_status', "reserved")
                         ->leftJoin('users', 'users.id', '=', 'transactions.client_id')
                         ->where('branch_id', $branch_id)
                         ->whereBetween('transaction_datetime', array($today." 00:00:00", $today." 23:59:00"))
+                        ->select("users.first_name","users.last_name","users.id as user_id","transactions.id as transaction_id","transactions.platform","transactions.transaction_type","transactions.reference_no","transactions.technician_id","transactions.transaction_datetime","transactions.waiver_data")
                         ->orderBy('transaction_datetime','asc')
                         ->get();
 
         foreach($queryQueue as $key => $value){
-            
 
-           
             $full_name              = $value['first_name']." ".$value['last_name'];
-            $transaction_id         = $value['id'];
+            $transaction_id         = $value['transaction_id'];
             $transaction_type       = $value['transaction_type'];
             $platform               = $value['platform'];
             $reference_no           = $value['reference_no'];
             $technician_id          = $value['technician_id'];
-            $client_id              = $value['client_id'];
+            $client_id              = $value['user_id'];
             $transaction_datetime   = $value['transaction_datetime'];
-            $waiver_data            = json_decode($value['waiver_data'],true);
             $booked_at              = $value['transaction_datetime'];
+            $waiver_data            = json_decode($value['waiver_data'],true);
             $ifClientSigned         = "";
+            $duration               = 0;
+
 
             if($waiver_data == null){
                 $ifClientSigned = false;
@@ -553,25 +554,31 @@ class KioskController extends Controller{
                 $ifClientSigned = true;
             }
 
-            $items                  = TransactionItem::where('transaction_id', $transaction_id)
+            $items              = TransactionItem::where('transaction_id', $transaction_id)
                                                 ->where("item_status","=","reserved")
                                                 ->get()->toArray();
+            
             foreach($items as $keys => $values){
                
                 $start_time     = $values['book_start_time'];
                 $end_time       = $values['book_end_time'];
                 if($values['item_type'] === 'service'){
                     $service_id      = $values["item_id"];
-                    $serviceQuery    = Service::where("id",$service_id)
+
+                    $serviceQuery    = Service::where("id","=",$service_id)
                                             ->select("service_minutes")
                                             ->get()->first();
-                    $service_duration   += $serviceQuery["service_minutes"];                        
+
+                    $minutes            = $serviceQuery["service_minutes"];                        
+                    $duration           += $minutes;                        
                 }
                 else{
                     continue;
                 }
             }
             $response[] = array(
+
+                    "total_duration"        => $duration,
                     "full_name"             => $full_name,
                     "client_id"             => $client_id,
                     "transaction_type"      => $transaction_type,
@@ -580,12 +587,10 @@ class KioskController extends Controller{
                     "transaction_id"        => $transaction_id,
                     "reference_no"          => $reference_no,
                     "technician_id"         => $technician_id,
-                    "total_duration"        => $service_duration,
                     "ifClientSignedWaiver"  => $ifClientSigned
                             );
         }
         return response()->json($response); 
-
     }
 
     public function addAppointments(Request $request){

@@ -187,7 +187,6 @@ Route::get('/contact/getContacts', 'ContactController@getContacts');
 //notifications
 Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
 //
-
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
@@ -238,19 +237,4 @@ Route::post('/kiosk/saveNewUser', 'KioskController@saveNewUser');
 Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings');
 Route::post('/kiosk/checkDeviceIfRegistered', 'KioskController@checkDeviceIfRegistered');
 Route::post('/kiosk/searchClient', 'KioskController@searchClient');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Route::post('/kiosk/addWaiver', 'KioskController@addWalkinWaiver');

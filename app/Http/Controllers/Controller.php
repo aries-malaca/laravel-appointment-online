@@ -9,6 +9,9 @@ use App\User;
 use App\Client;
 use App\Config;
 use App\Menu;
+use Mail;
+use Curl;
+use App\Notification;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
@@ -272,5 +275,58 @@ class Controller extends BaseController{
             return json_decode($transaction['waiver_data'])->signature;
 
         return 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('images/na.png')));
+    }
+
+    function addNotification($data, $user_id){
+        $notification = new Notification;
+        $notification->user_id = $user_id;
+        $notification->is_read = 0;
+        $notification->category = $data['category'];
+        $notification->title = $data['title'];
+        $notification->content = $data['content'];
+        $notification->notification_data = json_encode($data['notification_data']);
+        $notification->save();
+    }
+
+    function sendMail($template, $content_data, $headers){
+        Mail::send($template, $content_data, function ($mail) use($headers) {
+            $mail->from(env('MAIL_USERNAME'), env('APP_NAME'));
+            $mail->subject($headers['subject']);
+
+            foreach($headers['to'] as $to)
+                $mail->to($this->emailReceiver($to['email']), $to['name']);
+
+            if(isset($headers['cc']))
+                foreach($headers['cc'] as $cc)
+                    $mail->cc($this->emailReceiver($cc['email']), $cc['name']);
+
+            if(env('APP_MAILING_BCC_DEV'))
+                $mail->bcc(env('APP_MAILING_DEV_ADDRESS'));
+        });
+    }
+
+    function sendSMS($message, $mobile, $title, $api){
+        // Send a POST request to: http://www.foo.com/bar
+        $response = Curl::to('https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/'.env('GLOBE_API_SHORT_CODE').'/requests')
+            ->withData( array( 'app_id' => env('GLOBE_API_APP_ID'),
+                'app_secret' => env('GLOBE_API_APP_SECRET'),
+                'message' => $message,
+                'address' => $mobile,
+                'passphrase' => env('GLOBE_API_PASSPHRASE') ) )
+            ->asJson()
+            ->post();
+
+        if(isset($response->outboundSMSMessageRequest)){
+            $text = new TextMessage;
+            $text->message = $message;
+            $text->recipient = $mobile;
+            $text->title = $title;
+            $text->sent_by = $api['user']['id'];
+            $text->save();
+
+            return $response;
+        }
+
+        return false;
     }
 }

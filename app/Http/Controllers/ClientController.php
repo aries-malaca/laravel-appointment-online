@@ -61,9 +61,8 @@ class ClientController extends Controller{
                 'home_branch' => 'required'
             ]);
 
-            if ($validator->fails()) {
+            if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-            }
 
             $client = User::find($request->input('id'));
             $client->first_name = $request->input('first_name');
@@ -75,6 +74,7 @@ class ClientController extends Controller{
             $client->birth_date = $request->input('birth_date');
             $data = json_decode($client->user_data);
             $data->home_branch = $request->input('home_branch')['value'];
+            $data->notifications = $request->input('user_data')['notifications'] === null? [] :$request->input('user_data')['notifications'];
             $client->user_data = json_encode($data);
             $client->save();
 

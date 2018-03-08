@@ -40,11 +40,11 @@ class PasswordController extends Controller{
             User::where('id', $user['id'])
                         ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $email) {
-                $message->from('notification@system.lay-bare.com', 'LBO');
-                $message->subject('Password Reset');
-                $message->to($email, $user['first_name']);
-            });
+            $content_data = ["user"=>$user, "generated"=>$generated];
+            $headers = array("subject"=>'Password Reset',
+                "to"=> [["email"=>$email, "name"=> $user['first_name']]]
+            );
+            $this->sendMail('email.reset_password', $content_data, $headers);
 
             return response()->json(["result"=>"success"]);
         }
@@ -67,11 +67,11 @@ class PasswordController extends Controller{
 
                     User::where('id', $user['id'])
                         ->update(['password'=>bcrypt($temporary_password)]);
-                    Mail::send('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], function ($message) use($user,$email) {
-                        $message->from('notification@system.lay-bare.com', 'LBO');
-                        $message->subject('Temporary Password');
-                        $message->to($email, $user['first_name']);
-                    });
+
+                    $headers = array("subject"=>'Temporary Password',
+                                     "to"=> [["email"=>$email, "name"=> $user['first_name']]]);
+                    $this->sendMail('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], $headers);
+
                     $data = array("result"=>"success");
                 }
                 else

@@ -1,14 +1,8 @@
 <?php
-    namespace App\Libraries;
+namespace App\Libraries;
+class Version{
+    function __construct()
+    {
 
-    class Version{
-        function __construct()
-        {
-
-        }
-
-        function test(){
-            echo 'test';
-        }
     }
-?>
+}

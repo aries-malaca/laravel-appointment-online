@@ -151,6 +151,7 @@ class UserController extends Controller{
             }
             $user_data = json_decode( User::find($api['user']['id'])->user_data,true);
             $user_data['home_branch'] = $request->input('branch')['value'];
+            $user_data['notifications'] = $request->input('user_data')['notifications'] === null? [] :$request->input('user_data')['notifications'];
 
             User::where('id',$api['user']['id'])
                 ->update([  'first_name'=>$request->input('first_name'),
@@ -199,12 +200,10 @@ class UserController extends Controller{
             User::where('id', $user['id'])
                 ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.verification', ["user"=>$user, "generated"=>$generated], function ($message) use($user, $email) {
-                $message->from('notification@system.lay-bare.com', 'LBO');
-                $message->subject('Email Verification');
-                $message->to($email, $user['username']);
-                $message->bcc('aries@lay-bare.com', $user['username']);
-            });
+            $headers = array("subject"=>'Email Verification',
+                "to"=> [["email"=>$email, "name"=> $user['username']]]);
+            $this->sendMail('email.verification', ["user"=>$user, "generated"=>$generated], $headers);
+
             return true;
         }
         return false;

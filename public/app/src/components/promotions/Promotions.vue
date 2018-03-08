@@ -16,14 +16,17 @@
                     <li>
                         <a href="#surveys" data-toggle="tab">Surveys</a>
                     </li>
+                    <li>
+                        <a href="#campaign-manager" data-toggle="tab">Campaign Manager</a>
+                    </li>
                 </ul>
             </div>
             <div class="portlet-body">
                 <div class="tab-content">
                     <promos></promos>
                     <perks></perks>
-                    <div class="tab-pane" id="surveys">
-                    </div>
+                    <div class="tab-pane" id="surveys"></div>
+                    <campaign-manager></campaign-manager>
                 </div>
             </div>
         </div>
@@ -33,10 +36,11 @@
 <script>
     import Promos from './Promos.vue';
     import Perks from './Perks.vue';
+    import CampaignManager from './campaign/CampaignManager.vue';
 
     export default {
         name: 'Promotions',
-        components:{ Promos, Perks },
+        components:{ Promos, Perks, CampaignManager },
         data: function(){
             return {
                 title: 'Promotions',

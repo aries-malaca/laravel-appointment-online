@@ -198,6 +198,17 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row" v-if="newClient.user_data !== undefined">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Notifications</label>
+                                                        <div>
+                                                            <input type="checkbox" id="_email" value="email" v-model="newClient.user_data.notifications" />
+                                                            <label for="_email">Email</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <button type="button" @click="updateInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
                                         </div>
                                         <div id="account-settings" class="tab-pane">
@@ -327,8 +338,13 @@
                                 user_mobile: response.data.user_mobile,
                                 home_branch:response.data.home_branch,
                                 password:'',
-                                device_data:response.data.device_data
+                                device_data:response.data.device_data,
+                                user_data:response.data.user_data,
                             };
+
+                            if(u.newClient.user_data.notifications === undefined)
+                                u.newClient.user_data.notifications = [];
+
                             u.getBossTransactions();
                         }
                     });

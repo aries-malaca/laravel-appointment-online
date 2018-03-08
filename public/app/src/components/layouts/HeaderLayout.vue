@@ -106,6 +106,9 @@
             logout: function() {
                 this.$emit('logout')
             }
+        },
+        mounted(){
+            this.$store.dispatch('notifications/fetchNotifications');
         }
     }
 </script>

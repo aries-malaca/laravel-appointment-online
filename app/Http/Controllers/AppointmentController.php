@@ -360,14 +360,17 @@ class AppointmentController extends Controller{
     }
 
     function expireAppointments(){
-        $items = TransactionItem::where('item_status', 'reserved')
+        $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+                                    ->where('item_status', 'reserved')
                                     ->where('item_type', 'service')
+                                    ->select('transaction_items.*','client_id')
                                     ->get()->toArray();
         foreach($items as $key=>$value){
             if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d'))){
                 TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
 
                 $this->refreshStatus($value['transaction_id'], 'expired');
+                file_get_contents(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $value['client_id']);
             }
         }
     }
@@ -423,7 +426,11 @@ class AppointmentController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    function sendNotification(Request $request){
+    function sendBookingNotification(Request $request){
+
+    }
+
+    function sendCancelNotification(Request $request){
 
     }
 }

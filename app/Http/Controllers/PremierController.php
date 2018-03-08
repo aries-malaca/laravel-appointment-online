@@ -9,6 +9,7 @@ use Mail;
 use Validator;
 use Excel;
 use App\PlcReviewRequest;
+
 class PremierController extends Controller{
     function getPremiers(Request $request){
         if($request->segment(4) != 'all')
@@ -174,17 +175,11 @@ class PremierController extends Controller{
             }
             $email = $this->emailReceiver($user['email']);
 
-            Mail::send('email.plc_application', ["user"=>$user, "data"=>$data], function ($message) use($user, $email) {
-                $message->from('notification@system.lay-bare.com', 'LBO');
-                $message->subject('Premier Loyalty Card Application');
-                $message->to($email, $user['username']);
-            });
 
-            Mail::send('email.plc_result', ["user"=>$user, "result"=>$result], function ($message) use($user, $email) {
-                $message->from('notification@system.lay-bare.com', 'LBO');
-                $message->subject('Premier Loyalty Card Application');
-                $message->to($email, $user['username']);
-            });
+            $headers = array("subject"=>'Premier Loyalty Card Application',
+                             "to"=> [["email"=>$email, "name"=>  $user['username']]]);
+            $this->sendMail('email.plc_application', ["user"=>$user, "data"=>$data], $headers);
+            $this->sendMail('email.plc_result', ["user"=>$user, "result"=>$result], $headers);
 
             return true;
         }
@@ -294,5 +289,4 @@ class PremierController extends Controller{
        }
        return response()->json($api, $api["status_code"]);
     }
-
 }

@@ -173,6 +173,20 @@ Route::get('/review/getReviews/{by}/{id}', 'ReviewController@getReviews');
 Route::get('/review/getReview/{id}', 'ReviewController@getReview');
 Route::post('/review/submitReview', 'ReviewController@submitReview');
 
+//sms
+Route::get('/campaign/getTemplates', 'CampaignController@getTemplates');
+Route::post('/campaign/sendCampaign', 'CampaignController@sendCampaign');
+//
+
+
+//contact
+Route::get('/contact/importContacts/{file}/{extension}', 'ContactController@importContacts');
+Route::get('/contact/getContacts', 'ContactController@getContacts');
+//
+
+//notifications
+Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
+//
 
 //mobile
 //flag = active:string

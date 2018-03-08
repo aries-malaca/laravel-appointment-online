@@ -107,31 +107,46 @@ class MobileApiController extends Controller{
             $version_services   = (double)$this->getDataVersions("APP_SERVICE_VERSION");
             $arrayService       = Service::leftJoin('service_types','services.service_type_id','=','service_types.id')
                                     ->leftJoin('service_packages','services.service_package_id','=','service_packages.id')
-                                    ->select('services.*','service_name','package_name','service_description','service_picture')
+                                    ->select('services.*','service_name','package_name','service_description','service_picture','service_type_data')
                                     ->where('services.is_active', 1)
                                     ->where('services.service_type_id',"<>",0);
             $arrayService       = $arrayService->get()->toArray();
             foreach($arrayService as $key => $value){
+
+                $service_type_id                            = $value["service_type_id"];
+                $service_type_data                          = json_decode($value["service_type_data"]);
                 if($value['service_type_id'] === 0){
                     $package_services = ServicePackage::find($value['service_package_id'])['package_services'];
-                    $services[$key]['service_picture'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
-                    $services[$key]['service_description'] = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
+                    $services[$key]['service_picture']              = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_picture')->toArray();
+                    $services[$key]['service_description']          = ServiceType::whereIn('id', json_decode($package_services))->pluck('service_name')->toArray();
                 }
             }
         }
         if((double)$this->getDataVersions("APP_PACKAGE_VERSION") > (double)$version_packages) {
         
+            //$arrayPackage[$key]['id'];
             $version_packages   = (double)$this->getDataVersions("APP_PACKAGE_VERSION");
-            $arrayPackage       = ServicePackage::where('is_active', 1)->get()->toArray();
+            $arrayPackage       = Service::where('service_type_id','=',"0")
+                                        ->where('service_package_id','>',"0")
+                                        ->select('service_minutes','service_price','id','service_package_id','service_gender')
+                                        ->get()
+                                        ->toArray();
             foreach ($arrayPackage as $key => $value){
-                $query          = Service::where('service_package_id','=',$arrayPackage[$key]['id'])
-                                    ->select('service_minutes','service_price','id as service_id')
-                                    ->get()
-                                    ->first();
-                $arrayPackage[$key]['service_desc'] = implode(', ',ServiceType::whereIn('id', json_decode($value['package_services']))->pluck('service_name')->toArray());
-                $arrayPackage[$key]['service_duration'] = $query['service_minutes'];
-                $arrayPackage[$key]['service_price']    = $query['service_price'];
-                $arrayPackage[$key]['id_service']       = $query['service_id'];
+
+                $package_id     = $value["service_package_id"];
+                $service_gender = $value["service_gender"];
+                $packageQuery   = ServicePackage::where('is_active', 1)
+                                    ->where("id",$package_id)
+                                    ->select('package_name','package_services','package_image')
+                                    ->get()->first();
+                $arrayPackage[$key]["package_name"]     = $packageQuery['package_name']."(".ucfirst($service_gender).")";                   
+                $arrayPackage[$key]['package_desc']     = "Package is composed of the following services: \n".implode(', ',ServiceType::whereIn('id', json_decode($packageQuery['package_services']))->pluck('service_name')->toArray());
+                $arrayPackage[$key]['package_image']    = $packageQuery['package_image'];
+                $arrayPackage[$key]['package_duration'] = $value['service_minutes'];
+                $arrayPackage[$key]['package_price']    = $value['service_price'];
+                $arrayPackage[$key]['package_gender']   = $value['service_gender'];
+                $arrayPackage[$key]['package_services'] = json_decode($packageQuery['package_services']);
+
             } 
         }
         if( (double)$this->getDataVersions("APP_PRODUCT_VERSION")  > (double)$version_products) {
@@ -824,11 +839,12 @@ class MobileApiController extends Controller{
         $arrayQueuing        = Transaction::where("transaction_datetime","LIKE",$app_reserved.'%')
                                 ->where("transaction_status","reserved")
                                 ->where("branch_id",$branch_id)
-                                ->select("transaction_datetime","id")
+                                ->select("transaction_datetime","id","technician_id")
                                 ->get()->toArray();
         foreach ($arrayQueuing as $key => $value) {
             $transaction_id         = $value["id"]; 
             $transaction_datetime   = $value["transaction_datetime"];
+            $technician_id          = $value["technician_id"];
             $queryItems             = TransactionItem::leftJoin("services","transaction_items.item_id","=","services.id")
                                         ->where("transaction_items.transaction_id",$transaction_id)
                                         ->where("transaction_items.item_status","reserved")
@@ -840,7 +856,8 @@ class MobileApiController extends Controller{
             }
             $arrayTransaction[] = array(
                                 "transaction_datetime" => $transaction_datetime,
-                                "duration"             => $duration
+                                "duration"             => $duration,
+                                "technician_id"        => $technician_id
                                     );
         }
 

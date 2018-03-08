@@ -101,6 +101,7 @@ Route::post('/appointment/serveAppointment', 'QueuingController@serveAppointment
 Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppointment');
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
+Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -114,8 +115,16 @@ Route::post('/schedule/addTechnicianShift', 'BranchController@addTechnicianShift
 Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicianShift');
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
+Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
+Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
+Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
+Route::get('/technician/getSchedules/{id}', 'TechnicianController@getSchedules');
+Route::post('/technician/addRegularSchedule', 'TechnicianController@addRegularSchedule');
+Route::post('/technician/addSingleSchedule', 'TechnicianController@addSingleSchedule');
+Route::post('/technician/updateRegularSchedule', 'TechnicianController@updateRegularSchedule');
+Route::post('/technician/deleteSchedule', 'TechnicianController@deleteSchedule');
 
 Route::get('/premier/getPremiers/{client}/{status}', 'PremierController@getPremiers');
 Route::post('/premier/applyPremier', 'PremierController@applyPremier');
@@ -160,6 +169,24 @@ Route::post('/promotion/updatePerk', 'PromotionController@updatePerk');
 Route::post('/promotion/uploadPicture', 'PromotionController@uploadPicture');
 
 
+Route::get('/review/getReviews/{by}/{id}', 'ReviewController@getReviews');
+Route::get('/review/getReview/{id}', 'ReviewController@getReview');
+Route::post('/review/submitReview', 'ReviewController@submitReview');
+
+//sms
+Route::get('/campaign/getTemplates', 'CampaignController@getTemplates');
+Route::post('/campaign/sendCampaign', 'CampaignController@sendCampaign');
+//
+
+
+//contact
+Route::get('/contact/importContacts/{file}/{extension}', 'ContactController@importContacts');
+Route::get('/contact/getContacts', 'ContactController@getContacts');
+//
+
+//notifications
+Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
+//
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
@@ -211,18 +238,3 @@ Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings')
 Route::post('/kiosk/checkDeviceIfRegistered', 'KioskController@checkDeviceIfRegistered');
 Route::post('/kiosk/searchClient', 'KioskController@searchClient');
 Route::post('/kiosk/addWaiver', 'KioskController@addWalkinWaiver');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

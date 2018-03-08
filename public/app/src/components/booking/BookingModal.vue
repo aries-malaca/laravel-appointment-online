@@ -712,6 +712,9 @@
             }
         },
         watch:{
+            show_technicians(){
+                this.newTransaction.technician = null;
+            },
             'newTransaction.branch':function(){
                 this.getTechnicians();
                 this.getQueue();

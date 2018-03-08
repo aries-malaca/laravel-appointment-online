@@ -253,6 +253,7 @@
                         toastr.success("Schedule successfully added.");
                     })
                     .catch(function (error) {
+                        u.getSchedule();
                         XHRCatcher(error);
                     });
             },

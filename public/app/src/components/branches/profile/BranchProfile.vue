@@ -167,7 +167,7 @@
                     <!--end tab-pane-->
                     <div class="tab-pane" id="transactions"></div>
                     <!--end tab-pane-->
-                    <schedules @refresh_branch="getBranch" :branch="branch" v-if="branch.id !== undefined"></schedules>
+                    <schedules @refresh_branch="refreshBranch" :branch="branch" v-if="branch.id !== undefined"></schedules>
                     <reviews></reviews>
                     <!--end tab-pane-->
                 </div>
@@ -220,7 +220,7 @@
                 this.$store.commit('branches/updateViewingBranch', false);
             },
             refreshBranch:function(){
-                u.$socket.emit('refreshModel', 'branches');
+                this.$socket.emit('refreshModel', 'branches');
                 this.getBranch();
             },
             refreshList(){

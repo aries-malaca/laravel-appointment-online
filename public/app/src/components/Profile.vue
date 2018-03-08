@@ -104,6 +104,18 @@
                                         </div>
                                     </div>
 
+                                    <div class="row" v-if="profile.user_data !== undefined">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Notifications</label>
+                                                <div>
+                                                    <input type="checkbox" id="_email" value="email" v-model="profile.user_data.notifications" />
+                                                    <label for="_email">Email</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <my-devices-table/>
 
                                     <div class="margin-top-10" v-if="profile.username !== undefined">
@@ -195,6 +207,8 @@
         methods:{
             getProfile:function(){
                 this.profile = Object.assign({}, this.user);
+                if(this.profile.user_data.notifications === undefined)
+                    this.profile.user_data.notifications = [];
             },
             refreshProfile:function(){
                 this.$store.dispatch('fetchAuthenticatedUser');

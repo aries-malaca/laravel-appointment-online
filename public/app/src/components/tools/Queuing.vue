@@ -492,6 +492,7 @@
             moment:moment
         },
         mounted:function(){
+            this.$store.commit('updateQueuingBranch', null);
             this.$store.commit('updateTitle', 'Queuing');
             let v = this.$store.state.queuing_branch;
             let w = this.$store.state.queuing_date;

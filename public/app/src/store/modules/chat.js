@@ -7,7 +7,6 @@ export const chat = {
         is_visible:false
     },
     actions:{
-
     },
     mutations:{
         toggleVisibility(state){

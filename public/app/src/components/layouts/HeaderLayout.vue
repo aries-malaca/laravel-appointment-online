@@ -26,34 +26,27 @@
                         <!-- DOC: Apply "dropdown-hoverable" class after "dropdown" and remove data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to enable hover dropdown mode -->
                         <!-- DOC: Remove "dropdown-hoverable" and add data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to the below A element with dropdown-toggle class -->
                         <li class="dropdown dropdown-extended dropdown-notification dropdown-dark" id="header_notification_bar">
-                            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                               @click="seenNotifications" data-close-others="true">
                                 <i class="icon-bell"></i>
-                                <span class="badge badge-success"> 7 </span>
+                                <span v-if="unread_notifications.length > 0" class="badge badge-success"> {{ unread_notifications.length }} </span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="external">
                                     <h3>
-                                        <span class="bold">12 pending</span> notifications</h3>
+                                        <span v-if="unread_notifications.length > 0" class="bold">{{ unread_notifications.length }} unread notifications </span>
+                                    </h3>
                                     <router-link to="/notifications">view all</router-link>
                                 </li>
                                 <li>
                                     <ul class="dropdown-menu-list scroller" style="height: 250px;" data-handle-color="#637283">
-                                        <li>
+                                        <li v-for="notification in notifications" :style="notification.is_read===0?'background-color: papayawhip;':''">
                                             <a href="javascript:;">
-                                                <span class="time">14 hrs</span>
+                                                <span class="time" style="background: inherit">{{ moment(notification.created_at).fromNow() }}</span>
                                                 <span class="details">
                                             <span class="label label-sm label-icon label-info">
                                                 <i class="fa fa-bullhorn"></i>
-                                            </span> Application error. </span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="javascript:;">
-                                                <span class="time">2 days</span>
-                                                <span class="details">
-                                            <span class="label label-sm label-icon label-danger">
-                                                <i class="fa fa-bolt"></i>
-                                            </span> Database overloaded 68%. </span>
+                                            </span>{{ notification.title }}</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -100,15 +93,48 @@
         computed:{
             user(){
                 return this.$store.state.user;
+            },
+            token(){
+                return this.$store.state.token;
+            },
+            notifications(){
+                return this.$store.state.notifications.notifications;
+            },
+            unread_notifications(){
+                return this.$store.getters['notifications/unread_notifications'];
             }
         },
         methods:{
             logout: function() {
                 this.$emit('logout')
-            }
+            },
+            seenNotifications(){
+                let u = this;
+                if(this.unreadCount>0)
+                    setTimeout(()=>{
+                        axios.get('/api/notification/seenNotifications?token=' + this.token)
+                            .then(function () {
+                                u.getNotifications();
+                            })
+                    }, 1000);
+            },
+            getNotifications(){
+                let u = this;
+                axios.get('/api/notification/getUserNotifications?token=' + this.token)
+                    .then(function (response) {
+                        u.$store.commit('notifications/updateNotifications', response.data);
+                    })
+            },
+            moment:moment
         },
         mounted(){
-            this.$store.dispatch('notifications/fetchNotifications');
+            let u = this;
+
+            this.getNotifications();
+            this.$options.sockets.refreshNotifications = function(data){
+                if(data.client_id === u.id)
+                    u.getNotifications();
+            };
         }
     }
 </script>

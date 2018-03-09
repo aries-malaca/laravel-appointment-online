@@ -44,7 +44,7 @@
             <strong><i class="icon icon-bubbles"></i>
                 <span v-if="user.is_client === 0">Chat System</span>
                 <span v-else>Customer Service</span>
-                <span v-show="unseen_messages>0" class="badge badge-success">{{ unseen_messages }}</span>
+                <span v-show="unread_messages.length >0" class="badge badge-success">{{ unread_messages.length }}</span>
             </strong>
         </div>
     </div>
@@ -58,9 +58,7 @@
         name: 'app',
         components: { HeaderLayout, SidebarLayout, ChatLayout },
         data:function(){
-            return {
-                unseen_messages:0
-            }
+            return {}
         },
         computed:{
             user(){
@@ -76,15 +74,16 @@
                 return this.$store.state.title;
             },
             chat_visibility(){
-                return this.$store.state.chat.is_visible;
+                return this.$store.state.messages.chat_visibility;
+            },
+            unread_messages(){
+                return this.$store.state.messages.unread_messages;
             }
         },
         methods:{
             toggleChat(){
-              this.$store.commit('chat/toggleVisibility');
-            },
-            refreshUnseen:function(count){
-                this.unseen_messages = count;
+                this.$store.commit('messages/toggleVisibility', true);
+                $("body").addClass("page-quick-sidebar-open");
             },
             resendConfirmation:function(event){
                 var $btn = $(event.target);
@@ -168,9 +167,6 @@
             title(){
                 document.title = 'LAY-BARE Online | '+ this.title;
             },
-            chat_visibility(){
-                $("body").toggleClass("page-quick-sidebar-open");
-            }
         }
     }
 </script>

@@ -25,8 +25,8 @@
                         <li class="nav-item">
                             <h3>Serving:</h3>
                         </li>
-                        <li class="nav-item" v-for="item in clients" v-if="item.status==='serving'">
-                            <span class="serving bold">@{{ item.transaction.id }}</span>
+                        <li class="nav-item" v-for="item in clients" v-if="item.status === 'serving'">
+                            <span class="serving bold">@{{ item.client_name }}</span>
                         </li>
                     </ul>
                 </nav>
@@ -34,8 +34,7 @@
             <main class="row-fluid">
                 <div class="col-lg-3">
                     <h1 class="brown-text bold"> {{ $branch['branch_name'] }}</h1>
-                    <div class="item" v-bind:class="item.status" v-if="item.status!=='serving'"
-                            v-for="item in clients">
+                    <div class="item" v-bind:class="item.status" v-if="item.status !== 'serving'" v-for="item in clients">
                         <div class="row">
                             <div class="col-sm-6">
                                 <h2 class="bold uppercase">@{{ item.client_name }}</h2>

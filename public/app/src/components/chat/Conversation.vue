@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div class="page-quick-sidebar-chat-user-form" style="padding-top:0px;">
+            <div class="page-quick-sidebar-chat-user-form" style="position: fixed;bottom: 0px;">
                 <div style="padding:5px 0px 5px;font-size:11px;font-style: italic" v-bind:style="!is_typing?'color:#f2f6f9':''">
                     {{ partner.first_name }} is typing a message...
                 </div>
@@ -52,20 +52,36 @@
 <script>
     export default{
         name:'Conversation',
-        props:['partner','messages'],
         data:function(){
             return{
                 newMessage:{
                     body:''
                 },
-                typing_stamp: 0,
+                typing_stamp: 50,
                 now:50,
                 timer:false
             }
         },
         methods:{
             hideConversation:function(){
-                this.$emit('showConversation', false, null);
+                this.$store.commit('messages/updatePartner', false);
+                this.$store.commit('messages/updateMessages', []);
+            },
+            getMessages(){
+                let u = this;
+                axios.get('../../api/message/getConversation/'+ this.partner.id +'?token='+this.token)
+                    .then(function (response) {
+                        u.$store.commit('messages/updateMessages', response.data);
+                        $(".page-quick-sidebar-chat-user-messages").slimScroll({height: (window.innerHeight-170) + "px"});
+                        $(".page-quick-sidebar-chat-users").slimScroll({destroy: true});
+                        setTimeout(()=>{
+                            $(".page-quick-sidebar-chat-user-messages").slimScroll({height:  (window.innerHeight-170) + "px", scrollTo: "1000000px"});
+                        },100);
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+
             },
             sendMessage:function(){
                 let u = this;
@@ -74,14 +90,14 @@
                 axios.post('/api/message/sendMessage?token=' + u.token, {body:this.newMessage.body,recipient_id:this.partner.id})
                     .then(function () {
                         u.newMessage.body = '';
-                        u.$emit('refreshMessages');
+                        u.getMessages();
                         u.$socket.emit('newMessage', u.partner.id, u.user.id);
                         $btn.button('reset');
                     })
                     .catch(function (error) {
                         $btn.button('reset');
-                        XHRCatcher(error);
                         u.newMessage.body = '';
+                        XHRCatcher(error);
                     });
             },
             keyPress:function(event){
@@ -92,37 +108,45 @@
                 let u = this;
                 axios.post('/api/message/deleteConversation?token=' + this.token, {recipient_id:this.partner.id})
                     .then(function () {
-                        u.$emit('refreshMessages');
-                        u.$socket.emit('newMessage', u.partner.id, u.user.id);
+                        u.getMessages();
+                        u.$socket.emit('newMessage', u.partner.id, u.user.id, 'delete');
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
             },
-            moment:moment
+            moment:moment,
+        },
+        mounted(){
+            let u = this;
+            this.$options.sockets.notifyTyping = function(data){
+                if(data.recipient_id===u.user.id && this.partner.id===data.sender_id) {
+                    u.typing_stamp = Number(moment().format('X'));
+                    setTimeout(()=>{
+                        u.typing_stamp = 50;
+                    },300);
+                }
+            };
+
+            this.$options.sockets.newMessage = function(data){
+                if(data.recipient_id === u.user.id)
+                    u.getMessages();
+            };
         },
         watch:{
-            'partner.id':function(){
-                let u = this;
-                this.$options.sockets.notifyTyping = function(data){
-                    if(data.recipient_id===u.user.id && this.partner.id===data.sender_id)
-                        u.typing_stamp = Number(moment().format('X'));
-                };
-            },
-            messages:function(){
-                this.typing_stamp = 0;
-                let u = this;
-                this.timer = setInterval(function(){
-                    u.now = Number(moment().format("X"));
-                },200);
-            },
             'newMessage.body':function(){
                 this.$socket.emit('notifyTyping', this.partner.id, this.user.id);
+            },
+            partner(){
+                if(this.partner !== false)
+                    this.getMessages();
+                else
+                    $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
             }
         },
         computed:{
             is_typing:function(){
-                return (Number(this.now) - this.typing_stamp) < 2;
+                return (Number(this.now) !== this.typing_stamp) ;
             },
             user(){
                 return this.$store.state.user;
@@ -132,6 +156,12 @@
             },
             configs(){
                 return this.$store.state.configs;
+            },
+            partner(){
+                return this.$store.state.messages.partner;
+            },
+            messages(){
+                return this.$store.state.messages.messages;
             }
         },
     }

@@ -144,8 +144,7 @@ Route::get('/message/getConversation/{partner_id}', 'MessageController@getConver
 Route::post('/message/sendMessage', 'MessageController@sendMessage');
 Route::post('/message/deleteConversation', 'MessageController@deleteConversation');
 Route::post('/message/seenMessages', 'MessageController@seenMessages');
-Route::get('/message/getContactList', 'MessageController@getContactList');
-Route::get('/message/countUnseenMessages/{partner_id}', 'MessageController@countUnseenMessages');
+Route::get('/message/getUnreadMessages', 'MessageController@getUnreadMessages');
 Route::get('/message/getLastMessage/{sender_id}', 'MessageController@getLastMessage');
 
 Route::get('/faq/getFAQs', 'FAQController@getFAQs');
@@ -182,10 +181,12 @@ Route::post('/campaign/sendCampaign', 'CampaignController@sendCampaign');
 //contact
 Route::get('/contact/importContacts/{file}/{extension}', 'ContactController@importContacts');
 Route::get('/contact/getContacts', 'ContactController@getContacts');
+Route::get('/contact/getContactList', 'ContactController@getContactList');
 //
 
 //notifications
 Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
+Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
 //
 //mobile
 //flag = active:string

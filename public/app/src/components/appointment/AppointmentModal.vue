@@ -263,7 +263,7 @@
                     </div>
                     <div class="modal-footer" v-if="appointment.waiver_data !== undefined">
                         <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
-                        <a v-if="appointment.waiver_data.signature !== null" target="_blank" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
+                        <a target="_blank" v-show="appointment.waiver_data.questions !== undefined" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
                         <button type="button" @click="closeModal()" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>

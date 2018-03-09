@@ -106,12 +106,20 @@
                     conditions.
                 </p>
 
-                <div style="padding:20px">
+
+                <div style="padding:20px" >
+
                     <div style="width:50%;float:left">
-                        <img style="height:50px; width:100px" src="{{ $data->signature }}">
+                        @if( $data->signature != null)
+                        <img style="height:50px; width:100px" src="{{ $data->signature }}"/>
+                        @else
+                        <img style="height:50px; width:100px" src="../../images/na.png"/>
+                        @endif
                         <br>
                         {{ $client->username }}
+
                     </div>
+
                     <div style="width:50%;float:left">
                         <p>
                             <u>{{ date('m/d/Y h:i A', strtotime($appointment_date)) }}</u>

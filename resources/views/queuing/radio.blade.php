@@ -141,7 +141,7 @@
         <script src="../../theme/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
         <!-- END CORE PLUGINS -->
 
-        <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
         <script src="https://unpkg.com/vue@2.5.13/dist/vue.js" type="text/javascript"></script>
         <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script type="text/javascript" src="../../js/helpers.js"></script>

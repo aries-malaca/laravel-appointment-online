@@ -5,13 +5,18 @@ export const notifications = {
         notifications: [],
     },
     actions:{
-        fetchNotifications(context){
-            axios.get('/api/product/getProducts')
-                .then(function (response) {
-                    context.commit('updateProducts', response.data);
-                })
-        },
+
+    },
+    getters:{
+        unread_notifications(state){
+            return state.notifications.filter((item)=>{
+                return item.is_read === 0;
+            });
+        }
     },
     mutations:{
+        updateNotifications(state, notifications){
+            state.notifications = notifications;
+        }
     }
 };

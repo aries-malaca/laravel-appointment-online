@@ -6,7 +6,7 @@
         <div class="page-quick-sidebar">
             <ul class="nav nav-tabs">
                 <li class="active">
-                    <a @click="show_conversation = false" data-target="#quick_sidebar_tab_1" data-toggle="tab"> Messenger </a>
+                    <a data-target="#quick_sidebar_tab_1" data-toggle="tab"> Messenger </a>
                 </li>
                 <li>
                     <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab"> Settings </a>
@@ -14,12 +14,9 @@
             </ul>
             <div class="tab-content">
                 <div class="tab-pane active page-quick-sidebar-chat"
-                     v-bind:class="show_conversation?'page-quick-sidebar-content-item-shown':''" id="quick_sidebar_tab_1">
-                    <contact-list @showConversation="showConversation" :show_search="!show_conversation"
-                                  @refreshUnseen="refreshUnseen"/>
-
-                    <conversation @showConversation="showConversation" @refreshMessages="getMessages"
-                                  :messages="messages" :partner="partner"/>
+                     v-bind:class="partner !== false ?'page-quick-sidebar-content-item-shown':''" id="quick_sidebar_tab_1">
+                    <contact-list/>
+                    <conversation/>
                 </div>
                 <div class="tab-pane page-quick-sidebar-settings" id="quick_sidebar_tab_3">
 
@@ -47,29 +44,72 @@
                 return this.$store.state.configs;
             },
             chat_visibility(){
-                return this.$store.state.chat.is_visible;
-            }
-        },
-        data:function(){
-            return {
-                show_conversation:false,
-                partner:{},
-                messages:[],
-                unseen_messages:0
+                return this.$store.state.messages.chat_visibility;
+            },
+            partner(){
+                return this.$store.state.messages.partner;
+            },
+            contacts(){
+                return this.$store.state.messages.contacts;
             }
         },
         methods:{
             toggleChat(){
-                this.$store.commit('chat/toggleVisibility');
+                this.$store.commit('messages/toggleVisibility', false);
+                this.$store.commit('messages/updatePartner', false);
+                $("body").removeClass("page-quick-sidebar-open");
+            },
+            getContactList:function(){
+                let u = this;
+                axios.get('../../api/contact/getContactList?token=' + this.token)
+                    .then(function (response) {
+                        u.$store.commit('messages/updateContactList', response.data);
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
+            getUnreadMessages(){
+                let u = this;
+                axios.get('../../api/message/getUnreadMessages?token=' + this.token)
+                    .then(function (response) {
+                        response.data.forEach((i)=>{
+                            u.$store.commit('messages/addUnreadMessage', i );
+                        });
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
+            seenMessages:function(){
+                let u = this;
+                axios.post('/api/message/seenMessages?token=' + this.token, {sender_id:this.partner.id})
+                    .then(function () {
+                        u.$store.commit('messages/removeUnreadMessages', u.partner.id);
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             },
             notifyMe:function(sender_id){
                 let u = this;
                 axios.get('../../api/message/getLastMessage/'+ sender_id +'?token='+this.token)
                     .then(function (response) {
                         if(response.data.message !== undefined){
-                            let e = response;
                             notify(response.data.first_name, response.data.message, '../../images/users/' + response.data.user_picture, function(){
-                                u.showConversation(true, e.data);
+                                u.$store.commit('messages/toggleVisibility', true);
+
+                                setTimeout(()=>{
+                                    var partner = u.contacts.find((i)=>{
+                                        return (i.id === sender_id)
+                                    });
+
+                                    if(partner !== undefined) {
+                                        u.$store.commit('messages/updatePartner', partner);
+                                        $("body").addClass("page-quick-sidebar-open");
+                                    }
+                                },100);
+
                             });
                         }
                     })
@@ -77,59 +117,34 @@
                         XHRCatcher(error);
                     });
             },
-            refreshUnseen:function(count){
-                this.$emit('refreshUnseen', count);
-            },
-            showConversation:function(value, user){
-                this.show_conversation = value;
-
-                if(value){
-                    this.partner = user;
-                    this.seenMessages();
-                }
-            },
-            getMessages:function(){
-                if(this.partner.id === undefined || !this.show_conversation){
-                    return false;
-                }
-                let u = this;
-                axios.get('../../api/message/getConversation/'+ this.partner.id +'?token='+this.token)
-                    .then(function (response) {
-                        u.messages = response.data;
-                        $(".page-quick-sidebar-chat-user-messages").slimScroll({scrollTo: "1000000px"});
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
-                    });
-            },
-            seenMessages:function(){
-                axios.post('/api/message/seenMessages?token=' + this.token, {sender_id:this.partner.id})
-                    .then(function () {
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
-                    });
-            }
-        },
-        watch:{
-            'partner':function(){
-                this.messages = [];
-                this.getMessages();
-            }
         },
         mounted:function(){
             let u = this;
+            this.getContactList();
+            this.getUnreadMessages();
 
             this.$options.sockets.newMessage = function(data){
-                if(data.recipient_id === u.user.id)
-                    u.getMessages();
-
-                if(data.sender_id === u.partner.id && u.show_conversation)
+                if(data.sender_id === u.partner.id)
                     u.seenMessages();
 
-                if((u.partner.id !== data.sender_id || !u.show_conversation )&& data.recipient_id === u.user.id)
-                    u.notifyMe(data.sender_id);
+                if(data.action === 'delete')
+                    u.$store.commit('messages/removeUnreadMessages', data.sender_id);
+                else{
+                    if((u.partner.id !== data.sender_id)&& data.recipient_id === u.user.id) {
+                        u.notifyMe(data.sender_id);
+                        u.$store.commit('messages/addUnreadMessage', data);
+                    }
+                }
+
             };
+
+            $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
+        },
+        watch:{
+            partner(){
+                if(this.partner !== false)
+                    this.seenMessages();
+            }
         }
     }
 </script>

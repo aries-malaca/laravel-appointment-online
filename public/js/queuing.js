@@ -6,10 +6,12 @@ socket.on('refreshAppointments', function(data){
     }
 });
 
-socket.on('callItem', function(data){
-    if(Number(document.getElementById("branch_id").value) == data.branch_id){
-        vue_queuing.getAppointments();
-        new Audio('../../../audio/bell.ogg').play();
+socket.on('callClient', function(data){
+    if(Number(document.getElementById("branch_id").value) == data.branch_id) {
+        if(data.action === 'call')
+            new Audio('../../../audio/bell.ogg').play();
+
+        vue_queuing.refresh();
     }
 });
 // the instance should be accessible by other objects...
@@ -21,6 +23,8 @@ var vue_queuing = new Vue({
         branch_id: Number(document.getElementById("branch_id").value),
         current_time:moment().format("MM/DD/YYYY hh:mm:ss A"),
         appointments:[],
+        calling:[],
+        serving:[],
         show:true,
         current_image:1,
         limit:22
@@ -42,29 +46,13 @@ var vue_queuing = new Vue({
                     });
                 });
         },
-        getStatus:function(items){
-            for(var x=0;x<items.length;x++){
-                if(this.isOnCall(items[x]))
-                    return 'calling';
-
-                if(this.isOnServe(items[x]))
-                    return 'serving';
-            }
-
-            return 'pending';
-        },
-        isOnCall:function(item){
-            return (Number(moment().format('X'))- item.item_data.called)<60 && !this.isOnServe(item);
-        },
-        isOnServe:function(item){
-            return item.serve_time !== null && item.item_status == 'reserved';
-        },
-        hasPending:function(items){
-            for(var x=0;x<items.length;x++){
-                if(items[x].item_status === 'reserved')
-                    return true
-            }
-            return false;
+        refresh(){
+            let u = this;
+            axios.get('https://lbo-express.azurewebsites.net/api/queuing/' +this.branch_id)
+                .then(function (response) {
+                    u.calling = response.data.calling;
+                    u.serving = response.data.serving;
+                });
         },
         nextImage:function(){
             let u = this;
@@ -77,23 +65,47 @@ var vue_queuing = new Vue({
 
                 u.show = true;
             },100);
+        },
+        getStatus:function(item){
+            let find_s = this.serving.find(function(i){
+                return item.client_id === i.client_id;
+            });
+            let find_c = this.calling.find(function(i){
+                return item.client_id === i.client_id;
+            });
+
+            if(find_s !== undefined)
+                return 'serving';
+            if(find_c !== undefined)
+                return 'calling';
+
+            return 'pending';
+        },
+        exists:function(clients, appointment) {
+            return clients.filter(function(item){
+                return item.client_id === appointment.client_id
+            }).length > 0;
         }
     },
     computed:{
         clients:function(){
+            let u = this;
             var clients = [];
             for(var x=0;x<this.appointments.length;x++){
-                if(this.hasPending(this.appointments[x].items))
+                if(!this.exists(clients, this.appointments[x]))
                     clients.push({
                         client_name: this.appointments[x].client_shortname,
                         transaction: this.appointments[x].items[0],
                         transaction_time: moment(this.appointments[x].items[0].book_start_time).format("hh:mm A"),
                         technician_name: this.appointments[x].technician_shortname,
-                        status:this.getStatus(this.appointments[x].items)
+                        client_id:this.appointments[x].client_id
                     });
             }
 
-            return clients.sort(function(a, b) {
+            return clients.map(function(item){
+                    item.status = u.getStatus(item);
+                    return item;
+                }).sort(function(a, b) {
                 var nameA = a.status.toUpperCase(); // ignore upper and lowercase
                 var nameB = b.status.toUpperCase(); // ignore upper and lowercase
                 if (nameA < nameB)
@@ -101,7 +113,7 @@ var vue_queuing = new Vue({
                 if (nameA > nameB)
                     return 1;
             }).slice(0, 6);
-        }
+        },
     },
     mounted:function(){
         let u = this;

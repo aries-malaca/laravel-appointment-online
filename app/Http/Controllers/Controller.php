@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Client;
 use App\Config;
+use App\TextMessage;
 use App\Menu;
 use Mail;
 use Curl;

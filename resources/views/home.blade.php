@@ -48,7 +48,7 @@
     <![endif]-->
     <!-- BEGIN CORE PLUGINS -->
     <script src="../../theme/global/plugins/jquery.min.js" type="text/javascript"></script>
-    <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="../../js/jquery-ui.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/js.cookie.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
@@ -75,7 +75,7 @@
     <script src="../../theme/global/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script type="text/javascript" src="../../js/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>
     <script type="text/javascript" src="../../js/map.js"></script>
     <script type="text/javascript" src="../../js/croppie.js"></script>

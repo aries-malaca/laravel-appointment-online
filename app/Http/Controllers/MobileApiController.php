@@ -561,11 +561,17 @@ class MobileApiController extends Controller{
             User::where('id', $user['id'])
                         ->update(['user_data'=> json_encode($user_data)]);
 
-            Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
-                $message->from('notification@system.lay-bare.com', 'Lay Bare Online - Mobile Application');
-                $message->subject('Password Reset');
-                $message->to($user['email'], $user['first_name']);
-            });
+            // Mail::send('email.reset_password', ["user"=>$user, "generated"=>$generated], function ($message) use($user) {
+            //     $message->from('notification@system.lay-bare.com', 'Lay Bare Online - Mobile Application');
+            //     $message->subject('Password Reset');
+            //     $message->to($user['email'], $user['first_name']);
+            // });
+                        
+            //mmya try ko
+            $headers = array("subject"=>'Password Reset',
+                "to"=> [["email"=>$user['email'], "name"=> $user['username']]]);
+            $this->sendMail('email.reset_password', ["user"=>$user, "generated"=>$generated], $headers);
+
             return response()->json(["result"=>"success"]);
         }
         return response()->json([
@@ -824,8 +830,8 @@ class MobileApiController extends Controller{
         $arrayTransaction       = array();
         $queryBranchSchedule    = BranchSchedule::where("branch_id",$branch_id)
                                 ->orderBy('created_at','desc')->get()->toArray();                            
-        $technicians         = $this->getScheduledTechnicians($branch_id, $app_reserved);
-         foreach ($queryBranchSchedule as $key => $value) {
+        $technicians            = $this->getScheduledTechnicians($branch_id, $app_reserved);
+        foreach ($queryBranchSchedule as $key => $value) {
             $date_start     = $value["date_start"];
             $date_end       = $value["date_end"];
             $schedule_type  = $value["schedule_type"];  

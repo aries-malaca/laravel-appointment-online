@@ -419,7 +419,7 @@ class KioskController extends Controller{
                         $title      = "Lay Bare Online Account Confirmation";
                         $recipient  = $user->email;
                         $content    = "Dear ".$user->username;
-                        $countent+="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                        $countent.="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
                                     Here's your temporary credentials:<br>
                                     Username: ".$user->email."
                                     Password: ".$tempPassword."<br><br>
@@ -535,7 +535,7 @@ class KioskController extends Controller{
                 $title      = "Lay Bare Online Account Confirmation";
                 $recipient  = $user->email;
                 $content    = "Dear ".$user->username;
-                $countent+="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                $countent.="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
                             Here's your temporary credentials:<br>
                             Username: ".$user->email."
                             Password: ".$tempPassword."<br><br>

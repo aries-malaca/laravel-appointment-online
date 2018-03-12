@@ -371,7 +371,7 @@ class KioskController extends Controller{
                     $boss_fname     = $value["client_fname"];
                     $boss_lname     = $value["client_lname"];
                     $boss_mobile    = $value["client_mobile"];
-                
+                    $tempPassword   = bcrypt(randomPassword(10));
                     //save user from boss
                     $user               = new User;
                     $user->first_name   = $boss_fname;
@@ -381,7 +381,7 @@ class KioskController extends Controller{
                     $user->user_mobile  = $boss_mobile;
                     $user->gender       = $boss_gender;
                     $user->email        = $boss_email;
-                    $user->password     = bcrypt(12345);
+                    $user->password     = $tempPassword;
                     $user->user_address = "";
                     $user->is_confirmed = 0;
                     $user->is_active    = 0;
@@ -411,7 +411,26 @@ class KioskController extends Controller{
                                 "client_fname"      => $user->first_name,
                                 "client_lname"      => $user->last_name
                             );
+
                     $response["user_data_fetch"]    = $user_self_data;
+
+                    if($email != null || $email != ""){
+
+                        $title      = "Lay Bare Online Account Confirmation";
+                        $recipient  = $user->email;
+                        $content    = "Dear ".$user->username;
+                        $countent+="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                                    Here's your temporary credentials:<br>
+                                    Username: ".$user->email."
+                                    Password: ".$tempPassword."<br><br>
+                                    After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
+                                    Login your account once Confirmation is done.";
+
+                        $content_data = ["content"=>$content, "subject"=>$title];
+                        $headers = array("subject"=>$title,"to"=> [["email"=>$recipient, "name"=> $user->username]]);
+                        $this->sendMail('email.kiosk_confirmation_email', $content_data, $headers);
+
+                    }
                     return response()->json($response);   
                 }  
             }
@@ -435,7 +454,8 @@ class KioskController extends Controller{
         $arrayClientResult              = array();
         $response                       = array();    
         $arraySelfResult                = array();
-        $countExist  = 0;
+        $countExist   = 0;
+        $tempPassword = bcrypt(randomPassword(10));
 
         $queryCheckIfUserExistByBday    = DB::table("users")
                                             ->where('first_name', 'LIKE','%'.$first_name.'%')
@@ -468,7 +488,7 @@ class KioskController extends Controller{
         }
 
         if($countExist > 0){
-            return response()->json(["result"=>"failed","error"=>"Sorry, credentials is already exist. Please contact Branch Receptionist / Supervisor to search your account"],400);      
+            return response()->json(["result"=>"failed","error"=>"Sorry! It looks like you already visited Lay Bare before. Do you want to search your credentials?"],400);      
         }
         else{
 
@@ -479,7 +499,7 @@ class KioskController extends Controller{
             $user->username     = $first_name .' ' . $last_name;
             $user->user_mobile  = $contact;
             $user->email        = $email;
-            $user->password     = bcrypt(12345);
+            $user->password     = $tempPassword;
             $user->gender       = $gender;
             $user->user_address = "";
             $user->is_confirmed = 0;
@@ -509,6 +529,25 @@ class KioskController extends Controller{
                         "client_fname"      => $user->first_name,
                         "client_lname"      => $user->last_name
                     );
+           
+            if($email != null || $email != ""){
+
+                $title      = "Lay Bare Online Account Confirmation";
+                $recipient  = $user->email;
+                $content    = "Dear ".$user->username;
+                $countent+="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                            Here's your temporary credentials:<br>
+                            Username: ".$user->email."
+                            Password: ".$tempPassword."<br><br>
+                            After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
+                             Login your account once Confirmation is done.";
+
+                $content_data = ["content"=>$content, "subject"=>$title];
+                $headers = array("subject"=>$title,"to"=> [["email"=>$recipient, "name"=> $user->username]]);
+                $this->sendMail('email.kiosk_confirmation_email', $content_data, $headers);
+
+            }
+
             $response["user_data_fetch"]    =  $arrayClientResult;
             $response["user_self_data"]     =  $user_self_data;
 
@@ -716,6 +755,7 @@ class KioskController extends Controller{
                         ->where("transactions.transaction_status","=","reserved")
                         ->select('users.id as client_id','users.email','users.gender','users.username as full_name','users.birth_date','users.user_mobile','users.user_picture','users.email','transactions.id as transaction_id','transactions.reference_no','transactions.platform','transactions.waiver_data')
                         ->orderBy('transactions.transaction_datetime', 'asc')
+                        ->orderBy('transactions.waiver_data', '{"signature":null}')
                         ->get()->toArray();
         foreach ($queryUser as $key => $value) {
 
@@ -723,7 +763,8 @@ class KioskController extends Controller{
             $objectWaiver   = json_decode($value["waiver_data"]);
             $ifWaiverSigned = false;
             $arrayItems[]     = array();
-            if($objectWaiver->signature == null){
+           
+            if($value["waiver_data"] == '{"signature":null}' && $objectWaiver->signature == null){
                 $ifWaiverSigned = false;
             }
             else{
@@ -806,6 +847,15 @@ class KioskController extends Controller{
         return false;
     }
 
+
+    function randomPassword($len=10, $abc="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789") {
+        $letters = str_split($abc);
+        $str = "";
+        for ($i=0; $i<=$len; $i++) {
+            $str .= $letters[rand(0, count($letters)-1)];
+        }
+        return $str;
+    }
 
 
 }

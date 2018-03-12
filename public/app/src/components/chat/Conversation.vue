@@ -38,7 +38,8 @@
                     {{ partner.first_name }} is typing a message...
                 </div>
                 <div class="input-group">
-                    <input type="text" id="txt" class="form-control" @keypress="keyPress($event)" v-model="newMessage.body" placeholder="Type a message here...">
+                    <input type="text" id="txt" class="form-control" @keypress="keyPress($event)" v-model="newMessage.body"
+                           placeholder="Type a message here...">
                     <div class="input-group-btn">
                         <button type="button" id="btn" class="btn green" @click="sendMessage" data-loading-text="Sending...">
                             <i class="fa fa-send"></i>
@@ -142,6 +143,8 @@
                     this.getMessages();
                 else
                     $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
+
+                document.getElementById("txt").focus();
             }
         },
         computed:{

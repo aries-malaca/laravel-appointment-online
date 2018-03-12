@@ -63,7 +63,7 @@ class CampaignController extends Controller{
             if($request->input('flag') == 'preview')
                 return response()->json(['message'=>$message]);
 
-            if($response = $this->sendSMS($message, $mobile, $title, $api)){
+            if($response = $this->sendSMS($message, $mobile, $title, $api, $this->getGlobeShortCode($mobile) )){
                 return response()->json([
                     "result"=>"success",
                     "recipient"=>$recipient,
@@ -105,5 +105,12 @@ class CampaignController extends Controller{
         $url = '@(http)?(s)?(://)?(([a-zA-Z])([-\w]+\.)+([^\s\.]+[^\s]*)+[^,.\s])@';
         $string = preg_replace($url, '<a href="http$2://$4" target="_blank" title="$0">$0</a>', $string);
         return $string;
+    }
+
+    function getGlobeShortCode($number){
+        if(!in_array($number, config('app.home_network_prefixes') ))
+            //return env('GLOBE_API_SHORT_CODE_CROSS_TELCO');
+
+        return env('GLOBE_API_SHORT_CODE');
     }
 }

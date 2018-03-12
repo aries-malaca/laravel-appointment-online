@@ -418,8 +418,7 @@ class KioskController extends Controller{
 
                         $title      = "Lay Bare Online Account Confirmation";
                         $recipient  = $user->email;
-                        $content    = "Dear ".$user->username;
-                        $countent.="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                        $content    = "Dear ".$user->username."<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
                                     Here's your temporary credentials:<br>
                                     Username: ".$user->email."
                                     Password: ".$tempPassword."<br><br>
@@ -534,13 +533,12 @@ class KioskController extends Controller{
 
                 $title      = "Lay Bare Online Account Confirmation";
                 $recipient  = $user->email;
-                $content    = "Dear ".$user->username;
-                $countent.="<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
-                            Here's your temporary credentials:<br>
-                            Username: ".$user->email."
-                            Password: ".$tempPassword."<br><br>
-                            After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
-                             Login your account once Confirmation is done.";
+                $content    = "Dear ".$user->username."<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                        Here's your temporary credentials:<br>
+                        Username: ".$user->email."
+                        Password: ".$tempPassword."<br><br>
+                        After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
+                        Login your account once Confirmation is done.";
 
                 $content_data = ["content"=>$content, "subject"=>$title];
                 $headers = array("subject"=>$title,"to"=> [["email"=>$recipient, "name"=> $user->username]]);

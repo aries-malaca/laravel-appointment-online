@@ -306,9 +306,9 @@ class Controller extends BaseController{
         });
     }
 
-    function sendSMS($message, $mobile, $title, $api){
+    function sendSMS($message, $mobile, $title, $api, $shortcode){
         // Send a POST request to: http://www.foo.com/bar
-        $response = Curl::to('https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/'.env('GLOBE_API_SHORT_CODE').'/requests')
+        $response = Curl::to('https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/'.$shortcode.'/requests')
             ->withData( array( 'app_id' => env('GLOBE_API_APP_ID'),
                 'app_secret' => env('GLOBE_API_APP_SECRET'),
                 'message' => $message,

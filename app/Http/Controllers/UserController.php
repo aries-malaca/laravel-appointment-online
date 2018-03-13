@@ -227,7 +227,7 @@ class UserController extends Controller{
                     unset($user_data['verify_expiration']);
 
                     User::where('id', $user['id'])
-                        ->update(['is_confirmed'=>1 , 'user_data'=> json_encode($user_data)]);
+                        ->update(['is_confirmed'=>1 ,'is_active'=>1, 'user_data'=> json_encode($user_data)]);
                     $data = array("result"=>"success");
                 }
                 else

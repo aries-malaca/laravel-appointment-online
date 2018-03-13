@@ -289,8 +289,9 @@ class Controller extends BaseController{
         $notification->save();
     }
 
-    function sendMail($template, $content_data, $headers){
-        Mail::send($template, $content_data, function ($mail) use($headers) {
+    function sendMail($template, $content_data, $headers, $attachments=null){
+
+        Mail::send($template, $content_data, function ($mail) use($headers, $attachments) {
             $mail->from(env('MAIL_USERNAME'), env('APP_NAME'));
             $mail->subject($headers['subject']);
 
@@ -303,6 +304,9 @@ class Controller extends BaseController{
 
             if(env('APP_MAILING_BCC_DEV'))
                 $mail->bcc(env('APP_MAILING_DEV_ADDRESS'));
+            if($attachments !== null)
+                foreach($attachments as $att)
+                    $mail->attach($att);
         });
     }
 

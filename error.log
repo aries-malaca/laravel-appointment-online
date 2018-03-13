@@ -1,0 +1,4 @@
+[Tue Mar 13 13:01:10.743026 2018] [:error] [pid 1172:tid 139882764617472] [client 192.168.1.74:55049] SoftException in Application.cpp:249: File "/home/itdev/public_html/public/index.php" is writeable by group
+[Tue Mar 13 13:01:10.743220 2018] [core:error] [pid 1172:tid 139882764617472] [client 192.168.1.74:55049] End of script output before headers: index.php
+[Tue Mar 13 13:01:31.444846 2018] [:error] [pid 1172:tid 139882873722624] [client 192.168.1.74:55079] SoftException in Application.cpp:249: File "/home/itdev/public_html/public/index.php" is writeable by group, referer: http://192.168.1.71/
+[Tue Mar 13 13:01:31.444890 2018] [core:error] [pid 1172:tid 139882873722624] [client 192.168.1.74:55079] End of script output before headers: index.php, referer: http://192.168.1.71/

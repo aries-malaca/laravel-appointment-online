@@ -362,6 +362,7 @@ class KioskController extends Controller{
             if(count($queryBoss) > 0){
                 foreach ($queryBoss as $key => $value) {
 
+                    $generated      = md5(rand(1,600));
                     $boss_id        = $value["clientid"];
                     $boss_fullname  = $value["full_name"];
                     $boss_gender    = lcfirst($value["client_gender"]);
@@ -371,7 +372,7 @@ class KioskController extends Controller{
                     $boss_fname     = $value["client_fname"];
                     $boss_lname     = $value["client_lname"];
                     $boss_mobile    = $value["client_mobile"];
-                    $tempPassword   = bcrypt(randomPassword(10));
+                    $tempPassword   = $this->randomPassword(10);
                     //save user from boss
                     $user               = new User;
                     $user->first_name   = $boss_fname;
@@ -381,7 +382,7 @@ class KioskController extends Controller{
                     $user->user_mobile  = $boss_mobile;
                     $user->gender       = $boss_gender;
                     $user->email        = $boss_email;
-                    $user->password     = $tempPassword;
+                    $user->password     = bcrypt($tempPassword);
                     $user->user_address = "";
                     $user->is_confirmed = 0;
                     $user->is_active    = 0;
@@ -392,9 +393,10 @@ class KioskController extends Controller{
                     $user->user_picture = 'no photo ' . $boss_gender.'.jpg';
                     $user->level        = 0;
                     $user->user_data    = json_encode(array(
-                                            "home_branch"    => $branch_id,
-                                            "premier_status" => 0,
-                                            "boss_id"        => $boss_id
+                                            "home_branch"       => $branch_id,
+                                            "premier_status"    => 0,
+                                            "verify_key"        => $generated,
+                                            "verify_expiration" => time() + 300
                                             ));
                     $user->save();
                     $user_self_data[] = array(
@@ -411,25 +413,24 @@ class KioskController extends Controller{
                                 "client_fname"      => $user->first_name,
                                 "client_lname"      => $user->last_name
                             );
+                    if($boss_email != null || $boss_email != ""){
 
-                    $response["user_data_fetch"]    = $user_self_data;
-
-                    if($email != null || $email != ""){
-
+                        $recipient  = $boss_email;
+                        $linkUrl    = "http://192.168.1.225/register/verify?email=".$recipient."&key=".$generated;    
                         $title      = "Lay Bare Online Account Confirmation";
-                        $recipient  = $user->email;
-                        $content    = "Dear ".$user->username."<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                        $content    = "Dear ".$boss_fullname.", <br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
                                     Here's your temporary credentials:<br>
-                                    Username: ".$user->email."
-                                    Password: ".$tempPassword."<br><br>
-                                    After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
-                                    Login your account once Confirmation is done.";
+                                     Username: <strong>".$boss_email."</strong><br>
+                                    Password: <strong>".$tempPassword."</strong><br><br>
+                                    After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='".$linkUrl."' class='btn btn-primary'>VERIFY YOUR ACCOUNT</a> <br><br><br>
+                                    Login your account once Confirmation is done and change your password immediately.";
 
                         $content_data = ["content"=>$content, "subject"=>$title];
                         $headers = array("subject"=>$title,"to"=> [["email"=>$recipient, "name"=> $user->username]]);
                         $this->sendMail('email.kiosk_confirmation_email', $content_data, $headers);
 
                     }
+                    $response["user_data_fetch"]    = $user_self_data;
                     return response()->json($response);   
                 }  
             }
@@ -440,6 +441,7 @@ class KioskController extends Controller{
         }  
     }
 
+    
 
     public function saveNewUser(Request $request){
         
@@ -454,7 +456,7 @@ class KioskController extends Controller{
         $response                       = array();    
         $arraySelfResult                = array();
         $countExist   = 0;
-        $tempPassword = bcrypt(randomPassword(10));
+        $tempPassword = $this->randomPassword(10);
 
         $queryCheckIfUserExistByBday    = DB::table("users")
                                             ->where('first_name', 'LIKE','%'.$first_name.'%')
@@ -491,6 +493,7 @@ class KioskController extends Controller{
         }
         else{
 
+            $generated          = md5(rand(1,600));
             $user               = new User;
             $user->first_name   = $first_name;
             $user->middle_name  = "";
@@ -498,7 +501,7 @@ class KioskController extends Controller{
             $user->username     = $first_name .' ' . $last_name;
             $user->user_mobile  = $contact;
             $user->email        = $email;
-            $user->password     = $tempPassword;
+            $user->password     = bcrypt($tempPassword);
             $user->gender       = $gender;
             $user->user_address = "";
             $user->is_confirmed = 0;
@@ -510,8 +513,10 @@ class KioskController extends Controller{
             $user->birth_date   = $bday;
             $user->user_picture = 'no photo ' . $gender.'.jpg';
             $user->user_data    = json_encode(array(
-                                    "home_branch"    => $branch_id,
-                                    "premier_status" => 0
+                                    "home_branch"       => $branch_id,
+                                    "premier_status"    => 0,
+                                    "verify_key"        => $generated,
+                                    "verify_expiration" => time() + 300
                                     ));
             $user->save();
             $user_self_data = array(
@@ -531,14 +536,15 @@ class KioskController extends Controller{
            
             if($email != null || $email != ""){
 
-                $title      = "Lay Bare Online Account Confirmation";
                 $recipient  = $user->email;
-                $content    = "Dear ".$user->username."<br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
-                        Here's your temporary credentials:<br>
-                        Username: ".$user->email."
-                        Password: ".$tempPassword."<br><br>
-                        After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='' class='btn btn-success'>VERIFY YOUR ACCOUNT</a> <br><br><br><br>
-                        Login your account once Confirmation is done.";
+                $linkUrl    = "http://192.168.1.225/register/verify?email=".$recipient."&key=".$generated;    
+                $title      = "Lay Bare Online Account Confirmation";
+                $content    = "Dear ".$user->username.", <br><br>Thank you for for signing up to Lay Bare Online (Via Kiosk) <br><br><br>
+                            Here's your temporary credentials:<br>
+                             Username: <strong>".$user->email."</strong><br>
+                            Password: <strong>".$tempPassword."</strong><br><br>
+                            After receiving this email, please confirm your password by clicking the verify button to activate your account<br><a href='".$linkUrl."' class='btn btn-primary'>VERIFY YOUR ACCOUNT</a> <br><br><br>
+                            Login your account once Confirmation is done and change your password immediately.";
 
                 $content_data = ["content"=>$content, "subject"=>$title];
                 $headers = array("subject"=>$title,"to"=> [["email"=>$recipient, "name"=> $user->username]]);

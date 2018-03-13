@@ -5,6 +5,7 @@ use App\TextMessage;
 use App\TextTemplate;
 use Curl;
 use Validator;
+use Illuminate\Support\Facades\Storage;
 
 class CampaignController extends Controller{
 
@@ -43,7 +44,13 @@ class CampaignController extends Controller{
                 $content_data = ["recipient"=>$recipient, "content"=>$this->makeHyperlink($message), "subject"=>$title];
                 $headers = array("subject"=>$title,
                                  "to"=> [["email"=>$recipient['email'], "name"=> $recipient['first_name']]]);
-                $this->sendMail('email.common', $content_data, $headers);
+
+                if($request->input('disable_content') !== false)
+                    $template = 'email.blank';
+                else
+                    $template = 'email.common';
+
+                $this->sendMail($template, $content_data, $headers, $request->input('attachments'));
 
                 return response()->json([
                     "result"=>"success",
@@ -112,5 +119,10 @@ class CampaignController extends Controller{
             //return env('GLOBE_API_SHORT_CODE_CROSS_TELCO');
 
         return env('GLOBE_API_SHORT_CODE');
+    }
+
+    function getAttachments(){
+        $files = Storage::disk('public_root')->files('images/blast');
+        return response()->json($files);
     }
 }

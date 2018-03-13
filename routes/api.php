@@ -173,6 +173,7 @@ Route::get('/review/getReview/{id}', 'ReviewController@getReview');
 Route::post('/review/submitReview', 'ReviewController@submitReview');
 
 //sms
+Route::get('/campaign/getAttachments', 'CampaignController@getAttachments');
 Route::get('/campaign/getTemplates', 'CampaignController@getTemplates');
 Route::post('/campaign/sendCampaign', 'CampaignController@sendCampaign');
 //

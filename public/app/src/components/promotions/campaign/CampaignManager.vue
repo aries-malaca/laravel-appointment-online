@@ -43,6 +43,13 @@
                 </div>
                 <hr/>
                 <div class="row">
+                    <div class="col-md-12">
+                        <label>Attachments:</label>
+                        <vue-select v-model="attachments" :options="attachments_selection" multiple></vue-select>
+                    </div>
+                </div>
+                <hr/>
+                <div class="row">
                     <div class="col-md-6">
                         <label>Send via:</label>
                         <div>
@@ -73,6 +80,18 @@
                             </label>
                         </div>
                     </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Content Control:</label>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="disable_content" />
+                                <span>Attachment Only</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6"></div>
                 </div>
             </div>
             <div class="col-md-6">
@@ -131,12 +150,16 @@
     </div>
 </template>
 <script>
+    import VueSelect from 'vue-select';
     export default {
         name: 'CampaignManager',
+        components:{ VueSelect },
         data(){
             return{
                 contacts:[],
                 templates:[],
+                attachments:null,
+                attachments_selection:[],
                 source:'template',
                 custom_message:'',
                 selected_template:null,
@@ -145,6 +168,7 @@
                 title:'',
                 send_via:'sms',
                 force_sending:false,
+                disable_content:false,
             };
         },
         methods:{
@@ -171,9 +195,16 @@
                         u.templates = response.data;
                     });
             },
+            getAttachments(){
+                let u = this;
+                axios.get('/api/campaign/getAttachments')
+                    .then(function (response) {
+                        u.attachments_selection = response.data;
+                    });
+            },
             sendCampaign(recipient, flag){
                 let u = this;
-                axios.post('/api/campaign/sendCampaign?token=' + this.token, {message:this.message, recipient:recipient, send_via:this.send_via, force_sending:this.force_sending, flag:flag, title:this.title})
+                axios.post('/api/campaign/sendCampaign?token=' + this.token, {message:this.message, recipient:recipient, send_via:this.send_via, force_sending:this.force_sending, flag:flag, title:this.title, attachments:this.attachments, disable_content:this.disable_content})
                     .then(function (response) {
                         if(flag==='preview')
                             alert(response.data.message);
@@ -182,7 +213,7 @@
                             u.markAsSent(response.data.recipient, response.data.sent_message);
 
                             if(response.data.request_send_mail){
-                                axios.post('/api/campaign/sendCampaign?token=' + u.token, {message:response.data.sent_message, recipient:recipient, send_via:'email', force_sending:true, flag:'send', title:response.data.title})
+                                axios.post('/api/campaign/sendCampaign?token=' + u.token, {message:response.data.sent_message, recipient:recipient, send_via:'email', force_sending:true, flag:'send', title:response.data.title, attachments:u.attachments,  disable_content:u.disable_content})
                                     .then(function (res) {
                                         toastr.success(res.data.message);
                                     })
@@ -208,6 +239,7 @@
         mounted(){
             this.getContacts();
             this.getTemplates();
+            this.getAttachments();
         },
         watch:{
             selected_template(){
@@ -255,7 +287,8 @@
             },
             token(){
                 return this.$store.state.token;
-            }
+            },
+
         }
     }
 </script>

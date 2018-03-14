@@ -1,4 +1,4 @@
-var socket = io.connect('https://lbo-express.azurewebsites.net');
+/*var socket = io.connect('https://lbo-express.azurewebsites.net');
 
 socket.on('refreshAppointments', function(data){
     if(Number(document.getElementById("branch_id").value) == data.branch_id){
@@ -13,7 +13,7 @@ socket.on('callClient', function(data){
 
         vue_queuing.refresh();
     }
-});
+});*/
 // the instance should be accessible by other objects...
 var vue_queuing = new Vue({
     //inside the element with id main, vue_queing data, and methods will be accessible.
@@ -46,7 +46,7 @@ var vue_queuing = new Vue({
                     });
                 });
         },
-        refresh(){
+        refresh:function(){
             let u = this;
             axios.get('https://lbo-express.azurewebsites.net/api/queuing/' +this.branch_id)
                 .then(function (response) {
@@ -126,5 +126,9 @@ var vue_queuing = new Vue({
         },10000);
 
         this.getAppointments();
+        setInterval(function(){
+            u.getAppointments();
+            u.refresh();
+        }, 2000);
     }
 });

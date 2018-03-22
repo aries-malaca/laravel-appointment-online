@@ -113,7 +113,7 @@
                                     <h4>Branch Rating</h4>
                                     <star-rating :item-size="25"
                                                  inactive-color="#e4eadb"
-                                                 active-color="#67d21e"
+                                                 active-color="#92c740"
                                                  :read-only="true"
                                                  :increment="0.1"
                                                  text-class="starer"
@@ -381,7 +381,7 @@
         width:100%;
     }
     .starer{
-        color: #67d21e;
+        color: #92c740;
         font-size: 32px;
     }
 </style>

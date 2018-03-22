@@ -576,7 +576,8 @@
                                     services:this.branches[x].services,
                                     schedules:this.branches[x].schedules_original,
                                     branch_data:this.branches[x].branch_data,
-                                    branch_address:this.branches[x].branch_address
+                                    branch_address:this.branches[x].branch_address,
+                                    cluster_data:this.branches[x].cluster_data,
                                  });
                 }
                 return branches;
@@ -725,13 +726,16 @@
             },
             'newTransaction.technician':function(){
                 if(this.newTransaction.technician !==null){
-                    let u =this;
-                    axios.get(this.configs.GET_TECHNICIAN_ATTENDANCE+this.newTransaction.technician.employee_id+'/'+this.newTransaction.transaction_date)
-                        .then(function (response) {
-                            u.newTransaction.technician.attendance = response.data;
-                        }).catch(function(){
-                            u.newTransaction.technician.attendance = false;
-                        });
+                    let u = this;
+                    u.newTransaction.technician.attendance = false;
+
+                    if(this.newTransaction.branch.cluster_data.ems_supported)
+                        axios.get(this.newTransaction.branch.cluster_data.ems_server + this.configs.GET_TECHNICIAN_ATTENDANCE + this.newTransaction.technician.employee_id+'/'+this.newTransaction.transaction_date)
+                            .then(function (response) {
+                                u.newTransaction.technician.attendance = response.data;
+                            }).catch(function(){
+                                u.newTransaction.technician.attendance = false;
+                            });
                 }
             },
             toggle:function(){
@@ -743,19 +747,20 @@
                     branch:this.default_branch!==null?{
                         value: this.default_branch.value,
                         label : this.default_branch.label,
-                        rooms : this.default_branch.rooms,
+                        rooms : (this.default_branch.rooms=== undefined?0:this.default_branch.rooms),
                         products : this.default_branch.products,
                         services : this.default_branch.services,
                         schedules : this.default_branch.schedules,
                         branch_data : this.default_branch.branch_data,
-                        branch_address:this.default_branch.branch_address
+                        branch_address:this.default_branch.branch_address,
+                        cluster_data:this.default_branch.cluster_data,
                     }:null,
-                    client:this.default_client!==null?{ value: this.default_client.value,
+                    client:this.default_client !== null ? (this.default_client.value!==undefined? { value: this.default_client.value,
                                                         label : this.default_client.label,
                                                         gender : this.default_client.gender,
                                                         user_mobile: this.default_client.user_mobile,
-                                                        picture_html_big : this.default_client.picture_html_big}
-                                                        :null,
+                                                        picture_html_big : this.default_client.picture_html_big}: null
+                    ):null,
                     technician:null,
                     id:0,
                     transaction_date:moment().format("YYYY-MM-DD"),

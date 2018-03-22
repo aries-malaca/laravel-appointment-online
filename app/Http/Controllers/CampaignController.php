@@ -70,12 +70,12 @@ class CampaignController extends Controller{
             if($request->input('flag') == 'preview')
                 return response()->json(['message'=>$message]);
 
-            if($response = $this->sendSMS($message, $mobile, $title, $api, $this->getGlobeShortCode($mobile) )){
+            if($response = $this->sendSMS(strip_tags($message), $mobile, $title, $api, $this->getGlobeShortCode($mobile) )){
                 return response()->json([
                     "result"=>"success",
                     "recipient"=>$recipient,
                     "title"=>$title,
-                    "sent_message"=> $message,
+                    "sent_message"=> strip_tags($message),
                     "message"=>"SMS Successfully sent to " . $recipient['first_name'] .' '. $recipient['last_name'],
                     "request_send_mail"=> $request->input('send_via') == 'sms+email',
                 ]);

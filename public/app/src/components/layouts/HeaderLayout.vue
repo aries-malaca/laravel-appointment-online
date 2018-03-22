@@ -27,7 +27,7 @@
                         <!-- DOC: Remove "dropdown-hoverable" and add data-toggle="dropdown" data-hover="dropdown" data-close-others="true" attributes to the below A element with dropdown-toggle class -->
                         <li class="dropdown dropdown-extended dropdown-notification dropdown-dark" id="header_notification_bar">
                             <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
-                               @click="seenNotifications" data-close-others="true">
+                                data-close-others="true">
                                 <i class="icon-bell"></i>
                                 <span v-if="unread_notifications.length > 0" class="badge badge-success"> {{ unread_notifications.length }} </span>
                             </a>
@@ -98,43 +98,19 @@
                 return this.$store.state.token;
             },
             notifications(){
-                return this.$store.state.notifications.notifications;
+                return [];
             },
             unread_notifications(){
-                return this.$store.getters['notifications/unread_notifications'];
+                return [];
             }
         },
         methods:{
             logout: function() {
                 this.$emit('logout')
             },
-            seenNotifications(){
-                let u = this;
-                if(this.unreadCount>0)
-                    setTimeout(()=>{
-                        axios.get('/api/notification/seenNotifications?token=' + this.token)
-                            .then(function () {
-                                u.getNotifications();
-                            })
-                    }, 1000);
-            },
-            getNotifications(){
-                let u = this;
-                axios.get('/api/notification/getUserNotifications?token=' + this.token)
-                    .then(function (response) {
-                        u.$store.commit('notifications/updateNotifications', response.data);
-                    })
-            },
             moment:moment
         },
         mounted(){
-            let u = this;
-
-            this.getNotifications();
-            this.$options.sockets.refreshNotifications = function(data){
-                if(data.client_id === u.id)
-                    u.getNotifications();
-            };
         }
     }
 </script>

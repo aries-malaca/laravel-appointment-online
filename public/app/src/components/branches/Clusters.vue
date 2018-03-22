@@ -35,7 +35,7 @@
                             </div>
                         </div>
                         <div class="row" v-if="newCluster.cluster_data !== undefined">
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <label>EMS Supported</label>
                                     <div class="md-checkbox">
@@ -47,6 +47,18 @@
                                             {{newCluster.cluster_data.ems_supported?'YES':'NO' }}
                                         </label>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4" v-if="newCluster.cluster_data.ems_supported">
+                                <div class="form-group">
+                                    <label>EMS Server</label>
+                                    <input type="text" class="form-control" v-model="newCluster.cluster_data.ems_server" />
+                                </div>
+                            </div>
+                            <div class="col-md-6" v-if="newCluster.cluster_data.ems_supported">
+                                <div class="form-group">
+                                    <label>Data Pulling Schedule (CRON)</label>
+                                    <input type="text" class="form-control" v-model="newCluster.cluster_data.ems_cron" />
                                 </div>
                             </div>
                         </div>
@@ -115,7 +127,9 @@
                     services:[],
                     products:[],
                     cluster_data:{
-                        ems_supported:false
+                        ems_supported:false,
+                        ems_server:'',
+                        ems_cron:'* * * * * *',
                     }
                 };
                 $("#add-cluster-modal").modal("show");
@@ -141,7 +155,9 @@
                     services:[],
                     products:[],
                     cluster_data:{
-                        ems_supported:cluster.cluster_data.ems_supported
+                        ems_supported:cluster.cluster_data.ems_supported,
+                        ems_server:cluster.cluster_data.ems_server,
+                        ems_cron:cluster.cluster_data.ems_cron,
                     }
                 };
                 for(var x=0;x<cluster.services.length;x++){

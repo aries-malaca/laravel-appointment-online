@@ -32,8 +32,8 @@
         </div>
         <unauthorized-error v-else></unauthorized-error>
 
-        <booking-modal :toggle="toggle" :default_branch="default_branch" :lock_branch="true" :default_client="client" :lock_client="true"
-                       :branches="branches" :token="token" :user="user" :configs="configs" />
+        <booking-modal :toggle="toggle" :default_branch="default_branch" :lock_branch="true" :default_client="client"
+                       :lock_client="true"/>
     </div>
 </template>
 
@@ -75,9 +75,9 @@
                     Math.sin( mylat *(Math.PI/180) ) * Math.sin( marker_lat *(Math.PI/180)) ) );
             },
             clearMarkers:function(){
-                for (var i = 0; i < this.markers.length; i++) {
+                for (var i = 0; i < this.markers.length; i++)
                     this.markers[i].setMap(null);
-                }
+
                 this.markers = [];
             },
             initializeMap:function(){
@@ -103,13 +103,11 @@
                                 center: u.geolocation
                             });
 
-                            u.getBranches();
                             u.show_map = true;
                         });
                     }
-                    else{
+                    else
                         u.show_map = false;
-                    }
                 },1000);
             },
             initializeMarkers:function(){
@@ -136,7 +134,8 @@
                             '<p>Address: '+ branch.branch_address +'<br/>' +
                             'Phone: '+ branch.branch_contact +'</p>' +
                             '<button class="btn btn-success btn-md" id="btn-book">Book Appointment</button> &nbsp' +
-                            '<a target="_blank" class="btn btn-info btn-md" href="../../queuing/web/'+ branch.id +'">View Queue</a>'
+                            '<a target="_blank" class="btn btn-info btn-md" href="../../queuing/web/'+ branch.id +'">View Queue</a>&nbsp'+
+                            '<button class="btn btn-warning btn-md" id="btn-message">Message</button>'
                         });
 
                         u.markers[x].addListener('click', function(){
@@ -146,17 +145,39 @@
                             u.current_window = info;
                             info.open(map, marker);
                             setTimeout(function(){
+                                $('#btn-book').unbind( "click" );
                                 $('#btn-book').click(function(){
                                     u.default_branch = {
                                         branch_address:branch.branch_address,
                                         branch_data:branch.branch_data,
+                                        cluster_data:branch.cluster_data,
                                         label:branch.branch_name,
                                         rooms:branch.rooms,
                                         schedules:branch.schedules,
+                                        products:branch.products,
+                                        services:branch.services,
                                         value:branch.id,
                                     };
                                     u.toggle = !u.toggle;
                                 });
+                                $('#btn-message').unbind( "click" );
+                                $('#btn-message').click(function(){
+                                    axios.get('../../api/branch/getBranchSupervisor/' + branch.id)
+                                        .then(function (response) {
+                                            u.$store.commit('messages/updatePartnerByID', response.data);
+
+                                            if(u.partner===undefined)
+                                                u.$store.commit('messages/updatePartner', false);
+                                            else {
+                                                u.$store.commit('messages/toggleVisibility', true);
+                                                $("body").addClass("page-quick-sidebar-open");
+                                            }
+
+                                            if(!response.data)
+                                                toastr.error("Cannot message this branch.");
+                                        });
+                                });
+
                             }, 50);
                         });
                     }
@@ -169,25 +190,38 @@
             this.$store.commit('updateTitle', 'Branch Locator');
             this.initializeMap();
             this.initializeMarkers();
+
+            this.client = {
+                label:this.user.username,
+                value:this.user.id,
+                gender:this.user.gender,
+                user_mobile:this.user.user_mobile,
+                picture_html_big:this.user.picture_html_big,
+            };
+
         },
         computed:{
             nearbyBranches:function(){
+                let u = this;
                 if(!this.filter_nearby)
                     return this.branches;
 
                 var b = this.branches.sort(function(a, b) {
-                    return a.distance - b.distance;
+                    return u.getDistance(a.map_coordinates) - u.getDistance(b.map_coordinates);
                 });
 
                 var branches = [];
                 for(var x=0;x<b.length;x++){
-                   if(this.branches[x].distance<=this.configs.NEARBY_BRANCH_DISTANCE && branches.length < 10)
+                   if(u.getDistance(this.branches[x].map_coordinates)<=this.configs.NEARBY_BRANCH_DISTANCE && branches.length < 10)
                        branches.push(this.branches[x]);
                 }
                 return branches
             },
             user(){
                 return this.$store.state.user;
+            },
+            partner(){
+                return this.$store.state.messages.partner;
             },
             token(){
                 return this.$store.state.token;
@@ -206,15 +240,6 @@
             branches:function(){
                 for(var x=0;x<this.branches.length;x++)
                     this.branches[x].distance = this.getDistance(this.branches[x].map_coordinates);
-            },
-            user:function(){
-                this.client = {
-                    label:this.user.username,
-                    value:this.user.id,
-                    gender:this.user.gender,
-                    user_mobile:this.user.user_mobile,
-                    picture_html_big:this.user.picture_html_big,
-                };
             },
             geolocation:function(){
                 new google.maps.Marker({

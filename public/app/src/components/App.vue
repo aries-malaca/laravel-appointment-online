@@ -141,6 +141,13 @@
                     u.$store.dispatch('technicians/fetchTechnicians');
             };
 
+
+            this.$options.sockets.connect = function(){
+                setTimeout(()=>{
+                    u.$socket.emit('connectUser',u.$store.state.user.id);
+                },2000);
+            };
+
             Notification.requestPermission();
 
             setTimeout(function(){

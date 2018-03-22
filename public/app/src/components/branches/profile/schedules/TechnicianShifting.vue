@@ -3,7 +3,7 @@
         <div v-if="branch.cluster_data.ems_supported">
             <div class="alert alert-info">
                 Selected Branch is EMS Supported. Click here:
-                <a href="https://ems.lay-bare.com" target="_blank">http://ems.lay-bare.com</a> to login.
+                <a :href="branch.cluster_data.ems_server" target="_blank">{{ branch.cluster_data.ems_server }}</a> to login.
             </div>
         </div>
         <div v-else>

@@ -10,6 +10,7 @@ use App\BranchCluster;
 use DB;
 use DateTime;
 use Validator;
+use Curl;
 
 class TechnicianController extends Controller{
     function getTechnicians(){
@@ -38,12 +39,24 @@ class TechnicianController extends Controller{
         return response()->json($data);
     }
 
-    function fetchEMSTechnicians(){
-        $api = Config::where('config_name', 'FETCH_TECHNICIANS')->get()->first()['config_value'];
-        $picture_path = Config::where('config_name', 'EMS_TECHNICIAN_PICTURES_PATH')->get()->first()['config_value'];
+    function fetchEMSTechnicians(Request $request){
+        $cluster = BranchCluster::find($request->segment(4));
 
+        if(!isset($cluster->id))
+            return response()->json(["result"=>"failed",  "error"=>"Cluster not found."]);
 
-        $data = file_get_contents($api);
+        $cluster_data = json_decode($cluster->cluster_data);
+
+        if(!$cluster_data->ems_supported)
+            return response()->json(["result"=>"failed", "error"=>"Not supported."]);
+
+        $api = $cluster_data->ems_server . Config::where('config_name', 'FETCH_TECHNICIANS')
+                                                    ->get()->first()['config_value'];
+
+        $picture_path = $cluster_data->ems_server . Config::where('config_name', 'EMS_TECHNICIAN_PICTURES_PATH')
+                                                    ->get()->first()['config_value'];
+
+        $data = Curl::to($api)->get();
         $data = json_decode($data,true);
 
         foreach($data as $key=>$value) {
@@ -55,15 +68,22 @@ class TechnicianController extends Controller{
             else
                 $technician = new Technician;
 
+            $picture = Curl::to($picture_path. $value['picture'])
+                            ->returnResponseObject()
+                            ->get();
 
-            $picture = file_get_contents($picture_path. $value['picture']);
-            file_put_contents(public_path('images/technicians/'. $value['employee_no'].'.jpg'), $picture);
+            if($picture->status >= 200 && $picture->status <= 210) {
+                file_put_contents(public_path('images/technicians/' . $value['employee_no'] . '.jpg'), $picture->content);
+                $p = $value['employee_no'].'.jpg';
+            }
+            else
+                $p = 'no photo female.jpg';
 
             $technician->first_name = $value['first_name'];
             $technician->middle_name = $value['middle_name'];
             $technician->last_name = $value['last_name'];
             $technician->technician_status = '';
-            $technician->technician_picture = $value['employee_no'].'.jpg';
+            $technician->technician_picture = $p;
             $technician->cluster_id = isset($cluster['id'])?$cluster['id']:0;
             $technician->is_active = 1;
             $technician->technician_data = json_encode(array(
@@ -83,6 +103,7 @@ class TechnicianController extends Controller{
         }
 
         return response()->json(["result"=>"success"]);
+
     }
 
     function getCurrentBranch($id, $date){

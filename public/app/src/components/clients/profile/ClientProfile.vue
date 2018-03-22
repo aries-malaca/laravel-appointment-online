@@ -89,7 +89,7 @@
 
                                         </div>
                                         <!--end col-md-8-->
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" v-if="transactions !== false">
                                             <div class="portlet sale-summary">
                                                 <div class="portlet-title">
                                                     <div class="caption font-red sbold"> Transaction Summary </div>
@@ -115,12 +115,6 @@
                                         <!--end col-md-4-->
                                     </div>
                                     <!--end row-->
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <appointments-table title="Active Appointments" :hide_client="true" :appointments="active_appointments"
-                                                        @get_appointments="getAppointments"/>
                                 </div>
                             </div>
                         </div>
@@ -440,7 +434,10 @@
                 let u = this;
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
                     return false;
-                axios.get(this.configs.FETCH_BOSS_TRANSACTIONS +""+ this.client.email)
+
+                this.transactions = false;
+
+                axios.get(this.configs.FETCH_BOSS_TRANSACTIONS + "" + this.client.email)
                     .then(function (response) {
                         u.transactions = response.data;
                     })

@@ -14,9 +14,15 @@
                     </div>
                     <div v-if="source === 'template'" class="col-md-8">
                         <label>Select Template:</label>
-                        <select class="form-control" v-model="selected_template">
-                            <option v-for="template in templates" :value="template">{{template.name}}</option>
-                        </select><br/>
+                        <div class="input-group">
+                            <select class="form-control" v-model="selected_template">
+                                <option v-for="template in templates" :value="template">{{template.name}}</option>
+                            </select>
+                            <span class="input-group-btn">
+                                <button class="btn blue" type="button"><i class="fa fa-folder"></i></button>
+                            </span>
+                        </div>
+                        <br/>
                     </div>
                     <div class="col-md-8" v-else></div>
                 </div>
@@ -36,7 +42,7 @@
                     </div>
                     <div class="col-md-12" v-else>
                         <div v-if="selected_template!==null">
-                            <textarea class="form-control sms-text" v-model="selected_template.body" disabled rows="8"></textarea>
+                            <textarea class="form-control sms-text" v-model="selected_template.body" disabled rows="7"></textarea>
                             <small>Text count: {{ selected_template.body.length }} </small>
                         </div>
                     </div>
@@ -48,7 +54,6 @@
                         <vue-select v-model="attachments" :options="attachments_selection" multiple></vue-select>
                     </div>
                 </div>
-                <hr/>
                 <div class="row">
                     <div class="col-md-6">
                         <label>Send via:</label>
@@ -111,8 +116,15 @@
                         </div>
                     </div>
                 </div>
-                <label>Contact List</label>
-                <div style="overflow-y:scroll; max-height:290px">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>Contact List</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-warning btn-sm pull-right" @click="refreshContacts"><i class="fa fa-refresh"></i></button>
+                    </div>
+                </div>
+                <div style="overflow-y:scroll; max-height:310px">
                     <table class="table table-bordered">
                         <tbody>
                         <tr v-for="recipient, x in mappedContacts"
@@ -127,7 +139,7 @@
                                 <button class="btn btn-success btn-xs" @click="sendCampaign(recipient,'send')">Send</button>
                             </td>
                             <td v-else>
-                                <span class="badge badge-success">Sent!</span>
+                                <span class="badge badge-success">Message Sent! </span> &nbsp;
                                 <button class="btn btn-info btn-xs" @click="logMessage(recipient.message)">View</button>
                             </td>
                         </tr>
@@ -138,12 +150,6 @@
                     <small>
                         Selection: {{ selectionCount }} | Selected: {{ checkedCount }} | Sent: {{ sentCount }}
                     </small>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <button class="btn btn-info">Manage Contacts</button>
-                        <button class="btn btn-info">Manage Templates</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -234,6 +240,10 @@
                         this.contacts[x].message = sent_message;
                     }
                 }
+            },
+            refreshContacts(){
+                for(var x=0;x<this.contacts.length;x++)
+                    this.contacts[x].sent = false;
             }
         },
         mounted(){

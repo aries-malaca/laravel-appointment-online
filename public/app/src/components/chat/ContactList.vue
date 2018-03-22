@@ -26,8 +26,9 @@
              data-wrapper-class="page-quick-sidebar-list">
             <h3 class="list-heading" v-if="user.is_client === 0">Staff</h3>
             <ul class="media-list list-items">
-                <li class="media" v-for="item in admins" @click="showConversation(item)" v-show="keyword==='' || item.username.indexOf(keyword) !== -1"
-                        v-bind:style="item.unread > 0?'background-color:#e8fec7':''" v-if="item.id!==user.id">
+                <li class="media" v-for="item in admins" @click="showConversation(item)"
+                    v-show="keyword==='' || item.username.indexOf(keyword) !== -1" v-bind:style="item.unread > 0?'background-color:#e8fec7':''"
+                    v-if="(user.is_client === 0 || item.level_data.dashboard==='CustomerServiceDashboard') && item.id!==user.id">
                     <div class="media-status">
                         <span class="badge badge-success" v-if="item.is_online">Online</span>
                         <span class="badge badge-info" v-if="item.unread > 0">{{ item.unread }}</span>

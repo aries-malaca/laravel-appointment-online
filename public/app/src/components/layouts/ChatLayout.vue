@@ -51,6 +51,9 @@
             },
             contacts(){
                 return this.$store.state.messages.contacts;
+            },
+            branches(){
+                return this.$store.state.branches.branches;
             }
         },
         methods:{
@@ -63,7 +66,18 @@
                 let u = this;
                 axios.get('../../api/contact/getContactList?token=' + this.token)
                     .then(function (response) {
-                        u.$store.commit('messages/updateContactList', response.data);
+                        var e = response.data.map((item)=>{
+                            if(item.is_client === 0){
+                                if(item.level_data.dashboard === 'BranchSupervisorDashboard'){
+                                    for(var x=0;x<u.branches.length;x++){
+                                        if(item.user_data.branches.indexOf(u.branches[x].id) !== -1)
+                                            item.branch = u.branches[x].branch_name;
+                                    }
+                                }
+                            }
+                            return item;
+                        });
+                        u.$store.commit('messages/updateContactList', e);
                     })
                     .catch(function (error) {
                         XHRCatcher(error);

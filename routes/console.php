@@ -23,8 +23,3 @@ Artisan::command('inspire', function () {
 Artisan::command('expire',function(){
     file_get_contents(env('APP_URL').'/api/appointment/expireAppointments');
 });
-
-
-Artisan::command('pull-technicians',function(){
-    file_get_contents(env('APP_URL').'/api/technician/fetchEMSTechnicians');
-});

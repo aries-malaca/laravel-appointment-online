@@ -73,7 +73,7 @@ class ClientController extends Controller{
             $client->user_mobile = $request->input('user_mobile');
             $client->birth_date = $request->input('birth_date');
             $data = json_decode($client->user_data);
-            $data->home_branch = $request->input('home_branch')['value'];
+            $data->home_branch = (int)$request->input('home_branch')['value'];
             $data->notifications = $request->input('user_data')['notifications'] === null? [] :$request->input('user_data')['notifications'];
             $client->user_data = json_encode($data);
             $client->save();

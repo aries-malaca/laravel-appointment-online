@@ -19,12 +19,10 @@ class AppointmentController extends Controller{
             'branch' => 'required',
             'client' => 'required',
             'transaction_date' => 'required',
-            // 'transaction_time' => 'required',
             'services' => 'required',
             'products' => 'required_if:services,'.null,
             'platform' => 'required',
             'transaction_type' => 'required',
-            // 'waiver_data.signature' =>'required'
         ]);
 
         if ($validator->fails())
@@ -419,6 +417,27 @@ class AppointmentController extends Controller{
             $acknowledgement_data->signature = isset($waiver_data->signature)?$waiver_data->signature:$this->getLastSignature($api['user']['id']);
             $appointment->acknowledgement_data = json_encode($acknowledgement_data);
             $appointment->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function saveItem(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $item = new TransactionItem;
+            $item->transaction_id = $request->input('id');
+            $item->item_id = $request->input('service')['value'];
+            $item->item_type = 'service';
+            $item->amount = $request->input('service')['price'];
+            $item->quantity = 1;
+            $item->item_data = '{}';
+            $item->book_start_time = date('Y-m-d H:i:s');
+            $item->book_end_time = date('Y-m-d H:i:s');
+            $item->item_status = 'reserved';
+            $item->save();
 
             return response()->json(['result'=>'success']);
         }

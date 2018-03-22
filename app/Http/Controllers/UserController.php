@@ -80,8 +80,6 @@ class UserController extends Controller{
                 else
                     $branch = 'N/A';
 
-
-
                 $plc_request = PlcReviewRequest::where('client_id', $api['user']['id'])
                                                 ->get()->first();
 

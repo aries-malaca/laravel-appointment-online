@@ -42,6 +42,7 @@ Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
+Route::get('/branch/getBranchSupervisor/{id}', 'BranchController@getBranchSupervisor');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::post('/branch/removePicture', 'BranchController@removePicture');
 Route::post('/branch/addBranch', 'BranchController@addBranch');
@@ -102,6 +103,7 @@ Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppoint
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
+Route::post('/appointment/saveItem', 'AppointmentController@saveItem');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -116,7 +118,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians/{cluster_id}', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
@@ -140,7 +142,7 @@ Route::post('/premier/completeRequest', 'PremierReviewController@completeRequest
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 
-Route::get('/message/getConversation/{partner_id}', 'MessageController@getConversation');
+Route::get('/message/getConversation/{partner_id}/{limit}', 'MessageController@getConversation');
 Route::post('/message/sendMessage', 'MessageController@sendMessage');
 Route::post('/message/deleteConversation', 'MessageController@deleteConversation');
 Route::post('/message/seenMessages', 'MessageController@seenMessages');
@@ -185,10 +187,6 @@ Route::get('/contact/getContacts', 'ContactController@getContacts');
 Route::get('/contact/getContactList', 'ContactController@getContactList');
 //
 
-//notifications
-Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
-Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
-//
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

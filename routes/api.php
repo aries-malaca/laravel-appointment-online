@@ -42,6 +42,7 @@ Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
+Route::get('/branch/getBranchSupervisor/{id}', 'BranchController@getBranchSupervisor');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::post('/branch/removePicture', 'BranchController@removePicture');
 Route::post('/branch/addBranch', 'BranchController@addBranch');
@@ -116,7 +117,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians/{cluster_id}', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
@@ -185,10 +186,6 @@ Route::get('/contact/getContacts', 'ContactController@getContacts');
 Route::get('/contact/getContactList', 'ContactController@getContactList');
 //
 
-//notifications
-Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
-Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
-//
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

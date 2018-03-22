@@ -119,10 +119,6 @@ return [
     |
     */
 
-    'log' => env('APP_LOG', 'single'),
-
-    'log_level' => env('APP_LOG_LEVEL', 'debug'),
-
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -179,6 +175,7 @@ return [
         Spatie\LaravelImageOptimizer\ImageOptimizerServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Ixudra\Curl\CurlServiceProvider::class,
+        ShvetsGroup\LaravelEmailDatabaseLog\LaravelEmailDatabaseLogServiceProvider::class,
     ],
 
     /*
@@ -227,6 +224,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'ImageOptimizer' =>  Spatie\LaravelImageOptimizer\Facades\ImageOptimizer::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,

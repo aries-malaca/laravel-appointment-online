@@ -149,7 +149,8 @@
                                         </table>
                                     </div>
                                 </div>
-
+                                <button v-if="appointment.transaction_status === 'reserved' && title==='Queuing'"
+                                        class="btn btn-success btn-sm" @click="showAddServiceForm">Add Service</button>
                                 <hr/>
 
                                 <div v-if="title==='Queuing' && serving_appointments.indexOf(appointment.id) !== -1">
@@ -178,7 +179,7 @@
                                                     <option v-for="kiosk in queuing_branch.kiosk_data" :value="kiosk.serial_no">{{ kiosk.alias }}</option>
                                                 </select>
                                             </div>
-                                            <div v-else class="alert alert-warning">
+                                            <div class="alert alert-warning" v-else>
                                                 No Kiosk available for this branch.
                                             </div>
 
@@ -209,14 +210,14 @@
                                                 <span>Client's Signature</span>
                                             </div>
                                         </div>
-                                        <div v-if="appointment.acknowledgement_data.signature === null && user.id === appointment.client_id" >
+                                        <!-- div v-if="appointment.acknowledgement_data.signature === null && user.id === appointment.client_id" >
                                             <br/>
                                             <small>I acknowledge this transaction.</small><br/>
                                             <button class="btn btn-info btn-xs btn-block" @click="acknowledgeAppointment">Proceed</button>
-                                        </div>
+                                        </div -->
                                     </div>
-                                    <div class="col-md-7" v-if="appointment.acknowledgement_data !== null">
-                                        <div v-if="appointment.acknowledgement_data.signature !== null ">
+                                    <div class="col-md-7" v-if="appointment.transaction_status !== 'expired'">
+                                        <div>
                                             <h4 style="text-align:center">Feedback</h4>
                                             <star-rating :item-size="30"
                                                          inactive-color="#e4eadb"
@@ -300,15 +301,39 @@
                 </div>
             </div>
         </div>
+
+        <div v-bind:id="'add-item-modal-'+id" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">Add Service</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Service Name</label>
+                                <vue-select v-model="newItem" :options="service_selection"></vue-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" @click="saveItems" class="btn btn-success" data-loading-text="Please wait...">Save</button>
+                        <button type="button" data-dismiss="modal" class="btn dark btn-outline">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
     import { StarRating } from 'vue-rate-it';
+    import VueSelect from 'vue-select';
 
     export default {
         name: 'AppointmentModal',
-        components:{ StarRating },
+        components:{ StarRating, VueSelect },
         data: function(){
             return {
                 cancel:{},
@@ -343,10 +368,18 @@
                     rating:0,
                     feedback:''
                 },
-                review_writing:false
+                review_writing:false,
+                newItem:{}
             }
         },
         methods:{
+            saveItems(){
+
+            },
+            showAddServiceForm(){
+                this.newItem = null;
+                $("#add-item-modal-"+ this.id).modal("show");
+            },
             closeModal(){
                 this.$store.commit('appointments/updateViewingID', undefined);
                 $("#appointment-modal").modal("hide");
@@ -546,7 +579,24 @@
             },
             needsToAcknowledge(){
                 return this.$store.getters['appointments/needsToAcknowledge'];
-            }
+            },
+            service_selection:function(){
+                var services = [];
+
+                for(var x=0;x<this._services.length;x++){
+                    if(this._services[x].service_gender === this.appointment.client_gender){
+                        var name = this._services[x].service_type_id !== 0 ?  this._services[x].service_name: this._services[x].package_name;
+                        services.push({
+                            label: name + ' ' + this.appointment.client_gender.toUpperCase(),
+                            value: this._services[x].id,
+                        });
+                    }
+                }
+                return services;
+            },
+            _services(){
+                return this.$store.getters['services/activeServices'];
+            },
         },
         watch:{
             id:function(){

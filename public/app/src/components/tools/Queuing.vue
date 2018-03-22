@@ -532,6 +532,7 @@
                             services:item.services,
                             branch_address:item.branch_address,
                             kiosk_data:item.kiosk_data,
+                            cluster_data:item.cluster_data,
                         });
                 });
                 return a;

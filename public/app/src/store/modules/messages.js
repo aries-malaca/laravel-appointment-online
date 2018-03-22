@@ -6,7 +6,7 @@ export const messages = {
         messages:[],
         partner:false,
         chat_visibility:false,
-        unread_messages:[]
+        unread_messages:[],
     },
     mutations:{
         toggleVisibility(state, s){
@@ -17,6 +17,12 @@ export const messages = {
         },
         updatePartner(state, partner){
             state.partner = partner;
+        },
+        updatePartnerByID(state, partnerID){
+            state.partner = state.contacts.find((d)=>{
+                if(d.id === partnerID)
+                    return d;
+            });
         },
         updateContactList(state, contacts){
             state.contacts = contacts;

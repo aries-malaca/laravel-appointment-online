@@ -12,7 +12,6 @@ use App\TextMessage;
 use App\Menu;
 use Mail;
 use Curl;
-use App\Notification;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
@@ -23,6 +22,7 @@ class Controller extends BaseController{
     //returns true if authenticated,
     //returns error message response if not authenticated
     public function authenticateAPI(){
+        activity()->log('Look, I logged something');
         try{
             if (! $user = JWTAuth::parseToken()->authenticate()) 
                 return ["result"=>"failed","error"=>"token_user_not_found","status_code"=>401];
@@ -39,9 +39,8 @@ class Controller extends BaseController{
 
         $parsed = JWTAuth::getToken();
         $tokens = json_decode($user['device_data'],true);
-        if(sizeof($tokens) == 0){
+        if(sizeof($tokens) == 0)
             return ["result"=>"failed","error"=>"no_token_registered","status_code"=>401];
-        }
         else{
             foreach($tokens as $key=>$value){
                 if($parsed == $value['token']){
@@ -276,17 +275,6 @@ class Controller extends BaseController{
             return json_decode($transaction['waiver_data'])->signature;
 
         return 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('images/na.png')));
-    }
-
-    function addNotification($data, $user_id){
-        $notification = new Notification;
-        $notification->user_id = $user_id;
-        $notification->is_read = 0;
-        $notification->category = $data['category'];
-        $notification->title = $data['title'];
-        $notification->content = $data['content'];
-        $notification->notification_data = json_encode($data['notification_data']);
-        $notification->save();
     }
 
     function sendMail($template, $content_data, $headers, $attachments=null){

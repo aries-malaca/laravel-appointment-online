@@ -12,10 +12,11 @@ export const appointments = {
     getters:{
         //returns the object of the appointment with pending acknowledgement
         needsToAcknowledge(state){
-            return state.appointment_history.find((appointment)=>{
-                if(appointment.acknowledgement_data.signature===null && appointment.transaction_status !== 'expired')
-                    return appointment;
-            });
+            // return state.appointment_history.find((appointment)=>{
+            //     if(appointment.acknowledgement_data.signature===null && appointment.transaction_status !== 'expired')
+            //         return appointment;
+            // });
+            return undefined;
         }
     },
     mutations:{

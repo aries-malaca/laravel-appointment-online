@@ -5,7 +5,7 @@
                 <div class="note note-success" v-if="technician.cluster_data.ems_supported===true">
                     <h4 class="block">EMS Employee</h4>
                     <p>
-                        Setup {{ technician.first_name }} {{ technician.last_name }}'s schedule at EMS <a target="_blank" href="https://ems.lay-bare.com">https://ems.lay-bare.com</a>.
+                        Setup {{ technician.first_name }} {{ technician.last_name }}'s schedule at EMS <a target="_blank" :href="technician.cluster_data.ems_server">{{ technician.cluster_data.ems_server }}</a>.
                     </p>
                 </div>
                 <div v-else>

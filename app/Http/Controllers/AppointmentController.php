@@ -19,12 +19,10 @@ class AppointmentController extends Controller{
             'branch' => 'required',
             'client' => 'required',
             'transaction_date' => 'required',
-            // 'transaction_time' => 'required',
             'services' => 'required',
             'products' => 'required_if:services,'.null,
             'platform' => 'required',
             'transaction_type' => 'required',
-            // 'waiver_data.signature' =>'required'
         ]);
 
         if ($validator->fails())

@@ -7,7 +7,8 @@
                 </a>
                 <div class="btn-group  pull-right">
                     <button class="btn blue dropdown-toggle btn-xs" type="button" data-toggle="dropdown" aria-expanded="false">
-                        {{ partner.first_name }} {{ partner.last_name }}
+                        <span v-if="partner.branch !== undefined"> {{ partner.branch }} </span>
+                        <span v-else> {{ partner.first_name }} {{ partner.last_name }} </span>
                         <i class="fa fa-angle-down"></i>
                     </button>
                     <ul class="dropdown-menu" role="menu">

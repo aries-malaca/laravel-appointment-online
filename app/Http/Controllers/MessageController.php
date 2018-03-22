@@ -36,6 +36,7 @@ class MessageController extends Controller{
             $data = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
                             ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
                             ->orderBy('created_at')
+                            ->take($request->segment(5))
                             ->get()->toArray();
 
             return response()->json($data);

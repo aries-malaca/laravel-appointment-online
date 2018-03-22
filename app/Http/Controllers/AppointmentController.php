@@ -424,6 +424,27 @@ class AppointmentController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
+    function saveItem(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $item = new TransactionItem;
+            $item->transaction_id = $request->input('id');
+            $item->item_id = $request->input('service')['value'];
+            $item->item_type = 'service';
+            $item->amount = $request->input('service')['price'];
+            $item->quantity = 1;
+            $item->item_data = '{}';
+            $item->book_start_time = date('Y-m-d H:i:s');
+            $item->book_end_time = date('Y-m-d H:i:s');
+            $item->item_status = 'reserved';
+            $item->save();
+
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
     function sendBookingNotification(Request $request){
 
     }

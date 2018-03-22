@@ -22,6 +22,7 @@
                 </div>
             </div>
             <div class="page-quick-sidebar-chat-user-messages">
+                <small v-if="is_loading" style="text-align:center">Loading Messages...</small>
                 <div v-bind:class="'post ' + (message.sender_id== user.id?'out':'in')" v-for="message in messages">
                     <img class="avatar" alt="" v-bind:src="'../../images/users/'+ (message.sender_id== user.id?user.user_picture:partner.user_picture)" />
                     <div class="message">
@@ -61,7 +62,9 @@
                 },
                 typing_stamp: 50,
                 now:50,
-                timer:false
+                timer:false,
+                limit:10,
+                is_loading:false
             }
         },
         methods:{
@@ -71,7 +74,7 @@
             },
             getMessages(){
                 let u = this;
-                axios.get('../../api/message/getConversation/'+ this.partner.id +'?token='+this.token)
+                axios.get('../../api/message/getConversation/'+ this.partner.id +'/' + this.limit +'?token='+this.token )
                     .then(function (response) {
                         u.$store.commit('messages/updateMessages', response.data);
                         $(".page-quick-sidebar-chat-user-messages").slimScroll({height: (window.innerHeight-170) + "px"});
@@ -79,6 +82,7 @@
                         setTimeout(()=>{
                             $(".page-quick-sidebar-chat-user-messages").slimScroll({height:  (window.innerHeight-170) + "px", scrollTo: "1000000px"});
                         },100);
+
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
@@ -140,6 +144,8 @@
                 this.$socket.emit('notifyTyping', this.partner.id, this.user.id);
             },
             partner(){
+                this.limit = 10;
+
                 if(this.partner !== false)
                     this.getMessages();
                 else

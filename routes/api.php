@@ -103,6 +103,7 @@ Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppoint
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
+Route::post('/appointment/saveItem', 'AppointmentController@saveItem');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -141,7 +142,7 @@ Route::post('/premier/completeRequest', 'PremierReviewController@completeRequest
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 
-Route::get('/message/getConversation/{partner_id}', 'MessageController@getConversation');
+Route::get('/message/getConversation/{partner_id}/{limit}', 'MessageController@getConversation');
 Route::post('/message/sendMessage', 'MessageController@sendMessage');
 Route::post('/message/deleteConversation', 'MessageController@deleteConversation');
 Route::post('/message/seenMessages', 'MessageController@seenMessages');

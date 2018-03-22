@@ -318,7 +318,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" @click="saveItems" class="btn btn-success" data-loading-text="Please wait...">Save</button>
+                        <button type="button" @click="saveItem" class="btn btn-success" data-loading-text="Please wait...">Save</button>
                         <button type="button" data-dismiss="modal" class="btn dark btn-outline">Close</button>
                     </div>
                 </div>
@@ -373,8 +373,18 @@
             }
         },
         methods:{
-            saveItems(){
-
+            saveItem(){
+                let u = this;
+                axios({url:'/api/appointment/saveItem?token=' + this.token, method:'post', data: {service:this.newItem, id:this.appointment.id}})
+                    .then(function () {
+                        u.$socket.emit('refreshAppointment', u.appointment.id);
+                        u.$socket.emit('refreshAppointments', u.appointment.branch_id, u.appointment.client_id);
+                        toastr.success("Successfully added Service.");
+                        $("#add-item-modal-"+u.id).modal('hide');
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             },
             showAddServiceForm(){
                 this.newItem = null;
@@ -498,7 +508,7 @@
                 clearInterval(this.t);
                 this.$socket.emit('signingTimeout', this.appointment.id, this.device);
             },
-            acknowledgeAppointment(){
+            /*acknowledgeAppointment(){
                 let u = this;
                 axios({url:'/api/appointment/acknowledgeAppointment?token=' + this.token, method:'post', data:this.appointment})
                     .then(function () {
@@ -509,7 +519,7 @@
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
-            },
+            },*/
             editReview(){
                 this.review = {
                     rating: this.appointment.rating,
@@ -589,6 +599,7 @@
                         services.push({
                             label: name + ' ' + this.appointment.client_gender.toUpperCase(),
                             value: this._services[x].id,
+                            price: this._services[x].service_price,
                         });
                     }
                 }

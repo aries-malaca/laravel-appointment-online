@@ -22,7 +22,6 @@ class Controller extends BaseController{
     //returns true if authenticated,
     //returns error message response if not authenticated
     public function authenticateAPI(){
-        activity()->log('Look, I logged something');
         try{
             if (! $user = JWTAuth::parseToken()->authenticate()) 
                 return ["result"=>"failed","error"=>"token_user_not_found","status_code"=>401];

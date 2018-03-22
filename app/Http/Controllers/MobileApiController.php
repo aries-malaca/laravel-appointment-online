@@ -19,6 +19,7 @@ use App\Transaction;
 use App\TransactionItem;
 use App\Technician;
 use App\TechnicianSchedule;
+use App\Review;
 use DateTime;
 use Validator;
 use Hash;
@@ -44,13 +45,7 @@ class MobileApiController extends Controller{
         $arrayPackage         = array();
         $arrayBanner          = array();
         $arrayCommercial      = array();
-        $arrayBranch            = array();
-
-
-        $api = $this->authenticateAPI();
-        if($api['result'] === 'success'){
-            $ifValidToken = false;
-        }
+        $arrayBranch          = array();
 
         if( (double)$this->getBannerVersion() > (double)$version_banner) {
 
@@ -163,7 +158,7 @@ class MobileApiController extends Controller{
         if( (double)$this->getDataVersions("APP_COMMERCIAL_VERSION")  > (double)$version_commercial) {
             $version_commercial   = (double)$this->getDataVersions("APP_COMMERCIAL_VERSION");
         }
-     
+
         $response['arrayBanner']             = $arrayBanner;
         $response['arrayServices']           = $arrayService;
         $response['arrayPackage']            = $arrayPackage;
@@ -177,9 +172,33 @@ class MobileApiController extends Controller{
                             "version_services"      => $version_services,
                             "version_packages"      => $version_packages,
                             "version_products"      => $version_products,
-                                                );
+                           );
         return response()->json($response);
 	}
+
+    public function getAppointmentReview(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            
+            $dateToday     = date("Y-m-d H:i:s");
+            $dateYesterday = strtotime($dateToday." -1 day");
+            $client_id      = $api["user"]["id"];
+            $queryReview    = Transaction::join("branches","transactions.branch_id","branches.id")
+                                    ->join("technicians","transactions.technician_id","technicians.id")
+                                    ->leftJoin("reviews","transactions.id","reviews.transaction_id")
+                                    ->where("client_id",$client_id)
+                                    ->where("transaction_status","completed")
+                                    ->whereBetween('transactions.transaction_datetime', array($dateYesterday, $dateToday))
+                                    ->orderBy("transaction_datetime","desc")
+                                    ->select("transactions.*","reviews.id as review_id","branches.branch_name","technicians.first_name","technicians.last_name")
+                                    ->get()
+                                    ->first();
+            return response()->json($queryReview);
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+    }
 
     public function getAppVersion(Request $request){
 
@@ -871,13 +890,91 @@ class MobileApiController extends Controller{
         $response["technician"]     =   $technicians;
         $response["transactions"]   =   $arrayTransaction;
         return response()->json($response);
-        // if($queryBranchSchedule){
-
-        // }
-        // else{
-        //     return response()->json(["result"=>"failed","error"=>"Failed to load"],400);
-        // }
     }
+
+    //get branch rating
+    public function getBranchRatings(Request $request){
+
+        $branch_id   = $request->segment(4);
+        $offset      = $request->segment(5);
+        $response    = array();
+        $limit       = 20;
+        $queryRating = DB::table("reviews as a")
+                            ->join("transactions as b","a.transaction_id","=","b.id")
+                            ->join("branches as c","b.branch_id","=","c.id")
+                            ->join("users as d","b.client_id","=","d.id")
+                            ->where("b.branch_id","=",$branch_id)
+                            ->select("a.*","d.username","d.first_name","d.user_picture")
+                            ->orderBy("a.updated_at","desc")
+                            ->limit($limit)->offset($offset)
+                            ->get()
+                            ->toArray();
+        $response["arrayReview"]    = $queryRating;
+        $response["offset"]         = count($queryRating) + $offset;
+        $response["totalReviews"]   = $this->getTotalReviews($branch_id);
+        return response()->json($response); 
+    }
+
+    public function reviewTransaction(Request $request){
+
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $message          = "";
+            $transaction_id   = $request->input("transaction_id");
+            $rating           = $request->input("rating");
+            $feedback         = $request->input("feedback");
+            $review_id        = $request->input("review_id");
+            $review_status    = "pending";
+            // return response()->json(["result"=>count($queryCheckReview)]);
+            if($review_id > 0){
+                $queryReview                 = Review::find($review_id);
+                $queryReview->transaction_id = $transaction_id;
+                $queryReview->rating         = $rating;
+                $queryReview->feedback       = $feedback;
+                $queryReview->review_status  = $review_status;
+                $queryReview->save();
+                $message = "You already have a review! But we will update your last review and will mark as pending";
+            
+            }
+            else{
+                $queryReview                 = new Review;
+                $queryReview->transaction_id = $transaction_id;
+                $queryReview->rating         = $rating;
+                $queryReview->feedback       = $feedback;
+                $queryReview->review_status  = $review_status;
+                $queryReview->save();
+                $message = "You successfully review your transaction and mark as pending. Please wait for the coordinator to publish your review.";
+            }
+            return response()->json([
+                    "result"        =>"success",
+                    "data_response" => $queryReview,
+                    "data"          => $message
+            ]);
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+        
+
+    }
+
+
+
+
+
+    public function getTotalReviews($branch_id){
+
+        $objectResponse     = array();
+        $queryRatings       = Review::join("transactions as b","reviews.transaction_id","=","b.id")
+                                        ->where("b.branch_id","=",$branch_id)
+                                        ->select("reviews.feedback")
+                                        ->orderBy("reviews.updated_at","desc")
+                                        ->get()
+                                        ->toArray();
+        return count($queryRatings);
+    }
+
+
 
 
     //get Technician Schedule    

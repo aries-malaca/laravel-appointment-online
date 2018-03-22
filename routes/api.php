@@ -224,9 +224,17 @@ Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTra
 Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
 //get branch schedules
 Route::get('/mobile/getBranchSchedules/{branch_id}/{date}', 'MobileApiController@getBranchSchedules');
-
+//get branch reviews
+Route::get('/mobile/getBranchRatings/{branch_id}/{offset}', 'MobileApiController@getBranchRatings');
+Route::post('/mobile/reviews/reviewTransaction', 'MobileApiController@reviewTransaction');
+Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentReview');
 //queuing(short version)
 Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
+
+
+
+
+
 
 //Kiosk Configuration (Lay Bare)
 Route::get('/kiosk/checkLoggedInToken/{branch_id}', 'KioskController@checkLoggedInToken');
@@ -240,3 +248,8 @@ Route::post('/kiosk/settings/getSettings', 'KioskController@verifyUserSettings')
 Route::post('/kiosk/checkDeviceIfRegistered', 'KioskController@checkDeviceIfRegistered');
 Route::post('/kiosk/searchClient', 'KioskController@searchClient');
 Route::post('/kiosk/addWaiver', 'KioskController@addWalkinWaiver');
+
+
+
+
+

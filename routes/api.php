@@ -42,7 +42,6 @@ Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
-Route::get('/branch/getBranchSupervisor/{id}', 'BranchController@getBranchSupervisor');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::post('/branch/removePicture', 'BranchController@removePicture');
 Route::post('/branch/addBranch', 'BranchController@addBranch');
@@ -103,7 +102,6 @@ Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppoint
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
-Route::post('/appointment/saveItem', 'AppointmentController@saveItem');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -118,7 +116,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians/{cluster_id}', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
@@ -187,6 +185,10 @@ Route::get('/contact/getContacts', 'ContactController@getContacts');
 Route::get('/contact/getContactList', 'ContactController@getContactList');
 //
 
+//notifications
+Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
+Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
+//
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value
@@ -195,18 +197,14 @@ Route::get('/contact/getContactList', 'ContactController@getContactList');
 //Load this every splashscreens
 Route::get('/mobile/getAppVersion/{getVersion}/{deviceType}/{deviceName}', 'MobileApiController@getAppVersion');
 Route::get('/mobile/getFirstLoadDetails/{version_banner}/{version_commercial}/{version_services}/{version_packages}/{version_products}/{version_branches}', 'MobileApiController@LoadData');
-
 Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
-
 Route::post('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
 Route::post('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');
 Route::post('/mobile/updateAccount', 'MobileApiController@updateAccount');
 Route::post('/mobile/uploadUserImage', 'MobileApiController@uploadUserImage');
 Route::post('/mobile/registerUser', 'MobileApiController@registerUser');
-
 Route::post('/mobile/verifyMyPassword', 'MobileApiController@verifyMyPassword');
 Route::post('/mobile/FacebookLogin', 'MobileApiController@FacebookLogin');
-
 Route::post('/mobile/updateTerms', 'MobileApiController@updateTerms');
 // Route::post('/forgot/requestPassword', 'PasswordController@requestPassword');
 Route::get('/mobile/getPackageWithDescription/{flag}', 'MobileApiController@getPackageWithDescription');
@@ -214,10 +212,8 @@ Route::get('/mobile/getServices/{flag}', 'MobileApiController@getServices');
 Route::get('/mobile/getServices/', 'MobileApiController@getServices');
 Route::get('/mobile/getPLCDetails/{ifAll}', 'PremierController@getPLCDetails');
 Route::get('/mobile/getRequests/getAllPLCRequestAndApplication', 'MobileApiController@getPLCAllLogs');
-
 Route::get('/mobile/getClientTransactions/{clientid}', 'MobileApiController@getClientTransactions');
 Route::get('/mobile/getTotalTransactionAmount', 'MobileApiController@getTotalTransactionAmount');
-
 //get appointment & events by start and end month
 Route::post('/mobile/getAppointmentsByMonth', 'MobileApiController@getAppointmentsByMonth');
 //get branch schedules
@@ -228,8 +224,8 @@ Route::post('/mobile/reviews/reviewTransaction', 'MobileApiController@reviewTran
 Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentReview');
 //queuing(short version)
 Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
-
-
+Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
+Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');
 
 
 

@@ -22,6 +22,7 @@ use App\TechnicianSchedule;
 use App\Review;
 use DateTime;
 use Validator;
+use App\Message;
 use Hash;
 use DB;
 use Mail;
@@ -179,7 +180,7 @@ class MobileApiController extends Controller{
     public function getAppointmentReview(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success'){
-            
+
             $dateToday     = date("Y-m-d H:i:s");
             $dateYesterday = strtotime($dateToday." -1 day");
             $client_id      = $api["user"]["id"];
@@ -954,10 +955,75 @@ class MobileApiController extends Controller{
         else{
             return response()->json($api, $api["status_code"]);
         }
+    }
+
+
+    //chat messaging
+    public function getChatMessage(Request $request){
         
+        $recipientID        = $request->segment(4);
+        $offset             = $request->segment(5);
+        $latestlastChatID   = $request->segment(6);
+        $previouslastChatID = $request->segment(7);
+        $ifLatest           = $request->segment(8);
+        $limit              = 20;
+        $api                = $this->authenticateAPI();
+        $response           =  array();
+
+        if($api['result'] === 'success'){
+
+            $clientID                   = $api["user"]["id"];
+
+            //get latest chat136
+            if($ifLatest == "true"){
+                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
+                                            ->whereIn('sender_id', [$recipientID, $clientID])
+                                            ->where("id",">",$latestlastChatID)
+                                            ->orderBy('created_at')
+                                            ->get()->toArray();
+                $ifLatest = "true";                            
+            }
+            else {
+                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
+                                            ->whereIn('sender_id', [$recipientID, $clientID])
+                                            ->where("id","<",$previouslastChatID)
+                                            ->limit($limit)->offset($offset)
+                                            ->orderBy('created_at')
+                                            ->get()->toArray();
+                 $ifLatest = "false";                     
+            }                  
+            $response["offset"]     = $offset + count($queryGetChatMessage);
+            $response["getMessage"] = $queryGetChatMessage;        
+            $response["ifLatest"]   = $ifLatest === 'true'? true: false;;  
+            return response()->json($response);                               
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
 
     }
 
+    public function sendChatMessage(Request $request){
+
+        $recipientID = $request->input("recipient");
+        $textBody    = $request->input("textMessage");
+
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $message                = new Message;
+            $message->body          = $textBody;
+            $message->title         = null;
+            $message->sender_id     = $api['user']['id'];
+            $message->recipient_id  = $recipientID;
+            $message->message_data  = '{}';
+            $message->is_read       = 0;
+            $message->save();
+            return response()->json(["result"=>"success","latestChatID"=>$message->id,"chatDetails"=>$message]);
+        }
+        return response()->json($api, $api["status_code"]);
+
+
+    }
 
 
 

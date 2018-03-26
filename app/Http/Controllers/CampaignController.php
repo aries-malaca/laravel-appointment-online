@@ -40,7 +40,6 @@ class CampaignController extends Controller{
                 $message = $request->input('message');
 
             if($request->input('send_via')=='email' && $request->input('flag')!='preview'){
-
                 $content_data = ["recipient"=>$recipient, "content"=>$this->makeHyperlink($message), "subject"=>$title];
                 $headers = array("subject"=>$title,
                                  "to"=> [["email"=>$recipient['email'], "name"=> $recipient['first_name']]]);
@@ -60,6 +59,8 @@ class CampaignController extends Controller{
                     "message"=>"Email Successfully sent to " . $recipient['first_name'] .' '. $recipient['last_name'],
                 ]);
             }
+
+
 
             if(!$this->isValidMobile($mobile))
                 return response()->json(['result'=>'failed','error'=>'Invalid mobile number.'], 400);

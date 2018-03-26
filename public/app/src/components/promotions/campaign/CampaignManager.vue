@@ -19,7 +19,7 @@
                                 <option v-for="template in templates" :value="template">{{template.name}}</option>
                             </select>
                             <span class="input-group-btn">
-                                <button class="btn blue" type="button"><i class="fa fa-folder"></i></button>
+                                <button class="btn blue" type="button" @click="showTemplateModal"><i class="fa fa-folder"></i></button>
                             </span>
                         </div>
                         <br/>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label>Send via:</label>
                         <div>
                             <label class="mt-radio">
@@ -67,8 +67,23 @@
                                 <span></span>
                             </label>
                             <label class="mt-radio">
-                                <input type="radio" v-model="send_via" value="sms+email">Both &nbsp;
+                                <input type="radio" v-model="send_via" value="sms+email">SMS+Email &nbsp;
                                 <span></span>
+                            </label>
+                            <label class="mt-radio">
+                                <input type="radio" v-model="send_via" value="app">Push Notification &nbsp;
+                                <span></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Content Control:</label>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="disable_content" />
+                                <span>Attachment Only</span>
                             </label>
                         </div>
                     </div>
@@ -86,41 +101,41 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>Content Control:</label>
-                        <div>
-                            <label>
-                                <input type="checkbox" v-model="disable_content" />
-                                <span>Attachment Only</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6"></div>
-                </div>
             </div>
             <div class="col-md-6">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label>Recipient Selection:</label>
-                            <select class="form-control" v-model="selected_group">
-                                <option v-for="r in recipientGroups" :value="r">{{ r }}</option>
+                            <label>Recipient Type:</label>
+                            <select class="form-control" v-model="recipient_type">
+                                <option :value="contacts">Contact List</option>
+                                <option :value="clients">Clients</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <div class="form-group">
-                            <label>Filter:</label>
-                            <input type="text" class="form-control" v-model="filter"/>
+                            <label>Select Group:</label>
+                            <div class="input-group">
+                                <select class="form-control" v-model="selected_group">
+                                    <option v-for="r in recipientGroups" :value="r">{{ r }}</option>
+                                </select>
+                                <span class="input-group-btn">
+                                <button class="btn blue" type="button" @click="showContactModal"><i class="fa fa-folder"></i></button>
+                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-8">
-                        <h4>Contact List</h4>
+                        <div class="form-group">
+                            <label>Filter:</label>
+                            <input type="text" class="form-control" v-model="filter"/>
+                        </div>
                     </div>
                     <div class="col-md-4">
+                        <br/>
                         <button class="btn btn-warning btn-sm pull-right" @click="refreshContacts"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
@@ -153,6 +168,25 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="template-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title" v-if="newPerk.id==0">Add Perk</h4>
+                        <h4 class="modal-title" v-else>Edit Perk</h4>
+                    </div>
+                    <div class="modal-body" v-if="newPerk.perk_data !== undefined">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" v-if="newPerk.id==0" @click="addPerk($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                        <button type="button" v-else @click="updatePerk($event)" data-loading-text="Updating..." class="btn green">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -163,6 +197,7 @@
         data(){
             return{
                 contacts:[],
+                clients:[],
                 templates:[],
                 attachments:null,
                 attachments_selection:[],
@@ -170,14 +205,24 @@
                 custom_message:'',
                 selected_template:null,
                 selected_group:'',
+                recipient_type:'contacts',
                 filter:'',
                 title:'',
                 send_via:'sms',
                 force_sending:false,
                 disable_content:false,
+                newTemplate:{}
             };
         },
         methods:{
+            showTemplateModal(){
+                this.newTemplate = {
+
+                };
+            },
+            showContactModal(){
+
+            },
             logMessage(message){
                 alert(message);
             },

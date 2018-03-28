@@ -139,7 +139,8 @@
                             </div>
                         </div>
                         <div v-else>
-
+                            <br/>
+                            <button class="pull-right btn btn-success" @click="showFilterModal">Filter Clients</button>
                         </div>
                     </div>
                 </div>
@@ -188,6 +189,22 @@
         </div>
         <template-manager :templates="templates" @refresh_host="getTemplates"></template-manager>
         <contact-manager :contacts="contacts" @refresh_host="getContacts"></contact-manager>
+        <div class="modal fade" id="filter-modal" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">Filter Clients</h4>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -237,6 +254,9 @@
             },
             showContactModal(){
                 $("#contact-modal").modal("show");
+            },
+            showFilterModal(){
+                $("#filter-modal").modal("show");
             },
             getContacts(){
                 let u = this;

@@ -143,7 +143,6 @@
                         $btn.button('reset');
                         XHRCatcher(error);
                     });
-
             },
             updateTemplate(){
                 let $btn = $(event.target);

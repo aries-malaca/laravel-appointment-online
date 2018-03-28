@@ -185,6 +185,9 @@ Route::post('/campaign/removeFile', 'CampaignController@removeFile');
 //contact
 Route::get('/contact/importContacts/{file}/{extension}', 'ContactController@importContacts');
 Route::get('/contact/getContacts', 'ContactController@getContacts');
+Route::post('/contact/addContact', 'ContactController@addContact');
+Route::post('/contact/updateContact', 'ContactController@updateContact');
+Route::post('/contact/deleteContact', 'ContactController@deleteContact');
 Route::get('/contact/getContactList', 'ContactController@getContactList');
 //
 

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Contact;
 use App\UserLevel;
 use Excel;
+use Validator;
 use DB;
 
 class ContactController extends Controller{
@@ -34,6 +35,79 @@ class ContactController extends Controller{
                 $contact->save();
             }
         }
+    }
+
+    function addContact(Request $request){
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'email' => 'required|max:255',
+            'mobile' => 'required|max:255',
+            'gender' => 'required|in:female,male',
+            'remarks' => 'required',
+            'new_group' => 'required_if:remarks,new',
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success') {
+            $contact = new Contact;
+            $contact->first_name = $request->input('first_name');
+            $contact->last_name = $request->input('last_name');
+            $contact->gender = $request->input('gender');
+            $contact->email_addresses = json_encode([$request->input('email')]);
+            $contact->mobiles = json_encode([$request->input('mobile')]);
+            $contact->remarks = $request->input('remarks') !== 'new'?$request->input('remarks'):$request->input('new_group');
+            $contact->save();
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updateContact(Request $request){
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'email' => 'required|max:255',
+            'mobile' => 'required|max:255',
+            'gender' => 'required|in:female,male',
+            'remarks' => 'required',
+            'new_group' => 'required_if:remarks,new',
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success') {
+            $contact = Contact::find($request->input('id'));
+            $contact->first_name = $request->input('first_name');
+            $contact->last_name = $request->input('last_name');
+            $contact->gender = $request->input('gender');
+            $contact->email_addresses = json_encode([$request->input('email')]);
+            $contact->mobiles = json_encode([$request->input('mobile')]);
+            $contact->remarks = $request->input('remarks') !== 'new'?$request->input('remarks'):$request->input('new_group');
+            $contact->save();
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function deleteContact(Request $request){
+        $api = $this->authenticateAPI();
+
+        if($api['result'] === 'success') {
+            Contact::destroy($request->input('id'));
+            return response()->json(['result'=>'success']);
+        }
+
+        return response()->json($api, $api["status_code"]);
     }
 
     function getContactList(){

@@ -156,7 +156,7 @@
         },
         watch:{
             partner(){
-                if(this.partner !== false)
+                if(this.partner !== false && this.partner.unread > 0)
                     this.seenMessages();
             }
         }

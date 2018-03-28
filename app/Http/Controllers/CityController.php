@@ -8,8 +8,9 @@ use Validator;
 class CityController extends Controller{
     public function getCities(){
         return response()->json(City::leftJoin('regions','cities.region_id', '=','regions.id')
-                                            ->select('cities.*','region_name')
-                                            ->get());
+                                    ->select('cities.*','region_name')
+                                    ->orderBy('city_name')
+                                    ->get());
     }
 
     public function addCity(Request $request){

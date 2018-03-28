@@ -173,11 +173,14 @@ Route::get('/review/getReview/{id}', 'ReviewController@getReview');
 Route::post('/review/submitReview', 'ReviewController@submitReview');
 
 //sms
-Route::get('/campaign/getAttachments', 'CampaignController@getAttachments');
 Route::get('/campaign/getTemplates', 'CampaignController@getTemplates');
 Route::post('/campaign/sendCampaign', 'CampaignController@sendCampaign');
+Route::post('/campaign/addTemplate', 'CampaignController@addTemplate');
+Route::post('/campaign/updateTemplate', 'CampaignController@updateTemplate');
+Route::post('/campaign/deleteTemplate', 'CampaignController@deleteTemplate');
+Route::post('/campaign/uploadFile', 'CampaignController@uploadFile');
+Route::post('/campaign/removeFile', 'CampaignController@removeFile');
 //
-
 
 //contact
 Route::get('/contact/importContacts/{file}/{extension}', 'ContactController@importContacts');

@@ -129,6 +129,7 @@ class UserController extends Controller{
         return response()->json(User::leftJoin('user_levels','user_levels.id','=','users.level')
                                 ->where('is_client', 0)
                                 ->select('users.*', 'level_name')
+                                ->orderBy('username')
                                 ->get());
     }
 

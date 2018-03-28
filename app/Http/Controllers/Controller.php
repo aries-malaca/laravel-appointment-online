@@ -293,7 +293,7 @@ class Controller extends BaseController{
                 $mail->bcc(env('APP_MAILING_DEV_ADDRESS'));
             if($attachments !== null)
                 foreach($attachments as $att)
-                    $mail->attach($att);
+                    $mail->attach(public_path($att));
         });
     }
 

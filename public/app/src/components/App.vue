@@ -129,6 +129,12 @@
             u.$store.dispatch('products/fetchProducts');
             u.$store.dispatch('technicians/fetchTechnicians');
 
+            setTimeout(()=>{
+                u.$options.sockets.pingUsers = function(){
+                    u.$socket.emit('pongUsers', {id:u.$store.state.user.id, is_client:u.$store.state.user.is_client, platform:'web'});
+                };
+            },5000);
+
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
                 if(data.model === 'services')
@@ -139,13 +145,6 @@
                     u.$store.dispatch('products/fetchProducts');
                 if(data.model === 'technicians')
                     u.$store.dispatch('technicians/fetchTechnicians');
-            };
-
-
-            this.$options.sockets.connect = function(){
-                setTimeout(()=>{
-                    u.$socket.emit('connectUser',u.$store.state.user.id);
-                },2000);
             };
 
             Notification.requestPermission();

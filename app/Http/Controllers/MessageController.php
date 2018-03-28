@@ -35,11 +35,18 @@ class MessageController extends Controller{
         if($api['result'] === 'success') {
             $data = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
                             ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
-                            ->orderBy('created_at')
+                            ->orderBy('created_at','DESC')
                             ->take($request->segment(5))
                             ->get()->toArray();
 
-            return response()->json($data);
+            $last_id = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
+                            ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
+                            ->get()->first();
+
+            if(isset($last_id['id']))
+                $last_id = $last_id['id'];
+
+            return response()->json(['messages'=>$data, 'last_id'=>$last_id]);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -94,6 +101,5 @@ class MessageController extends Controller{
                 ->get()->first());
         }
         return response()->json($api, $api["status_code"]);
-
     }
 }

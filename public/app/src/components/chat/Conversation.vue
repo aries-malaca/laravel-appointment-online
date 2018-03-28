@@ -23,7 +23,7 @@
             </div>
             <div class="page-quick-sidebar-chat-user-messages">
                 <small v-if="is_loading" style="text-align:center">Loading Messages...</small>
-                <div v-bind:class="'post ' + (message.sender_id== user.id?'out':'in')" v-for="message in messages">
+                <div v-bind:class="'post ' + (message.sender_id== user.id?'out':'in')" v-for="message,key in messages" :id="'message-' + key">
                     <img class="avatar" alt="" v-bind:src="'../../images/users/'+ (message.sender_id== user.id?user.user_picture:partner.user_picture)" />
                     <div class="message">
                         <span class="arrow"></span>
@@ -72,22 +72,32 @@
                 this.$store.commit('messages/updatePartner', false);
                 this.$store.commit('messages/updateMessages', []);
             },
-            getMessages(){
+            getMessages(latest){
                 let u = this;
+                this.is_loading = true;
                 axios.get('../../api/message/getConversation/'+ this.partner.id +'/' + this.limit +'?token='+this.token )
                     .then(function (response) {
-                        u.$store.commit('messages/updateMessages', response.data);
-                        $(".page-quick-sidebar-chat-user-messages").slimScroll({height: (window.innerHeight-170) + "px"});
+                        u.$store.commit('messages/updateMessages', response.data.messages);
+                        u.$store.commit('messages/updateLastID', response.data.last_id);
+
                         $(".page-quick-sidebar-chat-users").slimScroll({destroy: true});
-                        setTimeout(()=>{
-                            $(".page-quick-sidebar-chat-user-messages").slimScroll({height:  (window.innerHeight-170) + "px", scrollTo: "1000000px"});
-                        },100);
+
+                        $(".page-quick-sidebar-chat-user-messages").slimScroll({height: (window.innerHeight-170) + "px"});
+                        if(latest)
+                            setTimeout(()=>{
+                                $(".page-quick-sidebar-chat-user-messages").slimScroll({height:  (window.innerHeight-170) + "px", scrollTo: "1000000px"});
+                                u.is_loading = false;
+                            },100);
+                        else
+                            setTimeout(()=>{
+                                $(".page-quick-sidebar-chat-user-messages").slimScroll({height:  (window.innerHeight-170) + "px", scrollTo: "1px"});
+                                u.is_loading = false;
+                            },100);
 
                     })
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
-
             },
             sendMessage:function(){
                 let u = this;
@@ -96,7 +106,7 @@
                 axios.post('/api/message/sendMessage?token=' + u.token, {body:this.newMessage.body,recipient_id:this.partner.id})
                     .then(function () {
                         u.newMessage.body = '';
-                        u.getMessages();
+                        u.getMessages(true);
                         u.$socket.emit('newMessage', u.partner.id, u.user.id);
                         $btn.button('reset');
                     })
@@ -114,7 +124,7 @@
                 let u = this;
                 axios.post('/api/message/deleteConversation?token=' + this.token, {recipient_id:this.partner.id})
                     .then(function () {
-                        u.getMessages();
+                        u.getMessages(true);
                         u.$socket.emit('newMessage', u.partner.id, u.user.id, 'delete');
                     })
                     .catch(function (error) {
@@ -136,8 +146,9 @@
 
             this.$options.sockets.newMessage = function(data){
                 if(data.recipient_id === u.user.id)
-                    u.getMessages();
+                    u.getMessages(true);
             };
+
         },
         watch:{
             'newMessage.body':function(){
@@ -147,11 +158,25 @@
                 this.limit = 10;
 
                 if(this.partner !== false)
-                    this.getMessages();
+                    this.getMessages(true);
                 else
                     $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
 
+
+
                 document.getElementById("txt").focus();
+            },
+            messages(){
+                let u = this;
+
+                if(u.partner !== false)
+                    $('.page-quick-sidebar-chat-user-messages').slimScroll().bind('slimscrolling', function (e, pos) {
+                        if(u.messages.length > 0)
+                            if(!u.is_loading && pos ===0 && u.messages[0].id !== u.last_id){
+                                u.limit +=10;
+                                u.getMessages();
+                            }
+                    });
             }
         },
         computed:{
@@ -171,7 +196,12 @@
                 return this.$store.state.messages.partner;
             },
             messages(){
-                return this.$store.state.messages.messages;
+                return this.$store.state.messages.messages.sort((a,b)=>{
+                    return (a.created_at > b.created_at?1:-1);
+                });
+            },
+            last_id(){
+                return this.$store.state.messages.last_id;
             }
         },
     }

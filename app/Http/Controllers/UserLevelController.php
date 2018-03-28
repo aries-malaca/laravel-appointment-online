@@ -9,7 +9,7 @@ use App\UserLevel;
 class UserLevelController extends Controller{
 
     public function getUserLevels(){
-        $data = UserLevel::get()->toArray();
+        $data = UserLevel::orderBy('level_name')->get()->toArray();
         foreach($data as $key=>$value){
             $data[$key]['level_data'] = json_decode($value['level_data']);
             $data[$key]['level_data']->permissions = $this->generateUserPermission($data[$key]['level_data']);

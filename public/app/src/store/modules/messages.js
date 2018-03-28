@@ -7,6 +7,7 @@ export const messages = {
         partner:false,
         chat_visibility:false,
         unread_messages:[],
+        last_id:0
     },
     mutations:{
         toggleVisibility(state, s){
@@ -14,6 +15,9 @@ export const messages = {
         },
         updateMessages(state, messages){
             state.messages = messages;
+        },
+        updateLastID(state, last_id){
+            state.last_id = last_id;
         },
         updatePartner(state, partner){
             state.partner = partner;

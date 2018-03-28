@@ -47,13 +47,26 @@
                         </div>
                     </div>
                 </div>
-                <hr/>
-                <div class="row">
-                    <div class="col-md-12">
-                        <label>Attachments:</label>
-                        <vue-select v-model="attachments" :options="attachments_selection" multiple></vue-select>
-                    </div>
-                </div>
+                <table class="table table-condensed table-hover table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Attachments</th>
+                            <th>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="att,key in attachments">
+                            <td>
+                                <a :href="att" target="_blank">{{ att }}</a>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" @click="removeFile(att,key)">X</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <upload-file path="/files/blast" category="campaign" @setFileName="addFile"></upload-file>
                 <div class="row">
                     <div class="col-md-12">
                         <label>Send via:</label>
@@ -108,13 +121,13 @@
                         <div class="form-group">
                             <label>Recipient Type:</label>
                             <select class="form-control" v-model="recipient_type">
-                                <option :value="contacts">Contact List</option>
-                                <option :value="clients">Clients</option>
+                                <option value="contacts">Contact List</option>
+                                <option value="clients">Clients</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <div class="form-group">
+                        <div class="form-group" v-if="recipient_type === 'contacts'">
                             <label>Select Group:</label>
                             <div class="input-group">
                                 <select class="form-control" v-model="selected_group">
@@ -125,9 +138,12 @@
                             </span>
                             </div>
                         </div>
+                        <div v-else>
+
+                        </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" v-if="recipient_type==='contacts'">
                     <div class="col-md-8">
                         <div class="form-group">
                             <label>Filter:</label>
@@ -139,7 +155,7 @@
                         <button class="btn btn-warning btn-sm pull-right" @click="refreshContacts"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
-                <div style="overflow-y:scroll; max-height:310px">
+                <div style="overflow-y:scroll; max-height:310px" v-if="recipient_type==='contacts'">
                     <table class="table table-bordered">
                         <tbody>
                         <tr v-for="recipient, x in mappedContacts"
@@ -150,56 +166,44 @@
                                 <strong>{{ recipient.first_name }} {{ recipient.last_name }}</strong>
                             </td>
                             <td v-if="!recipient.sent">
-                                <button class="btn btn-info btn-xs" @click="sendCampaign(recipient,'preview')">Preview</button>
-                                <button class="btn btn-success btn-xs" @click="sendCampaign(recipient,'send')">Send</button>
+                                <button class="btn btn-info btn-xs" @click="sendCampaign($event,recipient,'preview')" data-loading-text="Please Wait...">Preview</button>
+                                <button class="btn btn-success btn-xs" @click="sendCampaign($event,recipient,'send')" data-loading-text="Please Wait...">Send</button>
                             </td>
                             <td v-else>
                                 <span class="badge badge-success">Message Sent! </span> &nbsp;
-                                <button class="btn btn-info btn-xs" @click="logMessage(recipient.message)">View</button>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="alert alert-info">
+                <div class="alert alert-info" v-if="recipient_type==='contacts'">
                     <small>
                         Selection: {{ selectionCount }} | Selected: {{ checkedCount }} | Sent: {{ sentCount }}
                     </small>
                 </div>
-            </div>
-        </div>
-        <div class="modal fade" id="template-modal" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog modal-md">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                        <h4 class="modal-title" v-if="newPerk.id==0">Add Perk</h4>
-                        <h4 class="modal-title" v-else>Edit Perk</h4>
-                    </div>
-                    <div class="modal-body" v-if="newPerk.perk_data !== undefined">
+                <div v-else>
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                        <button type="button" v-if="newPerk.id==0" @click="addPerk($event)" data-loading-text="Saving..." class="btn green">Save</button>
-                        <button type="button" v-else @click="updatePerk($event)" data-loading-text="Updating..." class="btn green">Save</button>
-                    </div>
                 </div>
             </div>
         </div>
+        <template-manager :templates="templates" @refresh_host="getTemplates"></template-manager>
+        <contact-manager :contacts="contacts" @refresh_host="getContacts"></contact-manager>
     </div>
 </template>
 <script>
     import VueSelect from 'vue-select';
+    import TemplateManager from './TemplateManager.vue';
+    import ContactManager from './ContactManager.vue';
+    import UploadFile from '../../uploader/UploadFile.vue';
     export default {
         name: 'CampaignManager',
-        components:{ VueSelect },
+        components:{ VueSelect, TemplateManager, ContactManager, UploadFile },
         data(){
             return{
                 contacts:[],
                 clients:[],
                 templates:[],
-                attachments:null,
+                attachments:[],
                 attachments_selection:[],
                 source:'template',
                 custom_message:'',
@@ -215,16 +219,24 @@
             };
         },
         methods:{
+            addFile(filename){
+                this.attachments.push(filename);
+            },
+            removeFile(filename, key){
+                let u = this;
+                axios.post('/api/campaign/removeFile?token=' + this.token, {filename:filename})
+                    .then(function () {
+                        u.attachments.splice(key, 1);
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
+            },
             showTemplateModal(){
-                this.newTemplate = {
-
-                };
+                $("#template-modal").modal("show");
             },
             showContactModal(){
-
-            },
-            logMessage(message){
-                alert(message);
+                $("#contact-modal").modal("show");
             },
             getContacts(){
                 let u = this;
@@ -246,20 +258,19 @@
                         u.templates = response.data;
                     });
             },
-            getAttachments(){
-                let u = this;
-                axios.get('/api/campaign/getAttachments')
-                    .then(function (response) {
-                        u.attachments_selection = response.data;
-                    });
-            },
-            sendCampaign(recipient, flag){
+
+            sendCampaign(event, recipient, flag){
+                let $btn = $(event.target);
+                $btn.button('loading');
                 let u = this;
                 axios.post('/api/campaign/sendCampaign?token=' + this.token, {message:this.message, recipient:recipient, send_via:this.send_via, force_sending:this.force_sending, flag:flag, title:this.title, attachments:this.attachments, disable_content:this.disable_content})
                     .then(function (response) {
-                        if(flag==='preview')
+                        if(flag==='preview') {
+                            $btn.button('reset');
                             alert(response.data.message);
+                        }
                         else{
+                            $btn.button('reset');
                             toastr.success(response.data.message);
                             u.markAsSent(response.data.recipient, response.data.sent_message);
 
@@ -275,6 +286,7 @@
                         }
                     })
                     .catch(function (error) {
+                        $btn.button('reset');
                         XHRCatcher(error);
                     });
             },
@@ -294,7 +306,6 @@
         mounted(){
             this.getContacts();
             this.getTemplates();
-            this.getAttachments();
         },
         watch:{
             selected_template(){
@@ -343,7 +354,6 @@
             token(){
                 return this.$store.state.token;
             },
-
         }
     }
 </script>

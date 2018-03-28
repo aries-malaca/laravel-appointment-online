@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use Faker\Provider\Text;
 use Illuminate\Http\Request;
 use App\TextMessage;
 use App\TextTemplate;
@@ -34,8 +35,11 @@ class CampaignController extends Controller{
             $mobile = $this->convertMobile($recipient['mobile']);
             $title = $request->input('title');
 
-            if(isset($request->input('message')['body']))
+            if(isset($request->input('message')['body'])) {
                 $message = $this->parseMessage($request->input('message')['body'], $recipient, $request->input('message')['parameters']);
+                if($message ===false)
+                    return response()->json(['result'=>'failed','error'=>"Cannot parse message, make sure parameters are correct."], 400);
+            }
             else
                 $message = $request->input('message');
 
@@ -59,8 +63,6 @@ class CampaignController extends Controller{
                     "message"=>"Email Successfully sent to " . $recipient['first_name'] .' '. $recipient['last_name'],
                 ]);
             }
-
-
 
             if(!$this->isValidMobile($mobile))
                 return response()->json(['result'=>'failed','error'=>'Invalid mobile number.'], 400);
@@ -116,14 +118,92 @@ class CampaignController extends Controller{
     }
 
     function getGlobeShortCode($number){
-        if(!in_array($number, config('app.home_network_prefixes') ))
+        //if(!in_array($number, config('app.home_network_prefixes') ))
             //return env('GLOBE_API_SHORT_CODE_CROSS_TELCO');
 
         return env('GLOBE_API_SHORT_CODE');
     }
 
-    function getAttachments(){
-        $files = Storage::disk('public_root')->files('images/blast');
-        return response()->json($files);
+    function addTemplate(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|max:255',
+                'body' => 'required',
+            ]);
+
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            $template = new TextTemplate;
+            $template->name = $request->input('name');
+            $template->body = $request->input('body');
+            $template->parameters = json_encode($request->input('parameters'));
+            $template->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function updateTemplate(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|max:255',
+                'body' => 'required',
+            ]);
+
+            if ($validator->fails())
+                return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+            $template = TextTemplate::find($request->input('id'));
+            $template->name = $request->input('name');
+            $template->body = $request->input('body');
+            $template->parameters = json_encode($request->input('parameters'));
+            $template->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function deleteTemplate(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            TextTemplate::destroy($request->input('id'));
+            return response()->json(["result"=>"success"]);
+        }
+
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function uploadFile(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            //check if the file is submitted
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $name = $file->getClientOriginalName() ;
+                $file->move('files/blast/', $name);
+
+                return response()->json(["result"=>"success", "filename"=>$name],200);
+            }
+            return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function removeFile(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+            if(file_exists(public_path('/files/blast/'.$request->input('filename'))))
+                unlink(public_path('/files/blast/'.$request->input('filename')));
+
+            return response()->json(["result"=>"success"],200);
+        }
+        return response()->json($api, $api["status_code"]);
     }
 }

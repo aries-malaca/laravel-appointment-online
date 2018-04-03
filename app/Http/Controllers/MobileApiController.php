@@ -797,7 +797,7 @@ class MobileApiController extends Controller{
 
             $object_result                      = json_decode($transactions,true);
             $object_result["minimum_amount"]    = (double)$minimum;
-            if(count($premiers) > 0){
+            if(isset($premiers["id"])){
                 $object_result["premier"]           = $premiers;
             }
             return response()->json($object_result);
@@ -968,13 +968,10 @@ class MobileApiController extends Controller{
         $ifLatest           = $request->segment(8);
         $limit              = 20;
         $api                = $this->authenticateAPI();
-        $response           =  array();
-
+        $response           = array();
+        $lastActivity       = $this->getLastTimeActivity($recipientID);    
         if($api['result'] === 'success'){
-
             $clientID                   = $api["user"]["id"];
-
-            //get latest chat136
             if($ifLatest == "true"){
                 $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
                                             ->whereIn('sender_id', [$recipientID, $clientID])
@@ -992,9 +989,10 @@ class MobileApiController extends Controller{
                                             ->get()->toArray();
                  $ifLatest = "false";                     
             }                  
-            $response["offset"]     = $offset + count($queryGetChatMessage);
-            $response["getMessage"] = $queryGetChatMessage;        
-            $response["ifLatest"]   = $ifLatest === 'true'? true: false;;  
+            $response["offset"]         = $offset + count($queryGetChatMessage);
+            $response["getMessage"]     = $queryGetChatMessage;        
+            $response["ifLatest"]       = $ifLatest === 'true'? true: false;
+            $response["lastActivity"]   = $lastActivity;  
             return response()->json($response);                               
         }
         else{
@@ -1026,6 +1024,12 @@ class MobileApiController extends Controller{
     }
 
 
+
+    public function getLastTimeActivity($recipientID){
+
+        $userQuery = User::find($recipientID);
+        return $userQuery->last_activity;
+    }
 
 
     public function getTotalReviews($branch_id){

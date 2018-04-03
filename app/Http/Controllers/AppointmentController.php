@@ -79,7 +79,7 @@ class AppointmentController extends Controller{
                 $item->item_data    = '{}';
                 $item->save();
             }
-            return response()->json(["result"=>"success"],200);
+            return response()->json(["result"=>"success","appointment_id"=>$appointment->id],200);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -226,7 +226,7 @@ class AppointmentController extends Controller{
 
     public function cancelAppointment(Request $request){
         $validator = Validator::make($request->all(), [
-            'reason' => 'required|not_in:0',
+            'reason'    => 'required|not_in:0',
             'reason_text' => 'required_if:reason,"other"',
         ],[
             'reason.not_in' =>'Please select reason',

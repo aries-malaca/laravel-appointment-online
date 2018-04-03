@@ -266,7 +266,6 @@
                 }
                 catch(error){}
             },
-            moment:moment,
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'My Profile');

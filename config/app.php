@@ -232,54 +232,27 @@ return [
     ],
 
     'permissions' => [
-        ['name'=>'queuing',
-         'actions'=>['view','book','update']
-        ],
-        ['name'=>'clients',
-            'actions'=>['view','update']
-        ],
-        ['name'=>'branches',
-            'actions'=>['view','add','update']
-        ],
-        ['name'=>'clusters',
-            'actions'=>['view','add','update']
-        ],
-        ['name'=>'technicians',
-            'actions'=>['view','add','update']
-        ],
-        ['name'=>'services',
-            'actions'=>['view','add','update']
-        ],
-        ['name'=>'products',
-            'actions'=>['view','add','update']
-        ],
-        ['name'=>'plctracker',
-            'actions'=>['view','process','deliver','ready','pickup','delete']
-        ],
-        ['name'=>'faq',
-            'actions'=>['view','add','update','delete']
-        ],
-        ['name'=>'careers',
-            'actions'=>['view','add','update','delete']
-        ],
-        ['name'=>'news',
-            'actions'=>['view','add','update','delete']
-        ],
-        ['name'=>'promotions',
-            'actions'=>['view','add','update','delete']
-        ],
-        ['name'=>'control_panel',
-            'actions'=>['view','update']
-        ],
-        ['name'=>'users',
-            'actions'=>['view','update','add']
-        ],
-        ['name'=>'userlevels',
-            'actions'=>['view','update','add']
-        ],
-        ['name'=>'places',
-            'actions'=>['view','update','add','delete']
-        ],
+        'appointments'=>['view','add','serve','complete','update'],
+        'branches'=>['view','add','update'],
+        'campaign_manager'=>['view','add','update','delete'],
+        'careers'=>['view','add','update','delete'],
+        'clients'=>['view','update'],
+        'clusters'=>['view','add','update'],
+        'control_panel'=>['view','update'],
+        'database'=>['view','backup','restore', 'delete'],
+        'faqs'=>['view','add','update','delete'],
+        'news'=>['view','add','update','delete'],
+        'perks'=>['view','add','update','delete'],
+        'places'=>['view','update','add','delete'],
+        'plc_tracker'=>['view','process','deliver','ready','pickup','delete'],
+        'products'=>['view','add','update'],
+        'promos'=>['view','add','update','delete'],
+        'services'=>['view','add','update'],
+        'surveys'=>['view','add','update','delete'],
+        'technicians'=>['view','add','update'],
+        'technician_schedule'=>['view','add','update'],
+        'users'=>['view','update','add'],
+        'user_levels'=>['view','update','add'],
     ],
     'valid_prefixes'=>[ '0813', '0817', '0905', '0906', '0907' ,'0908','0909','0910','0911',
                         '0912','0913','0914','0915','0916','0917','0918','0919','0920','0921','0922','0923','0924',

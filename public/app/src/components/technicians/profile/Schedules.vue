@@ -373,8 +373,7 @@
                     }
                 }
                 return undefined;
-            },
-            moment:moment
+            }
         },
         mounted(){
             this.getSchedule();

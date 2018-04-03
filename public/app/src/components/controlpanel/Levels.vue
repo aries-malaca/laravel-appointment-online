@@ -40,27 +40,23 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row" v-if="newUserLevel.level_data !== undefined">
-                            <div class="col-md-12">
-                                <table class="table table-bordered table-hover table-striped">
-                                    <thead>
-                                        <th>Permission Category</th>
-                                        <th>Actions</th>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="permission,key in newUserLevel.level_data.permissions">
-                                            <td>{{ permission.name }}</td>
-                                            <td>
-                                                <label v-for="action,k in permission.actions">
-                                                    <input type="checkbox" v-model="newUserLevel.level_data.permissions[key].actions[k].value"/>
-                                                    {{ action.label }}&nbsp;
-                                                </label>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        <h4>User Access</h4>
+                        <table class="table table-condensed table-bordered table-hover table-striped"
+                               v-if="newUserLevel.level_data !== undefined">
+                            <tbody>
+                            <tr v-for="p,key in permissions">
+                                <th>{{ p.name }}</th>
+                                <td>
+                                    <span v-for="a,k in p.actions">
+                                        <label>
+                                             <input type="checkbox" v-model="newUserLevel.level_data.permissions[p.name]" :value="a"/>
+                                            {{ a }} &nbsp;
+                                        </label>
+                                    </span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
@@ -85,6 +81,7 @@
             return {
                 newUserLevel:{},
                 userLevels:[],
+                permissions:[],
                 userLevelTable:{
                     columns: [
                         { label: 'Level', field: 'level_name', filterable: true },
@@ -103,6 +100,9 @@
             }
         },
         methods:{
+            getPermissions(){
+                this.getData('/api/user/getPermissions', 'permissions');
+            },
             getData:function(url, field){
                 let u = this;
                 axios.get(url)
@@ -128,9 +128,16 @@
                     level_name:'',
                     description:'',
                     level_data:{
-                        dashboard:'AdminDashboard'
+                        dashboard:'AdminDashboard',
+                        permissions:{}
                     }
                 };
+
+                let u = this;
+                this.permissions.forEach((item)=>{
+                    u.newUserLevel.level_data.permissions[item.name] = [];
+                });
+
                 $("#add-user-level-modal").modal("show");
             },
             viewUserLevel:function(level){
@@ -140,15 +147,21 @@
                     description:level.description,
                     level_data:{
                         dashboard: level.level_data.dashboard,
-                        permissions:[]
+                        permissions:{}
                     }
                 };
 
-                for(var x=0;x<level.level_data.permissions.length;x++){
-                    this.newUserLevel.level_data.permissions.push(
-                        level.level_data.permissions[x]
-                    );
-                }
+                let u = this;
+                this.permissions.forEach((item)=>{
+                    u.newUserLevel.level_data.permissions[item.name] = function(){
+                        if(level.level_data.permissions !== undefined){
+                            if(level.level_data.permissions[item.name] !== undefined){
+                                return level.level_data.permissions[item.name];
+                            }
+                        }
+                        return [];
+                    }();
+                });
 
                 $("#add-user-level-modal").modal("show");
             },
@@ -185,6 +198,7 @@
         },
         mounted:function(){
             this.getUserLevels();
+            this.getPermissions();
         },
         computed:{
             token(){

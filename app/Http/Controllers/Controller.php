@@ -217,33 +217,6 @@ class Controller extends BaseController{
         return json_decode($boss_data,true);
     }
 
-    function generateUserPermission($level_data){
-        $system_permissions = config('app.permissions');
-        foreach($system_permissions as $key=>$value){
-            foreach($value['actions'] as $k=>$v){
-                $system_permissions[$key]['actions'][$k] =
-                    array("label"=>$v,
-                          "value"=>isset($level_data->permissions)?
-                                        $this->getPermissionValue($value['name'], $v, $level_data->permissions):false
-                        );
-            }
-        }
-        return $system_permissions;
-    }
-
-    function getPermissionValue($name, $action, $data){
-        if(isset($data))
-        foreach($data as $key=>$value){
-            if($name == $value->name){
-                foreach($value->actions as $k=>$v){
-                    if($v->label == $action)
-                        return $v->value;
-                }
-            }
-        }
-        return false;
-    }
-
     function incrementConfigVersion($config_name){
         $config = Config::where('config_name', $config_name)->get()->first();
         $config->config_value = number_format((float)$config->config_value + 0.1,1);

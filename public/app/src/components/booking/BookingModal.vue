@@ -466,8 +466,7 @@
                 let c = Number(moment(oldData.book_start_time).format("X"));
                 let d = Number(moment(oldData.book_end_time).format("X"));
                 return ((c<=a && d<=b &&d>=a) ||  (b<=d && c<=b &&a>=c) || (c<=b && a<=c) || (a<=d && c<= a));
-            },
-            moment:moment
+            }
         },
         computed:{
             user(){

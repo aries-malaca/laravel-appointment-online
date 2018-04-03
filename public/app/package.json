@@ -11,11 +11,13 @@
   "dependencies": {
     "axios": "0.16.2",
     "babel-plugin-transform-runtime": "^6.0.0",
-    "croppie": "^2.6.1",
+    "chart.js": "^2.7.2",
+    "croppie": "^2.6.2",
     "vm-editor": "^0.1.6",
-    "vue": "^2.5.13",
+    "vue": "^2.5.16",
+    "vue-chartjs": "^3.3.1",
     "vue-form-wizard": "^0.6.5",
-    "vue-good-table": "^1.20.2",
+    "vue-good-table": "^1.21.0",
     "vue-good-wizard": "^1.2.2",
     "vue-js-toggle-button": "^1.2.2",
     "vue-location-picker": "^1.0.1",
@@ -38,7 +40,7 @@
     "css-loader": "^0.25.0",
     "file-loader": "^0.9.0",
     "vue-loader": "^12.1.0",
-    "vue-template-compiler": "^2.5.15",
+    "vue-template-compiler": "^2.5.16",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.11.2"
   }

@@ -351,7 +351,6 @@
                 this.getAppointments();
                 this.getAppointmentHistory();
             },
-            moment:moment,
             showUploadModal:function () {
                 $("#upload-picture-modal").modal("show");
                 try{

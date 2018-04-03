@@ -71,8 +71,7 @@
         methods:{
             showConversation(item){
                 this.$store.commit('messages/updatePartner', item);
-            },
-            moment:moment
+            }
         },
         computed:{
             user(){

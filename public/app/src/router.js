@@ -27,6 +27,7 @@ import BranchLocator from './components/tools/BranchLocator.vue';
 import FrequentlyAskedQuestions from './components/tools/FrequentlyAskedQuestions.vue';
 import PromoWallet from './components/promotions/PromoWallet.vue';
 import PremierLoyaltyCard from './components/plc/PremierLoyaltyCard.vue';
+import NotFoundError from './components/errors/NotFoundError.vue';
 
 Vue.use(Router);
 
@@ -108,7 +109,7 @@ export default new Router({
             component: Promotions
         },
         {
-            path: '/plctracker',
+            path: '/plc_tracker',
             name: 'PLCTracker',
             component: PLCTracker
         },
@@ -166,6 +167,10 @@ export default new Router({
             path: '/testimonials',
             name: 'Testimonials',
             component: Testimonials
+        },
+        {
+            path: '*',
+            component: NotFoundError
         }
     ]
 })

@@ -19,6 +19,7 @@ use App\Transaction;
 use App\TransactionItem;
 use App\Technician;
 use App\TechnicianSchedule;
+use App\Notification;
 use App\Review;
 use DateTime;
 use Validator;
@@ -253,42 +254,75 @@ class MobileApiController extends Controller{
         return response()->json($response);
     }
 
-	public function getUser(){
+	public function loginUser(Request $request){
         
-        $api = $this->authenticateAPI();
-        $response = array();
+        $api        = $this->authenticateAPI();
+        $response   = array();
 
-        if($api['result'] === 'success'){
-            $user_data = json_decode($api['user']['user_data'],true);
-            if($api['user']['is_client'] == 1){
-                $branch = Branch::find($user_data['home_branch']);
-                if(isset($branch->id)){
-                    $branch = $branch->branch_name;
+         $validator = Validator::make($request->all(), [
+            'email'     => 'required|max:255',
+            'password'  => 'required|max:255',
+        ]);
+
+        if ($validator->fails()){
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+        }
+        $username       =  $request->input('email');
+        $password       =  $request->input('password');
+        $device         =  $request->input('device');
+        $device_info    =  $request->input('device_info');
+
+        $objectTransactions     = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$username);   
+        //attempt to login the system
+        $userQuery = User::where('email', $request['email'])->get()->first();
+
+        if(isset($userQuery['id'])){
+            if($userQuery['is_active'] == 0){
+                return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
+            }
+
+            if(Hash::check($password, $userQuery['password'])){
+
+                $token      = JWTAuth::fromUser(User::find($userQuery['id']));
+                $user_data  = json_decode($userQuery['user_data'],true);   
+                if($userQuery['is_client'] == 1){
+                    if($device === null){
+                        $this->registerToken($userQuery['id'], $token);
+                    }
+                    else{
+                        $this->registerToken($userQuery['id'], $token, $device, $device_info);
+                    }
+                    $minimum_amount   = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
+                    $minimum_amount   = $minimum_amount["config_value"];
+                    return response()->json(["token"=>$token, "result"=>'success',"users_data"=>$userQuery,"transactions"=>json_decode($objectTransactions)]);
                 }
                 else{
-                    $branch = 'N/A';
+                    //respond a non client 
+                    return response()->json(["result"=>"failed","error"=>"You are not allowed to use the Mobile app"],400); 
                 }
-                $api['user']['branch'] = ["value"=>$user_data['home_branch'], "label"=> $branch];
+               
+            }
+            return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
+        }
+
+        if($result = $this->selfMigrateClient($username, $password)){
+
+            if($device === null){
+                $this->registerToken($result['id'], $result['token']);
             }
             else{
-            	//respond a non client 
-            	return response()->json(["result"=>"failed","error"=>"You are not allowed to use the Mobile app"],400); 
+                $this->registerToken($result['id'], $result['token'], $device, $device_info);
             }
-           
-          	$rowUsers = $api['user'];
-          	$bday     = new DateTime($rowUsers->birth_date);
-            $email 	  = $rowUsers->email;
-       		
-       		$total_discount  	= 5550;
-            // file_get_contents("http://boss.lay-bare.com/laybare-online/client_discounts.php?email=".$email);	
-			$total_transaction 	= 230;
-            // file_get_contents("http://boss.lay-bare.com/laybare-online/new_trans.php?email=".$email);
-			// $total_discount		= "190";
-			// $total_transaction  = "5520";
-            $response = $api['user'];
-            return response()->json($response,$api["status_code"]);
+            
+            $minimum_amount       = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
+            if(isset($minimum_amount['id'])){
+                $minimum_amount   = $minimum_amount["config_value"];
+            }
+            $objectTransactions["minimum_amount"]    =  $minimum_amount;
+            return response()->json(["token"=>$token, "result"=>'success',"users_data"=>$userQuery,"transactions"=>json_decode($objectTransactions)]);
+
         }
-        return response()->json($api, $api["status_code"]);
+        return response()->json(["result"=>"failed","error"=>"User not found."],400);
     }
 
     public function updateHomeBranch(Request $request){
@@ -473,11 +507,19 @@ class MobileApiController extends Controller{
         $bday 			    = new DateTime($request->input('addBday'));
         $birth_date         = $bday->format("Y-m-d H:i:s");
         $branch 		    = $request->input('addBranch');
-        
         $gender 		    = lcfirst($request->input('addGender'));
         $device             = $request->input('addDevice');
         $device_name        = $request->input('addDeviceName');
         $facebook_id        = $request->input('addFBID');
+        $imageURL           = $request->input('addImageUrl');
+        
+        //CONTINUE TODAY
+        // if($imageURL == ""){
+
+        // }
+        // else{
+
+        // }
 
         $user 			    = new User;
         $user->first_name 	= $request->input('addFname');
@@ -1019,6 +1061,25 @@ class MobileApiController extends Controller{
             return response()->json(["result"=>"success","latestChatID"=>$message->id,"chatDetails"=>$message]);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    public function getNotifications(Request $request){
+
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success') {
+
+            $clientID   = $api['user']['id'];
+            $queryNotif = Notification::where(function($query) use ($clientID){
+                $query->where('user_id', $clientID)
+                        ->orWhere('user_id',0);
+            });
+            $queryNotif = $queryNotif
+                        ->orderBy('created_at')
+                        ->get()->toArray();
+            return response()->json($queryNotif);
+        }
+        return response()->json($api, $api["status_code"]);
+       
 
 
     }

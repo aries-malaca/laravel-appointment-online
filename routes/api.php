@@ -203,7 +203,7 @@ Route::get('/notification/seenNotifications', 'NotificationController@seenNotifi
 //Load this every splashscreens
 Route::get('/mobile/getAppVersion/{getVersion}/{deviceType}/{deviceName}', 'MobileApiController@getAppVersion');
 Route::get('/mobile/getFirstLoadDetails/{version_banner}/{version_commercial}/{version_services}/{version_packages}/{version_products}/{version_branches}', 'MobileApiController@LoadData');
-Route::get('/mobile/getClientDetails', 'MobileApiController@getUser');
+Route::post('/mobile/loginUser', 'MobileApiController@loginUser');
 Route::post('/mobile/updateHomeBranch', 'MobileApiController@updateHomeBranch');
 Route::post('/mobile/updatePersonalInfo', 'MobileApiController@updatePersonalInfo');
 Route::post('/mobile/updateAccount', 'MobileApiController@updateAccount');
@@ -232,7 +232,7 @@ Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentRe
 Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
 Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
 Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');
-
+Route::get('/mobile/getNotifications', 'MobileApiController@getNotifications');
 
 
 

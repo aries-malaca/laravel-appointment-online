@@ -4,7 +4,7 @@
             <div class="col-md-6">
                 <div class="portlet light bordered">
                     <div class="portlet-body tiles">
-                        <a href="../../#/plctracker" class="tile bg-green-meadow">
+                        <a href="../../#/plc_tracker" class="tile bg-green-meadow">
                             <div class="tile-body">
                                 <i class="icon icon-book-open"></i>
                             </div>

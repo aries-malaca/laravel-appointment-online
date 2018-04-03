@@ -137,7 +137,6 @@
                         u.cancelEditing();
                     })
                     .catch(function (error) {
-                        $btn.button('reset');
                         XHRCatcher(error);
                     });
             },

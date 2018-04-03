@@ -16,6 +16,7 @@ use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use App\Notification;
 
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -224,7 +225,6 @@ class Controller extends BaseController{
     }
 
     function emailReceiver($email){
-
         if(env('APP_MAILING_ENV')==='development')
             return env('APP_MAILING_DEV_ADDRESS');
 
@@ -293,5 +293,24 @@ class Controller extends BaseController{
         }
 
         return false;
+    }
+
+    function createNotification($type, $user_id, $data, $send_mail = false){
+        $notification = new Notification;
+        $notification->notification_type = $type;
+        $notification->notification_data = json_encode($data);
+        $notification->user_id = $user_id;
+        $notification->is_read = 0;
+        $notification->save();
+
+        $user = User::find($user_id);
+        if(isset($user->id)){
+            $d = json_decode($user->user_data);
+            if(in_array('email', $d->notifications) && $send_mail) {
+                if(isset($data['message']) && isset($data['title'])){
+
+                }
+            }
+        }
     }
 }

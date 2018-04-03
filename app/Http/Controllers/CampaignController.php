@@ -187,9 +187,14 @@ class CampaignController extends Controller{
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $name = $file->getClientOriginalName() ;
+                if(!in_array($file->getClientOriginalExtension(),['docx','doc','pdf','jpg','jpeg','gif','png','xls','xlsx']))
+                    return response()->json(["result"=>"failed","error"=>"File not supported."], 400);
+                if($file->getClientSize() > 5120000)
+                    return response()->json(["result"=>"failed","error"=>"File size exceeds the maximum of 5MB."], 400);
+
                 $file->move('files/blast/', $name);
 
-                return response()->json(["result"=>"success", "filename"=>$name],200);
+                return response()->json(["result"=>"success", "filename"=>$name, "size"=>$file->getClientSize()],200);
             }
             return response()->json(["result"=>"failed","error"=>"No File to be uploaded."], 400);
         }

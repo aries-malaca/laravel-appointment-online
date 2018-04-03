@@ -135,6 +135,15 @@
                 };
             },5000);
 
+
+            u.$options.sockets.destroyToken = function(data){
+                if(data.user_id === u.user.id && u.token === data.token){
+                    alert("You session has been ended by other device using your account.");
+                    location.reload();
+                }
+            };
+
+
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
                 if(data.model === 'services')

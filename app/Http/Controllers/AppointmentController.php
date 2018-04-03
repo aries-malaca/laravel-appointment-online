@@ -13,6 +13,7 @@ use App\ServiceType;
 use App\Product;
 use App\ProductGroup;
 
+
 class AppointmentController extends Controller{
     public function addAppointment(Request $request){
         $validator = Validator::make($request->all(), [
@@ -79,6 +80,7 @@ class AppointmentController extends Controller{
                 $item->item_data    = '{}';
                 $item->save();
             }
+
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);

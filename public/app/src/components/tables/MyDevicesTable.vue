@@ -41,10 +41,14 @@
                     axios.post('/api/user/destroyToken', { token : token, user_id : u.default_user !== undefined ? u.default_user.id: u.user.id})
                         .then(function () {
                             toastr.success("Device has been logged out.");
-                            if(u.default_user !== undefined)
+                            if(u.default_user !== undefined){
                                 u.$emit('emit_host');
+                            }
                             else
                                 u.$store.dispatch('fetchAuthenticatedUser');
+
+
+                            u.$socket.emit('destroyToken', u.user.id, token);
                         })
                         .catch(function (error) {
                             XHRCatcher(error);

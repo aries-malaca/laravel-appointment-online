@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.53.0",
+            "version": "3.53.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "225593974bb6f6b1c13ddf946d3736d3e39119e5"
+                "reference": "6c225154ac6f767c8135fc13a35d0aab1399288d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/225593974bb6f6b1c13ddf946d3736d3e39119e5",
-                "reference": "225593974bb6f6b1c13ddf946d3736d3e39119e5",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6c225154ac6f767c8135fc13a35d0aab1399288d",
+                "reference": "6c225154ac6f767c8135fc13a35d0aab1399288d",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-03-30T20:22:38+00:00"
+            "time": "2018-04-02T20:48:35+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1186,16 +1186,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v5.6.12",
+            "version": "v5.6.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "82d8165d1ea86bdd81ddfa1db9343fa19e7d1450"
+                "reference": "baa42cf6bdd942523fafece21ec16a1843c6db0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/82d8165d1ea86bdd81ddfa1db9343fa19e7d1450",
-                "reference": "82d8165d1ea86bdd81ddfa1db9343fa19e7d1450",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/baa42cf6bdd942523fafece21ec16a1843c6db0f",
+                "reference": "baa42cf6bdd942523fafece21ec16a1843c6db0f",
                 "shasum": ""
             },
             "require": {
@@ -1320,7 +1320,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2018-03-14T17:29:38+00:00"
+            "time": "2018-03-30T13:29:58+00:00"
         },
         {
             "name": "laravel/tinker",
@@ -1896,16 +1896,16 @@
         },
         {
             "name": "owen-it/laravel-auditing",
-            "version": "v6.0.1",
+            "version": "v6.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/owen-it/laravel-auditing.git",
-                "reference": "953f175307532cfd61d447229fd3fbb95d5a5e0d"
+                "reference": "8e6273d6bdef802e0efb51fe2005f1229f0c5f80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/953f175307532cfd61d447229fd3fbb95d5a5e0d",
-                "reference": "953f175307532cfd61d447229fd3fbb95d5a5e0d",
+                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/8e6273d6bdef802e0efb51fe2005f1229f0c5f80",
+                "reference": "8e6273d6bdef802e0efb51fe2005f1229f0c5f80",
                 "shasum": ""
             },
             "require": {
@@ -1975,7 +1975,7 @@
                 "revision",
                 "tracking"
             ],
-            "time": "2018-02-15T16:23:28+00:00"
+            "time": "2018-04-02T11:58:04+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -2325,16 +2325,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.8.17",
+            "version": "v0.8.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "5069b70e8c4ea492c2b5939b6eddc78bfe41cfec"
+                "reference": "5357b1cffc8fb375d6a9e3c86d5c82dd38a40834"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/5069b70e8c4ea492c2b5939b6eddc78bfe41cfec",
-                "reference": "5069b70e8c4ea492c2b5939b6eddc78bfe41cfec",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/5357b1cffc8fb375d6a9e3c86d5c82dd38a40834",
+                "reference": "5357b1cffc8fb375d6a9e3c86d5c82dd38a40834",
                 "shasum": ""
             },
             "require": {
@@ -2393,7 +2393,7 @@
                 "interactive",
                 "shell"
             ],
-            "time": "2017-12-28T16:14:16+00:00"
+            "time": "2018-04-02T05:41:44+00:00"
         },
         {
             "name": "pusher/pusher-php-server",
@@ -4702,16 +4702,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "7.0.2",
+            "version": "7.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "e2f8aa21bc54b6ba218bdd4f9e0dac1e9bc3b4e9"
+                "reference": "536f4d853c12d8189963435088e8ff7c0daeab2e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e2f8aa21bc54b6ba218bdd4f9e0dac1e9bc3b4e9",
-                "reference": "e2f8aa21bc54b6ba218bdd4f9e0dac1e9bc3b4e9",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/536f4d853c12d8189963435088e8ff7c0daeab2e",
+                "reference": "536f4d853c12d8189963435088e8ff7c0daeab2e",
                 "shasum": ""
             },
             "require": {
@@ -4725,7 +4725,7 @@
                 "phar-io/version": "^1.0",
                 "php": "^7.1",
                 "phpspec/prophecy": "^1.7",
-                "phpunit/php-code-coverage": "^6.0",
+                "phpunit/php-code-coverage": "^6.0.1",
                 "phpunit/php-file-iterator": "^1.4.3",
                 "phpunit/php-text-template": "^1.2.1",
                 "phpunit/php-timer": "^2.0",
@@ -4778,7 +4778,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-02-26T07:03:12+00:00"
+            "time": "2018-03-26T07:36:48+00:00"
         },
         {
             "name": "phpunit/phpunit-mock-objects",

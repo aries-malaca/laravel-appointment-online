@@ -10,4 +10,8 @@ class User extends Authenticatable implements Auditable
 {
     use Notifiable;
     use \OwenIt\Auditing\Auditable;
+
+    protected $auditExclude = [
+        'device_data', 'last_activity','password', 'is_active','level','user_data','user_picture'
+    ];
 }

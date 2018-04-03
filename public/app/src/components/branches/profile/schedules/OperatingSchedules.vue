@@ -302,8 +302,7 @@
                             XHRCatcher(error);
                         });
                 });
-            },
-            moment:moment
+            }
         },
         mounted:function(){
             let start = moment("2020-01-01 05:00:00");

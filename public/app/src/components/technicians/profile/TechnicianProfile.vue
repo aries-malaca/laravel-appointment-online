@@ -144,8 +144,7 @@
             },
             updateFromEMS(event){
 
-            },
-            moment:moment
+            }
         },
         watch:{
             'technician.id'(){

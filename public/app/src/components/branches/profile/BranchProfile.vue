@@ -88,7 +88,7 @@
                                 </table>
                                 <!--end row-->
 
-                                <div v-if="with_back && gate(user.level_data.permissions, 'branches', 'update')">
+                                <div v-if="with_back">
                                     <button class="btn btn-info" @click="editBranch(branch)">Edit Branch</button>
                                     <button class="btn btn-success" @click="addPicture">Add Photo</button>
                                 </div>
@@ -98,7 +98,7 @@
                                         <ul class="list-unstyled profile-nav" style="margin-top:5px">
                                             <li>
                                                 <img v-bind:src="'images/branches/'+ pic" class="img-responsive pic-bordered" alt="" />
-                                                <div v-if="with_back &&  gate(user.level_data.permissions, 'branches', 'update')">
+                                                <div v-if="with_back">
                                                     <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
                                                     <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
                                                 </div>
@@ -323,9 +323,7 @@
                             u.appointment_history.push(item);
                         });
                     });
-            },
-            moment:moment,
-            gate:gate
+            }
         },
         watch:{
             'branch.id'(){

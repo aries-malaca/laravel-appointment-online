@@ -130,8 +130,7 @@
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
-            },
-            moment:moment,
+            }
         },
         mounted(){
             let u = this;

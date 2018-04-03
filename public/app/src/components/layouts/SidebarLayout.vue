@@ -21,7 +21,7 @@
                     </router-link>
                 </li>
                 
-                <li class="nav-item" v-for="menu in menus" v-bind:class="{ active: (title==menu.title) }" v-if="gate(user.level_data.permissions, menu.url, 'view') || user.is_client === 1 || menu.title === 'Appointments'">
+                <li class="nav-item" v-for="menu in menus" v-bind:class="{ active: (title==menu.title) }" v-if="gate(user,menu.url,'view') || user.is_client === 1 || menu.title === 'Appointments'">
                     <router-link v-bind:to="'/'+ menu.url" class="nav-link">
                         <i v-bind:class="menu.icon"></i>
                         <span class="title">{{  menu.title }}</span>
@@ -58,8 +58,7 @@
         methods:{
             logout: function() {
                 this.$emit('logout')
-            },
-            gate:gate
+            }
         }
     }
 </script>

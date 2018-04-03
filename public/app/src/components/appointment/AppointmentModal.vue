@@ -542,8 +542,7 @@
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
-            },
-            moment:moment
+            }
         },
         computed:{
             services:function(){

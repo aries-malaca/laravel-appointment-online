@@ -26,6 +26,7 @@ Route::post('/user/uploadPicture', 'UserController@uploadPicture');
 Route::get('/user/getUserLevels', 'UserLevelController@getUserLevels');
 Route::post('/user/addUserLevel', 'UserLevelController@addUserLevel');
 Route::post('/user/updateUserLevel', 'UserLevelController@updateUserLevel');
+Route::get('/user/getPermissions', 'UserLevelController@getPermissions');
 Route::post('/user/saveLocation', 'UserController@saveLocation');
 //FB Login
 Route::post('/user/fbLogin', 'UserController@fbLogin');

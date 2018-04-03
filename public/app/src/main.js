@@ -7,13 +7,14 @@ import {store} from './store/store';
 Vue.config.productionTip = false;
 Vue.config.debug = true;
 Vue.config.devtools = true;
+import {mixins} from './mixins';
 
 //frontend configurations
 let client_socket = 'https://lbo-express.azurewebsites.net';
 //end frontend configurations
 
 Vue.use(VueSocketIO, client_socket);
-
+Vue.mixin(mixins);
 new Vue({
     el: '#app',
     router,

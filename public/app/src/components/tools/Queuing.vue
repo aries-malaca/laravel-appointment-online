@@ -33,14 +33,13 @@
                     <div class="col-md-4">
                         <div class="row" v-if="branch !== null">
                             <div class="col-md-6">
-                                <button v-if="gate(user.level_data.permissions, 'queuing', 'book')" @click="toggle = !toggle"
+                                <button @click="toggle = !toggle"
                                         type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
                             <div class="col-md-6">
                                 <a v-bind:href="'../../queuing/web/' + branch.value" target="_blank" class="btn btn-warning btn-block">Queuing Screen</a>
                             </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="tabbable-line" v-if="branch !== null">
@@ -487,9 +486,7 @@
                         return true;
                 }
                 return false;
-            },
-            gate:gate,
-            moment:moment
+            }
         },
         mounted:function(){
             this.$store.commit('updateQueuingBranch', null);

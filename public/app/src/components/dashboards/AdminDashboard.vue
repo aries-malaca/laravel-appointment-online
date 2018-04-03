@@ -43,7 +43,7 @@
                 </div>
                 <div class="portlet light bordered">
                     <div class="portlet-body tiles">
-                        <a href="../../#/plctracker" class="tile bg-yellow-saffron">
+                        <a href="../../#/plc_tracker" class="tile bg-yellow-saffron">
                             <div class="tile-body">
                                 <i class="icon icon-book-open"></i>
                             </div>

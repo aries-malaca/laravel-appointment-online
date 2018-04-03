@@ -34,7 +34,6 @@
         name: 'MyDevicesTable',
         props:['default_user'],
         methods:{
-            moment:moment,
             destroyToken:function(token){
                 let u = this;
 

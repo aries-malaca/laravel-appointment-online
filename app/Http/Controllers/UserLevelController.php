@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Validator;
 use Illuminate\Http\Request;
 use App\UserLevel;
@@ -10,10 +8,9 @@ class UserLevelController extends Controller{
 
     public function getUserLevels(){
         $data = UserLevel::orderBy('level_name')->get()->toArray();
-        foreach($data as $key=>$value){
+        foreach($data as $key=>$value)
             $data[$key]['level_data'] = json_decode($value['level_data']);
-            $data[$key]['level_data']->permissions = $this->generateUserPermission($data[$key]['level_data']);
-        }
+
         return response()->json($data);
     }
 
@@ -63,5 +60,17 @@ class UserLevelController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
+    }
+
+    function getPermissions(){
+        $data = config('app.permissions');
+        $permissions = [];
+        foreach($data as $key=>$value){
+            $permissions[] = [
+                "name"=>$key,
+                "actions"=>$value
+            ];
+        }
+        return response()->json($permissions);
     }
 }

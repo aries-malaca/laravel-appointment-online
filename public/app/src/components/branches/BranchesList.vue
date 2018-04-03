@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane active" id="branches">
-        <button type="button" v-if="gate(user.level_data.permissions, 'branches', 'add')" @click="showAddBranchModal" class="btn green-meadow">
+        <button type="button" @click="showAddBranchModal" class="btn green-meadow">
             New Branch
         </button>
         <br/><br/>
@@ -65,8 +65,7 @@
             },
             viewBranch:function(branch) {
                 this.$store.commit('branches/updateViewingBranch', branch);
-            },
-            gate:gate
+            }
         },
         computed:{
             filtered_branches:function(){

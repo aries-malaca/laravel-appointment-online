@@ -32,6 +32,7 @@ Route::post('/user/fbLogin', 'UserController@fbLogin');
 
 //clients
 Route::get('/client/searchClients', 'ClientController@searchClients');
+Route::post('/client/filterClients', 'ClientController@filterClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');

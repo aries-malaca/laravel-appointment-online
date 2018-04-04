@@ -5,14 +5,15 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Branch;
 use Validator;
+use DB;
 
 class ClientController extends Controller{
     public function searchClients(Request $request){
 
         $keyword = $request->input('keyword');
-        if($keyword == ''){
+        if($keyword == '')
             return response()->json(["result"=>"failed","error"=>"Please Enter Keyword."], 400);
-        }
+
         $clients = User::where('is_client', 1);
         $clients = $clients->where(function($query) use ($keyword){
             $query->where('first_name', 'LIKE', '%' . $keyword . '%')
@@ -33,6 +34,62 @@ class ClientController extends Controller{
             $clients[$key]['name'] = $value['first_name'] .' '. $value['last_name'];
         }
         return response()->json($clients);
+    }
+
+    public function filterClients(Request $request){
+        $search = DB::table('users')
+                    ->select(DB::raw('floor(DATEDIFF(CURDATE(),birth_date) /365.25) as age'),'first_name', 'gender',
+                            'last_name','user_address', 'user_mobile AS mobile', 'email', 'user_data')
+                    ->where('is_client', 1);
+        //this is for gender and address
+        $search = $search->where(function($query) use ($request){
+            if($request->input('gender') !== null)
+                $query = $query->where('gender', $request->input('gender'));
+
+            $addresses = $request->input('address');
+            if(sizeof($addresses)>0)
+                $query->where('user_address', '<>', '')
+                    ->where(function($q) use ($addresses){
+                        foreach($addresses as $address)
+                            $q = $q->orWhere('user_address', 'LIKE', '%'. $address .'%');
+                    });
+        });
+
+        $search = $search->get()
+            ->map(function($value){
+                $value->user_data = json_decode($value->user_data);
+                return $value;
+             })
+            ->filter(function($value) use ($request){
+                if(sizeof($request->input('home_branch')) >0 ){
+                    $home_branches = [];
+                    foreach($request->input('home_branch') as $k=>$v)
+                        $home_branches[] = (int)$v['value'];
+
+                    if(!in_array($value->user_data->home_branch, $home_branches))
+                        return false;
+                }
+                if($request->input('premier_status') !== null){
+                    if($value->user_data->premier_status === 0 && $request->input('premier_status') || $value->user_data->premier_status === 1 && !$request->input('premier_status'))
+                        return false;
+                }
+                if($request->input('age') !== null){
+                    if(! ($value->age >= $request->input('age')[0] && $value->age <= $request->input('age')[1]) )
+                        return false;
+                }
+                return true;
+            })->all();
+
+        $search = $this->unserialize($search);
+        return response()->json($search);
+    }
+
+    function unserialize($object){
+        $array = [];
+        foreach($object as $o)
+            $array[] = $o;
+
+        return $array;
     }
 
     public function getClient(Request $request){

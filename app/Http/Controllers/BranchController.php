@@ -13,7 +13,6 @@ use Storage;
 
 class BranchController extends Controller{
     public function getBranches(Request $request){
-
         $today = new DateTime();
         $date_today = $today->format("Y-m-d H:i:s");
 
@@ -26,7 +25,6 @@ class BranchController extends Controller{
                         ->get()->toArray();
 
         foreach($data as $key=>$value){
-
             $data[$key]['cluster_data']             = json_decode($value['cluster_data']);
             $data[$key]['branch_pictures']          = json_decode($value['branch_pictures']);
             $data[$key]['services']                 = json_decode($value['services']);
@@ -41,7 +39,6 @@ class BranchController extends Controller{
                                                                     ->get()->toArray();
             $array_sched = array();
             foreach($query_schedule as $k=>$v){
-
                 $schedule_type  = $query_schedule[$k]['schedule_type'];
                 $date_start     = $query_schedule[$k]['date_start'];
                 $date_end       = $query_schedule[$k]['date_end'];
@@ -513,8 +510,6 @@ class BranchController extends Controller{
     }
 
     function unregisterKiosk(Request $request){
-
-
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 

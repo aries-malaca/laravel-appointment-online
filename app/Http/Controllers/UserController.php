@@ -93,7 +93,7 @@ class UserController extends Controller{
 
                 $api['user']['review_request'] = isset($plc_request['id'])?$plc_request['status']:false;
                 $api['user']['branch'] = [
-                                "value"=>$user_data['home_branch'],
+                                "value"=>(int)$user_data['home_branch'],
                                 "label"=> $branch,
                                 "branch_data"=> json_decode($b['branch_data']),
                                 "branch_address"=> $b['branch_address'],
@@ -484,7 +484,7 @@ class UserController extends Controller{
         $user->is_active = 1;
         $user->is_confirmed = $request->input('from_facebook')==1?1:0;
         $user->is_agreed = 1;
-        $user->user_data = json_encode(array("home_branch"=>$request->input('home_branch'),
+        $user->user_data = json_encode(array("home_branch"=>(int)$request->input('home_branch'),
                                              "premier_status"=>0));
         $user->device_data = '[]';
         $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';

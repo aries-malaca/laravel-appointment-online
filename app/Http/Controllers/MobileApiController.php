@@ -638,7 +638,7 @@ class MobileApiController extends Controller{
         }
         return response()->json([
                             "result" => "failed",
-                            "error"  => "No email address or birthdate exist"
+                            "error"  => "No email address AND birthdate exist"
 
                         ],400);
     }
@@ -1062,7 +1062,7 @@ class MobileApiController extends Controller{
         }
         return response()->json($api, $api["status_code"]);
     }
-
+    
     public function getNotifications(Request $request){
 
         $api = $this->authenticateAPI();
@@ -1075,13 +1075,10 @@ class MobileApiController extends Controller{
             });
             $queryNotif = $queryNotif
                         ->orderBy('created_at')
-                        ->get()->toArray();
+                        ->get()->toArray();            
             return response()->json($queryNotif);
         }
         return response()->json($api, $api["status_code"]);
-       
-
-
     }
 
 

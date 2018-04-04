@@ -9,7 +9,7 @@ use Validator;
 
 class PromotionController extends Controller{
     function getPromotions(){
-        $data = Promotion::get()->toArray();
+        $data = Promotion::orderBy("created_at","desc")->get()->toArray();
 
         foreach($data as $key=>$value){
             $user = User::find($value['posted_by_id']);
@@ -71,7 +71,19 @@ class PromotionController extends Controller{
             $promo->promotions_data = '{}';
             $promo->posted_by_id = $api['user']['id'];
             $promo->save();
+        
+            $arrayImage                                     = array("no photo.jpg");
+            $arrayNotification                              = array();
+            $arrayNotification["title"]                     = $request->input('title');
+            $arrayNotification["body"]                      = $request->input('description');
+            $arrayNotification["images"]                    = $arrayImage;
+            $arrayNotification["promotion_id"]              = $promo->id;
+            $arrayNotification["promotion_type"]            = $request->input('type');
+            $arrayNotification["target_branch"]             = json_encode($branches);
+            $arrayNotification["date_posted"]               = $request->input('date_start');
+            $arrayNotification["date_expire"]               = $request->input('date_end');
 
+            $this->createNotification("promotion",0,$arrayNotification);
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);

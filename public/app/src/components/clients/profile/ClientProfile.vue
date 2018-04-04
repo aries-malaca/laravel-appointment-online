@@ -65,11 +65,11 @@
 
                                             <table class="table table-hover table-light">
                                                 <tbody>
-                                                <tr>
+                                                <tr v-if="client.last_login !== null">
                                                     <td> Last Login: </td>
                                                     <td> {{ moment(client.last_login).fromNow() }} </td>
                                                 </tr>
-                                                <tr>
+                                                <tr v-if="client.last_activity !== null">
                                                     <td> Last Activity: </td>
                                                     <td> {{ moment(client.last_activity).fromNow() }} </td>
                                                 </tr>
@@ -280,7 +280,6 @@
 
         <loading v-if="newClient.first_name===undefined && show"></loading>
     </div>
-
 </template>
 
 <script>
@@ -291,7 +290,6 @@
     import TransactionsView from "../../transactions/TransactionsView.vue";
     import VueSelect from "vue-select"
     import Loading from '../../etc/Loading.vue';
-
     export default {
         name: 'ClientProfile',
         props: ['with_back','id','show'],

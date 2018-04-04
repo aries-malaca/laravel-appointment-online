@@ -106,7 +106,8 @@ class CampaignController extends Controller{
 
     function parseMessage($message, $recipient, $fields){
         foreach($fields as $field)
-            $message = str_replace('{'. $field .'}', $recipient[$field], $message);
+            if(isset($recipient[$field]))
+                $message = str_replace('{'. $field .'}', $recipient[$field], $message);
 
         return $message;
     }

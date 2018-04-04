@@ -144,10 +144,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="row" v-if="recipient_type==='contacts'">
+                <div class="row">
                     <div class="col-md-8">
                         <div class="form-group">
-                            <label>Filter:</label>
+                            <label>Search:</label>
                             <input type="text" class="form-control" v-model="filter"/>
                         </div>
                     </div>
@@ -177,29 +177,127 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="alert alert-info" v-if="recipient_type==='contacts'">
-                    <small>
-                        Selection: {{ selectionCount }} | Selected: {{ checkedCount }} | Sent: {{ sentCount }}
-                    </small>
+                <div style="overflow-y:scroll; max-height:310px" v-if="recipient_type==='clients'">
+                    <table class="table table-bordered" v-if="using_filtered_client">
+                        <tbody>
+                        <tr v-for="recipient, x in filtered_clients" v-show="(filter==='' ||  recipient.first_name.toLowerCase().indexOf(filter) !== -1
+                                ||  recipient.last_name.toLowerCase().indexOf(filter) !== -1)">
+                            <td style="cursor:pointer">
+                                <strong>{{ recipient.first_name }} {{ recipient.last_name }}</strong>
+                            </td>
+                            <td v-if="!recipient.sent">
+                                <button class="btn btn-info btn-xs" @click="sendCampaign($event,recipient,'preview')" data-loading-text="Please Wait...">Preview</button>
+                                <button class="btn btn-success btn-xs" @click="sendCampaign($event,recipient,'send')" data-loading-text="Please Wait...">Send</button>
+                            </td>
+                            <td v-else>
+                                <span class="badge badge-success">Message Sent! </span> &nbsp;
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info" v-else>Please filter the client to create list of recipients</div>
                 </div>
-                <div v-else>
-
+                <div class="alert alert-info">
+                    <small>
+                        Selection: {{ selectionCount }} | Sent: {{ sentCount }}
+                    </small>
                 </div>
             </div>
         </div>
         <template-manager :templates="templates" @refresh_host="getTemplates"></template-manager>
         <contact-manager :contacts="contacts" @refresh_host="getContacts"></contact-manager>
         <div class="modal fade" id="filter-modal" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-full">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                         <h4 class="modal-title">Filter Clients</h4>
                     </div>
                     <div class="modal-body">
-
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Gender</label>
+                                            <select class="form-control" v-model="filter_object.gender">
+                                                <option :value="null"></option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select class="form-control" v-model="filter_object.premier_status">
+                                                <option :value="null"></option>
+                                                <option :value="true">Premier</option>
+                                                <option :value="false">Non-premier</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Age</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="number" v-model.number="filter_object.age[0]" class="form-control" />
+                                            <small>Age From</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="number" v-model.number="filter_object.age[1]" class="form-control" />
+                                            <small>Age To</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <div class="input-group" v-for="address,key in filter_object.address">
+                                        <input type="text" v-model="filter_object.address[key]" class="form-control"/>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-danger" type="button" @click="removeAddress(key)"><i class="fa fa-trash"></i></button>
+                                        </span>
+                                    </div>
+                                    <small><a @click="addAddress">Add..</a></small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Home Branch</label>
+                                    <vue-select v-model="filter_object.home_branch" multiple :options="branch_selection"></vue-select>
+                                </div>
+                                <button class="btn btn-success btn-block" @click="filterClients">Apply Filter</button>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Gender</th>
+                                            <th>Age</th>
+                                            <th>Home Branch</th>
+                                            <th>Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="client in filtered_clients">
+                                            <td>{{ client.first_name }}</td>
+                                            <td>{{ client.last_name }}</td>
+                                            <td>
+                                                <span class="badge badge-info" v-if="client.gender==='male'">Male</span>
+                                                <span class="badge badge-warning" v-else>Female</span>
+                                            </td>
+                                            <td>{{ client.age }}</td>
+                                            <td>{{ client.home_branch }}</td>
+                                            <td>{{ client.user_address }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-success" @click="useData">Use</button>
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -232,12 +330,53 @@
                 send_via:'sms',
                 force_sending:false,
                 disable_content:false,
-                newTemplate:{}
+                newTemplate:{},
+                filtered_clients:[],
+                filter_object:{
+                    gender:null,
+                    age:[13, 70],
+                    address:[],
+                    home_branch:[],
+                    premier_status:null
+                },
+                using_filtered_client:false,
             };
         },
         methods:{
+            useData(){
+                this.using_filtered_client = true;
+                $("#filter-modal").modal("hide");
+            },
+            addAddress(){
+              this.filter_object.address.push("");
+            },
+            removeAddress(key){
+                this.filter_object.address.splice(key,1);
+            },
             addFile(filename){
                 this.attachments.push(filename);
+            },
+            filterClients(){
+                let u = this;
+
+                axios.post('/api/client/filterClients', this.filter_object)
+                    .then(function (response) {
+                        u.filtered_clients = [];
+                        response.data.forEach((item)=>{
+                            item.home_branch = function(){
+                                for(var x=0;x<u.branches.length;x++){
+                                    if(u.branches[x].id === Number(item.user_data.home_branch))
+                                        return u.branches[x].branch_name;
+                                }
+                                return 'N/A';
+                            }();
+                            item.sent = false;
+                            u.filtered_clients.push(item);
+                        });
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                    });
             },
             removeFile(filename, key){
                 let u = this;
@@ -257,6 +396,7 @@
             },
             showFilterModal(){
                 $("#filter-modal").modal("show");
+                this.using_filtered_client = false;
             },
             getContacts(){
                 let u = this;
@@ -277,8 +417,8 @@
                     .then(function (response) {
                         u.templates = response.data;
                     });
+                this.selected_template = null;
             },
-
             sendCampaign(event, recipient, flag){
                 let $btn = $(event.target);
                 $btn.button('loading');
@@ -311,16 +451,29 @@
                     });
             },
             markAsSent(recipient, sent_message){
-                for(var x=0;x<this.contacts.length;x++){
-                    if(recipient.id === this.contacts[x].id) {
-                        this.contacts[x].sent = true;
-                        this.contacts[x].message = sent_message;
+                if(this.recipient_type==='contacts'){
+                    for(var x=0;x<this.contacts.length;x++){
+                        if(recipient.id === this.contacts[x].id) {
+                            this.contacts[x].sent = true;
+                            this.contacts[x].message = sent_message;
+                        }
                     }
                 }
+                else{
+                    for(var x=0;x<this.filtered_clients.length;x++){
+                        if(recipient.email === this.filtered_clients[x].email) {
+                            this.filtered_clients[x].sent = true;
+                            this.filtered_clients[x].message = sent_message;
+                        }
+                    }
+                }
+
             },
             refreshContacts(){
                 for(var x=0;x<this.contacts.length;x++)
                     this.contacts[x].sent = false;
+                for(var x=0;x<this.filtered_clients.length;x++)
+                    this.filtered_clients[x].sent = false;
             }
         },
         mounted(){
@@ -336,6 +489,9 @@
             }
         },
         computed:{
+            branches(){
+                return this.$store.getters['branches/activeBranches'];
+            },
             mappedContacts(){
                 return this.contacts.map((item)=>{
                     item.gender = item.gender === 'female' ? 'Ms.':'Mr.';
@@ -346,9 +502,14 @@
                 return this.source === 'template'? this.selected_template:this.custom_message;
             },
             sentCount(){
-                return this.mappedContacts.filter((item)=>{
-                    return item.sent
-                }).length;
+                if(this.recipient_type==='contacts')
+                    return this.mappedContacts.filter((item)=>{
+                        return item.sent
+                    }).length;
+                else
+                    return this.filtered_clients.filter((item)=>{
+                        return item.sent
+                    }).length;
             },
             checkedCount(){
                 return this.mappedContacts.filter((item)=>{
@@ -365,14 +526,27 @@
             },
             selectionCount(){
                 let u = this;
-                return this.mappedContacts.filter((recipient)=>{
-                    return (u.filter==='' ||  recipient.first_name.toLowerCase().indexOf(u.filter) !== -1
-                    ||  recipient.last_name.toLowerCase().indexOf(u.filter) !== -1)
-                    &&  recipient.remarks===u.selected_group;
-                }).length;
+                if(this.recipient_type==='contacts')
+                    return this.mappedContacts.filter((recipient)=>{
+                        return (u.filter==='' ||  recipient.first_name.toLowerCase().indexOf(u.filter) !== -1
+                        ||  recipient.last_name.toLowerCase().indexOf(u.filter) !== -1)
+                        &&  recipient.remarks===u.selected_group;
+                    }).length;
+                else
+                    return this.filtered_clients.filter((recipient)=>{
+                        return (u.filter==='' ||  recipient.first_name.toLowerCase().indexOf(u.filter) !== -1
+                            ||  recipient.last_name.toLowerCase().indexOf(u.filter) !== -1);
+                    }).length;
             },
             token(){
                 return this.$store.state.token;
+            },
+            branch_selection:function(){
+                var a = [];
+                this.branches.forEach(function(item, i){
+                    a.push({label:item.branch_name, value:item.id});
+                });
+                return a;
             },
         }
     }

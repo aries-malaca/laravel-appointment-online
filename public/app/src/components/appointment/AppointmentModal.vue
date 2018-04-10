@@ -240,7 +240,7 @@
                                                 <div class="mt-comments" v-else>
                                                     <div class="mt-comment">
                                                         <div class="mt-comment-img">
-                                                            <img style="height:48px" :src="'../../images/users/' + appointment.client_picture"> </div>
+                                                            <img style="height:36px" :src="'../../images/users/' + appointment.client_picture"> </div>
                                                         <div class="mt-comment-body">
                                                             <div class="mt-comment-info">
                                                                 <span class="mt-comment-author">{{ appointment.client_name }}</span>

@@ -56,54 +56,59 @@ class TechnicianController extends Controller{
         $picture_path = $cluster_data->ems_server . Config::where('config_name', 'EMS_TECHNICIAN_PICTURES_PATH')
                                                     ->get()->first()['config_value'];
 
-        $data = Curl::to($api)->get();
-        $data = json_decode($data,true);
+        $response = Curl::to($api)
+                    ->returnResponseObject()
+                    ->get();
 
-        foreach($data as $key=>$value) {
-            $find = Technician::where('employee_id', $value['employee_no'])->get()->first();
-            $cluster = BranchCluster::where('cluster_data','LIKE','%"ems_supported":true%')->get()->first();
+        if($response->status >= 200 && $response->status <= 210) {
+            $data = json_decode($response->content,true);
 
-            if (isset($find['id']))
-                $technician = Technician::find($find['id']);
-            else
-                $technician = new Technician;
+            foreach($data as $key=>$value) {
+                $find = Technician::where('employee_id', $value['employee_no'])->get()->first();
+                $cluster = BranchCluster::where('cluster_data','LIKE','%"ems_supported":true%')->get()->first();
 
-            $picture = Curl::to($picture_path. $value['picture'])
-                            ->returnResponseObject()
-                            ->get();
+                if (isset($find['id']))
+                    $technician = Technician::find($find['id']);
+                else
+                    $technician = new Technician;
 
-            if($picture->status >= 200 && $picture->status <= 210) {
-                file_put_contents(public_path('images/technicians/' . $value['employee_no'] . '.jpg'), $picture->content);
-                $p = $value['employee_no'].'.jpg';
+                $picture = Curl::to($picture_path. $value['picture'])
+                    ->returnResponseObject()
+                    ->get();
+
+                if($picture->status >= 200 && $picture->status <= 210) {
+                    file_put_contents(public_path('images/technicians/' . $value['employee_no'] . '.jpg'), $picture->content);
+                    $p = $value['employee_no'].'.jpg';
+                }
+                else
+                    $p = 'no photo female.jpg';
+
+                $technician->first_name = $value['first_name'];
+                $technician->middle_name = $value['middle_name'];
+                $technician->last_name = $value['last_name'];
+                $technician->technician_status = '';
+                $technician->technician_picture = $p;
+                $technician->cluster_id = isset($cluster['id'])?$cluster['id']:0;
+                $technician->is_active = 1;
+                $technician->technician_data = json_encode(array(
+                    "mobile" => $value['mobile'],
+                    "gender" => $value['gender'],
+                    "email" => $value['email'],
+                    "civil_status" => $value['civil_status'],
+                    "position_name" => $value['position_name'],
+                    "birth_date" => $value['birth_date'],
+                    "hired_date" => $value['hired_date'],
+                    "address" => $value['address'],
+                ));
+                $technician->employee_id = $value['employee_no'];
+                $technician->save();
+
+                $this->fillSchedules($value['schedules'], $technician->id);
             }
-            else
-                $p = 'no photo female.jpg';
 
-            $technician->first_name = $value['first_name'];
-            $technician->middle_name = $value['middle_name'];
-            $technician->last_name = $value['last_name'];
-            $technician->technician_status = '';
-            $technician->technician_picture = $p;
-            $technician->cluster_id = isset($cluster['id'])?$cluster['id']:0;
-            $technician->is_active = 1;
-            $technician->technician_data = json_encode(array(
-                "mobile" => $value['mobile'],
-                "gender" => $value['gender'],
-                "email" => $value['email'],
-                "civil_status" => $value['civil_status'],
-                "position_name" => $value['position_name'],
-                "birth_date" => $value['birth_date'],
-                "hired_date" => $value['hired_date'],
-                "address" => $value['address'],
-            ));
-            $technician->employee_id = $value['employee_no'];
-            $technician->save();
-
-            $this->fillSchedules($value['schedules'], $technician->id);
+            return response()->json(["result"=>"success"]);
         }
-
-        return response()->json(["result"=>"success"]);
-
+        return response()->json(["result"=>"failed", "errors"=>"Error in API"],400);
     }
 
     function getCurrentBranch($id, $date){
@@ -223,7 +228,7 @@ class TechnicianController extends Controller{
 
             foreach($schedules as $k=>$v){
 
-                $branch = Branch::where('branch_data','LIKE', '%"ems_id":"'. $v['branch_id'] .'"%')
+                $branch = Branch::where('branch_data','LIKE', '%"ems_id":'. $v['branch_id'] .'%')
                     ->get()->first();
 
                 if(isset($branch['id'])){

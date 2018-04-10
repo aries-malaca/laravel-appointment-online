@@ -23,6 +23,7 @@ Route::post('/user/updateProfile', 'UserController@updateProfile');
 Route::post('/user/changePassword', 'UserController@changePassword');
 Route::post('/user/uploadPicture', 'UserController@uploadPicture');
 
+Route::get('/user/getPermissions', 'UserLevelController@getPermissions');
 Route::get('/user/getUserLevels', 'UserLevelController@getUserLevels');
 Route::post('/user/addUserLevel', 'UserLevelController@addUserLevel');
 Route::post('/user/updateUserLevel', 'UserLevelController@updateUserLevel');
@@ -36,6 +37,7 @@ Route::post('/client/filterClients', 'ClientController@filterClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
+Route::post('/client/updateTransactionData', 'ClientController@updateTransactionData');
 
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
@@ -117,7 +119,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians/{id}', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');

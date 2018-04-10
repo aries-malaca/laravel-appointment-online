@@ -105,6 +105,7 @@ class UserController extends Controller{
                                 "products"=>$products,
                         ];
                 $api['user']['level_data'] = array();
+                $api['user']['transaction_data'] = json_decode($api['user']['transaction_data']);
             }
             else{
                 $level = UserLevel::find($api['user']['level']);
@@ -372,7 +373,7 @@ class UserController extends Controller{
             $user->is_confirmed = 1;
             $user->is_active = 1;
             $user->is_agreed = 1;
-            $user->device_data = '{}';
+            $user->device_data = '[]';
             $user->birth_date = '2000-01-01';
             $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
             $user->level = $request->input('level');
@@ -485,7 +486,10 @@ class UserController extends Controller{
         $user->is_confirmed = $request->input('from_facebook')==1?1:0;
         $user->is_agreed = 1;
         $user->user_data = json_encode(array("home_branch"=>(int)$request->input('home_branch'),
-                                             "premier_status"=>0));
+                                             "premier_status"=>0,
+                                             "notifications"=>["email"]));
+        $user->transaction_data = '[]';
+        $user->notifications_read = '[]';
         $user->device_data = '[]';
         $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
 
@@ -493,8 +497,10 @@ class UserController extends Controller{
 
         if($request->input('fbid') !== null ){
             $filename = $user->id.'_'.time().'.jpg';
-            $data = file_get_contents('https://graph.facebook.com/'.$request->input('fbid').'/picture?type=large');
+
+            $data = Curl::to('https://graph.facebook.com/'.$request->input('fbid').'/picture?type=large')->get();
             file_put_contents(public_path('images/users/'). $filename, $data );
+
             User::where('id', $user->id)
                     ->update(['user_picture' => $filename]);
         }

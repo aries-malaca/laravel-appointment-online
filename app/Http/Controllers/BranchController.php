@@ -261,7 +261,6 @@ class BranchController extends Controller{
             $cluster->is_active = 1;
             $cluster->cluster_data = json_encode($request->input('cluster_data'));
             $cluster->save();
-            $this->refreshClusterCron();
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -294,28 +293,11 @@ class BranchController extends Controller{
             $cluster->services = json_encode($services);
             $cluster->products = json_encode($products);
             $cluster->cluster_data = json_encode($request->input('cluster_data'));
-            $this->refreshClusterCron();
             $cluster->save();
 
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
-    }
-
-    function refreshClusterCron(){
-        $clusters = BranchCluster::where('cluster_data', 'LIKE', '%"ems_supported":true%')
-                                ->get()->toArray();
-        if(Storage::disk('local')->exists('cron.json')){
-            $data = array();
-            foreach($clusters as $cluster){
-                $d = json_decode($cluster['cluster_data']);
-
-                $data[] = array("id"=>$cluster['id'],
-                                "run"=>$d->ems_cron);
-            }
-
-            Storage::disk('local')->put('cron.json', json_encode($data));
-        }
     }
 
     public function uploadPicture(Request $request){

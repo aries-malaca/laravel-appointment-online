@@ -6,10 +6,7 @@
         <div class="page-quick-sidebar">
             <ul class="nav nav-tabs">
                 <li class="active">
-                    <a data-target="#quick_sidebar_tab_1" data-toggle="tab"> Messenger </a>
-                </li>
-                <li>
-                    <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab"> Settings </a>
+                    <a data-target="#quick_sidebar_tab_1" data-toggle="tab"> Chat System </a>
                 </li>
             </ul>
             <div class="tab-content">
@@ -17,9 +14,6 @@
                      v-bind:class="partner !== false ?'page-quick-sidebar-content-item-shown':''" id="quick_sidebar_tab_1">
                     <contact-list/>
                     <conversation/>
-                </div>
-                <div class="tab-pane page-quick-sidebar-settings" id="quick_sidebar_tab_3">
-
                 </div>
             </div>
         </div>
@@ -131,6 +125,22 @@
                         XHRCatcher(error);
                     });
             },
+            modifyOnlineUsers(users){
+                var contacts = this.contacts;
+
+                for(var x=0;x<contacts.length;x++){
+                    var find = users.find((item)=>{
+                        return item.id===contacts[x].id
+                    });
+                    if(find !== undefined){
+                        contacts[x].last_activity = find.last_seen;
+                        contacts[x].is_online = 1;
+                    }
+                    else
+                        contacts[x].is_online = 0;
+                }
+                this.$store.commit('messages/updateContactList', contacts);
+            }
         },
         mounted:function(){
             let u = this;
@@ -151,6 +161,12 @@
                 }
 
             };
+            setTimeout(function () {
+                u.$options.sockets.pingUsers = function(users){
+                    u.modifyOnlineUsers(users);
+                    u.$socket.emit('pongUsers', {id:u.$store.state.user.id, is_client:u.$store.state.user.is_client, platform:'WEB'});
+                };
+            },5000);
 
             $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
         },

@@ -79,7 +79,7 @@ class PromotionController extends Controller{
             $arrayNotification["images"]                    = $arrayImage;
             $arrayNotification["promotion_id"]              = $promo->id;
             $arrayNotification["promotion_type"]            = $request->input('type');
-            $arrayNotification["target_branch"]             = json_encode($branches);
+            $arrayNotification["target_branch"]             = $branches;
             $arrayNotification["date_posted"]               = $request->input('date_start');
             $arrayNotification["date_expire"]               = $request->input('date_end');
 
@@ -217,10 +217,6 @@ class PromotionController extends Controller{
                         $perk->perk_picture = $request->input('perk_id') . '_' . $timestamp;
                         $perk->save();
                     }
-
-
-
-
                     return response()->json(["result"=>"success"],200);
                 }
                 return response()->json(["result"=>"failed","error"=>"Invalid File Format."],400);

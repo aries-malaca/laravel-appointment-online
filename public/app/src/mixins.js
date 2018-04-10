@@ -3,6 +3,8 @@ export const mixins = {
         gate(user, permission, action){
             if(user.level === 1)
                 return true;
+            if(user.level === 0)
+                return false;
 
             if(user.level_data === undefined)
                 return false;

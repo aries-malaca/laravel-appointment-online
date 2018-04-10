@@ -34,9 +34,8 @@
                             <ul class="dropdown-menu">
                                 <li class="external">
                                     <h3>
-                                        <span v-if="unread_notifications.length > 0" class="bold">{{ unread_notifications.length }} unread notifications </span>
+                                        <span v-if="unread_notifications.length > 0" class="bold"> ({{ unread_notifications.length }} unread notifications)</span> <router-link to="/notifications" class="pull-right">view all</router-link>
                                     </h3>
-                                    <router-link to="/notifications">view all</router-link>
                                 </li>
                                 <li>
                                     <ul class="dropdown-menu-list scroller" style="height: 250px;" data-handle-color="#637283">
@@ -66,6 +65,11 @@
                                 <li>
                                     <router-link to="/profile">
                                         <i class="icon-user"></i> My Profile
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link to="/logs">
+                                        <i class="icon-user"></i> Activity Logs
                                     </router-link>
                                 </li>
                                 <li class="divider"> </li>

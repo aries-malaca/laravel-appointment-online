@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\BranchCluster;
 use Storage;
 
 class Kernel extends ConsoleKernel
@@ -26,17 +27,16 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule){
         $schedule->command('expire')->hourly();
-        $schedule->command('pull-technicians')->hourly();
+        $schedule->command('auditing:clean')->hourly();
 
-        if(Storage::disk('local')->exists('cron.json')){
-            $clusters = json_decode(Storage::disk('local')->get('cron.json'));
-            foreach($clusters as $cluster){
-                $schedule->call(function () use ($cluster) {
-                    file_get_contents(env('APP_URL').'/api/technician/fetchEMSTechnicians/' . $cluster->id);
-                })->cron($cluster->run);
-            }
+        //loop through all the clusters
+        foreach( BranchCluster::get()->toArray() as $cluster){
+            $cluster_data = json_decode($cluster['cluster_data']);
+            if(!$cluster_data->ems_supported)
+                continue;
+
+            $schedule->command('fetch-technicians', [$cluster['id']] )->cron($cluster_data->ems_cron);
         }
-
     }
 
     /**

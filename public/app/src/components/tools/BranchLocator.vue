@@ -25,8 +25,8 @@
                         <div id="map"></div>
                     </div>
                 </div>
-                <div class="alert alert-warning" v-show="!show_map">
-                    Please Allow site the access your location first.
+                <div class="alert alert-info" v-show="!show_map">
+                    Please allow the System to access your location first. <button class="btn btn-success btn-xs" @click="initializeMap">Proceed</button>
                 </div>
             </div>
         </div>
@@ -104,11 +104,14 @@
                             });
 
                             u.show_map = true;
+
+
+                            u.initializeMarkers();
                         });
                     }
                     else
                         u.show_map = false;
-                },1000);
+                },500);
             },
             initializeMarkers:function(){
                 this.clearMarkers();
@@ -188,9 +191,6 @@
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Branch Locator');
-            this.initializeMap();
-            this.initializeMarkers();
-
             this.client = {
                 label:this.user.username,
                 value:this.user.id,

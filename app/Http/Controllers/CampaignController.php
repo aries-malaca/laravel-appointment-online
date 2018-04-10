@@ -1,12 +1,9 @@
 <?php
 namespace App\Http\Controllers;
-use Faker\Provider\Text;
 use Illuminate\Http\Request;
 use App\TextMessage;
 use App\TextTemplate;
-use Curl;
 use Validator;
-use Illuminate\Support\Facades\Storage;
 
 class CampaignController extends Controller{
 

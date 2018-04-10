@@ -5,21 +5,6 @@
                 <i class="fa fa-search"></i>
                 <input type="text" class="form-control" v-model="keyword" placeholder="Search ..."/>
             </div>
-            <div class="input-group-btn">
-                <button type="button" class="btn yellow dropdown-toggle" data-toggle="dropdown">
-                    <i class="fa fa-cog"></i>
-                    <i class="fa fa-angle-down"></i>
-                </button>
-                <ul class="dropdown-menu pull-right">
-                    <li>
-                        <a href="javascript:;"> Action </a>
-                    </li>
-                    <li>
-                        <a href="javascript:;"> Another action </a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /btn-group -->
         </div>
 
         <div class="page-quick-sidebar-chat-users" data-rail-color="#e8fec7" v-show="partner === false"

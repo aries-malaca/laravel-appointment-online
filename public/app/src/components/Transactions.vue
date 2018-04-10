@@ -13,12 +13,7 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <div v-if="transactions">
-                    <transactions-view :client="user" :transactions="transactions"></transactions-view>
-                </div>
-                <div class="alert alert-info" v-else>
-                    Please wait while we loading your transactions.
-                </div>
+                <transactions-view :client="user"></transactions-view>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>

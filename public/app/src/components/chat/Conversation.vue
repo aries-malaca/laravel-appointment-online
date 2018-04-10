@@ -73,8 +73,10 @@
                 this.$store.commit('messages/updateMessages', []);
             },
             getMessages(latest){
+                $(".page-quick-sidebar-chat-users").slimScroll({destroy: true});
+                $(".page-quick-sidebar-chat-user-messages").slimScroll({height: (window.innerHeight-170) + "px"});
+
                 let u = this;
-                this.is_loading = true;
                 axios.get('../../api/message/getConversation/'+ this.partner.id +'/' + this.limit +'?token='+this.token )
                     .then(function (response) {
                         u.$store.commit('messages/updateMessages', response.data.messages);
@@ -161,8 +163,6 @@
                 else
                     $(".page-quick-sidebar-chat-users").slimScroll({height: (window.innerHeight-150) + "px"});
 
-
-
                 document.getElementById("txt").focus();
             },
             messages(){
@@ -173,6 +173,7 @@
                         if(u.messages.length > 0)
                             if(!u.is_loading && pos ===0 && u.messages[0].id !== u.last_id){
                                 u.limit +=10;
+                                u.is_loading = true;
                                 u.getMessages();
                             }
                     });

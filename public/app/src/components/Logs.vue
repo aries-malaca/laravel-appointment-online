@@ -3,7 +3,7 @@
         <div class="portlet-title">
             <div class="caption">
                 <i class="icon-puzzle font-grey-gallery"></i>
-                <span class="caption-subject bold font-green uppercase">Activity Logs</span>
+                <span class="caption-subject bold uppercase">Activity Logs</span>
             </div>
         </div>
         <div class="portlet-body">

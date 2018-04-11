@@ -196,9 +196,10 @@
                 return this.$store.state.messages.partner;
             },
             messages(){
+                let u = this;
                 return this.$store.state.messages.messages.sort((a,b)=>{
                     return (a.created_at > b.created_at?1:-1);
-                });
+                })
             },
             last_id(){
                 return this.$store.state.messages.last_id;

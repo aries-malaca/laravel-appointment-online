@@ -112,9 +112,17 @@ class ClientController extends Controller{
         if($api['result'] === 'success'){
             $user = User::find($request->input('id'));
             if(isset($user->id)){
+                $boss_client = $this->getBossClient($user['email']);
+                if($boss_client !== false){
+                    $ud = json_decode($user->user_data);
+                    $ud->boss_id = $boss_client['custom_client_id'];
+                    $user->user_data = json_encode($ud);
+                }
+
                 $user->transaction_data = json_encode($request->input('data'));
                 $user->save();
             }
+
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);

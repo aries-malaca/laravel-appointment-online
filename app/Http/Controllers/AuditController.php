@@ -19,10 +19,8 @@ class AuditController extends Controller{
                 $body = [];
                 if($value->event==='updated')
                     foreach($old as $k=>$v)
-                        $body[] = [$k=>$v .' -> ' . $new->$k ];
-                else
-                    foreach($new as $k=>$v)
-                        $body[] = [$k=>$v];
+                        $body[] = ["field"=>$k, "new_value"=>$v, "old_value"=> $new->$k ];
+
                 $category = strtolower(str_replace("App\\", "", $value->auditable_type));
                 if($value->user_id === $value->auditable_id) {
                     $action = "Updated Profile";
@@ -37,7 +35,9 @@ class AuditController extends Controller{
                     "body" => $body,
                     "category"=>$category,
                     "ip_address"=>$value->ip_address,
-                    "created_at"=>$value->created_at
+                    "created_at"=>$value->created_at,
+                    "reference_id"=>$value->auditable_id,
+                    "event"=>$value->event
                 );
             }
         }

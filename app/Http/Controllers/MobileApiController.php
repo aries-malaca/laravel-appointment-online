@@ -209,10 +209,10 @@ class MobileApiController extends Controller{
 
         $api                        = $this->authenticateAPI();
         $isValidToken               = false;
-        $app_version                = (double)$request->segment(3);
-        $currentAppVersion          = $request->segment(4);
-        $deviceType                 = $request->segment(6);
-        $deviceName                 = $request->segment(7);
+        $app_version                = (double)$request->segment(4);
+        $deviceType                 = $request->segment(5);
+        $deviceName                 = $request->segment(6);
+        $unique_id                  = $request->segment(7);
         $user_token                 = $_GET["token"];
         $response                   = array();
         $response['arrayProfile']   = array();
@@ -227,12 +227,13 @@ class MobileApiController extends Controller{
                 $fetchToken     = $tokenResults[$x]["token"];
                 $dateRegistered = $tokenResults[$x]["registered"];
                 if($fetchToken == $user_token){
-                    $tokenResults[$x]["token"]           = $user_token;
-                    $tokenResults[$x]["type"]            = $deviceType;
-                    $tokenResults[$x]["last_activity"]   = date('Y-m-d H:i');
-                    $tokenResults[$x]["device_info"]     = $deviceName;
-                    $tokenResults[$x]["registered"]      = $dateRegistered;
-                    $user->device_data               = json_encode($tokenResults);
+                    $tokenResults[$x]["token"]              = $user_token;
+                    $tokenResults[$x]["last_activity"]      = date('Y-m-d H:i');
+                    $tokenResults[$x]["type"]               = $deviceType;
+                    $tokenResults[$x]["device_info"]        = $deviceName;
+                    $tokenResults[$x]["registered"]         = $dateRegistered;
+                    $tokenResults[$x]["unique_device_id"]   = $unique_id;
+                    $user->device_data                      = json_encode($tokenResults);
                     $user->save();
                     break;
                 }
@@ -270,15 +271,15 @@ class MobileApiController extends Controller{
         if ($validator->fails()){
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
         }
-        $username       =  $request->input('email');
-        $password       =  $request->input('password');
-        $device         =  $request->input('device');
-        $device_info    =  $request->input('device_info');
+        $username           =  $request->input('email');
+        $password           =  $request->input('password');
+        $device             =  $request->input('device');
+        $device_info        =  $request->input('device_info');
+        $unique_device_id   =  $request->input('unique_device_id');
 
         // $objectTransactions     = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$username);   
         //attempt to login the system
         $userQuery = User::where('email', $request['email'])->get()->first();
-
         if(isset($userQuery['id'])){
             if($userQuery['is_active'] == 0){
                 return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
@@ -286,14 +287,16 @@ class MobileApiController extends Controller{
 
             if(Hash::check($password, $userQuery['password'])){
 
-                $token      = JWTAuth::fromUser(User::find($userQuery['id']));
-                $user_data  = json_decode($userQuery['user_data'],true);   
+                $token          = JWTAuth::fromUser(User::find($userQuery['id']));
+                $user_data      = json_decode($userQuery['user_data'],true);  
+                 
                 if($userQuery['is_client'] == 1){
+                    
                     if($device === null){
                         $this->registerToken($userQuery['id'], $token);
                     }
                     else{
-                        $this->registerToken($userQuery['id'], $token, $device, $device_info);
+                        $this->registerToken($userQuery['id'], $token, $device, $device_info,$unique_device_id);
                     }
                     $minimum_amount       = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
                     if(isset($minimum_amount['id'])){
@@ -305,8 +308,8 @@ class MobileApiController extends Controller{
                         ->orderBy('created_at', 'DESC')->get()->first();
 
                     $objectTransactions = array();
-                    $objectTransactions["total_price"]       = 5000;
-                    $objectTransactions["total_discount"]    = 890;
+                    $objectTransactions["total_price"]       = 0;
+                    $objectTransactions["total_discount"]    = 0;
                     $objectTransactions["minimum_amount"]    = $minimum_amount;
                     $objectTransactions["premier"]           = $premiers;
                     $objectTransactions = json_encode($objectTransactions);
@@ -328,7 +331,7 @@ class MobileApiController extends Controller{
                 $this->registerToken($result['id'], $result['token']);
             }
             else{
-                $this->registerToken($result['id'], $result['token'], $device, $device_info);
+                $this->registerToken($result['id'], $result['token'], $device, $device_info,$unique_device_id);
             }
             
             $minimum_amount       = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
@@ -529,7 +532,7 @@ class MobileApiController extends Controller{
         $validator = Validator::make($request->all(),$rule,$message);
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-
+        $device_unique_id   = $request->input("addUniqueID");
         $bday 			    = new DateTime($request->input('addBday'));
         $birth_date         = $bday->format("Y-m-d H:i:s");
         $branch 		    = $request->input('addBranch');
@@ -539,14 +542,7 @@ class MobileApiController extends Controller{
         $facebook_id        = $request->input('addFBID');
         $imageURL           = $request->input('addImageUrl');
         
-        //CONTINUE TODAY
-        // if($imageURL == ""){
-
-        // }
-        // else{
-
-        // }
-
+    
         $user 			    = new User;
         $user->first_name 	= $request->input('addFname');
         $user->middle_name 	= $request->input('addMname');
@@ -594,7 +590,7 @@ class MobileApiController extends Controller{
             file_put_contents(public_path('images/users/').$filename, $data);
 
             $token    = JWTAuth::fromUser($user);
-            $this->registerToken($clientID, $token,$device,$device_name);
+            $this->registerToken($clientID, $token,$device,$device_name,$device_unique_id);
             
             $user     = User::find($clientID);
             $user->user_picture = $filename;   
@@ -695,6 +691,7 @@ class MobileApiController extends Controller{
         $image              = $request->input("fb_image");
         $device             = $request->input("device");
         $device_name        = $request->input("device_info");
+        $unique_device_id   = $request->input("unique_device_id");
         $branch_id          = "";  
         $branch_name        = ""; 
 
@@ -709,9 +706,9 @@ class MobileApiController extends Controller{
         }
         if(isset($user_fb_login_query)){                        
                           
-            $clientID = $user_fb_login_query['id']; 
+            $clientID       = $user_fb_login_query['id']; 
             $token                  = JWTAuth::fromUser($user_fb_login_query);
-            $this->registerToken($clientID, $token,$device,$device_name);
+            $this->registerToken($clientID, $token,$device,$device_name,$unique_device_id);
             $client                 = User::find($clientID);
             $data                   = json_decode($client->user_data,true);
             $data['facebook_id']    = $facebook_id;
@@ -1041,6 +1038,7 @@ class MobileApiController extends Controller{
         $response           = array();
         $lastActivity       = $this->getLastTimeActivity($recipientID);    
         if($api['result'] === 'success'){
+        
             $clientID                   = $api["user"]["id"];
             if($ifLatest == "true"){
                 $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
@@ -1070,6 +1068,60 @@ class MobileApiController extends Controller{
         }
 
     }
+
+    public function getAllChatMessage(Request $request){
+        $api                = $this->authenticateAPI();
+        $response           = array();
+        $offset             = 0;
+        $limit              = 20;
+        // $lastActivity       = $this->getLastTimeActivity($recipientID);
+         $responseArray = array();
+        if($api['result'] === 'success'){
+           
+            $clientID       = $api["user"]["id"];
+            $userQuery      = DB::table("messages")
+                                ->leftJoin("users as a","messages.sender_id","a.id")
+                                ->leftJoin("users as b","messages.recipient_id","b.id")
+                                ->where(function($userChatQuery) use ($clientID){
+                                    $userChatQuery->where('messages.recipient_id', $clientID)
+                                                 ->orWhere('messages.sender_id',$clientID);
+                                    })
+                                ->select("b.id","b.first_name","b.last_name")
+                                ->groupBy("b.id","b.first_name","b.last_name")
+                                ->orderBy("messages.created_at","desc")
+                                ->get()->toArray();
+
+            foreach($userQuery as $key => $myVal) {
+
+                $id                     = $myVal->id;
+                // if($id == $clientID){
+                //     continue;
+                // }
+                // else{
+                $full_name              = $myVal->first_name." ".$myVal->last_name;
+                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$id, $clientID])
+                                            ->whereIn('sender_id', [$id, $clientID])
+                                            // ->where("id",">",$latestlastChatID)
+                                            ->orderBy('created_at','desc')
+                                            ->limit($limit)
+                                            ->offset($offset)
+                                            ->get()->toArray();
+                $responseArray[] = array(
+                                "id"            => $id,
+                                "full_name"     => $full_name,
+                                "message"       => $queryGetChatMessage
+                                    );
+                // }
+            }
+
+            return response()->json($responseArray); 
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+
+    }
+
 
     public function sendChatMessage(Request $request){
 
@@ -1183,7 +1235,7 @@ class MobileApiController extends Controller{
 
 
     public function sendPushNotification(Request $request){
-
+        // 
         $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub"); 
     
         //android

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Message;
+use App\MessageThread;
 use DB;
 use Validator;
 
@@ -17,13 +18,29 @@ class MessageController extends Controller{
 
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
+
+            $thread = Message::whereIn('sender_id', [$api['user']['id'], $request->input('recipient_id')])
+                            ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
+                            ->get()->first();
+            if(isset($thread['id']))
+                $thread_id = $thread['id'];
+            else{
+                $thread = new MessageThread;
+                $thread->created_by_id = $api['user']['id'];
+                $thread->participant_ids = json_encode([$request->input('recipient_id')]);
+                $thread->save();
+
+                $thread_id = $thread->id;
+            }
+
+
             $message = new Message;
             $message->body = $request->input('body');
             $message->title = $request->input('title');
             $message->sender_id = $api['user']['id'];
             $message->recipient_id = $request->input('recipient_id');
             $message->message_data = '{}';
-            $message->is_read = 0;
+            $message->message_thread_id = $thread_id;
             $message->save();
             return response()->json(["result"=>"success"]);
         }
@@ -54,9 +71,16 @@ class MessageController extends Controller{
     function deleteConversation(Request $request){
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
-            Message::whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
+            $messages = Message::whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                 ->whereIn('sender_id', [$api['user']['id'], $request->input('recipient_id')])
-                ->delete();
+                ->get();
+
+            foreach($messages as $key=>$value){
+                if($value['deleted_to_id'] == 0)
+                    Message::find($value['id'])->update(['deleted_to_id'=>$api['user']['id']]);
+                elseif($value['deleted_to_id'] == $request->input('recipient_id'))
+                    Message::find($value['id'])->update(['deleted_to_id'=>-1]);
+            }
 
             return response()->json(["result"=>"success"]);
         }

@@ -197,25 +197,9 @@ class Controller extends BaseController{
     }
 
     public function getBossClient($email){
-        $response = Curl::to(Config::where('config_name', 'SEARCH_BOSS_CLIENT')->get()->first()->config_value . $email)
+        $response = Curl::to(Config::where('config_name', 'SEARCH_BOSS_CLIENT')->get()->first()['config_value'] . $email)
                         ->returnResponseObject()
                         ->get();
-
-        if($response->status >= 200 && $response->status <= 210) {
-            $boss_data = $response->content;
-
-            if($boss_data !== false)
-                return json_decode($boss_data,true);
-        }
-        return false;
-    }
-
-    function getBossID($email){
-
-        $response = Curl::to(Config::where('config_name', 'GET_BOSS_ID')->get()->first()->config_value . $email)
-                        ->returnResponseObject()
-                        ->get();
-
         if($response->status >= 200 && $response->status <= 210) {
             $boss_data = $response->content;
 

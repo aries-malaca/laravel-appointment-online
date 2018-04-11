@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAdvertismentsTable extends Migration
+class CreateMessageThreadsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateAdvertismentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('advertisments', function (Blueprint $table) {
+        Schema::create('message_threads', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('ads_image')->nullable();
-            $table->string('description')->nullable();
-            $table->string('is_active')->nullable();
+            $table->text('participant_ids');
+            $table->integer('created_by_id');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateAdvertismentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('advertisments');
+        Schema::dropIfExists('message_threads');
     }
 }

@@ -173,9 +173,10 @@ return [
         App\Providers\RouteServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         Spatie\LaravelImageOptimizer\ImageOptimizerServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
         Ixudra\Curl\CurlServiceProvider::class,
         ShvetsGroup\LaravelEmailDatabaseLog\LaravelEmailDatabaseLogServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+
     ],
 
     /*
@@ -224,11 +225,10 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'ImageOptimizer' =>  Spatie\LaravelImageOptimizer\Facades\ImageOptimizer::class,
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Curl'  => Ixudra\Curl\Facades\Curl::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
     'permissions' => [

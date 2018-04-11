@@ -9,6 +9,7 @@ use Mail;
 use Validator;
 use Excel;
 use App\PlcReviewRequest;
+use App\Exports\PremiereExport;
 
 class PremierController extends Controller{
     function getPremiers(Request $request){
@@ -190,41 +191,7 @@ class PremierController extends Controller{
         $api = $this->authenticateAPI();
 
         if($api['result'] === 'success'){
-            $premiers = PremierLoyaltyCard::whereIn('id', $request->input('selected'))
-                                            ->get()->toArray();
-            foreach($premiers as $key=>$value){
-                $branch = Branch::find($value['branch_id']);
-                $branch_name = isset($branch->id)?$branch->branch_name:'N/A';
-                $premiers[$key]['branch_name']  = $branch_name;
-                $premiers[$key]['client']  = User::where('id', $value['client_id'])
-                                                ->select('birth_date', 'user_mobile', 'first_name', 'last_name', 'middle_name', 'username',
-                                                    'email', 'gender','user_address','user_data')->get()->first();
-                $premiers[$key]['client']['user_data'] = json_decode($premiers[$key]['client']['user_data']);
-            }
-
-            Excel::create('PLC_' . $time, function($excel) use($premiers) {
-                $excel->sheet('Sheet1', function($sheet) use($premiers) {
-                    $sheet->row(1, array('BOSS ID', 'Client', 'Email', 'Contact', 'Birthdate', 'Address', 'Branch', 'Type', 'Replacement Reason', 'Status'));
-
-                    foreach($premiers as $k=>$v){
-                        $data = json_decode($v['plc_data'],true);
-                        $sheet->row($k+2,
-                            array(
-                                $v['client']['user_data']->boss_id,
-                                $v['client']['first_name'].' '.$v['client']['last_name'],
-                                $v['client']['email'],
-                                $v['client']['user_mobile'],
-                                date('m/d/Y',strtotime($v['client']['birth_date'])),
-                                $v['client']['user_address'],
-                                $v['branch_name'],
-                                $v['application_type'],
-                                $data['reason'],
-                                $v['status']
-                            )
-                        );
-                    }
-                });
-            })->store('xlsx');
+            Excel::store(new PremiereExport($request), 'temp/PLC_' . $time.'.xlsx', 'public_root');
             return response()->json(["result"=>"success", "filename"=>'PLC_' . $time.'.xlsx']);
         }
 

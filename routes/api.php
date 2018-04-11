@@ -44,6 +44,7 @@ Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
 Route::post('/client/updateTransactionData', 'ClientController@updateTransactionData');
+Route::post('/client/filterClients', 'ClientController@filterClients');
 
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');

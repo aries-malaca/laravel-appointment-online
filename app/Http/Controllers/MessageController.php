@@ -23,7 +23,7 @@ class MessageController extends Controller{
                             ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->get()->first();
             if(isset($thread['id']))
-                $thread_id = $thread['id'];
+                $thread_id = $thread['message_thread_id'];
             else{
                 $thread = new MessageThread;
                 $thread->created_by_id = $api['user']['id'];
@@ -52,6 +52,11 @@ class MessageController extends Controller{
         if($api['result'] === 'success') {
             $data = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
                             ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
+                            ->where(function($query) use($api){
+                                $query->orWhereNull('deleted_to_id');
+                                $query->orWhere('deleted_to_id', '<>', -1);
+                            })
+                            ->where('deleted_to_id', '<>',$api['user']['id'])
                             ->orderBy('created_at','DESC')
                             ->take($request->segment(5))
                             ->get()->toArray();
@@ -93,19 +98,20 @@ class MessageController extends Controller{
         if($api['result'] === 'success') {
              Message::where('recipient_id', $api['user']['id'])
                         ->where('sender_id', $request->input('sender_id'))
-                        ->update(['is_read'=>1]);
+                        ->whereNull('read_at')
+                        ->update(['read_at'=>date('Y-m-d H:i:s')]);
 
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
     }
 
-    function getUnreadMessages(Request $request){
+    function getUnreadMessages(){
         $api = $this->authenticateAPI();
 
         if($api['result'] === 'success') {
             return response()->json(Message::where('recipient_id', $api['user']['id'])
-                                            ->where('is_read', 0)
+                                            ->whereNull('read_at')
                                             ->get()->toArray());
         }
         return response()->json($api, $api["status_code"]);

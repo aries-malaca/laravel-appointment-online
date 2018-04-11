@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule){
         $schedule->command('expire')->hourly();
-        $schedule->command('auditing:clean')->hourly();
+        $schedule->command('auditing:clean')->everyFiveMinutes();
 
         //loop through all the clusters
         foreach( BranchCluster::get()->toArray() as $cluster){

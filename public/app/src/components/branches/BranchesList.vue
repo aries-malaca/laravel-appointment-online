@@ -27,7 +27,6 @@
                 branchTable:{
                     columns: [
                         { label: 'Branch Name', field: 'branch_name', filterable: true },
-                        { label: 'Branch Code', field: 'branch_code', filterable: true },
                         { label: 'Contact No.', field: 'branch_contact', filterable: true },
                         { label: 'Email', field: 'branch_email', filterable: true },
                         { label: 'Classification', field: 'branch_classification_html',html:true, filterable: true },

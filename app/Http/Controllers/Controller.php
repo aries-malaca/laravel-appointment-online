@@ -138,15 +138,12 @@ class Controller extends BaseController{
     }
 
     public function selfMigrateClient($email, $password=null, $birth_date=null){
-        if($password !== null){
+        if($password !== null)
             $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."' AND password='". md5($password) ."'");
-        }
-        elseif($password === null && $birth_date === null){
+        elseif($password === null && $birth_date === null)
             $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."'");
-        }
-        else{
+        else
             $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."' AND cusbday LIKE '". $birth_date."%'");
-        }
 
         if(!empty($client))
             $client = $client[0];
@@ -304,7 +301,4 @@ class Controller extends BaseController{
             }
         }
     }
-
-    
-
 }

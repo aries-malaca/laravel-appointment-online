@@ -37,7 +37,9 @@ class AuditController extends Controller{
                     "body" => $body,
                     "category"=>$category,
                     "ip_address"=>$value->ip_address,
-                    "created_at"=>$value->created_at
+                    "created_at"=>$value->created_at,
+                    "reference_id"=>$value->auditable_id,
+                    "event"=>$value->event
                 );
             }
         }

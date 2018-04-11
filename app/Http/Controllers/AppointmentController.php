@@ -81,7 +81,7 @@ class AppointmentController extends Controller{
                 $item->save();
             }
 
-            return response()->json(["result"=>"success","appointment_id"=>$appointment->id],200);
+            return response()->json(["result"=>"success","appointment_id"=>$appointment->id, "transaction_datetime"=>$appointment->transaction_datetime],200);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -174,7 +174,7 @@ class AppointmentController extends Controller{
             else
                 $appointments = $appointments->where('transaction_datetime', 'LIKE',$request->segment(6) .'%');
         }
-        $appointments = $appointments->orderBy('transaction_datetime')
+        $appointments = $appointments->orderBy('transaction_datetime','desc')
                                     ->get()->toArray();
 
         foreach($appointments as $key=>$value){

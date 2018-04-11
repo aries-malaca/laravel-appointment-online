@@ -21,6 +21,9 @@ use App\Technician;
 use App\TechnicianSchedule;
 use App\Notification;
 use App\Review;
+use App\Promotion;
+use App\Libraries\NotificationHub;
+use App\Libraries\Notification_Azure;
 use DateTime;
 use Validator;
 use App\Message;
@@ -272,7 +275,7 @@ class MobileApiController extends Controller{
         $device         =  $request->input('device');
         $device_info    =  $request->input('device_info');
 
-        $objectTransactions     = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$username);   
+        // $objectTransactions     = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$username);   
         //attempt to login the system
         $userQuery = User::where('email', $request['email'])->get()->first();
 
@@ -292,8 +295,22 @@ class MobileApiController extends Controller{
                     else{
                         $this->registerToken($userQuery['id'], $token, $device, $device_info);
                     }
-                    $minimum_amount   = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
-                    $minimum_amount   = $minimum_amount["config_value"];
+                    $minimum_amount       = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
+                    if(isset($minimum_amount['id'])){
+                        $minimum_amount   = $minimum_amount["config_value"];
+                    }
+
+                    $premiers   = PremierLoyaltyCard::where('client_id','=', $userQuery['id'])
+                        ->select("id","reference_no","status","remarks","application_type")
+                        ->orderBy('created_at', 'DESC')->get()->first();
+
+                    $objectTransactions = array();
+                    $objectTransactions["total_price"]       = 5000;
+                    $objectTransactions["total_discount"]    = 890;
+                    $objectTransactions["minimum_amount"]    = $minimum_amount;
+                    $objectTransactions["premier"]           = $premiers;
+                    $objectTransactions = json_encode($objectTransactions);
+
                     return response()->json(["token"=>$token, "result"=>'success',"users_data"=>$userQuery,"transactions"=>json_decode($objectTransactions)]);
                 }
                 else{
@@ -318,7 +335,16 @@ class MobileApiController extends Controller{
             if(isset($minimum_amount['id'])){
                 $minimum_amount   = $minimum_amount["config_value"];
             }
-            $objectTransactions["minimum_amount"]    =  $minimum_amount;
+            $premiers   = PremierLoyaltyCard::where('client_id','=', $userQuery['id'])
+                        ->select("id","reference_no","status","remarks","application_type")
+                        ->orderBy('created_at', 'DESC')->get()->first();
+
+            $objectTransactions = array();
+            $objectTransactions["total_price"]       = 5000;
+            $objectTransactions["total_discount"]    = 890;
+            $objectTransactions["minimum_amount"]    = $minimum_amount;
+            $objectTransactions["premier"]           = $premiers;
+            $objectTransactions = json_encode($objectTransactions);
             return response()->json(["token"=>$token, "result"=>'success',"users_data"=>$userQuery,"transactions"=>json_decode($objectTransactions)]);
 
         }
@@ -531,8 +557,9 @@ class MobileApiController extends Controller{
         $user->email 		= $request->input('addEmail');
         $user->password 	= bcrypt($request->input('addPassword'));
         $user->gender 		= $gender;
-        $user->birth_date 	= $birth_date;
-        $user->user_address = $request->input('addAddress');
+        $user->birth_date 	      = $birth_date;
+        $user->notifications_read = "[]";
+        $user->user_address       = $request->input('addAddress');
         $user->level 		= 0;
         $user->is_client 	= 1;
         $user->is_active 	= 0;
@@ -680,7 +707,7 @@ class MobileApiController extends Controller{
                                   ->get()
                                   ->first();
         }
-        if(count($user_fb_login_query)){                        
+        if(isset($user_fb_login_query)){                        
                           
             $clientID = $user_fb_login_query['id']; 
             $token                  = JWTAuth::fromUser($user_fb_login_query);
@@ -827,6 +854,7 @@ class MobileApiController extends Controller{
 
             $client_id      = $api['user']['id'];
             $email          = $api['user']['email'];
+
             $transactions   = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$email);
             $minimum = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
             if(isset($minimum['id'])){
@@ -1062,25 +1090,146 @@ class MobileApiController extends Controller{
         }
         return response()->json($api, $api["status_code"]);
     }
-    
+
     public function getNotifications(Request $request){
 
-        $api = $this->authenticateAPI();
+        $api    = $this->authenticateAPI();
+        $isRead = 0;
         if($api['result'] === 'success') {
 
-            $clientID   = $api['user']['id'];
-            $queryNotif = Notification::where(function($query) use ($clientID){
-                $query->where('user_id', $clientID)
-                        ->orWhere('user_id',0);
-            });
+            $arrayResult    = array();
+            $latestID       = $request->segment(4);  
+            $clientID       = $api['user']['id'];
+            $queryNotif     = Notification::where('id',">",$latestID)
+                                ->where(function($query) use ($clientID){
+                                    $query->where('user_id', $clientID)
+                                ->orWhere('user_id',0);
+                            });
             $queryNotif = $queryNotif
-                        ->orderBy('created_at')
-                        ->get()->toArray();            
-            return response()->json($queryNotif);
+                        ->orderBy('created_at','desc')
+                        ->get()->toArray();
+
+            $arraySeenNotif = json_decode($api["user"]["notifications_read"]);
+            
+            foreach ($queryNotif as $key => $value) {
+                $notification_id            = $value["id"];
+                $notification_user_id       = $value["user_id"];
+                $notification_notif_id      = $value["notif_id"];
+                $notification_data          = $value["notification_data"];
+                $notification_type          = $value["notification_type"];
+                $notification_created_at    = $value["created_at"];
+                $notification_updated_at    = $value["updated_at"];
+
+                if($notification_user_id == 0 ||  $notification_user_id == $clientID){
+                    
+                    if(in_array($notification_id,$arraySeenNotif) == false){
+                       $isRead = 0;    
+                    }
+                    else{
+                        $isRead = 1;
+                    }
+                    $arrayResult[]  = array(
+                                    "id"                =>$notification_id,
+                                    "user_id"           =>$notification_user_id,
+                                    "notif_id"          =>$notification_notif_id,
+                                    "notification_data" =>$notification_data,
+                                    "notification_type" =>$notification_type,
+                                    "created_at"        =>$notification_created_at,
+                                    "updated_at"        =>$notification_updated_at,
+                                    "isRead"            =>$isRead
+                                        );
+                }
+            }
+        
+            return response()->json($arrayResult);
         }
+
         return response()->json($api, $api["status_code"]);
     }
 
+    public function getAllNotifications(Request $request){
+
+        
+        $arrayResult    = array();
+        $latestID       = $request->segment(4);  
+        $isRead         = 0;
+        $queryNotif     = Notification::where('id',">",$latestID)
+                                ->Where('user_id',0)
+                                ->orderBy('created_at','desc')
+                                ->get()->toArray();
+        
+        foreach ($queryNotif as $key => $value) {
+            $notification_id            = $value["id"];
+            $notification_user_id       = $value["user_id"];
+            $notification_notif_id      = $value["notif_id"];
+            $notification_data          = $value["notification_data"];
+            $notification_type          = $value["notification_type"];
+            $notification_created_at    = $value["created_at"];
+            $notification_updated_at    = $value["updated_at"];
+
+            $arrayResult[]  = array(
+                        "id"                =>$notification_id,
+                        "user_id"           =>$notification_user_id,
+                        "notif_id"          =>$notification_notif_id,
+                        "notification_data" =>$notification_data,
+                        "notification_type" =>$notification_type,
+                        "created_at"        =>$notification_created_at,
+                        "updated_at"        =>$notification_updated_at,
+                        "isRead"            =>$isRead
+                            );
+        }
+        return response()->json($arrayResult);
+    }
+
+
+    public function sendPushNotification(Request $request){
+
+        $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub"); 
+    
+        //android
+        $message        = '{"data":{"user_id":57427,"unique_id":1,"notification_type":"notification"}}';
+        $notification   = new Notification_Azure("gcm", $message);
+        $hub->sendNotification($notification, null);    
+
+        // //ios
+        // $alert = '{"aps":{"alert":"Hello from PHP!"}}';
+        // $notification = new Notification_Azure("apple", $alert);
+        // $hub->sendNotification($notification, null);
+    }
+
+    public function setNotificationAsSeen(Request $request){
+        $api    = $this->authenticateAPI();
+        $isRead = 0;
+        $id = $request->input("id");
+        if($api['result'] === 'success') {
+            $clientID                       = $api["user"]["id"];
+            $notifsID                       = json_decode($api["user"]["notifications_read"]);
+            if (in_array($id,$notifsID) == false) {
+                $notifsID[]                     = (int)$id;
+                $client                         = User::find($clientID);
+                $client->notifications_read     = json_encode($notifsID);
+                $client->save();        
+            }
+            return response()->json(["result"=>"success"]);
+        }
+        else{
+            return response()->json($api, $api["status_code"]);
+        }
+    }
+
+    public function getPromotion(Request $request){
+
+        $promotion_id   = $request->segment(4);
+        $data           = Promotion:: where("id",$promotion_id)->where("is_active",1)->get()->first();
+        if (isset($data)) {
+            $user                       = User::find($data['posted_by_id']);
+            $username                   = isset($user->id)?$user->first_name .' ' . $user->last_name:'';
+            $data['branches']           = json_decode($data['branches']);
+            $data['posted_by_name']     = $username;
+            $data['promotions_data']    = json_decode($data['promotions_data']);
+        }
+        return response()->json($data);
+    }
 
 
     public function getLastTimeActivity($recipientID){

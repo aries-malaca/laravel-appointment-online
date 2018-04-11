@@ -32,7 +32,6 @@ Route::post('/user/fbLogin', 'UserController@fbLogin');
 
 //clients
 Route::get('/client/searchClients', 'ClientController@searchClients');
-Route::post('/client/filterClients', 'ClientController@filterClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
@@ -229,13 +228,17 @@ Route::get('/mobile/getBranchSchedules/{branch_id}/{date}', 'MobileApiController
 Route::get('/mobile/getBranchRatings/{branch_id}/{offset}', 'MobileApiController@getBranchRatings');
 Route::post('/mobile/reviews/reviewTransaction', 'MobileApiController@reviewTransaction');
 Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentReview');
-//queuing(short version)
-Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
+
 Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
 Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');
-Route::get('/mobile/getNotifications', 'MobileApiController@getNotifications');
+Route::get('/mobile/getNotifications/{latest_id}', 'MobileApiController@getNotifications');
+Route::get('/mobile/getAllNotifications/{latest_id}', 'MobileApiController@getAllNotifications');
+Route::get('/mobile/getPromotion/{promo_id}', 'MobileApiController@getPromotion');
+Route::post('/mobile/sendPushNotification', 'MobileApiController@sendPushNotification');
+Route::post('/mobile/setNotificationAsSeen', 'MobileApiController@setNotificationAsSeen');
 
-
+//queuing(short version)
+Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
 
 //Kiosk Configuration (Lay Bare)
 Route::get('/kiosk/checkLoggedInToken/{branch_id}', 'KioskController@checkLoggedInToken');

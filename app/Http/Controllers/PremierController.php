@@ -32,7 +32,6 @@ class PremierController extends Controller{
             $premiers[$key]['plc_data']     = json_decode($value['plc_data']);
             $premiers[$key]['date_applied'] = date('m/d/Y', strtotime($value['created_at']));
         }
-
         return response()->json($premiers);
     }
 
@@ -87,10 +86,10 @@ class PremierController extends Controller{
                 $premier->created_at = date('Y-m-d H:i:s');
                 $premier->save();
 
-                $u = User::find($premier->client_id);
-                $user_data = json_decode($u->user_data);
+                $u                  = User::find($premier->client_id);
+                $user_data          = json_decode($u->user_data);
                 $user_data->boss_id = $boss_id[0];
-                $u->user_data = json_encode($user_data);
+                $u->user_data       = json_encode($user_data);
                 $u->save();
 
                 if($premier->remarks=='')

@@ -35,11 +35,10 @@ Route::get('/client/searchClients', 'ClientController@searchClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
-<<<<<<< HEAD
-=======
+
 Route::post('/client/updateTransactionData', 'ClientController@updateTransactionData');
 Route::post('/client/filterClients', 'ClientController@filterClients');
->>>>>>> 8564f25f0d6085bc87e628d79606b95191678124
+
 
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');

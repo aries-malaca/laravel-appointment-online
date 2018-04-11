@@ -23,10 +23,18 @@ Route::post('/user/updateProfile', 'UserController@updateProfile');
 Route::post('/user/changePassword', 'UserController@changePassword');
 Route::post('/user/uploadPicture', 'UserController@uploadPicture');
 
+Route::get('/user/getPermissions', 'UserLevelController@getPermissions');
 Route::get('/user/getUserLevels', 'UserLevelController@getUserLevels');
 Route::post('/user/addUserLevel', 'UserLevelController@addUserLevel');
 Route::post('/user/updateUserLevel', 'UserLevelController@updateUserLevel');
 Route::post('/user/saveLocation', 'UserController@saveLocation');
+
+Route::post('/user/saveLocation', 'UserController@saveLocation');
+
+//logs
+Route::get('/audits/getAudits/{id}', 'AuditController@getAudits');
+//logs
+
 //FB Login
 Route::post('/user/fbLogin', 'UserController@fbLogin');
 
@@ -46,6 +54,7 @@ Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
+Route::get('/branch/getBranchSupervisor/{id}', 'BranchController@getBranchSupervisor');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::post('/branch/removePicture', 'BranchController@removePicture');
 Route::post('/branch/addBranch', 'BranchController@addBranch');

@@ -3,10 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-class TransactionItem extends Model implements Auditable{
-    use \OwenIt\Auditing\Auditable;
-    protected $auditExclude = [
-        'created_at','updated_at'
-    ];
+class TransactionItem extends Model {
+
 }

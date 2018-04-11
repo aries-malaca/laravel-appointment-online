@@ -23,10 +23,18 @@ Route::post('/user/updateProfile', 'UserController@updateProfile');
 Route::post('/user/changePassword', 'UserController@changePassword');
 Route::post('/user/uploadPicture', 'UserController@uploadPicture');
 
+Route::get('/user/getPermissions', 'UserLevelController@getPermissions');
 Route::get('/user/getUserLevels', 'UserLevelController@getUserLevels');
 Route::post('/user/addUserLevel', 'UserLevelController@addUserLevel');
 Route::post('/user/updateUserLevel', 'UserLevelController@updateUserLevel');
 Route::post('/user/saveLocation', 'UserController@saveLocation');
+
+Route::post('/user/saveLocation', 'UserController@saveLocation');
+
+//logs
+Route::get('/audits/getAudits/{id}', 'AuditController@getAudits');
+//logs
+
 //FB Login
 Route::post('/user/fbLogin', 'UserController@fbLogin');
 
@@ -35,6 +43,7 @@ Route::get('/client/searchClients', 'ClientController@searchClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');
 Route::post('/client/changePassword', 'ClientController@changePassword');
+Route::post('/client/updateTransactionData', 'ClientController@updateTransactionData');
 
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
@@ -42,6 +51,7 @@ Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
+Route::get('/branch/getBranchSupervisor/{id}', 'BranchController@getBranchSupervisor');
 Route::post('/branch/uploadPicture', 'BranchController@uploadPicture');
 Route::post('/branch/removePicture', 'BranchController@removePicture');
 Route::post('/branch/addBranch', 'BranchController@addBranch');
@@ -116,7 +126,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians/{id}', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');
@@ -167,7 +177,6 @@ Route::post('/promotion/addPerk', 'PromotionController@addPerk');
 Route::post('/promotion/updatePerk', 'PromotionController@updatePerk');
 Route::post('/promotion/uploadPicture', 'PromotionController@uploadPicture');
 
-
 Route::get('/review/getReviews/{by}/{id}', 'ReviewController@getReviews');
 Route::get('/review/getReview/{id}', 'ReviewController@getReview');
 Route::post('/review/submitReview', 'ReviewController@submitReview');
@@ -193,8 +202,9 @@ Route::get('/contact/getContactList', 'ContactController@getContactList');
 
 //notifications
 Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
-Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
 //
+
+
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

@@ -101,9 +101,23 @@ class ClientController extends Controller{
             $client['home_branch_id'] = $client['user_data']->home_branch;
             $find = Branch::find($client['home_branch_id']);
             $client['home_branch_name'] = isset($find->id)? $find->branch_name:'N/A';
+            $client['transaction_data'] = json_decode($client['transaction_data']);
             $client['home_branch'] = array("label"=>$client['home_branch_name'], "value"=> $client['home_branch_id']);
         }
         return response()->json($client);
+    }
+
+    public function updateTransactionData(Request $request){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+            $user = User::find($request->input('id'));
+            if(isset($user->id)){
+                $user->transaction_data = json_encode($request->input('data'));
+                $user->save();
+            }
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
     }
 
     public function updateInfo(Request $request){

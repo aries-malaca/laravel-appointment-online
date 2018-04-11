@@ -257,7 +257,7 @@
                         </div>
                         <!--end tab-pane-->
                         <div class="tab-pane" id="transactions">
-                            <transactions-view :client="client" :transactions="transactions"></transactions-view>
+                            <transactions-view :client="client" :transactions="transactions" @refreshClient="refreshClient"></transactions-view>
                         </div>
                         <!--end tab-pane-->
                     </div>
@@ -332,12 +332,11 @@
                                 password:'',
                                 device_data:response.data.device_data,
                                 user_data:response.data.user_data,
+                                transaction_data:response.data.transaction_data,
                             };
 
                             if(u.newClient.user_data.notifications === undefined)
                                 u.newClient.user_data.notifications = [];
-
-                            u.getBossTransactions();
                         }
                     });
             },
@@ -425,21 +424,6 @@
                         response.data.forEach(function(item){
                             u.appointment_history.push(item);
                         });
-                    });
-            },
-            getBossTransactions:function(){
-                let u = this;
-                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
-                    return false;
-
-                this.transactions = false;
-
-                axios.get(this.configs.FETCH_BOSS_TRANSACTIONS + "" + this.client.email)
-                    .then(function (response) {
-                        u.transactions = response.data;
-                    })
-                    .catch(function (error) {
-                        XHRCatcher(error);
                     });
             }
         },

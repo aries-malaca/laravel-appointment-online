@@ -6,11 +6,11 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
-use App\Client;
 use App\Config;
 use App\TextMessage;
 use App\Menu;
 use Mail;
+use DB;
 use Curl;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -120,9 +120,8 @@ class Controller extends BaseController{
      * @param null $device_info
      */
     public function registerToken($user_id, $token, $type='WEB', $device_info=null){
-        if($type == 'WEB'){
+        if($type == 'WEB')
             $device_info = $_SERVER['HTTP_USER_AGENT'];
-        }
 
         $user = User::find($user_id);
         $tokens = json_decode($user->device_data, true);
@@ -139,46 +138,47 @@ class Controller extends BaseController{
     }
 
     public function selfMigrateClient($email, $password=null, $birth_date=null){
-
         if($password !== null){
-            $client = Client::where('cusemail', $email)
-                ->where('password', md5($password))
-                ->get()->first();
+            $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."' AND password='". md5($password) ."'");
         }
         elseif($password === null && $birth_date === null){
-            $client = Client::where('cusemail', $email)
-                ->get()->first();
+            $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."'");
         }
         else{
-            $client = Client::where('cusemail', $email)
-                ->where('cusbday', 'LIKE', $birth_date.'%')
-                ->get()->first();
+            $client = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $email ."' AND cusbday LIKE '". $birth_date."%'");
         }
 
-        if(isset($client['cusid'])){
+        if(!empty($client))
+            $client = $client[0];
+
+        if(isset($client->cusid)){
             $boss_data = $this->getBossClient($email);
 
             $user = new User;
             $user->email = $email;
             $user->password = bcrypt($password);
-            $user->first_name = ($client['cusfname'] != '') ? $client['cusfname'] : $boss_data['firstname'];
-            $user->middle_name = ($client['cusmname'] != '') ? $client['cusmname'] : $boss_data['middlename'];
-            $user->last_name = ($client['cuslname'] != '') ? $client['cuslname'] : $boss_data['lastname'];
+            $user->first_name = ($client->cusfname != '') ? $client->cusfname : $boss_data['firstname'];
+            $user->middle_name = ($client->cusmname != '') ? $client->cusmname : $boss_data['middlename'];
+            $user->last_name = ($client->cuslname != '') ? $client->cuslname : $boss_data['lastname'];
             $user->username = $user->first_name .' ' . $user->last_name;
-            $user->birth_date = date('Y-m-d',strtotime($client['cusbday']));
-            $user->user_mobile = $client['cusmob'];
+            $user->birth_date = date('Y-m-d',strtotime($client->cusbday));
+            $user->user_mobile = $client->cusmob;
             $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
             $user->level = 0;
             $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
                 "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
-                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ) ));
+                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
+                "notifications"=>["email"]
+            ));
             $user->device_data = '[]';
             $user->last_activity = date('Y-m-d H:i');
             $user->last_login = date('Y-m-d H:i');
-            $user->is_confirmed = ($client['confirmed'] == 'Confirmed') ? 1:0;
+            $user->is_confirmed = ($client->confirmed == 'Confirmed') ? 1:0;
             $user->is_active = 1;
             $user->is_client = 1;
-            $user->is_agreed = ($client['confirmed']=='Confirmed'?1:0);
+            $user->transaction_data = '[]';
+            $user->notifications_read = '[]';
+            $user->is_agreed = ($client->confirmed=='Confirmed'?1:0);
             $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
             $user->save();
             //end self migration
@@ -190,32 +190,39 @@ class Controller extends BaseController{
     function getConfigs(){
         $data = Config::get()->toArray();
         $array = array();
-        foreach($data as $key=>$value){
+        foreach($data as $key=>$value)
             $array[$value['config_name']] = $value['config_value'];
-        }
 
         return $array;
     }
 
     public function getBossClient($email){
-        $boss_data = file_get_contents(Config::where('config_name', 'SEARCH_BOSS_CLIENT')->get()->first()->config_value . $email);
+        $response = Curl::to(Config::where('config_name', 'SEARCH_BOSS_CLIENT')->get()->first()->config_value . $email)
+                        ->returnResponseObject()
+                        ->get();
 
-        if($boss_data === false){
-            return false;
+        if($response->status >= 200 && $response->status <= 210) {
+            $boss_data = $response->content;
+
+            if($boss_data !== false)
+                return json_decode($boss_data,true);
         }
-        //start self migration
-
-        return json_decode($boss_data,true);
+        return false;
     }
 
     function getBossID($email){
-        $boss_data = file_get_contents(Config::where('config_name', 'GET_BOSS_ID')->get()->first()->config_value . $email);
 
-        if($boss_data === false)
-            return false;
+        $response = Curl::to(Config::where('config_name', 'GET_BOSS_ID')->get()->first()->config_value . $email)
+                        ->returnResponseObject()
+                        ->get();
 
-        //start self migration
-        return json_decode($boss_data,true);
+        if($response->status >= 200 && $response->status <= 210) {
+            $boss_data = $response->content;
+
+            if($boss_data !== false)
+                return json_decode($boss_data,true);
+        }
+        return false;
     }
 
     function incrementConfigVersion($config_name){

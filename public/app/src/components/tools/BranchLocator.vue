@@ -25,8 +25,8 @@
                         <div id="map"></div>
                     </div>
                 </div>
-                <div class="alert alert-warning" v-show="!show_map">
-                    Please Allow site the access your location first.
+                <div class="alert alert-info" v-show="!show_map">
+                    Please allow the System to access your location first. <button class="btn btn-success btn-xs" @click="initializeMap">Proceed</button>
                 </div>
             </div>
         </div>
@@ -81,34 +81,43 @@
                 this.markers = [];
             },
             initializeMap:function(){
+                this.$store.dispatch('saveLocation');
                 let u = this;
-                setTimeout(function(){
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function(position) {
-                            u.geolocation = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude
-                            };
-                            var geocoder = new google.maps.Geocoder;
-                            geocoder.geocode({'location': u.geolocation}, function(results, status) {
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var geocoder = new google.maps.Geocoder;
+                        geocoder.geocode({'location': { lat: position.coords.latitude, lng: position.coords.longitude}},
+                            function(results, status) {
                                 if (status === 'OK' && results.lat === undefined) {
-                                    axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:results }})
+                                    axios({url:'/api/user/saveLocation?token=' + context.state.token, method:'post', data:{ geolocation:results, coordinates: { lat: position.coords.latitude, lng: position.coords.longitude} }})
                                         .then(function () {
+                                            u.$store.dispatch('fetchAuthenticatedUser');
                                         });
                                 }
                             });
+                    });
+                }
 
-                            u.map = new google.maps.Map(document.getElementById('map'), {
-                                zoom: 12,
-                                center: u.geolocation
-                            });
+                setTimeout(()=>{
+                    if(this.token_location !== false)
+                        u.geolocation = {
+                            lat: this.token_location.lat,
+                            lng: this.token_location.lng
+                        };
+                    if(u.geolocation.lat===0 && u.geolocation.lng===0)
+                        u.geolocation = {
+                            lat: 14.596970599999999,
+                            lng: 121.03923239999999
+                        };
+                    u.map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 12,
+                        center: u.geolocation
+                    });
 
-                            u.show_map = true;
-                        });
-                    }
-                    else
-                        u.show_map = false;
-                },1000);
+                    u.show_map = true;
+                    u.initializeMarkers();
+                },3000);
             },
             initializeMarkers:function(){
                 this.clearMarkers();
@@ -130,7 +139,7 @@
                         let marker =  u.markers[x];
 
                         let info = new google.maps.InfoWindow({
-                            content: '<h3><b>'+ branch.branch_name +' </b></h3>' +
+                            content: '<a href="../../#/branches/'+ branch.id  +'" target="_blank"><h3><b>'+ branch.branch_name +' </b></h3></a>' +
                             '<p>Address: '+ branch.branch_address +'<br/>' +
                             'Phone: '+ branch.branch_contact +'</p>' +
                             '<button class="btn btn-success btn-md" id="btn-book">Book Appointment</button> &nbsp' +
@@ -164,20 +173,19 @@
                                 $('#btn-message').click(function(){
                                     axios.get('../../api/branch/getBranchSupervisor/' + branch.id)
                                         .then(function (response) {
-                                            u.$store.commit('messages/updatePartnerByID', response.data);
-
-                                            if(u.partner===undefined)
+                                            if(u.partner===false){
                                                 u.$store.commit('messages/updatePartner', false);
-                                            else {
-                                                u.$store.commit('messages/toggleVisibility', true);
-                                                $("body").addClass("page-quick-sidebar-open");
                                             }
 
-                                            if(!response.data)
-                                                toastr.error("Cannot message this branch.");
+                                            if(response.data === false)
+                                                toastr.error("No available receptionist for this branch.");
+                                            else{
+                                                u.$store.commit('messages/toggleVisibility', true);
+                                                $("body").addClass("page-quick-sidebar-open");
+                                                u.$store.commit('messages/updatePartnerByID', response.data.id);
+                                            }
                                         });
                                 });
-
                             }, 50);
                         });
                     }
@@ -188,9 +196,6 @@
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Branch Locator');
-            this.initializeMap();
-            this.initializeMarkers();
-
             this.client = {
                 label:this.user.username,
                 value:this.user.id,
@@ -231,6 +236,17 @@
             },
             branches(){
                 return this.$store.getters['branches/activeBranches'];
+            },
+            token_location(){
+                var e = false;
+                let u = this;
+                this.user.device_data.forEach((token)=>{
+                    if(u.token === token.token){
+                        if(token.coordinates !== undefined)
+                            e = token.coordinates;
+                    }
+                });
+                return e;
             }
         },
         watch:{

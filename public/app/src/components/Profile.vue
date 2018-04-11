@@ -43,6 +43,11 @@
                                 <i class="fa fa-envelope"></i>
                                 <span>{{ user.email }}</span>
                             </div>
+                            <div class="margin-top-10 profile-desc-link" >
+                                <i class="fa fa-female" v-if="user.gender==='female'"></i>
+                                <i class="fa fa-male" v-else></i>
+                                <span>{{ user.gender.toUpperCase() }}</span>
+                            </div>
                         </div>
                     </div>
                     <!-- END PORTLET MAIN -->

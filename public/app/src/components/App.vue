@@ -129,13 +129,6 @@
             u.$store.dispatch('products/fetchProducts');
             u.$store.dispatch('technicians/fetchTechnicians');
 
-            setTimeout(()=>{
-                u.$options.sockets.pingUsers = function(){
-                    u.$socket.emit('pongUsers', {id:u.$store.state.user.id, is_client:u.$store.state.user.is_client, platform:'web'});
-                };
-            },5000);
-
-
             u.$options.sockets.destroyToken = function(data){
                 if(data.user_id === u.user.id && u.token === data.token){
                     alert("You session has been ended by other device using your account.");
@@ -172,6 +165,14 @@
                     axios.get(u.configs.FETCH_BOSS_TRANSACTIONS +""+ u.user.email)
                         .then(function (response) {
                             u.$store.commit('updateTransactions', response.data);
+
+                            axios.post('/api/client/updateTransactionData?token=' + u.token, {id:u.user.id, data:response.data})
+                                .then(function () {
+                                })
+                                .catch(function (error) {
+                                    XHRCatcher(error);
+                                });
+
                         })
                         .catch(function (error) {
                         });

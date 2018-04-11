@@ -49,7 +49,7 @@ export const store = new Vuex.Store({
                         geocoder.geocode({'location': { lat: position.coords.latitude, lng: position.coords.longitude}},
                             function(results, status) {
                                 if (status === 'OK' && results.lat === undefined) {
-                                    axios({url:'/api/user/saveLocation?token=' + context.state.token, method:'post', data:{ geolocation:results }})
+                                    axios({url:'/api/user/saveLocation?token=' + context.state.token, method:'post', data:{ geolocation:results, coordinates: { lat: position.coords.latitude, lng: position.coords.longitude} }})
                                         .then(function () {
                                             context.dispatch('fetchAuthenticatedUser');
                                         });

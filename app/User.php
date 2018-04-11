@@ -11,7 +11,7 @@ class User extends Authenticatable implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $auditExclude = [
-        'device_data', 'last_activity','password', 'is_active','level','user_data','user_picture'
+        'device_data', 'last_activity','password', 'is_active','level','user_data','user_picture','transactions_data','notifications_read'
     ];
 
     function userLevel(){

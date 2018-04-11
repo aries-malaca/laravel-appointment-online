@@ -342,10 +342,6 @@
                         return false;
                     }
 
-                    if(!this.branch_operating_schedule){
-                        toastr.error("Selected Branch were closed in selected date.");
-                        return false;
-                    }
                 }
                 else if(currentPage === 1){
                     if(this.newTransaction.services.length === 0){
@@ -513,6 +509,10 @@
                 return queue;
             },
             booking_warning:function(){
+                if(this.branch_operating_schedule===false)
+                    return "Selected Branch were closed in selected date/time.";
+
+
                 var today = this.newTransaction.transaction_date;
                 var allowance = (this.configs!==undefined)?Number(this.configs.SERVICE_TIME_ALLOWANCE):0;
                 var extension = 0;
@@ -665,18 +665,23 @@
             },
             branch_operating_schedule:function(){
                 if(this.newTransaction.branch !== undefined && this.newTransaction.transaction_date !==""){
-                    var f = this.newTransaction.transaction_date;
+                    var tt =  this.newTransaction.transaction_time;
 
-                    for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
-                        var e = this.newTransaction.branch.schedules[x];
 
-                        if( Number(moment(e.date_start).format("X") <= Number(moment(f).format("X")) ) &&
-                            Number(moment(e.date_end).format("X") >= Number(moment(f).format("X"))) ){
+                    if(this.newTransaction.services.length>0){
+                        var f = this.newTransaction.services[0].start;
 
-                            if(e.schedule_type === 'closed')
-                                return false;
-                            else if(e.schedule_type === 'custom')
-                                return e.schedule_data[Number(moment(f).format("e"))];
+                        for(var x=0;x<this.newTransaction.branch.schedules.length;x++){
+                            var e = this.newTransaction.branch.schedules[x];
+
+                            if( Number(moment(e.date_start).format("X") <= Number(moment(f).format("X")) ) &&
+                                Number(moment(e.date_end).format("X") >= Number(moment(f).format("X"))) ){
+
+                                if(e.schedule_type === 'closed')
+                                    return false;
+                                else if(e.schedule_type === 'custom')
+                                    return e.schedule_data[Number(moment(f).format("e"))];
+                            }
                         }
                     }
 
@@ -688,7 +693,6 @@
                 return false;
             },
             hasOverlappedServices:function(){
-
                 for(var x=0; x<this.newTransaction.services.length;x++){
                     var temp_a = this.newTransaction.services[x].service_type_data.restricted;
 

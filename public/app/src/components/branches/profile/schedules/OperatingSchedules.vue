@@ -62,8 +62,14 @@
                 </thead>
                 <tbody>
                     <tr v-for="schedule,key in custom_schedules" v-show="currently_editing !== schedule.id">
-                        <td>{{ moment(schedule.date_start).format("MM/DD/YYYY") }}</td>
-                        <td>{{ moment(schedule.date_end).format("MM/DD/YYYY") }}</td>
+                        <td>
+                            {{ moment(schedule.date_start).format("MM/DD/YYYY") }}
+                            <span v-if="schedule.schedule_type==='closed'"> ({{ moment(schedule.date_start).format("hh:mm A") }})</span>
+                        </td>
+                        <td>
+                            {{ moment(schedule.date_end).format("MM/DD/YYYY") }}
+                            <span v-if="schedule.schedule_type==='closed'"> ({{ moment(schedule.date_end).format("hh:mm A") }})</span>
+                        </td>
                         <td>{{ schedule.schedule_type }}</td>
                         <td v-for="time in custom_schedules[key].schedule_data" v-if="schedule.schedule_type==='custom' ">
                             {{ moment("2000-01-01 " + time.start).format("hh:mm A") }} - {{ moment("2000-01-01 " + time.end).format("hh:mm A")}}
@@ -107,9 +113,11 @@
                     <tr v-show="newSchedule.schedule_type==='closed' && currently_editing===newSchedule.id">
                         <td>
                             <input type="date" class="form-control" v-model="newSchedule.date_start"/>
+                            <input type="time" class="form-control" v-model="newSchedule.time_start"/>
                         </td>
                         <td>
                             <input type="date" class="form-control" v-model="newSchedule.date_end"/>
+                            <input type="time" class="form-control" v-model="newSchedule.time_end"/>
                         </td>
                         <td>
                             <select style="width:100px;" v-model="newSchedule.schedule_type" class="form-control">
@@ -119,7 +127,7 @@
                         </td>
                         <td colspan="7">
                             <div class="alert alert-danger">
-                                <h2>Branch Closed</h2>
+                                <h3>Branch Closed</h3>
                             </div>
                         </td>
                         <td>
@@ -148,12 +156,14 @@
                                 <div class="form-group">
                                     <label class="control-label">Start</label>
                                     <input type="date" class="form-control" v-model="newSchedule.date_start"/>
+                                    <input type="time" class="form-control" v-if="newSchedule.schedule_type === 'closed'" v-model="newSchedule.time_start"/>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="control-label">End</label>
                                     <input type="date" class="form-control" v-model="newSchedule.date_end"/>
+                                    <input type="time" v-if="newSchedule.schedule_type === 'closed'" class="form-control" v-model="newSchedule.time_end"/>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -224,6 +234,8 @@
                     id:0,
                     date_start:moment().format("YYYY-MM-DD"),
                     date_end:moment().format("YYYY-MM-DD"),
+                    time_start: moment().format("HH:mm"),
+                    time_end: moment().format("HH:mm"),
                     branch_id:this.branch.id,
                     schedule_data:[
                         {start:"09:00" , end: "20:00"},
@@ -244,6 +256,8 @@
                     id:schedule.id,
                     date_start:moment(schedule.date_start).format("YYYY-MM-DD"),
                     date_end:moment(schedule.date_end).format("YYYY-MM-DD"),
+                    time_start: moment(schedule.date_start).format("HH:mm"),
+                    time_end: moment(schedule.date_end).format("HH:mm"),
                     schedule_data:[],
                     branch_id:this.branch.id,
                     schedule_type:schedule.schedule_type

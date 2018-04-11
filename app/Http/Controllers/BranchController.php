@@ -95,13 +95,13 @@ class BranchController extends Controller{
     function getBranchSupervisor(Request $request){
         $users = User::leftJoin('user_levels', 'users.level', '=', 'user_levels.id')
                         ->where('user_levels.level_data', 'LIKE', '%"dashboard":"BranchSupervisorDashboard"%')
-                        ->select('user_levels.level_data', 'users.*')
+                        ->select('user_data', 'users.id', 'username')
                         ->get()->toArray();
 
         foreach($users as $user){
             $d = json_decode($user['user_data'])->branches;
             if(in_array($request->segment(4), $d) OR in_array(0, $d) )
-                return response()->json($user['id']);
+                return response()->json($user);
         }
         return response()->json(false);
     }
@@ -359,9 +359,8 @@ class BranchController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             $schedule = BranchSchedule::find($request->input('id'));
-            $schedule->date_start = $request->input('date_start');
-            $schedule->date_end = $request->input('date_end');
-            $schedule->schedule_data = json_encode($request->input('schedule_data'));
+            $schedule->date_start = $request->input('schedule_type')==='closed'?$request->input('date_start').' '.$request->input('time_start') :$request->input('date_start');
+            $schedule->date_end = $request->input('schedule_type')==='closed'?$request->input('date_end').' '.$request->input('time_end') :$request->input('date_end');
             $schedule->schedule_type = $request->input('schedule_type');
             $schedule->save();
             return response()->json(["result"=>"success"],200);
@@ -381,8 +380,8 @@ class BranchController extends Controller{
         if($api['result'] === 'success') {
             $schedule = new BranchSchedule;
             $schedule->branch_id = $request->input('branch_id');
-            $schedule->date_start = $request->input('date_start');
-            $schedule->date_end = $request->input('date_end');
+            $schedule->date_start = $request->input('schedule_type')==='closed'?$request->input('date_start').' '.$request->input('time_start') :$request->input('date_start');
+            $schedule->date_end = $request->input('schedule_type')==='closed'?$request->input('date_end').' '.$request->input('time_end') :$request->input('date_end');
             $schedule->schedule_data = json_encode($request->input('schedule_data'));
             $schedule->schedule_type = $request->input('schedule_type');
             $schedule->save();

@@ -10,6 +10,7 @@ import ClientProfileContainer from './components/clients/profile/ClientProfileCo
 import BranchProfileContainer from './components/branches/profile/BranchProfileContainer.vue';
 import ControlPanel from './components/ControlPanel.vue';
 import Dashboard from './components/Dashboard.vue';
+import Logs from './components/Logs.vue';
 import Messages from './components/Messages.vue';
 import NewsFeeds from './components/tools/NewsFeeds.vue';
 import Notifications from './components/Notifications.vue';
@@ -82,6 +83,11 @@ export default new Router({
             path: '/dashboard',
             name: 'Dashboard',
             component: Dashboard
+        },
+        {
+            path: '/logs',
+            name: 'Logs',
+            component: Logs
         },
         {
             path: '/messages',

@@ -9,7 +9,7 @@
                     &nbsp;
                     <span class="caption-subject bold font-grey-gallery uppercase"> {{ newBranch.branch_name }} </span>
                 </div>
-                <ul class="nav nav-tabs">
+                <ul class="nav nav-tabs" v-if="user.is_client === 0">
                     <li class="active">
                         <a href="#info" data-toggle="tab">Branch Info</a>
                     </li>
@@ -126,11 +126,14 @@
                                     </div>
                                 </div>
                                 <div class="alert alert-info">Directions: {{ newBranch.directions}} </div>
+                                <div v-if="branch_supervisor !== false ">
+                                    <b>Branch Supervisor: </b>
+                                    <span><br/> {{ branch_supervisor.username }}</span>
+                                </div>
+                                <br/>
                                 <div v-if="technicians.length>0">
                                     <b>Technicians: </b>
-                                    <ul>
-                                        <li v-for="technician in technicians">{{ technician.name }} </li>
-                                    </ul>
+                                    <span v-for="technician in technicians"><br/> {{ technician.name }}</span>
                                 </div>
                                 <h4></h4>
                             </div>
@@ -212,7 +215,8 @@
                appointment_history:[],
                active_appointments:[],
                newBranch:{},
-               technicians:[]
+               technicians:[],
+               branch_supervisor:false
            }
         },
         methods:{
@@ -229,7 +233,6 @@
             },
             getBranch:function(){
                 let u = this;
-
                 axios.get('/api/branch/getBranch/' + this.branch.id)
                     .then(function (response) {
                         if(response.data.id !== undefined){
@@ -252,7 +255,16 @@
                                 marker.setMap(map);
                             },1000);
                             u.$store.commit('branches/updateViewingBranch', u.newBranch);
+                            u.getTechnicians();
+                            u.getBranchSupervisor();
                         }
+                    });
+            },
+            getBranchSupervisor(){
+                let u = this;
+                axios.get('../../api/branch/getBranchSupervisor/' + this.branch.id)
+                    .then(function (response) {
+                        u.branch_supervisor = response.data;
                     });
             },
             getTechnicians:function(){
@@ -328,7 +340,7 @@
         watch:{
             'branch.id'(){
                 if(this.branch)
-                    if(this.branch.id !== 0){
+                    if(this.branch.id !== 0 && this.branch.id !== undefined){
                         this.getAppointments();
                         this.getAppointmentHistory();
                         this.getBranch();
@@ -341,8 +353,8 @@
             if(this.branch.id !== 0){
                 this.getAppointments();
                 this.getAppointmentHistory();
-                this.getBranch();
-                this.getTechnicians();
+                if(this.branch.id !== 0 && this.branch.id !== undefined)
+                    this.getBranch();
             }
 
             this.$options.sockets.refreshAppointments = function(data){

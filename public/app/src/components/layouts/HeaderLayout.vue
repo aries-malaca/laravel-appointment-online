@@ -69,7 +69,7 @@
                                 </li>
                                 <li>
                                     <router-link to="/logs">
-                                        <i class="icon-user"></i> Activity Logs
+                                        <i class="fa fa-list"></i> Activity Logs
                                     </router-link>
                                 </li>
                                 <li class="divider"> </li>

@@ -76,7 +76,6 @@ class UserController extends Controller{
                         $products = json_decode($cluster->products);
                     }
                 }
-
                 else
                     $branch = 'N/A';
 
@@ -99,6 +98,7 @@ class UserController extends Controller{
                                 "branch_address"=> $b['branch_address'],
                                 "rooms"=> isset($b->rooms_count)?$b->rooms_count:0,
                                 "schedules"=> $eee,
+                                "cluster_data"=> $cluster,
                                 "schedules_original"=> $eee,
 
                                 "services"=>$services,
@@ -519,8 +519,10 @@ class UserController extends Controller{
             $tokens = json_decode($user->device_data, true);
 
             foreach($tokens as $key=>$value){
-                if(JWTAuth::getToken() == $value['token'])
+                if(JWTAuth::getToken() == $value['token']) {
                     $tokens[$key]['geolocation'] = $request->input('geolocation');
+                    $tokens[$key]['geolocation'] = $request->input('geolocation');
+                }
             }
 
             $user->device_data = json_encode($tokens);

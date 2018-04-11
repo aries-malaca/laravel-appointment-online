@@ -42,7 +42,22 @@ export const store = new Vuex.Store({
                 });
         },
         saveLocation(context){
-
+            setTimeout(function(){
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var geocoder = new google.maps.Geocoder;
+                        geocoder.geocode({'location': { lat: position.coords.latitude, lng: position.coords.longitude}},
+                            function(results, status) {
+                                if (status === 'OK' && results.lat === undefined) {
+                                    axios({url:'/api/user/saveLocation?token=' + context.state.token, method:'post', data:{ geolocation:results, coordinates: { lat: position.coords.latitude, lng: position.coords.longitude} }})
+                                        .then(function () {
+                                            context.dispatch('fetchAuthenticatedUser');
+                                        });
+                                }
+                            });
+                    });
+                }
+            },1000);
         }
     },
     mutations:{

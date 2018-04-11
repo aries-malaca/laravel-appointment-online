@@ -3,8 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
-class Review extends Model
-{
-    //
+use OwenIt\Auditing\Contracts\Auditable;
+class Review extends Model implements Auditable{
+    use \OwenIt\Auditing\Auditable;
+    protected $auditExclude = [
+        'created_at','updated_at'
+    ];
 }
+

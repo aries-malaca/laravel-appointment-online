@@ -3,8 +3,10 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
-class TechnicianSchedule extends Model
-{
-    //
+use OwenIt\Auditing\Contracts\Auditable;
+class TechnicianSchedule extends Model implements Auditable{
+    use \OwenIt\Auditing\Auditable;
+    protected $auditExclude = [
+        'created_at','updated_at'
+    ];
 }

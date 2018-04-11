@@ -3,8 +3,10 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
-class Region extends Model
-{
-    //
+use OwenIt\Auditing\Contracts\Auditable;
+class Region extends Model implements Auditable{
+    use \OwenIt\Auditing\Auditable;
+    protected $auditExclude = [
+        'created_at','updated_at'
+    ];
 }

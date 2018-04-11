@@ -133,9 +133,10 @@
                     </div>
                     <div class="mt-list-container list-news" style="background-color: white" v-if="active_appointments.length>0">
                         <ul>
-                            <li class="mt-list-item" v-for="appointment in active_appointments">
+                            <li style="cursor:pointer"
+                                    class="mt-list-item" v-for="appointment in active_appointments" @click="viewAppointment(appointment)">
                                 <div class="list-icon-container">
-                                    <a href="javascript:;" @click="viewAppointment(appointment)">
+                                    <a href="javascript:;">
                                         <i class="fa fa-angle-right"></i>
                                     </a>
                                 </div>
@@ -148,7 +149,7 @@
                                         <a href="javascript:;" @click="viewAppointment(appointment)">{{ appointment.branch_name }}</a>
                                     </h3>
                                     <p>
-                                        <span v-for="item in appointment.items"> {{ item.item_name }}</span>
+                                        <span v-for="item,k in appointment.items"> {{ item.item_name }}<span v-if="(k+1) < appointment.items.length ">,</span></span>
                                     </p>
                                 </div>
                             </li>

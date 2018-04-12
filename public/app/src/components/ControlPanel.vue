@@ -19,6 +19,12 @@
                     <li>
                         <a href="#places" data-toggle="tab">Places</a>
                     </li>
+                    <li>
+                        <a href="#database" data-toggle="tab">Database</a>
+                    </li>
+                    <li>
+                        <a href="#logs" data-toggle="tab">Logs</a>
+                    </li>
                 </ul>
             </div>
             <div class="portlet-body">

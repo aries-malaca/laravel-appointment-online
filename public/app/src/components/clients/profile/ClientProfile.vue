@@ -77,11 +77,18 @@
                                                     <td> Home Branch: </td>
                                                     <td> {{ client.home_branch_name }} </td>
                                                 </tr>
-                                                <tr>
+                                                <tr v-if="client.user_data !== undefined ">
                                                     <td> Premier Client: </td>
-                                                    <td v-if="client.user_data !== undefined ">
+                                                    <td >
                                                         <span class="badge badge-success" v-if="client.user_data.premier_status == 1">Yes</span>
                                                         <span class="badge badge-warning" v-else>No</span>
+                                                    </td>
+                                                </tr>
+                                                <tr v-if="client.user_data !== undefined">
+                                                    <td> BOSS ID: </td>
+                                                    <td>
+                                                        <span v-if="client.user_data.boss_id !== undefined && client.user_data.boss_id !== null">{{ client.user_data.boss_id }} </span>
+                                                        <span v-else> (Not Available)</span>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -179,13 +186,19 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label class="control-label">Mobile</label>
                                                         <input type="text" class="form-control" v-model="newClient.user_mobile">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-8" v-if="newClient.home_branch !== undefined ">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label class="control-label">BOSS ID</label>
+                                                        <input type="text" class="form-control" v-model="newClient.user_data.boss_id">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6" v-if="newClient.home_branch !== undefined ">
                                                     <div class="form-group">
                                                         <label class="control-label">Home Branch</label>
                                                         <vue-select v-model="newClient.home_branch" :options="branch_selection"></vue-select>

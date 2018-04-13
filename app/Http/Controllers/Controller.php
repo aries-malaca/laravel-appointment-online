@@ -10,12 +10,14 @@ use App\Config;
 use App\TextMessage;
 use App\Menu;
 use Mail;
+use DB;
 use Curl;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use App\Notification;
+use App\Jobs\SendEmailJob;
 
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -127,9 +129,11 @@ class Controller extends BaseController{
         $tokens = json_decode($user->device_data, true);
         $key_find    = false;
         foreach ($tokens as $key => $value) {
-            $token_unique_id = $value["unique_device_id"];
-            if($token_unique_id == $device_unique_id && $device_unique_id != null && $token_unique_id != null){
-                $key_find    = $key;
+            if(isset($value["unique_device_id"])){
+                $token_unique_id = $value["unique_device_id"];
+                if($token_unique_id == $device_unique_id && $device_unique_id != null && $token_unique_id != null){
+                    $key_find    = $key;
+                }
             }
         }
         $data   = array(  
@@ -165,7 +169,6 @@ class Controller extends BaseController{
 
         if(isset($client->cusid)){
             $boss_data = $this->getBossClient($email);
-
             $user = new User;
             $user->email = $email;
             $user->password = bcrypt($password);
@@ -177,11 +180,19 @@ class Controller extends BaseController{
             $user->user_mobile = $client->cusmob;
             $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
             $user->level = 0;
-            $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
-                "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
-                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
-                "notifications"=>["email"]
-            ));
+            if($boss_data === false)
+                $user->user_data = json_encode(array("premier_status"=>0,
+                    "premier_branch"=>0,
+                    "home_branch"=>10,
+                    "notifications"=>["email"]
+                ));
+            else
+                $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
+                    "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
+                    "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
+                    "boss_id"=>$boss_data['custom_client_id'],
+                    "notifications"=>["email"]
+                ));
             $user->device_data = '[]';
             $user->last_activity = date('Y-m-d H:i');
             $user->last_login = date('Y-m-d H:i');
@@ -228,13 +239,6 @@ class Controller extends BaseController{
         $config->save();
     }
 
-    function emailReceiver($email){
-        if(env('APP_MAILING_ENV')==='development')
-            return env('APP_MAILING_DEV_ADDRESS');
-
-        return $email;
-    }
-
     function getLastSignature($client_id){
         $transaction = Transaction::where('client_id', $client_id)
                                     ->where('acknowledgement_data', 'LIKE', '%"signature":"data:%')
@@ -254,24 +258,13 @@ class Controller extends BaseController{
     }
 
     function sendMail($template, $content_data, $headers, $attachments=null){
-
-        Mail::send($template, $content_data, function ($mail) use($headers, $attachments) {
-            $mail->from(env('MAIL_USERNAME'), env('APP_NAME'));
-            $mail->subject($headers['subject']);
-
-            foreach($headers['to'] as $to)
-                $mail->to($this->emailReceiver($to['email']), $to['name']);
-
-            if(isset($headers['cc']))
-                foreach($headers['cc'] as $cc)
-                    $mail->cc($this->emailReceiver($cc['email']), $cc['name']);
-
-            if(env('APP_MAILING_BCC_DEV'))
-                $mail->bcc(env('APP_MAILING_DEV_ADDRESS'));
-            if($attachments !== null)
-                foreach($attachments as $att)
-                    $mail->attach(public_path($att));
-        });
+        $data = [
+            "template"=>$template,
+            "content_data"=>$content_data,
+            "headers"=>$headers,
+            "attachments"=>$attachments
+        ];
+        SendEmailJob::dispatch($data)->delay(now()->addSeconds(5));
     }
 
     function sendSMS($message, $mobile, $title, $api, $shortcode){

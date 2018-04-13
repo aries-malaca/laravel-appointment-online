@@ -164,6 +164,9 @@
                 else
                     var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email;
 
+                if(this.client.user_data.boss_id !== null && this.client.user_data.boss_id !== undefined)
+                    link = link + "?boss_id=" + this.client.user_data.boss_id;
+
                 this.is_loading = true;
                 axios.get(link)
                     .then(function (response) {

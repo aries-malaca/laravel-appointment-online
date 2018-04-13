@@ -13,6 +13,7 @@ use Validator;
 use Hash;
 use Facebook\Facebook;
 use Mail;
+use Curl;
 
 class UserController extends Controller{
     public function login(Request $request){
@@ -89,7 +90,6 @@ class UserController extends Controller{
                 foreach($eee as $key=>$value)
                     $eee[$key]['schedule_data'] = json_decode($value['schedule_data']);
 
-
                 $api['user']['review_request'] = isset($plc_request['id'])?$plc_request['status']:false;
                 $api['user']['branch'] = [
                                 "value"=>(int)$user_data['home_branch'],
@@ -100,7 +100,6 @@ class UserController extends Controller{
                                 "schedules"=> $eee,
                                 "cluster_data"=> $cluster,
                                 "schedules_original"=> $eee,
-
                                 "services"=>$services,
                                 "products"=>$products,
                         ];
@@ -452,6 +451,7 @@ class UserController extends Controller{
     }
 
     public function register(Request $request){
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|max:255',
             'last_name' => 'required|max:255',
@@ -464,10 +464,34 @@ class UserController extends Controller{
             'password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
             'verify_password' => 'required|same:password',
             'birth_date' => 'required'
+        ],[
+            'password.regex'    => 'Password must be alphanumeric.',
         ]);
 
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        if ($request->input('is_agreed') == "false")
+            return response()->json(['result'=>'failed','error'=>["Must agree the terms and conditions."]], 400);
+
+        //check boss ID unique
+        if($request->input('boss_id') !== null){
+            $checker = User::where("user_data", "LIKE", '%"boss_id":"'. $request->input('boss_id') .'"%')->count();
+            if ($checker > 0)
+                return response()->json(['result'=>'failed','error'=>["BOSS ID (Transaction account) already been taken."]], 400);
+        }
+
+        $response = Curl::to('https://www.google.com/recaptcha/api/siteverify?secret=' . $request->input('captcha_secret') .'&response='. $request->input('captcha_response'))
+            ->asJson()
+            ->returnResponseObject()
+            ->post();
+
+        if($response->status == 200){
+            if($response->content->success === false)
+                return response()->json(['result'=>'failed','error'=>["Please verify captcha."]], 400);
+        }
+        else
+            return response()->json(['result'=>'failed','error'=>["Failed to validate the captcha due to server error."]], 400);
 
         $user = new User;
         $user->first_name = $request->input('first_name');
@@ -487,6 +511,7 @@ class UserController extends Controller{
         $user->is_agreed = 1;
         $user->user_data = json_encode(array("home_branch"=>(int)$request->input('home_branch'),
                                              "premier_status"=>0,
+                                             "boss_id"=> $request->input('boss_id'),
                                              "notifications"=>["email"]));
         $user->transaction_data = '[]';
         $user->notifications_read = '[]';

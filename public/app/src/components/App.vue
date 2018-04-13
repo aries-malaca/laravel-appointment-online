@@ -136,7 +136,6 @@
                 }
             };
 
-
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
                 if(data.model === 'services')
@@ -152,31 +151,8 @@
             Notification.requestPermission();
 
             setTimeout(function(){
-                if(u.user !== null){
-
+                if(u.user !== null)
                     u.$store.dispatch('saveLocation');
-
-                    if(u.user.is_client !== 1)
-                        return false;
-
-                    if(u.configs.FETCH_BOSS_TRANSACTIONS === undefined && u.user.is_client === 1)
-                        return false;
-
-                    axios.get(u.configs.FETCH_BOSS_TRANSACTIONS +""+ u.user.email)
-                        .then(function (response) {
-                            u.$store.commit('updateTransactions', response.data);
-
-                            axios.post('/api/client/updateTransactionData?token=' + u.token, {id:u.user.id, data:response.data})
-                                .then(function () {
-                                })
-                                .catch(function (error) {
-                                    XHRCatcher(error);
-                                });
-
-                        })
-                        .catch(function (error) {
-                        });
-                }
             },3000);
         },
         watch:{

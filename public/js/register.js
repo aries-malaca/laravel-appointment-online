@@ -15,39 +15,28 @@ var reg = new Vue({
             home_branch:0,
             user_mobile:'',
             from_facebook:false,
+            is_agreed:false,
+            boss_id:null
         },
         branches:[],
-        agree:false,
         terms:'',
-        clicked_yes:false
+        aj:false,
+        accounts:[],
+        loading:false,
     },
     methods:{
-        listenKey:function(event){
+        onBlur:function(){
+            if(this.aj !== false){
+                this.aj.abort();
+                this.aj = false;
+            }
 
             let u = this;
-            if(event.target.placeholder == 'First Name' || event.target.placeholder == 'Last Name' || event.target.type == 'date'){
-             this.clicked_yes = false;
-            }
-            if( (this.newUser.first_name !== '' || this.newUser.last_name !== '' || this.newUser.birth_date !== '') && !this.clicked_yes){
-                $.get('http://boss.lay-bare.com/laybare-online/API/get_last_transaction.php?birth_date='+u.newUser.birth_date+'&first_name='+u.newUser.first_name+'&last_name='+u.newUser.last_name,function(response){
-                    if(response.length>0){
-                        $.ajax({
-                            url: '/api/client/searchClients?search=' + response[0].email_address,
-                            method: 'GET',
-                            data: this.newUser,
-                            error: function (response1){
-                                if(response1.responseJSON.result == 'failed'){
-                                    let branch = Number(response.branch_id);
-                                    u.clicked_yes = true;
-                                    SweetConfirmation("Did you recently visited "+ u.branchName(branch) +"?",
-                                        function(){
-                                            u.boss_id = response.client_id;
-                                        }
-                                    )
-                                }
-                            },
-                        });
-                    }
+            if( this.newUser.first_name !== '' && this.newUser.last_name !== ''){
+                this.loading = true;
+                this.aj = $.get('https://api.lay-bare.com/transactions/getLastTransaction?birth_date='+u.newUser.birth_date+'&first_name='+u.newUser.first_name+'&last_name='+u.newUser.last_name,function(response){
+                    u.accounts = response;
+                    u.loading = false;
                 });
             }
         },
@@ -63,22 +52,52 @@ var reg = new Vue({
                 u.terms = response;
             });
         },
+        agree:function(){
+            this.newUser.is_agreed = true;
+            $("#terms-modal").modal("hide");
+        },
+        chooseAccount(account){
+            let u = this;
+            SweetConfirmation("Do you want to choose this as your transaction record account? " +
+                "Once validated, you'll be notified via email and credit this account's transaction into your account.",
+                function(){
+                    u.newUser.boss_id = account.custom_client_id;
+                }
+            )
+        },
+        resetForm(){
+            SweetConfirmation("Are you sure?",
+                function(){
+                   window.location.reload();
+                }
+            )
+        },
+        removeBossID(){
+            this.newUser.boss_id = null;
+        },
         register:function(button){
+            if(this.accounts.length > 0 && this.newUser.boss_id === null && this.aj !== false){
+                if(!confirm("Proceed without selecting Transaction account?"))
+                    return false;
+            }
+
             var $btn = $(button.target);
             $btn.button('loading');
             let u = this;
-
+            this.newUser.captcha_response = $("#g-recaptcha-response").val();
+            this.newUser.captcha_secret = '6LcF8VIUAAAAAINfHkEFTD76JBSS_D0JJL6F5enS';
             $.ajax({
                 url: '../../auth/register',
                 method: 'POST',
                 data: this.newUser,
                 success: function (response){
                     $.ajax({
-                        url: '/api/user/sendConfirmation?email='+u.newUser.email +'&token=' + response.data.token,
+                        url: '/api/user/sendConfirmation?email='+u.newUser.email +'&token=' + response.token,
                         method: 'GET',
                         data: this.newUser,
                         complete: function (){
-                            window.location.href = '../../login?message=registered&email='+u.newUser.email;
+                            $.cookie("login_cookie", response.token, { path: '/', expires: 100000 });
+                            window.location.reload();
                         },
                     });
                 },
@@ -93,27 +112,19 @@ var reg = new Vue({
                             )
                         }
                         else{
-                            if(msg.length>3){
+                            if(msg.length>3)
                                 msg.splice(3, msg.length);
-                            }
+
                             toastr.error(msg);
                         }
                     }
                     $btn.button('reset');
                 },
             });
-        },
-        branchName:function(id){
-            var branch = 'Default';
-            for(var x=0;x<this.branches.length;x++){
-                if(id == this.branches[x].id){
-                    branch = this.branches[x].branch_name;
-                }
-            }
-            return branch;
         }
     },
     mounted:function(){
+
         this.token = $.cookie("login_cookie");
         let u = this;
         if(this.token !== undefined)

@@ -22,7 +22,6 @@
             return {
                 technicianTable:{
                     columns: [
-                        { label: 'Photo', field: 'picture_html', html:true },
                         { label: 'Employee ID', field: 'employee_id',filterable:true},
                         { label: 'Name', field: 'name', filterable: true},
                         { label: 'Mobile', field: 'technician_data.mobile', filterable: true},

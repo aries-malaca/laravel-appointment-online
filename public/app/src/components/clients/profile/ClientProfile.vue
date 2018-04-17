@@ -192,7 +192,7 @@
                                                         <input type="text" class="form-control" v-model="newClient.user_mobile">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-3" v-if="client.user_data !== undefined">
                                                     <div class="form-group">
                                                         <label class="control-label">BOSS ID</label>
                                                         <input type="text" class="form-control" v-model="newClient.user_data.boss_id">

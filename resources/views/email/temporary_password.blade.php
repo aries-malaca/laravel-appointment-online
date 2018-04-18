@@ -12,54 +12,30 @@
         <td>&nbsp;</td>
         <td class="container">
             <div class="content">
-
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Temporary Password</span>
                 <table class="main">
 
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
                         <td class="wrapper">
                             @include('email.layouts.logo')
-
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
                                         <p>Hi {{  $user['first_name'] }},</p>
                                         <p>Below is your temporary Password.</p>
-                                        <table border="0" cellpadding="0" cellspacing="0">
-                                            <tbody>
-                                            <tr>
-                                                <td align="left">
-                                                    <table border="0" cellpadding="0" cellspacing="0">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td> Password: {{ $temporary_password }}</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        <br/>
                                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                                             <tbody>
                                             <tr>
-                                                <td align="left">
-                                                    <table border="0" cellpadding="0" cellspacing="0">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td> <a href="{{ url('login')  }}" target="_blank">Login</a> </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
+                                                <td> Password: {{ $temporary_password }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td> <a href="{{ url('login?email=' . $user['email'])  }}" target="_blank">Login</a> </td>
                                             </tr>
                                             </tbody>
                                         </table>
-                                        <p></p>
-                                        <p>Thank you!</p>
+                                        <p>Sincerely,</p>
+                                        <p>Lay Bare Waxing Salon</p>
                                     </td>
                                 </tr>
                             </table>

@@ -172,8 +172,6 @@ class PremierController extends Controller{
                 User::where('email', $email)
                     ->update(["user_data" => json_encode($user_data)]);
             }
-            $email = $this->emailReceiver($user['email']);
-
 
             $headers = array("subject"=>'Premier Loyalty Card Application',
                              "to"=> [["email"=>$email, "name"=>  $user['username']]]);

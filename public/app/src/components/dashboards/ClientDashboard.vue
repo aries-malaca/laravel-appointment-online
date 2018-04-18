@@ -165,7 +165,7 @@
         </div>
         <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"
                        :branches="branches"/>
-
+        <privacy-consent></privacy-consent>
         <appointment-modal @refresh_list="refreshList"></appointment-modal>
     </div>
 </template>
@@ -173,9 +173,11 @@
 <script>
     import BookingModal from "../booking/BookingModal.vue";
     import AppointmentModal from "../appointment/AppointmentModal.vue";
+    import PrivacyConsent from '../alerts/PrivacyConsent.vue';
+
     export default {
         name: 'ClientDashboard',
-        components:{ BookingModal, AppointmentModal },
+        components:{ BookingModal, AppointmentModal, PrivacyConsent },
         data: function(){
             return {
                 display_appointment:{},

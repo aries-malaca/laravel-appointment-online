@@ -13,7 +13,8 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <transactions-view :client="user"></transactions-view>
+                <transactions-view :client="user" v-if="user.is_confirmed === 1"></transactions-view>
+                <verify-account-alert v-else></verify-account-alert>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
@@ -23,17 +24,15 @@
 <script>
     import TransactionsView from './transactions/TransactionsView.vue';
     import UnauthorizedError from './errors/UnauthorizedError.vue';
+    import VerifyAccountAlert from './transactions/VerifyAccountAlert.vue';
 
     export default {
         name: 'Transactions',
-        components: { TransactionsView, UnauthorizedError },
+        components: { TransactionsView, UnauthorizedError, VerifyAccountAlert },
         data: function(){
             return {
                 title: 'Transactions',
             }
-        },
-        methods:{
-
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Transactions');
@@ -41,9 +40,6 @@
         computed:{
             user(){
                 return this.$store.state.user;
-            },
-            token(){
-                return this.$store.state.token;
             },
             configs(){
                 return this.$store.state.configs;

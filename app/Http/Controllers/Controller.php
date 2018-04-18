@@ -264,7 +264,7 @@ class Controller extends BaseController{
             "headers"=>$headers,
             "attachments"=>$attachments
         ];
-        SendEmailJob::dispatch($data)->delay(now()->addSeconds(5));
+        SendEmailJob::dispatch($data)->delay(now()->addSeconds(2));
     }
 
     function sendSMS($message, $mobile, $title, $api, $shortcode){

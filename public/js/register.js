@@ -91,15 +91,8 @@ var reg = new Vue({
                 method: 'POST',
                 data: this.newUser,
                 success: function (response){
-                    $.ajax({
-                        url: '/api/user/sendConfirmation?email='+u.newUser.email +'&token=' + response.token,
-                        method: 'GET',
-                        data: this.newUser,
-                        complete: function (){
-                            $.cookie("login_cookie", response.token, { path: '/', expires: 100000 });
-                            window.location.reload();
-                        },
-                    });
+                    $.cookie("login_cookie", response.token, { path: '/', expires: 100000 });
+                    window.location.reload();
                 },
                 error:function(error){
                     if(error.status === 400){

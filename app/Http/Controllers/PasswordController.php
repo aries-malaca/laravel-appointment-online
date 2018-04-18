@@ -15,9 +15,9 @@ class PasswordController extends Controller{
             'email' => 'required|max:255',
             'birth_date' => 'required|max:255',
         ]);
-        if ($validator->fails()) {
+
+        if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-        }
 
         $user = User::where('email', $request->input('email'))
                             ->where('birth_date', 'LIKE', $request->input('birth_date').'%')
@@ -25,24 +25,22 @@ class PasswordController extends Controller{
 
 
         if(!isset($user['id'])) {
-            if($result = $this->selfMigrateClient($request->input('email'),null, $request->input('birth_date')) ){
+            if($result = $this->selfMigrateClient($request->input('email'),null, $request->input('birth_date')) )
                 $user = User::where('id', $result['id'])->get()->first();
-            }
         }
-
-        $email = $this->emailReceiver($user['email']);
 
         if(isset($user['id'])) {
             $generated = md5(rand(1,600));
             $user_data = json_decode($user['user_data'],true);
             $user_data['reset_password_key'] = $generated;
+            $user_data['prompt_change_password'] = 1;
             $user_data['reset_password_expiration'] = time() + 300;
             User::where('id', $user['id'])
                         ->update(['user_data'=> json_encode($user_data)]);
 
             $content_data = ["user"=>$user, "generated"=>$generated];
-            $headers = array("subject"=>'Password Reset',
-                "to"=> [["email"=>$email, "name"=> $user['first_name']]]
+            $headers = array("subject"=>'Lay Bare On-line - Password Reset',
+                "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]
             );
             $this->sendMail('email.reset_password', $content_data, $headers);
 
@@ -63,14 +61,16 @@ class PasswordController extends Controller{
             if($user_data['reset_password_key'] == $request->input('key')){
                 $diff = time() - $user_data['reset_password_expiration'];
                 if($diff < 300){
-                    $email = $this->emailReceiver($user['email']);
 
                     User::where('id', $user['id'])
                         ->update(['password'=>bcrypt($temporary_password)]);
 
-                    $headers = array("subject"=>'Temporary Password',
-                                     "to"=> [["email"=>$email, "name"=> $user['first_name']]]);
+                    $headers = array("subject"=>'Lay Bare On-line - Temporary Password',
+                                     "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]);
                     $this->sendMail('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], $headers);
+
+                    $user_data['reset_password_expiration'] = 0;
+                    User::where('id', $user['id'])->update(['user_data'=>json_encode($user_data)]);
 
                     $data = array("result"=>"success");
                 }
@@ -82,6 +82,7 @@ class PasswordController extends Controller{
         }
         else
             $data = array("result"=>"failed", "error"=>"Invalid Link.");
+
         return view('auth.forgot_verify', $data);
     }
 }

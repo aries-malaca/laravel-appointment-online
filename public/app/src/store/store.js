@@ -61,6 +61,9 @@ export const store = new Vuex.Store({
         }
     },
     mutations:{
+        updatePromptChangePassword(state, value){
+            state.user.user_data.prompt_change_password = value;
+        },
         updateQueuingBranch(state, queuing_branch){
             state.queuing_branch = queuing_branch;
         },

@@ -135,21 +135,23 @@
             </div>
         </div>
 
-        <div class="modal fade" id="change-password" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal fade" id="change-password" data-backdrop="static" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                         <h4 class="modal-title">Change Password</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="alert alert-info">
+                        <div class="alert alert-info" v-if="user.user_data !== undefined">
+                            <span v-if="user.user_data.prompt_change_password === 1">
+                                You're currently using a temporary password, please change it immediately to secure your account.<br/>
+                            </span>
                             Note: Your password must be alphanumeric.
                         </div>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="control-label">Old Password</label>
+                                    <label class="control-label">Current Password</label>
                                     <input type="password" class="form-control" v-model="change_password.old_password" />
                                 </div>
                             </div>
@@ -168,7 +170,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn dark btn-outline" @click="skipChangePassword" v-if="user.user_data !== undefined">
+                            <span v-if="user.user_data.prompt_change_password === 1">Skip</span>
+                            <span v-else>Close</span>
+                        </button>
                         <button type="button" @click="changePassword($event)" data-loading-text="Saving..." class="btn green">Save changes</button>
                     </div>
                 </div>
@@ -239,12 +244,19 @@
                             u.$store.dispatch('fetchAuthenticatedUser');
                             toastr.success("Profile successfully updated.");
                             $btn.button('reset');
+                            u.$store.commit('updatePromptChangePassword', 0);
                         })
                         .catch(function (error) {
                             XHRCatcher(error);
                             $btn.button('reset');
                         });
                 });
+            },
+            skipChangePassword(){
+                $('#change-password').modal('hide');
+                axios.post('/api/user/skipChangePassword?token=' + this.token)
+                    .then(function () {
+                    });
             },
             changePassword:function (event) {
                 let u = this;
@@ -253,6 +265,7 @@
 
                 axios.post('/api/user/changePassword?token=' + this.token, this.change_password)
                 .then(function () {
+                    u.$store.commit('updatePromptChangePassword', 0);
                     u.getProfile();
                     toastr.success("Password successfully changed.");
                     $btn.button('reset');
@@ -286,6 +299,10 @@
                     u.profile.user_address = event.target.value;
                 },100);
             });
+
+            if(this.user.user_data.prompt_change_password === 1){
+                $('#change-password').modal('show');
+            }
 
             //outsourced function from map
             initAutocomplete();

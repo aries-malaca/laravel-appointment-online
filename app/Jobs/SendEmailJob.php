@@ -54,7 +54,7 @@ class SendEmailJob implements ShouldQueue
     }
 
     function emailReceiver($email){
-        if(env('APP_MAILING_ENV')==='development')
+        if(env('APP_MAILING_ENV')=='development')
             return env('APP_MAILING_DEV_ADDRESS');
 
         return $email;

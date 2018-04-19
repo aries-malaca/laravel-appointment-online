@@ -34,6 +34,12 @@ class SendEmailJob implements ShouldQueue
         $headers = $this->data['headers'];
         $attachments = $this->data['attachments'];
 
+        $type = pathinfo(public_path('logo.png'), PATHINFO_EXTENSION);
+        $raw = file_get_contents(public_path('logo.png'));
+        $logo = 'data:image/' . $type . ';base64,' . base64_encode($raw);
+
+        $headers['logo'] = $logo;
+
         Mail::send($this->data['template'], $this->data['content_data'], function ($mail) use($headers, $attachments) {
             $mail->from(env('MAIL_USERNAME'), env('APP_NAME'));
             $mail->subject($headers['subject']);

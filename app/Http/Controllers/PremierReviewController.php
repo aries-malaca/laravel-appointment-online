@@ -49,6 +49,13 @@ class PremierReviewController extends Controller{
             $review->valid_id_url = $filename;
             $review->save();
 
+            $this->sendMail('email.transaction_review_request',
+                ["user"=>$api['user'], "delegation"=>($api['user']['gender']=='male' ? 'Mr.':'Ms.')],
+                ["subject"=> "Lay Bare On-line - Transaction Review",
+                    "to"=>[["email"=>$api['user']['email'],"name"=> $api['user']['first_name'] . ' ' . $api['user']['last_name']]]
+                ]
+            );
+
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);

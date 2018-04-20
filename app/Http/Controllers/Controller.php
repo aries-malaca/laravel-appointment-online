@@ -125,7 +125,7 @@ class Controller extends BaseController{
             ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
             ->get()->toArray();
         foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data']);
+            $items[$key]['item_data'] = json_decode($value['item_data'], true);
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;

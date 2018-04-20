@@ -172,6 +172,7 @@
         mounted:function(){
             this.$store.commit('updateTitle', 'Premier Loyalty Card');
             this.getBranches();
+            this.getPLC();
         },
         watch:{
           'user':function(){

@@ -45,8 +45,7 @@
                                     <tr>
                                         <td> Branch: </td>
                                         <td>
-                                            <a target="_blank" v-if="user.is_client===0" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
-                                            <span v-else> {{ appointment.branch_name }} </span>
+                                            <a target="_blank" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
                                         </td>
                                     </tr>
                                     <tr>

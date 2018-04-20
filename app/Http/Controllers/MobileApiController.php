@@ -657,7 +657,7 @@ class MobileApiController extends Controller{
             //mmya try ko
             $headers = array("subject"=>'Password Reset',
                 "to"=> [["email"=>$user['email'], "name"=> $user['username']]]);
-            $this->sendMail('email.reset_password', ["user"=>$user, "generated"=>$generated], $headers);
+            $this->sendMail('email.password_reset', ["user"=>$user, "generated"=>$generated], $headers);
 
             return response()->json(["result"=>"success"]);
         }
@@ -1481,8 +1481,6 @@ class MobileApiController extends Controller{
 
         return is_array($schedule)?array("schedule"=>$schedule[$i],"type"=>"RANGE"): array("schedule"=>$schedule,"type"=>"SINGLE");
     }
-
-
 
 
 

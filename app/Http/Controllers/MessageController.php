@@ -22,8 +22,12 @@ class MessageController extends Controller{
             $thread = Message::whereIn('sender_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->get()->first();
-            if(isset($thread['id']))
+            if(isset($thread['id'])){
                 $thread_id = $thread['message_thread_id'];
+                $updateThread                 = MessageThread::find($thread_id);
+                $updateThread->updated_at     = date("Y-m-d H:i:s");
+                $updateThread->save();
+            }
             else{
                 $thread = new MessageThread;
                 $thread->created_by_id = $api['user']['id'];
@@ -32,6 +36,7 @@ class MessageController extends Controller{
 
                 $thread_id = $thread->id;
             }
+
 
 
             $message = new Message;
@@ -94,14 +99,17 @@ class MessageController extends Controller{
 
     function seenMessages(Request $request){
         $api = $this->authenticateAPI();
-
+        $sender_id  = $request->input('sender_id');
+        $thread     = $request->input('thread_id');
         if($api['result'] === 'success') {
-             Message::where('recipient_id', $api['user']['id'])
-                        ->where('sender_id', $request->input('sender_id'))
-                        ->whereNull('read_at')
-                        ->update(['read_at'=>date('Y-m-d H:i:s')]);
+            
+            $querySeen =  Message::where('sender_id',$sender_id)
+                            ->where('message_thread_id', $thread)
+                            ->where('recipient_id',  $api['user']['id'])
+                            ->update(['read_at'=>date('Y-m-d H:i:s')]);
+           
 
-            return response()->json(["result"=>"success"]);
+            return response()->json(["result"=>"success","thread_id"=>$thread]);
         }
         return response()->json($api, $api["status_code"]);
     }

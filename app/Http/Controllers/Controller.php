@@ -127,7 +127,10 @@ class Controller extends BaseController{
         $tokens = json_decode($user->device_data, true);
         $key_find    = false;
         foreach ($tokens as $key => $value) {
-            $token_unique_id = $value["unique_device_id"];
+            $token_unique_id = "";
+            if(isset($value["unique_device_id"])){
+                $token_unique_id = $value["unique_device_id"];
+            }
             if($token_unique_id == $device_unique_id && $device_unique_id != null && $token_unique_id != null){
                 $key_find    = $key;
             }

@@ -244,6 +244,7 @@ Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentRe
 
 Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
 Route::get('/mobile/getAllChatMessage', 'MobileApiController@getAllChatMessage');
+Route::post('/mobile/getChatMessageByThread','MobileApiController@getChatMessageByThread');
 
 Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');
 Route::get('/mobile/getNotifications/{latest_id}', 'MobileApiController@getNotifications');

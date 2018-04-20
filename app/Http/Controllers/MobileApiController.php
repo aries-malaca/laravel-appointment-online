@@ -27,6 +27,7 @@ use App\Libraries\Notification_Azure;
 use DateTime;
 use Validator;
 use App\Message;
+use App\MessageThread;
 use Hash;
 use DB;
 use Mail;
@@ -1070,56 +1071,135 @@ class MobileApiController extends Controller{
     }
 
     public function getAllChatMessage(Request $request){
+        
         $api                = $this->authenticateAPI();
         $response           = array();
         $offset             = 0;
         $limit              = 20;
         // $lastActivity       = $this->getLastTimeActivity($recipientID);
-         $responseArray = array();
+        $responseArray = array();
         if($api['result'] === 'success'){
            
-            $clientID       = $api["user"]["id"];
-            $userQuery      = DB::table("messages")
-                                ->leftJoin("users as a","messages.sender_id","a.id")
-                                ->leftJoin("users as b","messages.recipient_id","b.id")
-                                ->where(function($userChatQuery) use ($clientID){
-                                    $userChatQuery->where('messages.recipient_id', $clientID)
-                                                 ->orWhere('messages.sender_id',$clientID);
-                                    })
-                                ->select("b.id","b.first_name","b.last_name")
-                                ->groupBy("b.id","b.first_name","b.last_name")
-                                ->orderBy("messages.created_at","desc")
-                                ->get()->toArray();
+            $responseArray = array();
+            $clientID      = $api["user"]["id"];
+            $messageQuery  =   $this->getThreadID($clientID);
+            foreach ($messageQuery as $key => $value) {
 
-            foreach($userQuery as $key => $myVal) {
+                $ifHasMore      = false;
+                $thread_id      = $value["thread_id"];
+                $threadQuery    = MessageThread::where("id",$thread_id)->get()->first();
+                $created_by_id  = $threadQuery["created_by_id"];
+                $thread_name    = "";
+                $participants   = json_decode($threadQuery["participant_ids"],true);
+                foreach ($participants as $k => $val) {
+                    if($k == count($participants) - 1) {
+                        $thread_name.=$this->getThreadName($val,$created_by_id,$clientID);   
+                    }
+                    else{
+                        $thread_name.=$this->getThreadName($val,$created_by_id,$clientID).", ";   
+                    }
+                }  
+                $chatQuery  = Message::where("message_thread_id",$thread_id)
+                                    ->limit($limit)
+                                    ->orderBy("created_at")
+                                    ->get()->toArray();   
 
-                $id                     = $myVal->id;
-                // if($id == $clientID){
-                //     continue;
-                // }
-                // else{
-                $full_name              = $myVal->first_name." ".$myVal->last_name;
-                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$id, $clientID])
-                                            ->whereIn('sender_id', [$id, $clientID])
-                                            // ->where("id",">",$latestlastChatID)
-                                            ->orderBy('created_at','desc')
-                                            ->limit($limit)
-                                            ->offset($offset)
-                                            ->get()->toArray();
-                $responseArray[] = array(
-                                "id"            => $id,
-                                "full_name"     => $full_name,
-                                "message"       => $queryGetChatMessage
-                                    );
-                // }
+                if(count($chatQuery) >= $limit){
+                    $ifHasMore = true;
+                }
+                $threadQuery["thread_name"] = $thread_name;
+                $threadQuery["messages"]    = $chatQuery;
+                $threadQuery["ifHasMore"]   = $ifHasMore;
+
+                $responseArray[] =  $threadQuery;
             }
-
             return response()->json($responseArray); 
         }
         else{
             return response()->json($api, $api["status_code"]);
         }
+    }
 
+    public function getChatMessageByThread(Request $request){
+        $api                = $this->authenticateAPI();
+        $response           = array();
+        $offset             = 0;
+        $limit              = 20;
+        // $thread_id          = $request->segment(4);
+        $thread_id          = $request->input("thread_id");
+        $latest_id          = (int)$request->input("latest_id");
+        $offset             = $request->input("offset");
+        // $lastActivity       = $this->getLastTimeActivity($recipientID);
+        $responseArray = array();
+        if($api['result'] === 'success'){
+            $clientID       = $api["user"]["id"];
+            $thread_name    = "";
+            $threadQuery    = MessageThread::where("id",$thread_id)
+                                ->get()->first();
+        
+            if(isset($threadQuery)){
+                
+                if($latest_id > 0){
+                     $messageQuery =  Message::where("message_thread_id",$thread_id)
+                                ->where("id",">",$latest_id)
+                                ->orderBy("created_at","desc")
+                                ->get()->toArray();
+                }
+                else{
+                   $messageQuery =  Message::where("message_thread_id",$thread_id)
+                                ->get()->toArray();
+                }
+               
+                $participants   = json_decode($threadQuery["participant_ids"],true);
+                foreach ($participants as $k => $val) {
+                    if($k == count($participants) - 1) {
+                        $thread_name.=$this->getThreadName($val,$threadQuery->created_by_id,$clientID);   
+                    }
+                    else{
+                        $thread_name.=$this->getThreadName($val,$threadQuery->created_by_id,$clientID).", ";   
+                    }
+                }                  
+                $threadQuery["thread_name"] = $thread_name;
+                $threadQuery["messages"]    = $messageQuery;
+                $responseArray = $threadQuery;
+                return  response()->json($responseArray);               
+            } 
+            return  response()->json($responseArray);         
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+
+
+    function getThreadID($clientID){
+
+        $messageQuery =  Message::where(function($messageQuery) use ($clientID){
+                                    $messageQuery->whereIn("sender_id",[$clientID])
+                                                 ->orWhere('recipient_id',$clientID);
+                                    })
+                                ->select("message_thread_id as thread_id")
+                                ->groupBy("message_thread_id")
+                                ->orderBy("messages.created_at","desc")
+                                ->get()->toArray();
+
+        return $messageQuery;                        
+    }
+
+    function getThreadName($user_id,$created_by_id,$clientID){
+        $userName = "";
+        $paramID  = 0;
+        if($user_id == $clientID){
+            $paramID = $created_by_id;
+        }
+        else{
+            $paramID = $user_id;
+        }
+        $queryUser  = User::where("id",$paramID)
+                        ->select("first_name","last_name","level")
+                        ->get()->first();
+        $level      = $queryUser->level;
+        $userName   = $queryUser->first_name." ".$queryUser->last_name;        
+        return $userName;              
     }
 
 
@@ -1127,16 +1207,19 @@ class MobileApiController extends Controller{
 
         $recipientID = $request->input("recipient");
         $textBody    = $request->input("textMessage");
+        $thread_id   = $request->input("thread_id");
 
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
-            $message                = new Message;
-            $message->body          = $textBody;
-            $message->title         = null;
-            $message->sender_id     = $api['user']['id'];
-            $message->recipient_id  = $recipientID;
-            $message->message_data  = '{}';
-            $message->is_read       = 0;
+
+            $message                        = new Message;
+            $message->body                  = $textBody;
+            $message->title                 = null;
+            $message->sender_id             = $api['user']['id'];
+            $message->recipient_id          = $recipientID;
+            $message->message_data          = '{}';
+            $message->read_at               = null;
+            $message->message_thread_id     = $thread_id;
             $message->save();
             return response()->json(["result"=>"success","latestChatID"=>$message->id,"chatDetails"=>$message]);
         }

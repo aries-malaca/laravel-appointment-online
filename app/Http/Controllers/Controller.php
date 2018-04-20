@@ -7,7 +7,13 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Config;
+use App\Service;
+use App\ServiceType;
+use App\ServicePackage;
+use App\Product;
+use App\ProductGroup;
 use App\TextMessage;
+use App\TransactionItem;
 use App\Menu;
 use Mail;
 use DB;
@@ -65,7 +71,6 @@ class Controller extends BaseController{
                 $u->device_data = json_encode($data);
             }
         }
-
         $u->save();
     }
 
@@ -112,6 +117,41 @@ class Controller extends BaseController{
         }
         $dash_str .= $password;
         return $dash_str;
+    }
+
+    function getAppointmentItems($id){
+        $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->where('transaction_id', $id)
+            ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
+            ->get()->toArray();
+        foreach($items as $key=>$value){
+            $items[$key]['item_data'] = json_decode($value['item_data']);
+            if($value['item_type'] === 'service'){
+                $service = Service::find($value['item_id']);
+                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
+
+                if($service->service_type_id !== 0)
+                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
+                else
+                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
+
+                $items[$key]['item_name']       = $service_name;
+                $items[$key]['item_image']      = $service_image;
+                $items[$key]['item_duration']   = $service->service_minutes;
+                $items[$key]['item_info']['gender'] = $service->service_gender;
+            }
+            else{
+                $product       = Product::find($value['item_id']);
+                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
+                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
+                $items[$key]['item_name']            = $product_name;
+                $items[$key]['item_info']['size']    = $product->product_size;
+                $items[$key]['item_info']['variant'] = $product->product_variant;
+                $items[$key]['item_image']           = $product_image;
+
+            }
+        }
+        return $items;
     }
 
     /**
@@ -297,24 +337,49 @@ class Controller extends BaseController{
         $notification->notification_type = $type;
         $notification->notification_data = json_encode($data);
         $notification->user_id = $user_id;
-        $notification->is_read = 0;
         $notification->save();
+        Curl::to(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $user_id)->get();
 
-        $user = User::find($user_id);
-        if(isset($user->id)){
-            $d = json_decode($user->user_data);
+        $user = User::where('id',$user_id)->get()->first();
+        if(isset($user['id'])){
+            $d = json_decode($user['user_data']);
             if(in_array('email', $d->notifications) && $send_mail) {
-                if(isset($data['message']) && isset($data['title'])){
+                if(isset($data['body']) && isset($data['title'])){
 
+                    $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
+                                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
+
+                    switch($type){
+                        case 'appointment':
+                            $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                                            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                            ->where('transactions.id', $data['unique_id'])
+                                            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                                'transactions.*')
+                                            ->get()->first();
+                            $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
+
+                            if($data['title'] == 'Expired Appointment') {
+                                $template = 'email.appointment_expired_client';
+                            }
+                            elseif($data['title'] == 'Appointment Complete')
+                                $template = 'email.appointment_completed';
+
+                            $data = ["user"=>$user, "appointment"=> $appointment]; //override data
+
+                            if(isset($template))
+                                $this->sendMail($template, $data, $headers);
+                        break;
+                        // other types
+                    }
                 }
             }
         }
     }
 
     // public function sendPushNotification(Request $request){
+    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
 
-    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub"); 
-        
     //     //android
     //     $message        = '{"data":{"user_id":57427,"unique_id":1,"notification_type":"notification"}}';
     //     $notification   = new Notification_Azure("gcm", $message);

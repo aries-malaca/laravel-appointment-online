@@ -7,11 +7,7 @@ use Validator;
 use App\Branch;
 use App\User;
 use App\Technician;
-use App\Service;
-use App\ServicePackage;
-use App\ServiceType;
-use App\Product;
-use App\ProductGroup;
+use Curl;
 
 
 class AppointmentController extends Controller{
@@ -81,9 +77,27 @@ class AppointmentController extends Controller{
                 $item->save();
             }
 
+            $this->sendAppointmentNotification($appointment->id, 'Appointment Confirmation', 'email.appointment_confirmation');
+
             return response()->json(["result"=>"success","appointment_id"=>$appointment->id, "transaction_datetime"=>$appointment->transaction_datetime],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function sendAppointmentNotification($appointment_id, $title, $template){
+        $transaction = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+            ->where('transactions.id', $appointment_id)
+            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                'transactions.*')
+            ->get()->first();
+
+        $transaction['items'] = $this->getAppointmentItems($appointment_id);
+        $user = User::where('id', $transaction->client_id)->get()->first();
+        $data = ["user"=>$user, "appointment"=> $transaction]; //override data
+        $headers = array("subject" => env("APP_NAME") .' - '. $title,
+            "to" => [["email" => $user['email'], "name" => $user['username']]]);
+        $this->sendMail($template, $data, $headers);
     }
 
     function hasPendingAppointment($client_id){
@@ -223,6 +237,12 @@ class AppointmentController extends Controller{
                                 'complete_time'=> date('Y-m-d H:i:s')
                             ]);
 
+        $this->createNotification('appointment', $request->input('client_id'), ["title"=>"Appointment Complete",
+                    "body"=>"Your appointment has been completed.",
+                    "unique_id"=>(int)$request->input('id'),
+                    "images"=>[],
+        ] , true  );
+
         return response()->json(["result"=>"success"]);
     }
 
@@ -264,6 +284,8 @@ class AppointmentController extends Controller{
 
             Transaction::where('id', $request->input('id'))
                             ->update(['transaction_status'=>'cancelled']);
+
+            $this->sendAppointmentNotification($request->input('id'), 'Appointment Cancelled', 'email.appointment_cancelled');
 
             return response()->json(["result"=>"success"], 200);
         }
@@ -362,52 +384,31 @@ class AppointmentController extends Controller{
     function expireAppointments(){
         $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
                                     ->where('item_status', 'reserved')
-                                    ->where('item_type', 'service')
                                     ->select('transaction_items.*','client_id')
                                     ->get()->toArray();
+        $ids = [];
+
         foreach($items as $key=>$value){
             if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d'))){
                 TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
-
-                $this->refreshStatus($value['transaction_id'], 'expired');
-                file_get_contents(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $value['client_id']);
+                if(!in_array($value['transaction_id'], $ids))
+                    $ids[] = $value['transaction_id'];
             }
         }
-    }
 
-    function getAppointmentItems($id){
-        $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
-                                ->where('transaction_id', $id)
-                                ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
-                                ->get()->toArray();
-        foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data']);
-            if($value['item_type'] === 'service'){
-                $service = Service::find($value['item_id']);
-                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
-
-                if($service->service_type_id !== 0)
-                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
-                else
-                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
-
-                $items[$key]['item_name']       = $service_name;
-                $items[$key]['item_image']      = $service_image;
-                $items[$key]['item_duration']   = $service->service_minutes;
-                $items[$key]['item_info']['gender'] = $service->service_gender;
-            }
-            else{
-                $product       = Product::find($value['item_id']);
-                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
-                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
-                $items[$key]['item_name']            = $product_name;
-                $items[$key]['item_info']['size']    = $product->product_size;
-                $items[$key]['item_info']['variant'] = $product->product_variant;
-                $items[$key]['item_image']           = $product_image;
-
-            }
+        $transactions = Transaction::whereIn('id',$ids)->get()->toArray();
+        $branches = [];
+        foreach($transactions as $transaction){
+            $this->refreshStatus($transaction['id'], 'expired');
+            $this->createNotification('appointment', $transaction['client_id'],
+                            ["title"=>"Expired Appointment",
+                                "body"=>"Your appointment has been expired.",
+                                "unique_id"=>(int)$transaction['id'],
+                                "images"=>[],
+                            ] , true );
+            if(!in_array($transaction['branch_id'], $branches))
+                $branches[] = $transaction['branch_id'];
         }
-        return $items;
     }
 
     function acknowledgeAppointment(Request $request){
@@ -445,13 +446,5 @@ class AppointmentController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
-    }
-
-    function sendBookingNotification(Request $request){
-
-    }
-
-    function sendCancelNotification(Request $request){
-
     }
 }

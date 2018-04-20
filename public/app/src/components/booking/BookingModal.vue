@@ -31,6 +31,10 @@
                                             <table class="table table-hover table-light">
                                                 <tbody>
                                                     <tr>
+                                                        <td> Email:</td>
+                                                        <td> {{ newTransaction.client.email }}</td>
+                                                    </tr>
+                                                    <tr>
                                                         <td> Mobile:</td>
                                                         <td> {{ newTransaction.client.user_mobile }}</td>
                                                     </tr>
@@ -587,6 +591,7 @@
                     clients.push({  label:this.clients[x].username,
                                     value:this.clients[x].id,
                                     gender:this.clients[x].gender,
+                                    email:this.clients[x].email,
                                     user_mobile:this.clients[x].user_mobile,
                                     picture_html_big:this.clients[x].picture_html_big,
                     });
@@ -761,6 +766,7 @@
                     client:this.default_client !== null ? (this.default_client.value!==undefined? { value: this.default_client.value,
                                                         label : this.default_client.label,
                                                         gender : this.default_client.gender,
+                                                        email : this.default_client.email,
                                                         user_mobile: this.default_client.user_mobile,
                                                         picture_html_big : this.default_client.picture_html_big}: null
                     ):null,

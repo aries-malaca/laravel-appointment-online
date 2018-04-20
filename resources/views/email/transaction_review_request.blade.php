@@ -21,7 +21,7 @@
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <p>Hi {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
+                                        <p>Hi {{ delegation($user) }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
 
                                         <p>Thank you for submitting your request on the transaction review we will get back you once we are done reviewing your Profile.</p>
 

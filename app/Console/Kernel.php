@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule){
-        $schedule->command('expire')->hourly();
+        $schedule->command('expire')->dailyAt('07:00');
         $schedule->command('auditing:clean')->everyFiveMinutes();
         $schedule->command('backup:mysql-dump')->cron(env("DB_BACKUP_SCHEDULE", "* * * * *"));
 

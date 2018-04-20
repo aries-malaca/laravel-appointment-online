@@ -5,6 +5,7 @@ use App\Transaction;
 use App\TransactionItem;
 use App\Review;
 use Illuminate\Support\Facades\DB;
+use Ixudra\Curl\Facades\Curl;
 /*
 |--------------------------------------------------------------------------
 | Console Routes
@@ -15,14 +16,8 @@ use Illuminate\Support\Facades\DB;
 | simple approach to interacting with each command's IO methods.
 |
 */
-
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->describe('Display an inspiring quote');
-
-
 Artisan::command('expire',function(){
-    file_get_contents(env('APP_URL').'/api/appointment/expireAppointments');
+    Curl::to(env('APP_URL').'/api/appointment/expireAppointments')->get();
 })->describe('Executes expire appointment');
 
 Artisan::command('reset-data',function(){
@@ -40,5 +35,5 @@ Artisan::command('auditing:clean',function(){
 })->describe('Clear audits having no data');
 
 Artisan::command('fetch-technicians {cluster_id}',function($cluster_id){
-    file_get_contents(env('APP_URL').'/api/technician/fetchEMSTechnicians/' . $cluster_id);
+    Curl::to(env('APP_URL').'/api/technician/fetchEMSTechnicians/' . $cluster_id)->get();
 })->describe('Fetch technicians with cluster_id');

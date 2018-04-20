@@ -40,19 +40,27 @@ function initMap(lat,long){
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
 
-var placeSearch, autocomplete;
+var autocomplete;
 
 var initAutocomplete = function() {
     // Create the autocomplete object, restricting the search to geographical
     // location types.
-    autocomplete = new google.maps.places.Autocomplete(
-        /** @type {!HTMLInputElement} */(document.getElementById('autocomplete')),
-        {types: ['geocode']});
+    try{
+        if((document.getElementById('autocomplete')) !== null)
+            autocomplete = new google.maps.places.Autocomplete(
+                (document.getElementById('autocomplete')),
+                {types: ['geocode']});
 
-    autocomplete2 = new google.maps.places.Autocomplete(
-        /** @type {!HTMLInputElement} */(document.getElementById('autocomplete2')),
-        {types: ['geocode']});
-}
+        if((document.getElementById('autocomplete2')) !== null)
+            autocomplete2 = new google.maps.places.Autocomplete(
+                (document.getElementById('autocomplete2')),
+                {types: ['geocode']});
+    }
+    catch(e){
+
+    }
+
+};
 
 // Bias the autocomplete object to the user's geographical location,
 // as supplied by the browser's 'navigator.geolocation' object.

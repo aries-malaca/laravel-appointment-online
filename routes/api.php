@@ -152,7 +152,7 @@ Route::post('/premier/exportExcel', 'PremierController@exportExcel');
 Route::get('/premier/getRequests', 'PremierReviewController@getRequests');
 Route::get('/premier/getAllRequests', 'PremierReviewController@getAllRequests');
 Route::post('/premier/deleteRequest', 'PremierReviewController@deleteRequest');
-Route::post('/premier/completeRequest', 'PremierReviewController@completeRequest');
+Route::post('/premier/processRequest', 'PremierReviewController@processRequest');
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 

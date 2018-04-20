@@ -99,7 +99,7 @@ class PremierController extends Controller{
                     return response()->json(["result" => 'failed', "error" => $premier->remarks], 400);
             }
 
-            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment."], 400);
+            return response()->json(["result" => "failed", "error" => "Couldn't fetch Transaction records. Please request for account review in order us to link your transaction records to your account.."], 400);
         }
         return response()->json($api, $api["status_code"]);
     }

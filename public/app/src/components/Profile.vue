@@ -286,6 +286,7 @@
             },
         },
         mounted:function(){
+            this.$store.dispatch('saveLocation');
             this.$store.commit('updateTitle', 'My Profile');
             this.getUserLevels();
             let u = this;

@@ -134,7 +134,6 @@
             user(){
                 if(this.user !== null){
                     if(this.user.id !== undefined) {
-                        this.$store.dispatch('saveLocation');
                         if (this.user.user_data.prompt_change_password === 1)
                             window.location.href = '../../#/profile';
                     }

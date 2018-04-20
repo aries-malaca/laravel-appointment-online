@@ -388,7 +388,9 @@ class KioskController extends Controller{
                     $user->is_active    = 0;
                     $user->is_agreed    = 0;
                     $user->is_client    = 1;
-                    $user->device_data  = '{}';
+                    $user->device_data  = '[]';
+                    $user->transactions_data    = '[]';
+                    $user->notifications_read    = '[]';
                     $user->birth_date   = $bday." 00:00:00";
                     $user->user_picture = 'no photo ' . $boss_gender.'.jpg';
                     $user->level        = 0;
@@ -509,7 +511,9 @@ class KioskController extends Controller{
             $user->is_agreed    = 0;
             $user->level        = 0;
             $user->is_client    = 1;
-            $user->device_data  = '{}';
+            $user->device_data  = '[]';
+            $user->transactions_data    = '[]';
+            $user->notifications_read    = '[]';
             $user->birth_date   = $bday;
             $user->user_picture = 'no photo ' . $gender.'.jpg';
             $user->user_data    = json_encode(array(

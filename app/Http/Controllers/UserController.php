@@ -49,8 +49,8 @@ class UserController extends Controller{
             $attempts++;
             if($attempts >= 5){
                 $this->sendMail('email.failed_login',
-                    ["user"=>["first_name"=>$u['first_name'], "last_name"=>$u['last_name'], "delegation"=>($u['gender']=='male' ? 'Mr.':'Ms.')]],
-                    ["subject"=> "Lay Bare On-line - Failed Login Notification", "to"=>[["email"=>$u['email'],"name"=> $u['first_name'] . ' ' . $u['last_name']]]]
+                    ["user"=>$u],
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>[["email"=>$u['email'],"name"=> $u['first_name'] . ' ' . $u['last_name']]]]
                 );
                 $attempts = 0;
             }
@@ -75,7 +75,7 @@ class UserController extends Controller{
             if($attempts >= 5){
                 $this->sendMail('failed_login',
                     ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "delegation"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'Mr.':'Ms.')]],
-                    ["subject"=> "Lay Bare On-line - Failed Login Notification", "to"=>["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]
                 );
                 $attempts = 0;
             }
@@ -217,7 +217,7 @@ class UserController extends Controller{
         User::where('id', $user['id'])
             ->update(['user_data' => json_encode($user_data)]);
 
-        $headers = array("subject" => 'Lay Bare On-line Signup | Verification',
+        $headers = array("subject" => env("APP_NAME"). ' | Signup Verification',
                         "to" => [["email" => $user['email'], "name" => $user['username']]]);
         $this->sendMail('email.account_verification', ["user" => $user, "generated" => $generated,"raw_password"=>$raw_password], $headers);
     }

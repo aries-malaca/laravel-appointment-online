@@ -250,6 +250,7 @@
                     gender:this.user.gender,
                     user_mobile:this.user.user_mobile,
                     picture_html_big:this.user.picture_html_big,
+                    email:this.user.email,
                 };
             }
         },
@@ -257,6 +258,7 @@
             this.client = {
                 label:this.user.username,
                 value:this.user.id,
+                email:this.user.email,
                 gender:this.user.gender,
                 user_mobile:this.user.user_mobile,
                 picture_html_big:this.user.picture_html_big,

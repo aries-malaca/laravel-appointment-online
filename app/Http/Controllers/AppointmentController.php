@@ -7,11 +7,6 @@ use Validator;
 use App\Branch;
 use App\User;
 use App\Technician;
-use App\Service;
-use App\ServicePackage;
-use App\ServiceType;
-use App\Product;
-use App\ProductGroup;
 use Curl;
 
 
@@ -82,9 +77,27 @@ class AppointmentController extends Controller{
                 $item->save();
             }
 
+            $this->sendAppointmentNotification($appointment->id, 'Appointment Confirmation', 'email.appointment_confirmation');
+
             return response()->json(["result"=>"success","appointment_id"=>$appointment->id, "transaction_datetime"=>$appointment->transaction_datetime],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function sendAppointmentNotification($appointment_id, $title, $template){
+        $transaction = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+            ->where('transactions.id', $appointment_id)
+            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                'transactions.*')
+            ->get()->first();
+
+        $transaction['items'] = $this->getAppointmentItems($appointment_id);
+        $user = User::where('id', $transaction->client_id)->get()->first();
+        $data = ["user"=>$user, "appointment"=> $transaction]; //override data
+        $headers = array("subject" => env("APP_NAME") .' - '. $title,
+            "to" => [["email" => $user['email'], "name" => $user['username']]]);
+        $this->sendMail($template, $data, $headers);
     }
 
     function hasPendingAppointment($client_id){
@@ -224,6 +237,12 @@ class AppointmentController extends Controller{
                                 'complete_time'=> date('Y-m-d H:i:s')
                             ]);
 
+        $this->createNotification('appointment', $request->input('client_id'), ["title"=>"Appointment Complete",
+                    "body"=>"Your appointment has been completed.",
+                    "unique_id"=>(int)$request->input('id'),
+                    "images"=>[],
+        ] , true  );
+
         return response()->json(["result"=>"success"]);
     }
 
@@ -265,6 +284,8 @@ class AppointmentController extends Controller{
 
             Transaction::where('id', $request->input('id'))
                             ->update(['transaction_status'=>'cancelled']);
+
+            $this->sendAppointmentNotification($request->input('id'), 'Appointment Cancelled', 'email.appointment_cancelled');
 
             return response()->json(["result"=>"success"], 200);
         }
@@ -425,13 +446,5 @@ class AppointmentController extends Controller{
         }
 
         return response()->json($api, $api["status_code"]);
-    }
-
-    function sendBookingNotification(Request $request){
-
-    }
-
-    function sendCancelNotification(Request $request){
-
     }
 }

@@ -117,6 +117,7 @@ Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppoint
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
+Route::post('/appointment/saveItem', 'AppointmentController@saveItem');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 

@@ -20,38 +20,29 @@
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <p>Dear {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
-
-                                        <p>
-                                            Thank you for using Lay Bare On-line. To activate your account, please select the link found below and follow the instruction in the web page.
-                                        </p>
-
+                                        <p>Dear {{ delegation($user) }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
+                                        <p>Thank you for using Lay Bare On-line. To activate your account, please select the link found below and follow the instruction in the web page.</p>
                                         @if($raw_password !== null)
-                                            <p>
-                                                Your log-in credentials are specified below:
-                                            </p>
-                                            <p>
-                                                <table style="width:50%" class="datatable">
-                                                    <tr>
-                                                        <td>Username: </td>
-                                                        <td> {{ $user['email'] }} </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Password: </td>
-                                                        <td> {{ $raw_password}} </td>
-                                                    </tr>
-                                                </table>
-                                            </p>
+                                            <p>Your log-in credentials are specified below:</p>
+                                            <br/>
+                                            <table style="width:50%" class="datatable">
+                                                <tr>
+                                                    <td>Username: </td>
+                                                    <td> {{ $user['email'] }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Password: </td>
+                                                    <td> {{ $raw_password}} </td>
+                                                </tr>
+                                            </table>
+                                            <br/>
                                         @endif
-
                                         <p>Please click this link or copy & paste into your address bar to activate your account:</p>
-
                                         <p>
                                             <a href="{{ url('/register/verify?email='. $user['email'] .'&key=' . $generated)  }}" target="_blank">
                                                 {{ url('/register/verify?email='. $user['email'] .'&key=' . $generated)  }}
                                             </a>
                                         </p>
-
                                         <p>Sincerely,</p>
                                         <p>Lay Bare Waxing Salon</p>
                                     </td>

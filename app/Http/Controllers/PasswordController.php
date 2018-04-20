@@ -39,7 +39,7 @@ class PasswordController extends Controller{
                         ->update(['user_data'=> json_encode($user_data)]);
 
             $content_data = ["user"=>$user, "generated"=>$generated];
-            $headers = array("subject"=>'Lay Bare On-line - Password Reset',
+            $headers = array("subject"=>env("APP_NAME"). ' - Password Reset',
                 "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]
             );
             $this->sendMail('email.reset_password', $content_data, $headers);
@@ -65,7 +65,7 @@ class PasswordController extends Controller{
                     User::where('id', $user['id'])
                         ->update(['password'=>bcrypt($temporary_password)]);
 
-                    $headers = array("subject"=>'Lay Bare On-line - Temporary Password',
+                    $headers = array("subject"=>env("APP_NAME"). ' - Temporary Password',
                                      "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]);
                     $this->sendMail('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], $headers);
 

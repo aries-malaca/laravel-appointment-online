@@ -20,7 +20,7 @@
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <p>Dear {{ $user['delegation'] }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
+                                        <p>Dear {{ delegation($user) }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
                                         <p>Based on our system records, you've been trying without success to access your Lay Bare On-line Profile.</p>
                                         <p>
                                             You may access the forgot password tool found in the log-in page of the system to have your password sent to your email.

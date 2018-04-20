@@ -25,6 +25,7 @@
         border-collapse: collapse;
         border:1px solid #e7ecf1;
         background-color: #f4f4fe;
+        width:100%;
     }
     .datatable td{
         border:1px solid #e7ecf1;

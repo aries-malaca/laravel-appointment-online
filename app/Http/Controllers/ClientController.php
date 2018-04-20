@@ -143,6 +143,15 @@ class ClientController extends Controller{
             if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
+            //check boss ID unique
+            if(isset($request->input('user_data')['boss_id'])){
+                $checker = User::where('id', '<>', $request->input('id'))
+                                ->where("user_data", "LIKE", '%"boss_id":"'. $request->input('user_data')['boss_id'] .'"%')->count();
+                if ($checker > 0)
+                    return response()->json(['result'=>'failed','error'=>["BOSS ID (Transaction account) already been taken."]], 400);
+            }
+
+
             $client = User::find($request->input('id'));
             $client->first_name = $request->input('first_name');
             $client->middle_name = $request->input('middle_name');
@@ -154,6 +163,7 @@ class ClientController extends Controller{
             $data = json_decode($client->user_data);
             $data->home_branch = (int)$request->input('home_branch')['value'];
             $data->notifications = $request->input('user_data')['notifications'] === null? [] :$request->input('user_data')['notifications'];
+            $data->boss_id = !isset($request->input('user_data')['boss_id'])? null :$request->input('user_data')['boss_id'];
             $client->user_data = json_encode($data);
             $client->save();
 

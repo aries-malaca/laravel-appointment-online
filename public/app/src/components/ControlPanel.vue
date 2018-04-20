@@ -33,6 +33,7 @@
                     <levels></levels>
                     <places></places>
                     <users></users>
+                    <database></database>
                 </div>
             </div>
         </div>
@@ -47,11 +48,12 @@
     import Places from './controlpanel/Places.vue';
     import Levels from './controlpanel/Levels.vue';
     import Users from './controlpanel/Users.vue';
+    import Database from './controlpanel/Database.vue';
     import UnauthorizedError from './errors/UnauthorizedError.vue';
 
     export default {
         name: 'ControlPanel',
-        components:{ VueSelect, DataTable, Places, Levels, Users, Settings, UnauthorizedError},
+        components:{ VueSelect, DataTable, Places, Levels, Users, Settings, Database, UnauthorizedError},
         data: function(){
             return {
                 title: 'Control Panel',

@@ -13,7 +13,7 @@
                 </div>
             </div>
             <div class="portlet-body">
-                <div class="tabbable-line">
+                <div class="tabbable-line" v-if="user.is_confirmed === 1">
                     <ul class="nav nav-tabs">
                         <li class="active">
                             <a href="#apply-now" data-toggle="tab">Apply Now</a>
@@ -49,8 +49,8 @@
                                 </div>
                                 <div class="col-md-7">
                                     <transactions-summary :transactions="transactions" v-if="transactions"></transactions-summary>
-                                    <div class="alert alert-info" v-else>
-                                        Please wait while we loading your transactions.
+                                    <div class="alert alert-warning" v-else>
+                                        No transactions found in your account. <a class="btn btn-info btn-xs" href="#/transactions">Go to Transactions Page</a>
                                     </div>
 
                                     <img style="display:block; margin:auto;" v-bind:src="'../../images/app/plc_'+ user.gender +'.png'">
@@ -66,6 +66,7 @@
                         </div>
                     </div>
                 </div>
+                <verify-account-alert v-else></verify-account-alert>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
@@ -81,10 +82,11 @@
     import DataTable from '../tables/DataTable.vue';
     import TransactionsSummary from '../transactions/TransactionsSummary.vue';
     import UnauthorizedError from '../errors/UnauthorizedError.vue';
+    import VerifyAccountAlert from '../transactions/VerifyAccountAlert.vue';
 
     export default {
         name: 'PLC',
-        components:{ VueSelect, DataTable, UnauthorizedError, TransactionsSummary },
+        components:{ VueSelect, DataTable, UnauthorizedError, TransactionsSummary, VerifyAccountAlert },
         data: function(){
             return {
                 title: 'Premier Loyalty Card',
@@ -149,7 +151,23 @@
                     .catch(function (error) {
                         XHRCatcher(error);
                     });
-            }
+            },
+            resendConfirmation:function(event){
+                var $btn = $(event.target);
+                $btn.button('loading');
+
+                axios.get('/api/user/sendConfirmation?token=' + this.token)
+                    .then(function (response) {
+                        if(response.data.result === 'success'){
+                            toastr.success("Email sent! check your email to verify your account.");
+                            $btn.button('reset');
+                        }
+                    })
+                    .catch(function (error) {
+                        XHRCatcher(error);
+                        $btn.button('reset');
+                    });
+            },
         },
         mounted:function(){
             this.$store.commit('updateTitle', 'Premier Loyalty Card');

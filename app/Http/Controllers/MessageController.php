@@ -57,17 +57,20 @@ class MessageController extends Controller{
         if($api['result'] === 'success') {
             $data = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
                             ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
-                            ->where(function($query) use($api){
+                            ->where(function($query) use($request){
                                 $query->orWhereNull('deleted_to_id');
-                                $query->orWhere('deleted_to_id', '<>', -1);
+                                $query->orWhere('deleted_to_id', '=', $request->segment(4));
                             })
-                            ->where('deleted_to_id', '<>',$api['user']['id'])
                             ->orderBy('created_at','DESC')
                             ->take($request->segment(5))
                             ->get()->toArray();
 
             $last_id = Message::whereIn('recipient_id', [$api['user']['id'], $request->segment(4)])
                             ->whereIn('sender_id', [$api['user']['id'], $request->segment(4)])
+                            ->where(function($query) use($request){
+                                $query->orWhereNull('deleted_to_id');
+                                $query->orWhere('deleted_to_id', '=', $request->segment(4));
+                            })
                             ->get()->first();
 
             if(isset($last_id['id']))

@@ -7,15 +7,23 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Config;
+use App\Service;
+use App\ServiceType;
+use App\ServicePackage;
+use App\Product;
+use App\ProductGroup;
 use App\TextMessage;
+use App\TransactionItem;
 use App\Menu;
 use Mail;
+use DB;
 use Curl;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use App\Notification;
+use App\Jobs\SendEmailJob;
 
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -63,7 +71,6 @@ class Controller extends BaseController{
                 $u->device_data = json_encode($data);
             }
         }
-
         $u->save();
     }
 
@@ -112,6 +119,41 @@ class Controller extends BaseController{
         return $dash_str;
     }
 
+    function getAppointmentItems($id){
+        $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->where('transaction_id', $id)
+            ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
+            ->get()->toArray();
+        foreach($items as $key=>$value){
+            $items[$key]['item_data'] = json_decode($value['item_data']);
+            if($value['item_type'] === 'service'){
+                $service = Service::find($value['item_id']);
+                $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
+
+                if($service->service_type_id !== 0)
+                    $service_image = ServiceType::find($service->service_type_id)->service_picture;
+                else
+                    $service_image  = ServicePackage::find($service->service_package_id)->package_image;
+
+                $items[$key]['item_name']       = $service_name;
+                $items[$key]['item_image']      = $service_image;
+                $items[$key]['item_duration']   = $service->service_minutes;
+                $items[$key]['item_info']['gender'] = $service->service_gender;
+            }
+            else{
+                $product       = Product::find($value['item_id']);
+                $product_name  = ProductGroup::find($product->product_group_id)->product_group_name;
+                $product_image = ProductGroup::find($product->product_group_id)->product_picture;
+                $items[$key]['item_name']            = $product_name;
+                $items[$key]['item_info']['size']    = $product->product_size;
+                $items[$key]['item_info']['variant'] = $product->product_variant;
+                $items[$key]['item_image']           = $product_image;
+
+            }
+        }
+        return $items;
+    }
+
     /**
      * @param $user_id
      * @param $token
@@ -119,21 +161,20 @@ class Controller extends BaseController{
      * @param null $device_info
      */
     public function registerToken($user_id, $token, $type='WEB', $device_info=null,$device_unique_id = null){
-        if($type == 'WEB'){
+        if($type == 'WEB')
             $device_info = $_SERVER['HTTP_USER_AGENT'];
-        }
+        
 
         $user   = User::find($user_id);
         $tokens = json_decode($user->device_data, true);
         $key_find    = false;
         foreach ($tokens as $key => $value) {
             $token_unique_id = "";
-            if(isset($value["unique_device_id"])){
+            if(isset($value["unique_device_id"]))
                 $token_unique_id = $value["unique_device_id"];
-            }
-            if($token_unique_id == $device_unique_id && $device_unique_id != null && $token_unique_id != null){
+            
+            if($token_unique_id == $device_unique_id && $device_unique_id != null && $token_unique_id != null)
                 $key_find    = $key;
-            }
         }
         $data   = array(  
                       "token"           => $token,
@@ -144,12 +185,11 @@ class Controller extends BaseController{
                       "unique_device_id"=> $device_unique_id
                     );
 
-        if($key_find !== false){
+        if($key_find !== false)
             $tokens[$key_find] = $data;
-        }
-        else{
+        else
             array_unshift($tokens, $data);
-        }
+        
         $user->last_login  = date('Y-m-d H:i');
         $user->device_data = json_encode($tokens);
         $user->save();
@@ -168,7 +208,6 @@ class Controller extends BaseController{
 
         if(isset($client->cusid)){
             $boss_data = $this->getBossClient($email);
-
             $user = new User;
             $user->email = $email;
             $user->password = bcrypt($password);
@@ -180,11 +219,19 @@ class Controller extends BaseController{
             $user->user_mobile = $client->cusmob;
             $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
             $user->level = 0;
-            $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
-                "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
-                "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
-                "notifications"=>["email"]
-            ));
+            if($boss_data === false)
+                $user->user_data = json_encode(array("premier_status"=>0,
+                    "premier_branch"=>0,
+                    "home_branch"=>10,
+                    "notifications"=>["email"]
+                ));
+            else
+                $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
+                    "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
+                    "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
+                    "boss_id"=>$boss_data['custom_client_id'],
+                    "notifications"=>["email"]
+                ));
             $user->device_data = '[]';
             $user->last_activity = date('Y-m-d H:i');
             $user->last_login = date('Y-m-d H:i');
@@ -231,13 +278,6 @@ class Controller extends BaseController{
         $config->save();
     }
 
-    function emailReceiver($email){
-        if(env('APP_MAILING_ENV')==='development')
-            return env('APP_MAILING_DEV_ADDRESS');
-
-        return $email;
-    }
-
     function getLastSignature($client_id){
         $transaction = Transaction::where('client_id', $client_id)
                                     ->where('acknowledgement_data', 'LIKE', '%"signature":"data:%')
@@ -257,24 +297,13 @@ class Controller extends BaseController{
     }
 
     function sendMail($template, $content_data, $headers, $attachments=null){
-
-        Mail::send($template, $content_data, function ($mail) use($headers, $attachments) {
-            $mail->from(env('MAIL_USERNAME'), env('APP_NAME'));
-            $mail->subject($headers['subject']);
-
-            foreach($headers['to'] as $to)
-                $mail->to($this->emailReceiver($to['email']), $to['name']);
-
-            if(isset($headers['cc']))
-                foreach($headers['cc'] as $cc)
-                    $mail->cc($this->emailReceiver($cc['email']), $cc['name']);
-
-            if(env('APP_MAILING_BCC_DEV'))
-                $mail->bcc(env('APP_MAILING_DEV_ADDRESS'));
-            if($attachments !== null)
-                foreach($attachments as $att)
-                    $mail->attach(public_path($att));
-        });
+        $data = [
+            "template"=>$template,
+            "content_data"=>$content_data,
+            "headers"=>$headers,
+            "attachments"=>$attachments
+        ];
+        SendEmailJob::dispatch($data)->delay(now()->addSeconds(2));
     }
 
     function sendSMS($message, $mobile, $title, $api, $shortcode){
@@ -307,24 +336,49 @@ class Controller extends BaseController{
         $notification->notification_type = $type;
         $notification->notification_data = json_encode($data);
         $notification->user_id = $user_id;
-        $notification->is_read = 0;
         $notification->save();
+        Curl::to(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $user_id)->get();
 
-        $user = User::find($user_id);
-        if(isset($user->id)){
-            $d = json_decode($user->user_data);
+        $user = User::where('id',$user_id)->get()->first();
+        if(isset($user['id'])){
+            $d = json_decode($user['user_data']);
             if(in_array('email', $d->notifications) && $send_mail) {
-                if(isset($data['message']) && isset($data['title'])){
+                if(isset($data['body']) && isset($data['title'])){
 
+                    $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
+                                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
+
+                    switch($type){
+                        case 'appointment':
+                            $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                                            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                            ->where('transactions.id', $data['unique_id'])
+                                            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                                'transactions.*')
+                                            ->get()->first();
+                            $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
+
+                            if($data['title'] == 'Expired Appointment') {
+                                $template = 'email.appointment_expired_client';
+                            }
+                            elseif($data['title'] == 'Appointment Complete')
+                                $template = 'email.appointment_completed';
+
+                            $data = ["user"=>$user, "appointment"=> $appointment]; //override data
+
+                            if(isset($template))
+                                $this->sendMail($template, $data, $headers);
+                        break;
+                        // other types
+                    }
                 }
             }
         }
     }
 
     // public function sendPushNotification(Request $request){
+    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
 
-    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub"); 
-        
     //     //android
     //     $message        = '{"data":{"user_id":57427,"unique_id":1,"notification_type":"notification"}}';
     //     $notification   = new Notification_Azure("gcm", $message);

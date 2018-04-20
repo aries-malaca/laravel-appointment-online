@@ -30,6 +30,8 @@ Route::post('/user/updateUserLevel', 'UserLevelController@updateUserLevel');
 Route::post('/user/saveLocation', 'UserController@saveLocation');
 
 Route::post('/user/saveLocation', 'UserController@saveLocation');
+Route::post('/user/skipChangePassword', 'UserController@skipChangePassword');
+Route::post('/user/approveConsent', 'UserController@approveConsent');
 
 //logs
 Route::get('/audits/getAudits/{id}', 'AuditController@getAudits');
@@ -115,6 +117,7 @@ Route::post('/appointment/unServeAppointment', 'QueuingController@unServeAppoint
 Route::post('/appointment/completeAppointment', 'AppointmentController@completeAppointment');
 Route::get('/appointment/expireAppointments', 'AppointmentController@expireAppointments');
 Route::post('/appointment/acknowledgeAppointment', 'AppointmentController@acknowledgeAppointment');
+Route::post('/appointment/saveItem', 'AppointmentController@saveItem');
 
 Route::get('/waiver/getWaiverQuestions', 'WaiverController@getWaiverQuestions');
 
@@ -208,6 +211,15 @@ Route::get('/contact/getContactList', 'ContactController@getContactList');
 Route::get('/notification/getUserNotifications', 'NotificationController@getUserNotifications');
 Route::get('/notification/seenNotifications', 'NotificationController@seenNotifications');
 //
+
+//database API
+Route::get('/config/getBackups', 'ConfigController@getBackups');
+Route::get('/config/runBackup', 'ConfigController@runBackup');
+Route::post('/config/restoreBackup', 'ConfigController@restoreBackup');
+Route::post('/config/deleteBackup', 'ConfigController@deleteBackup');
+//end database API
+
+
 //mobile
 //flag = active:string
 // 192.168.1.225/api/user/getUsers?token=token_value

@@ -555,7 +555,8 @@ class MobileApiController extends Controller{
         $user->password 	= bcrypt($request->input('addPassword'));
         $user->gender 		= $gender;
         $user->birth_date 	      = $birth_date;
-        $user->notifications_read = "[]";
+        $user->transactions_data    = '[]';
+        $user->notifications_read    = '[]';
         $user->user_address       = $request->input('addAddress');
         $user->level 		= 0;
         $user->is_client 	= 1;

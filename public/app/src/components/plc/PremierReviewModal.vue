@@ -63,28 +63,36 @@
                                     </div>
                                     <div v-bind:id="'collapse_'+key" class="panel-collapse collapse" aria-expanded="false">
                                         <div class="panel-body">
-                                            <img class="img img-responsive" v-bind:src="'../../images/ids/'+request.valid_id_url" alt="image" />
-                                            <table class="table table-hover table-light">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Message: </td>
-                                                        <td>{{ request.message }}</td>
-                                                    </tr>
-                                                    <tr v-if="request.remarks !== null">
-                                                        <td>Remarks: </td>
-                                                        <td>{{ request.remarks }}</td>
-                                                    </tr>
-                                                    <tr v-if="request.processed_date !== null">
-                                                        <td>Date Processed: </td>
-                                                        <td>{{ request.processed_date_formatted }}</td>
-                                                    </tr>
-                                                    <tr v-if="request.processed_date !== null">
-                                                        <td>Processed By: </td>
-                                                        <td>{{ request.updated_by }}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <img class="img img-responsive" v-bind:src="'../../images/ids/'+request.valid_id_url" alt="image" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <table class="table table-hover table-light">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>Message: </td>
+                                                            <td>{{ request.message }}</td>
+                                                        </tr>
+                                                        <tr v-if="request.remarks !== null">
+                                                            <td>Remarks: </td>
+                                                            <td>{{ request.remarks }}</td>
+                                                        </tr>
+                                                        <tr v-if="request.processed_date !== null">
+                                                            <td>Date Processed: </td>
+                                                            <td>{{ request.processed_date_formatted }}</td>
+                                                        </tr>
+                                                        <tr v-if="request.processed_date !== null">
+                                                            <td>Processed By: </td>
+                                                            <td>{{ request.updated_by }}</td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -144,8 +152,8 @@
                 let u = this;
                 let el = document.getElementById('croppie');
                 this.croppie = new Croppie(el, {
-                    viewport: {width:200,height:200, type:'square'},
-                    boundary: {width:220,height:220},
+                    viewport: {width:200,height:300, type:'square'},
+                    boundary: {width:200,height:300},
                     showZoomer: true,
                     enableOrientation:true,
                     enableResize: true,
@@ -186,6 +194,7 @@
                     this.croppie.result({
                         type:'canvas',
                         format: 'jpeg',
+                        size:{height:720}
                     }).then(response=>{
                         axios({url:'/api/premier/sendReviewRequest?token='+u.token, method:'post', data:{message:u.message, valid_id_url:response}})
                             .then(function () {

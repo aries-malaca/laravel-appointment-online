@@ -15,11 +15,6 @@
             <div class="page-content-wrapper">
                 <!-- BEGIN CONTENT BODY -->
                 <div class="page-content">
-                    <div class="alert alert-danger" v-if="user.is_confirmed != 1 && user.username !== undefined">
-                        <strong>Important!</strong>
-                        Please verify your email address first to book an appointment or access your transactions. &nbsp;
-                        <button data-loading-text="Sending..." class="btn btn-success btn-xs" @click="resendConfirmation($event)"> Resend Email </button> 
-                    </div>
                     <!-- BEGIN PAGE BASE CONTENT -->
                     <router-view></router-view>
                     <!-- END PAGE BASE CONTENT -->
@@ -85,24 +80,6 @@
                 this.$store.commit('messages/toggleVisibility', true);
                 $("body").addClass("page-quick-sidebar-open");
             },
-            resendConfirmation:function(event){
-                var $btn = $(event.target);
-                $btn.button('loading');
-                var u = this;
-
-                axios.get('/api/user/sendConfirmation?token=' + this.token)
-                .then(function (response) {
-                    if(response.data.result == 'success'){
-                        toastr.success("Email sent! check your email to verify your account.");
-                        u.user.is_confirmed = 1;
-                        $btn.button('reset');
-                    }
-                })
-                .catch(function (error) {
-                    XHRCatcher(error);
-                    $btn.button('reset');
-                });    
-            },
             logout:function(){
                 if(this.token !== undefined){
                     axios.post('/api/user/destroyToken', { token : this.token, user_id : this.user.id})
@@ -136,7 +113,6 @@
                 }
             };
 
-
             //listens to all socket events
             this.$options.sockets.refreshModel = function(data){
                 if(data.model === 'services')
@@ -150,39 +126,20 @@
             };
 
             Notification.requestPermission();
-
-            setTimeout(function(){
-                if(u.user !== null){
-
-                    u.$store.dispatch('saveLocation');
-
-                    if(u.user.is_client !== 1)
-                        return false;
-
-                    if(u.configs.FETCH_BOSS_TRANSACTIONS === undefined && u.user.is_client === 1)
-                        return false;
-
-                    axios.get(u.configs.FETCH_BOSS_TRANSACTIONS +""+ u.user.email)
-                        .then(function (response) {
-                            u.$store.commit('updateTransactions', response.data);
-
-                            axios.post('/api/client/updateTransactionData?token=' + u.token, {id:u.user.id, data:response.data})
-                                .then(function () {
-                                })
-                                .catch(function (error) {
-                                    XHRCatcher(error);
-                                });
-
-                        })
-                        .catch(function (error) {
-                        });
-                }
-            },3000);
         },
         watch:{
             title(){
                 document.title = 'LAY-BARE Online | '+ this.title;
             },
+            user(){
+                if(this.user !== null){
+                    if(this.user.id !== undefined) {
+                        this.$store.dispatch('saveLocation');
+                        if (this.user.user_data.prompt_change_password === 1)
+                            window.location.href = '../../#/profile';
+                    }
+                }
+            }
         }
     }
 </script>

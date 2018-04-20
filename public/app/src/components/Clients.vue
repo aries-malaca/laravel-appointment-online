@@ -64,7 +64,6 @@
                 clients:[],
                 clientTable:{
                     columns: [
-                        { label: 'Photo', field: 'picture_html', html:true },
                         { label: 'Name', field: 'name', filterable: true, html:true },
                         { label: 'Address', field: 'user_address', filterable: true },
                         { label: 'Mobile', field: 'user_mobile', filterable: true },

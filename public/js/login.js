@@ -4,17 +4,18 @@ new Vue({
         email:'',
         password:'',
         remember:false,
-        token:undefined
+        token:undefined,
+        attempts:0
     },
     methods:{
         login:function(button){
             var $btn = $(button.target);
             $btn.button('loading');
-            
+            let u = this;
             $.ajax({
                 url: '../../auth/login',
                 method: 'POST',
-                data: {email:this.email, password:this.password, remember:this.remember},
+                data: {email:this.email, password:this.password, remember:this.remember, attempts:this.attempts},
                 success: function (data) {
                     $.cookie("login_cookie", data.token, { path: '/', expires: 100000 });
                     window.location.href = '../../';
@@ -24,6 +25,8 @@ new Vue({
                     console.log(error);
                     if(error.status === 400){
                         toastr.error("An error occurs, " + error.responseJSON.error);
+                        if(error.responseJSON.attempts !== undefined)
+                            u.attempts = error.responseJSON.attempts;
                     }
                     $btn.button('reset');
                 },

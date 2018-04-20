@@ -61,9 +61,9 @@ class PremierController extends Controller{
             }
 
             $amount = $this->evaluatePremier($api['user']['email']);
-            $boss_id = $this->getBossID($api['user']['email']);
+            $boss_client = $this->getBossClient($api['user']['email']);
 
-            if (!empty($boss_id)) {
+            if (!empty($boss_client)) {
                 if (!$amount) {
                     $find = PremierLoyaltyCard::where('client_id', $api['user']['id'])
                                                 ->where('status', 'denied')->get()->first();
@@ -81,7 +81,7 @@ class PremierController extends Controller{
                 $premier->application_type = $request->input('type');
                 $premier->platform = $request->input('platform');
                 $premier->status = $amount ? 'approved' : 'denied';
-                $premier->reference_no = $boss_id[0];
+                $premier->reference_no = $boss_client['custom_client_id'];
                 $premier->remarks = $amount ? '' : 'Failed to reach the qualified amount';
                 $premier->plc_data = json_encode($data);
                 $premier->created_at = date('Y-m-d H:i:s');
@@ -89,7 +89,7 @@ class PremierController extends Controller{
 
                 $u                  = User::find($premier->client_id);
                 $user_data          = json_decode($u->user_data);
-                $user_data->boss_id = $boss_id[0];
+                $user_data->boss_id = $boss_client['custom_client_id'];
                 $u->user_data       = json_encode($user_data);
                 $u->save();
 
@@ -155,7 +155,6 @@ class PremierController extends Controller{
             $u = $this->dispatchPremierVerification($api['user']['email'], $request->input("data"), $request->input("result"));
         }
 
-        //default return if not authenticated
         if($u)
             return response()->json(["result"=>"success"]);
 
@@ -173,8 +172,6 @@ class PremierController extends Controller{
                 User::where('email', $email)
                     ->update(["user_data" => json_encode($user_data)]);
             }
-            $email = $this->emailReceiver($user['email']);
-
 
             $headers = array("subject"=>'Premier Loyalty Card Application',
                              "to"=> [["email"=>$email, "name"=>  $user['username']]]);

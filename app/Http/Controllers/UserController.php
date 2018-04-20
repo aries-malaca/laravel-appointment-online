@@ -13,9 +13,13 @@ use Validator;
 use Hash;
 use Facebook\Facebook;
 use Mail;
+use Curl;
+use DB;
 
 class UserController extends Controller{
     public function login(Request $request){
+        $attempts = $request->input('attempts');
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|max:255',
             'password' => 'required|max:255',
@@ -41,8 +45,20 @@ class UserController extends Controller{
 
                 return response()->json(["token"=>$token, "result"=>'success']);
             }
-            return response()->json(["result"=>"failed","error"=>"Incorrect Password"],400);
+
+            $attempts++;
+            if($attempts >= 5){
+                $this->sendMail('email.failed_login',
+                    ["user"=>$u],
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>[["email"=>$u['email'],"name"=> $u['first_name'] . ' ' . $u['last_name']]]]
+                );
+                $attempts = 0;
+            }
+
+            return response()->json(["result"=>"failed","error"=>"Incorrect Password", "attempts"=> $attempts ],400);
         }
+
+        $find = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $request->input('email') ."'");
 
         if($result = $this->selfMigrateClient($request->input('email'), $request->input('password'))){
 
@@ -53,6 +69,19 @@ class UserController extends Controller{
 
             return response()->json(["token"=>$result['token'], "result"=>'success']);
         }
+        if(sizeof($find) > 0){
+            $find = $find[0];
+            $attempts++;
+            if($attempts >= 5){
+                $this->sendMail('failed_login',
+                    ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "delegation"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'Mr.':'Ms.')]],
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]
+                );
+                $attempts = 0;
+            }
+            return response()->json(["result"=>"failed","error"=>"Incorrect password.", "attempts"=> $attempts ],400);
+        }
+
         return response()->json(["result"=>"failed","error"=>"User not found."],400);
     }
 
@@ -89,7 +118,6 @@ class UserController extends Controller{
                 foreach($eee as $key=>$value)
                     $eee[$key]['schedule_data'] = json_decode($value['schedule_data']);
 
-
                 $api['user']['review_request'] = isset($plc_request['id'])?$plc_request['status']:false;
                 $api['user']['branch'] = [
                                 "value"=>(int)$user_data['home_branch'],
@@ -100,7 +128,6 @@ class UserController extends Controller{
                                 "schedules"=> $eee,
                                 "cluster_data"=> $cluster,
                                 "schedules_original"=> $eee,
-
                                 "services"=>$services,
                                 "products"=>$products,
                         ];
@@ -168,78 +195,31 @@ class UserController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function sendConfirmation(Request $request){
+    public function sendConfirmation(){
         $api = $this->authenticateAPI();
-        $u = false;
 
         if($api['result'] === 'success'){
-            //this block for resend purposes
-            $u = $this->dispatchConfirmation($api['user']['email']);
+            $user = User::where('email', $api['user']['email'])->get()->first();
+            if(isset($user['id'])) {
+                $this->dispatchVerification($user);
+                return response()->json(["result" => "success"]);
+            }
         }
-
-        if($request->input('email') !== null){
-            //this block will be used by newly registered users
-            $u = $this->dispatchConfirmation($request->input('email'));
-        }
-
-        //default return if not authenticated
-        if($u)
-            return response()->json(["result"=>"success"]);
 
         return response()->json(["result"=>"failed"]);
     }
 
-    public function dispatchConfirmation($email){
-        $user = User::where('email', $email)->get()->first();
-        $email = $this->emailReceiver($user['email']);
-        if(isset($user['id'])){
-            $generated = md5(rand(1,600));
-            $user_data = json_decode($user['user_data'],true);
-            $user_data['verify_key'] = $generated;
-            $user_data['verify_expiration'] = time() + 300;
-            User::where('id', $user['id'])
-                ->update(['user_data'=> json_encode($user_data)]);
+    function dispatchVerification($user, $raw_password = null){
+        $generated = md5(rand(1, 600));
+        $user_data = json_decode($user['user_data'], true);
+        $user_data['verify_key'] = $generated;
+        $user_data['verify_expiration'] = time() + 300;
+        User::where('id', $user['id'])
+            ->update(['user_data' => json_encode($user_data)]);
 
-            $headers = array("subject"=>'Email Verification',
-                "to"=> [["email"=>$email, "name"=> $user['username']]]);
-            $this->sendMail('email.verification', ["user"=>$user, "generated"=>$generated], $headers);
-
-            return true;
-        }
-        return false;
-    }
-
-    public function registerVerify(Request $request){
-        $user = User::where('email', $request->input('email'))
-            ->get()->first();
-
-        if(isset($user['id'])){
-            $user_data = json_decode($user['user_data'], true);
-
-            if(!isset($user_data['verify_key']))
-                return view('errors.404');
-
-
-            if($user_data['verify_key'] == $request->input('key')){
-                $diff = time() - $user_data['verify_expiration'];
-                if($diff < 300){
-                    unset($user_data['verify_key']);
-                    unset($user_data['verify_expiration']);
-
-                    User::where('id', $user['id'])
-                        ->update(['is_confirmed'=>1 ,'is_active'=>1, 'user_data'=> json_encode($user_data)]);
-                    $data = array("result"=>"success");
-                }
-                else
-                    $data = array("result"=>"failed", "error"=>"Link Expired.");
-            }
-            else
-                $data = array("result"=>"failed", "error"=>"Link Mismatch.");
-        }
-        else
-            $data = array("result"=>"failed", "error"=>"Invalid Link.");
-
-        return view('auth.register_verify', $data);
+        $headers = array("subject" => env("APP_NAME"). ' | Signup Verification',
+                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
+        $this->sendMail('email.account_verification', ["user" => $user, "generated" => $generated,"raw_password"=>$raw_password], $headers);
     }
 
     public function changePassword(Request $request){
@@ -251,15 +231,20 @@ class UserController extends Controller{
                 return response()->json(["result"=>"failed","error"=>"Old password incorrect"], 400);
 
             $validator = Validator::make($request->all(),[
-                'new_password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/|min:10',
+                'new_password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/|min:6',
                 'verify_password' => 'required|same:new_password'
-                // required and has to match the password field
             ]);
 
             if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
-            User::where('id', $api['user']['id'])->update(['password'=>bcrypt($request->input('new_password'))]);
+            $user = User::find($api['user']['id']);
+            $user_data = json_decode($user->user_data, true);
+            $user_data['prompt_change_password'] = 0;
+            $user->user_data = json_encode($user_data);
+            $user->password = bcrypt($request->input('new_password'));
+            $user->save();
+
             return response()->json(["result"=>"success"]);
         }
 
@@ -464,10 +449,34 @@ class UserController extends Controller{
             'password'     => 'required|regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/',
             'verify_password' => 'required|same:password',
             'birth_date' => 'required'
+        ],[
+            'password.regex'    => 'Password must be alphanumeric.',
         ]);
 
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+        if ($request->input('is_agreed') == "false")
+            return response()->json(['result'=>'failed','error'=>["Must agree the terms and conditions."]], 400);
+
+        //check boss ID unique
+        if($request->input('boss_id') !== null){
+            $checker = User::where("user_data", "LIKE", '%"boss_id":"'. $request->input('boss_id') .'"%')->count();
+            if ($checker > 0)
+                return response()->json(['result'=>'failed','error'=>["BOSS ID (Transaction account) already been taken."]], 400);
+        }
+
+        $response = Curl::to('https://www.google.com/recaptcha/api/siteverify?secret=' . $request->input('captcha_secret') .'&response='. $request->input('captcha_response'))
+            ->asJson()
+            ->returnResponseObject()
+            ->post();
+
+        if($response->status == 200){
+            if($response->content->success === false)
+                return response()->json(['result'=>'failed','error'=>["Please verify captcha."]], 400);
+        }
+        else
+            return response()->json(['result'=>'failed','error'=>["Failed to validate the captcha due to server error."]], 400);
 
         $user = new User;
         $user->first_name = $request->input('first_name');
@@ -484,9 +493,10 @@ class UserController extends Controller{
         $user->is_client = 1;
         $user->is_active = 1;
         $user->is_confirmed = $request->input('from_facebook')==1?1:0;
-        $user->is_agreed = 1;
+        $user->is_agreed = 0;
         $user->user_data = json_encode(array("home_branch"=>(int)$request->input('home_branch'),
                                              "premier_status"=>0,
+                                             "boss_id"=> $request->input('boss_id'),
                                              "notifications"=>["email"]));
         $user->transaction_data = '[]';
         $user->notifications_read = '[]';
@@ -507,8 +517,43 @@ class UserController extends Controller{
 
         $token = JWTAuth::fromUser($user);
         $this->registerToken($user->id, $token);
+        $user = User::where('id', $user->id)->get()->first();
+
+        $this->dispatchVerification($user, $request->input('password'));
 
         return response()->json(["result"=>"success","token"=>$token]);
+    }
+
+    public function registerVerify(Request $request){
+        $user = User::where('email', $request->input('email'))
+            ->get()->first();
+
+        if(isset($user['id'])){
+            $user_data = json_decode($user['user_data'], true);
+
+            if(!isset($user_data['verify_key']))
+                return view('auth.register_verify', array("result"=>"failed", "error"=>"Link Expired."));
+
+            if($user_data['verify_key'] == $request->input('key')){
+                $diff = time() - $user_data['verify_expiration'];
+                if($diff < 300){
+                    unset($user_data['verify_key']);
+                    unset($user_data['verify_expiration']);
+
+                    User::where('id', $user['id'])
+                        ->update(['is_confirmed'=>1 ,'is_active'=>1, 'user_data'=> json_encode($user_data)]);
+                    $data = array("result"=>"success");
+                }
+                else
+                    $data = array("result"=>"failed", "error"=>"Link Expired.");
+            }
+            else
+                $data = array("result"=>"failed", "error"=>"Link Mismatch.");
+        }
+        else
+            $data = array("result"=>"failed", "error"=>"Invalid Link.");
+
+        return view('auth.register_verify', $data);
     }
 
     function saveLocation(Request $request){
@@ -526,6 +571,34 @@ class UserController extends Controller{
             }
 
             $user->device_data = json_encode($tokens);
+            $user->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function skipChangePassword(){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+
+            $user = User::find($api['user']['id']);
+            $user_data = json_decode($user->user_data, true);
+            $user_data['prompt_change_password'] = 0;
+            $user->user_data = json_encode($user_data);
+            $user->save();
+
+            return response()->json(["result"=>"success"]);
+        }
+        return response()->json($api, $api["status_code"]);
+    }
+
+    function approveConsent(){
+        $api = $this->authenticateAPI();
+        if($api['result'] === 'success'){
+
+            $user = User::find($api['user']['id']);
+            $user->is_agreed = 1;
             $user->save();
 
             return response()->json(["result"=>"success"]);

@@ -92,6 +92,10 @@
                     });
             },
             processRequest:function(event, action){
+                if(!confirm("Are you sure you want to take this action? Client will be notified and will receive " +
+                        "transaction summary via email."))
+                    return false;
+
                 this.newRequest.status = action;
 
                 let u = this;

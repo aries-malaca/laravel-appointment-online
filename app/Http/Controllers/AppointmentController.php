@@ -250,9 +250,8 @@ class AppointmentController extends Controller{
                     "unique_id"=>(int)$request->input('id'),
                     "images"=>[],
         ] , true  );
-
        
-        return response()->json(["result"=>"success"],400);
+        return response()->json(["result"=>"success"]);
     }
 
     public function cancelAppointment(Request $request){

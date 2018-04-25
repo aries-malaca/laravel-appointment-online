@@ -15,7 +15,12 @@ var XHRCatcher = function(error){
     else
         response_data = error.responseJSON.error;
 
-    toastr.error(response_data.join("<br/> ") );
+    e = response_data;
+
+    if(typeof(e) === 'object')
+        e = response_data.join("<br/> ");
+
+    toastr.error(e);
 
     if(typeof(response_data) !== 'object'){
         if(response_data.search('token') !== -1 ){

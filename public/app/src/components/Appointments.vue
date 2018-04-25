@@ -12,20 +12,67 @@
                 </span>
             </div>
             <div class="portlet-body" style="padding-top:0px;">
-                <div class="row">
+                <div class="row" v-if="user.is_client === 0">
                     <div class="col-md-4">
-                        <h4>Legend:</h4>
-                        <span class="badge badge-info">Queued</span>
-                        <span class="badge badge-success">Completed</span>
-                        <span class="badge badge-danger">Cancelled/Expired</span>
-                        <div v-if="user.is_client===1">
-                            <br/>
-                            <h4>Your last appointment:</h4>
-                            <span v-if="!last_appointment">N/A</span>
-                            <div class="alert alert-info" v-else>
-                                Date: {{ moment(last_appointment.transaction_datetime).format("MM/DD/YYYY hh:mm A") }} <br/>
-                                Branch: {{ last_appointment.branch_name }} <br/>
-                                <button class="btn btn-xs btn-success" @click="viewAppointment(last_appointment.id)">View</button>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4>Legend:</h4>
+                                <span class="badge badge-info">Queued</span>
+                                <span class="badge badge-success">Completed</span>
+                                <span class="badge badge-danger">Cancelled/Expired</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <br/>
+                                <h4>Filter by Branch:</h4>
+                                <vue-select multiple v-model="branches" :options="branch_selection"></vue-select>
+                            </div>
+                        </div>
+                        <div class="row" v-if="calendar_view">
+                            <div class="col-md-12">
+                                <br/>
+                                <div class="portlet sale-summary">
+                                    <div class="portlet-title">
+                                        <h4>Appointment Summary</h4>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <ul class="list-unstyled">
+                                            <li>
+                                                <span class="sale-info">Viewing:</span>
+                                                <span class="sale-num">{{ calendar_view.title }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="sale-info">Pending:</span>
+                                                <span class="sale-num">{{ summary.pending.length }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="sale-info">Completed:</span>
+                                                <span class="sale-num">{{ summary.completed.length }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="sale-info">Cancelled:</span>
+                                                <span class="sale-num">{{ summary.cancelled.length }}</span>
+                                            </li>
+                                            <li>
+                                                <span class="sale-info">Expired:</span>
+                                                <span class="sale-num">{{ summary.expired.length }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" v-if="user.is_client===1">
+                            <div class="col-md-12">
+                                <br/>
+                                <h4>Your last appointment:</h4>
+                                <span v-if="!last_appointment">N/A</span>
+                                <div class="alert alert-info" v-else>
+                                    Date: {{ moment(last_appointment.transaction_datetime).format("MM/DD/YYYY hh:mm A") }} <br/>
+                                    Branch: {{ last_appointment.branch_name }} <br/>
+                                    <button class="btn btn-xs btn-success" @click="viewAppointment(last_appointment.id)">View</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -37,10 +84,32 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" v-else>
+                    <div class="col-md-12">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#active-appointments" data-toggle="tab">Active Appointments</a>
+                            </li>
+                            <li>
+                                <a href="#appointment-history" data-toggle="tab">Appointment History</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="active-appointments">
+                                <appointments-table :hide_client="user.is_client===1"
+                                                    :paginate="true" :appointments="active_appointments" />
+                            </div>
+                            <div class="tab-pane" id="appointment-history">
+                                <appointments-table :hide_client="user.is_client===1"
+                                                    :paginate="true" :appointments="appointment_history" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <booking-modal :toggle="toggle" :default_branch="user.branch" :lock_branch="false" :default_client="client" :lock_client="true"
-                   @get_appointments="getAppointments" :branches="branches" :token="token" :user="user" :configs="configs"/>
+                   @get_appointments="getAppointments" :token="token" :user="user" :configs="configs"/>
         <appointment-modal @refresh_list="refreshList"></appointment-modal>
     </div>
 </template>
@@ -49,16 +118,18 @@
     import BookingModal from "./booking/BookingModal.vue";
     import AppointmentsTable from "./appointment/AppointmentsTable.vue";
     import AppointmentModal from "./appointment/AppointmentModal.vue";
+    import VueSelect from "vue-select";
 
     export default {
         name: 'Appointments',
-        components: { BookingModal, AppointmentsTable, AppointmentModal },
+        components: { BookingModal, AppointmentsTable, AppointmentModal, VueSelect },
         data: function(){
             return {
                 title: 'Appointments',
-                branches:[],
+                branches:[{label:"ALL", value:0}],
                 toggle:false,
-                client:{}
+                calendar_view:false,
+                client:{},
             }
         },
         methods:{
@@ -72,10 +143,10 @@
                 var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/active';
 
                 if(this.user.is_client !== 1)
-                    url = '/api/appointment/getAppointments/all/all/active?branches=' + this.user.user_data.branches;
+                    url = '/api/appointment/getAppointments/all/all/active?branches=' + this.branchIds;
 
                 axios.get(url)
-                    .then(function (response) {
+                    .then(function(response) {
                         var appointments = [];
                         response.data.forEach(function(item){
                             if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
@@ -93,7 +164,7 @@
                 var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/inactive';
 
                 if(this.user.is_client !== 1)
-                    url = '/api/appointment/getAppointments/all/all/inactive?branches=' + this.user.user_data.branches;
+                    url = '/api/appointment/getAppointments/all/all/inactive?branches=' + this.branchIds;
 
                 axios.get(url)
                     .then(function (response) {
@@ -119,6 +190,7 @@
             initCalendar(view){
                 let u = this;
                 setTimeout(()=>{
+                    $('#calendar').fullCalendar('destroy');
                     $('#calendar').fullCalendar({
                         allDaySlot: false,
                         defaultView:view,
@@ -158,7 +230,6 @@
         mounted:function(){
             this.$store.commit('updateTitle', 'Appointments');
             this.$store.dispatch('fetchAuthenticatedUser');
-            this.branches = this.$store.state.branches.branches;
             this.getAppointments();
             this.getAppointmentHistory();
 
@@ -169,9 +240,32 @@
                 u.getAppointments();
                 u.getAppointmentHistory();
             };
-
+            setInterval(()=>{
+                u.calendar_view = $("#calendar").fullCalendar('getView');
+            });
         },
         computed:{
+            branchIds(){
+                var a = [];
+
+                this.branches.forEach((item)=>{
+                    a.push(item.value);
+                });
+                return a;
+            },
+            branch_selection(){
+                let u = this;
+                var a = [];
+                a.push({label:"ALL", value:0});
+
+                this.$store.state.branches.branches.forEach(function(item){
+                    a.push({label:item.branch_name, value:item.id});
+                });
+
+                return a.filter((branch)=>{
+                    return (u.user.user_data.branches.indexOf(branch.id)  !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
+                });
+            },
             user(){
                 return this.$store.state.user;
             },
@@ -211,6 +305,7 @@
                             }
                         }(),
                         id:item.id,
+                        transaction_status:item.transaction_status,
                         backgroundColor:function(){
                             if(item.transaction_status === 'completed')
                                 return "#0ed3c5";
@@ -232,6 +327,27 @@
                     }
                 });
             },
+            summary(){
+                var object = {
+                    pending:[],
+                    completed:[],
+                    cancelled:[],
+                    expired:[]
+                };
+
+                this.calendar_view.options.events.forEach((event)=>{
+                    if(event.transaction_status === 'reserved')
+                        object.pending.push(event);
+                    else if(event.transaction_status === 'completed')
+                        object.completed.push(event);
+                    else if(event.transaction_status === 'cancelled')
+                        object.cancelled.push(event);
+                    else if(event.transaction_status === 'expired')
+                        object.expired.push(event);
+                });
+
+                return object;
+            }
         },
         watch:{
             'user':function(){
@@ -245,6 +361,10 @@
             },
             all_appointments(){
                 this.initCalendar('agendaThreeDays');
+            },
+            branches(){
+                this.getAppointments();
+                this.getAppointmentHistory();
             }
         }
     }

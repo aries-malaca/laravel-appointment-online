@@ -369,7 +369,7 @@
                         response.data.forEach(function(item){
                             u.appointments.push(item);
                         });
-                        u.initAgenda();
+                        u.renderEvents();
                     });
             },
             groupedItems:function(status){
@@ -503,7 +503,7 @@
                     .then(function (response) {
                         u.calling = response.data.calling;
                         u.$store.commit('updateServing',response.data.serving);
-                        u.initAgenda();
+                        u.renderEvents();
                     });
             },
             refreshList(){
@@ -521,7 +521,6 @@
 
                 if(this.technicians.length > 0 && this.operating_schedule)
                 setTimeout(()=>{
-                    $('#calendar').fullCalendar("destroy");
                     $('#calendar').fullCalendar({
                         defaultView: 'agendaDay',
                         groupByResource: true,
@@ -539,6 +538,10 @@
                         },
                     });
                 }, 1000);
+            },
+            renderEvents(){
+                $('#calendar').fullCalendar('removeEvents');
+                $('#calendar').fullCalendar('renderEvents', this.mappedAppointments);
             }
         },
         mounted:function(){
@@ -763,5 +766,8 @@
     }
     .fc-time, .fc-title{
         font-size:11px !important;
+    }
+    .fc-time-grid-container{
+        height: 300px !important;
     }
 </style>

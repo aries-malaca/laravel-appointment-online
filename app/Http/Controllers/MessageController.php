@@ -117,16 +117,17 @@ class MessageController extends Controller{
     function seenMessages(Request $request){
         $api = $this->authenticateAPI();
         $sender_id  = $request->input('sender_id');
-        $thread     = $request->input('thread_id');
         if($api['result'] === 'success') {
             
-            $querySeen =  Message::where('sender_id',$sender_id)
-                            ->where('message_thread_id', $thread)
+             Message::where('sender_id',$sender_id)
                             ->where('recipient_id',  $api['user']['id'])
                             ->update(['read_at'=>date('Y-m-d H:i:s')]);
-           
 
+<<<<<<< HEAD
             return response()->json(["result"=>"success","thread_id"=>(int)$thread]);
+=======
+            return response()->json(["result"=>"success"]);
+>>>>>>> 6a62f6bdba6bdbc7ef1fc8e18c8432d5f24c93b5
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -150,7 +151,7 @@ class MessageController extends Controller{
                 ->leftJoin('user_levels', 'users.level', '=','user_levels.id')
                 ->where('sender_id', $request->segment(4))
                 ->where('recipient_id', $api['user']['id'])
-                ->where('is_read', 0)
+                ->whereNotNull('read_at')
                 ->select( 'body as message','first_name', 'last_name', 'users.id', 'user_picture', 'level_name','is_client')
                 ->orderBy('messages.created_at', 'DESC')
                 ->get()->first());

@@ -268,6 +268,7 @@
                             $("#schedule-calendar").fullCalendar({
                                 events: u.schedules,
                                 timeFormat: 'hh:mm A',
+                                schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
                                 droppable: true, // this allows things
                                 eventClick: function(event) {
                                     if(event.event.schedule_type === 'RANGE')

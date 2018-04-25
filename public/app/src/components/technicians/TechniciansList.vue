@@ -45,13 +45,26 @@
             token(){
                 return this.$store.state.token;
             },
+            user(){
+                return this.$store.state.user;
+            },
             technicians(){
+                let u = this;
                 return this.$store.state.technicians.technicians.map((technician)=>{
                     technician.picture_html = '<img class="img-circle" style="height:35px" src="images/technicians/'+ technician.technician_picture +'" />';
                     technician.name = technician.first_name + ' ' + technician.last_name;
                     technician.branch_name = technician.branch ?  technician.branch.branch_name : 'N/A';
 
                     return technician;
+                }).filter((item)=>{
+                    if(u.user.level === 1)
+                        return true;
+
+                    if(u.user.user_data.branches !== undefined)
+                        if(item.branch)
+                            return (u.user.user_data.branches.indexOf(item.branch.id) !== -1 || u.user.user_data.branches.indexOf(0) !== -1);
+
+                    return false;
                 });
             },
             technician(){

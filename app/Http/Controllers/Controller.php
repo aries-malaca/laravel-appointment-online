@@ -360,6 +360,7 @@ class Controller extends BaseController{
         $user = User::where('id',$user_id)->get()->first();
         if(isset($user['id'])){
             $d = json_decode($user['user_data']);
+<<<<<<< HEAD
             if(in_array('email', $d->notifications) && $send_mail) {
                 if(isset($data['body']) && isset($data['title'])){
 
@@ -389,9 +390,39 @@ class Controller extends BaseController{
                                 $this->sendMail($template, $data, $headers);
                         break;
                         // other types
+=======
+            if(isset( $d->notifications))
+                if(in_array('email', $d->notifications) && $send_mail)
+                    if(isset($data['body']) && isset($data['title'])){
+
+                        $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
+                                            "to" => [["email" => $user['email'], "name" => $user['username']]]);
+
+                        switch($type){
+                            case 'appointment':
+                                $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                                                ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                                ->where('transactions.id', $data['unique_id'])
+                                                ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                                    'transactions.*')
+                                                ->get()->first();
+                                $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
+
+                                if($data['title'] == 'Expired Appointment') {
+                                    $template = 'email.appointment_expired_client';
+                                }
+                                elseif($data['title'] == 'Appointment Complete')
+                                    $template = 'email.appointment_completed';
+
+                                $data = ["user"=>$user, "appointment"=> $appointment]; //override data
+
+                                if(isset($template))
+                                    $this->sendMail($template, $data, $headers);
+                            break;
+                            // other types
+                        }
+>>>>>>> 6a62f6bdba6bdbc7ef1fc8e18c8432d5f24c93b5
                     }
-                }
-            }
         }
     }
 

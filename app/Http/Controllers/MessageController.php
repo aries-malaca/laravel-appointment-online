@@ -123,11 +123,8 @@ class MessageController extends Controller{
                             ->where('recipient_id',  $api['user']['id'])
                             ->update(['read_at'=>date('Y-m-d H:i:s')]);
 
-<<<<<<< HEAD
-            return response()->json(["result"=>"success","thread_id"=>(int)$thread]);
-=======
+
             return response()->json(["result"=>"success"]);
->>>>>>> 6a62f6bdba6bdbc7ef1fc8e18c8432d5f24c93b5
         }
         return response()->json($api, $api["status_code"]);
     }

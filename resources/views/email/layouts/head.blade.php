@@ -23,8 +23,8 @@
         width: 100%; }
     .datatable{
         border-collapse: collapse;
-        border:1px solid #e7ecf1;
-        background-color: #f4f4fe;
+        border:1px solid #aee458;
+        background-color: #f5ffe5;
         width:100%;
     }
     .datatable td{

@@ -10,13 +10,12 @@ var XHRCatcher = function(error){
     }
 
     var response_data;
-    if(error.responseJSON === undefined){
+    if(error.responseJSON === undefined)
         response_data = error.response.data.error;
-    }
-    else{
+    else
         response_data = error.responseJSON.error;
-    }
-    toastr.error("An error occurs: "+response_data);
+
+    toastr.error(response_data.join("<br/> ") );
 
     if(typeof(response_data) !== 'object'){
         if(response_data.search('token') !== -1 ){
@@ -44,17 +43,3 @@ var SweetConfirmation = function(text, confirm_callback){
             }
         });
 };
-
-function gate(permissions, permission, action){
-    if(permissions === undefined)
-        return false;
-    for(var x=0;x<permissions.length;x++){
-        if(permissions[x].name === permission){
-            for(var y=0;y<permissions[x].actions.length;y++){
-                if(permissions[x].actions[y].label === action)
-                    return permissions[x].actions[y].value;
-            }
-        }
-    }
-    return false;
-}

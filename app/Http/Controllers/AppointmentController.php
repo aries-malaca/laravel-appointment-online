@@ -5,6 +5,7 @@ use App\Transaction;
 use App\TransactionItem;
 use Validator;
 use App\Branch;
+use App\Service;
 use App\User;
 use App\Technician;
 use Curl;
@@ -15,11 +16,13 @@ class AppointmentController extends Controller{
         $validator = Validator::make($request->all(), [
             'branch' => 'required',
             'client' => 'required',
-            'transaction_date' => 'required',
-            'services' => 'required',
+            'transaction_date' => 'required|date_format:Y-m-d',
             'products' => 'required_if:services,'.null,
             'platform' => 'required',
             'transaction_type' => 'required',
+        ],[
+            'transaction_date.required'=>'Appointment Date is required',
+            'transaction_date.date_format'    => 'Appointment Date must be mm/dd/yyyy format'
         ]);
 
         if ($validator->fails())
@@ -86,17 +89,17 @@ class AppointmentController extends Controller{
 
     function sendAppointmentNotification($appointment_id, $title, $template){
         $transaction = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
-            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
-            ->where('transactions.id', $appointment_id)
-            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
-                'transactions.*')
-            ->get()->first();
+                                    ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                    ->where('transactions.id', $appointment_id)
+                                    ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                        'transactions.*')
+                                    ->get()->first();
 
         $transaction['items'] = $this->getAppointmentItems($appointment_id);
         $user = User::where('id', $transaction->client_id)->get()->first();
         $data = ["user"=>$user, "appointment"=> $transaction]; //override data
         $headers = array("subject" => env("APP_NAME") .' - '. $title,
-            "to" => [["email" => $user['email'], "name" => $user['username']]]);
+                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
         $this->sendMail($template, $data, $headers);
     }
 
@@ -188,6 +191,12 @@ class AppointmentController extends Controller{
             else
                 $appointments = $appointments->where('transaction_datetime', 'LIKE',$request->segment(6) .'%');
         }
+
+
+        if($request->input('branches') !== null)
+            if(!in_array(0, explode( ",",$request->input('branches'))))
+                $appointments = $appointments->whereIn('branch_id', explode( ",",$request->input('branches')));
+
         $appointments = $appointments->orderBy('transaction_datetime','desc')
                                     ->get()->toArray();
 
@@ -327,7 +336,7 @@ class AppointmentController extends Controller{
             $item->item_data = json_encode($item_data);
             $item->save();
 
-            $this->arrangeServiceTimes($item->transaction_id, $item->id);
+            $this->arrangeServiceTimes($item->transaction_id);
             $this->refreshStatus($item->transaction_id, 'cancelled');
 
             return response()->json(["result"=>"success","items_length"=>TransactionItem::where('transaction_id', $item->transaction_id)
@@ -357,26 +366,27 @@ class AppointmentController extends Controller{
             Transaction::where('id', $id)->update(["transaction_status" => $status]);
     }
 
-    function arrangeServiceTimes($transaction_id, $item_id){
+    function arrangeServiceTimes($transaction_id){
         $items = TransactionItem::where('transaction_id', $transaction_id)
+                                    ->where('item_type', 'service')
                                     ->get()->toArray();
-        $index = 0;
-        $start = '';
+        $start = false;
         foreach($items as $key=>$value){
-            if($item_id == $value['id']){
-                $index = $key;
-                $start = $value['book_start_time'];
-            }
-        }
+            if($value['item_status'] == 'reserved'){
+                if(!$start){
+                    $start = strtotime($value['book_start_time']);
+                    Transaction::where('id', $value['transaction_id'])
+                                ->update(['transaction_datetime'=> date('Y-m-d H:i',$start)]);
+                }
 
-        $start = strtotime($start);
-        foreach($items as $key=>$value){
-            if($key > $index){
-                $interval = strtotime($value['book_end_time']) - strtotime($value['book_start_time']);
+                $service = Service::find($value['item_id']);
+                $interval = isset($service->id)?($service->service_minutes * 60):0;
 
-                TransactionItem::where('id', $value['id'])
-                                ->update(['book_start_time' => date('Y-m-d H:i',$start) ,
-                                          'book_end_time' => date('Y-m-d H:i',$start+=$interval)]);
+                if($start){
+                    TransactionItem::where('id', $value['id'])
+                        ->update(['book_start_time' => date('Y-m-d H:i',$start) ,
+                            'book_end_time' => date('Y-m-d H:i',$start+=$interval)]);
+                }
             }
         }
     }
@@ -389,7 +399,7 @@ class AppointmentController extends Controller{
         $ids = [];
 
         foreach($items as $key=>$value){
-            if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d'))){
+            if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d')) && $value['book_start_time'] != null){
                 TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
                 if(!in_array($value['transaction_id'], $ids))
                     $ids[] = $value['transaction_id'];
@@ -408,6 +418,30 @@ class AppointmentController extends Controller{
                             ] , true );
             if(!in_array($transaction['branch_id'], $branches))
                 $branches[] = $transaction['branch_id'];
+        }
+        $this->expireAppointmentBranches($branches, $ids);
+    }
+
+    function expireAppointmentBranches($branches, $ids){
+        foreach($branches as $key=>$value){
+            $transactions = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                            ->leftJoin('users', 'transactions.client_id', '=', 'users.id')
+                            ->whereIn('transactions.id', $ids)
+                            ->where('transactions.branch_id', $value)
+                            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                        'users.first_name as client_first_name', 'users.last_name as client_last_name', 'transactions.*')
+                            ->get()->toArray();
+            if(!empty($transactions)){
+                foreach($transactions as $k=>$v)
+                    $transactions[$key]['items'] = $this->getAppointmentItems($v['id']);
+
+                $branch = Branch::where('id', $value)->get()->first();
+                $data = ["branch"=>$branch, "appointments"=> $transactions]; //override data
+                $headers = array("subject" => env("APP_NAME") .' - '. 'Expired Branch Appointments',
+                    "to" => [["email" => $branch['branch_email'], "name" => $branch['branch_name']]]);
+                $this->sendMail('email.appointment_expired_branch', $data, $headers);
+            }
         }
     }
 
@@ -428,6 +462,15 @@ class AppointmentController extends Controller{
     }
 
     function saveItem(Request $request){
+        $validator = Validator::make($request->all(), [
+            'service' => 'required',
+        ],[
+            'service.required'=>'Please select service.'
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
             $item = new TransactionItem;
@@ -441,7 +484,7 @@ class AppointmentController extends Controller{
             $item->book_end_time = date('Y-m-d H:i:s');
             $item->item_status = 'reserved';
             $item->save();
-
+            $this->arrangeServiceTimes($item->transaction_id);
             return response()->json(['result'=>'success']);
         }
 

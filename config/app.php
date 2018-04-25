@@ -247,6 +247,7 @@ return [
         'plc_tracker'=>['view','process','deliver','ready','pickup','delete'],
         'products'=>['view','add','update'],
         'promos'=>['view','add','update','delete'],
+        'queuing'=>['view'],
         'services'=>['view','add','update'],
         'surveys'=>['view','add','update','delete'],
         'technicians'=>['view','add','update'],

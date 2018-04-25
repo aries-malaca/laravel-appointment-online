@@ -25,6 +25,7 @@
         <link href="../../css/custom.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
         <link href="../../theme/global/plugins/fullcalendar/fullcalendar.min.css" rel="stylesheet" type="text/css" />
+        <link href="../../theme/global/plugins/fullcalendar/scheduler.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/socicon/socicon.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/pages/css/profile.min.css" rel="stylesheet" type="text/css" />
         <link href="../../theme/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
@@ -74,6 +75,7 @@
     <script src="../../theme/layouts/layout4/scripts/demo.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/cubeportfolio/js/jquery.cubeportfolio.min.js" type="text/javascript"></script>
     <script src="../../theme/global/plugins/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
+    <script src="../../theme/global/plugins/fullcalendar/scheduler.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>
     <script type="text/javascript" src="../../js/axios.min.js"></script>
     <script type="text/javascript" src="../../js/helpers.js"></script>

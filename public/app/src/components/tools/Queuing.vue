@@ -51,13 +51,19 @@
                             </a>
                         </li>
                         <li class="">
-                            <a href="#completed" data-toggle="tab" aria-expanded="false"> Completed </a>
+                            <a href="#completed" data-toggle="tab" aria-expanded="false"> Completed
+                                <span class="badge badge-success" v-if="completed.length > 0"> {{ completed.length }} </span>
+                            </a>
                         </li>
                         <li class="">
-                            <a href="#cancelled" data-toggle="tab" aria-expanded="false"> Cancelled </a>
+                            <a href="#cancelled" data-toggle="tab" aria-expanded="false"> Cancelled
+                                <span class="badge badge-success" v-if="cancelled.length > 0"> {{ cancelled.length }} </span>
+                            </a>
                         </li>
                         <li class="">
-                            <a href="#statistics" data-toggle="tab" aria-expanded="false"> Statistics </a>
+                            <a href="#statistics" @click="initAgenda" data-toggle="tab" aria-expanded="false"> Full Day View
+                                <span class="badge badge-info"> New! </span>
+                            </a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -217,6 +223,27 @@
                             </table>
                         </div>
                         <div class="tab-pane" id="statistics">
+                            <div v-if="operating_schedule">
+                                <div v-if="technicians.length>0 && appointments.length>0">
+                                    <span class="badge badge-info">Queued</span>
+                                    <span class="badge badge-success">Completed</span>
+                                    <span class="badge badge-danger">Cancelled/Expired</span>
+                                    <br/>
+                                    <div class="portlet light calendar">
+                                        <div class="portlet-body">
+                                            <div id="calendar"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger" v-else>
+                                    This feature is not available. No Technicians/Appointments for this branch.
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="alert alert-danger">
+                                    No schedule for the selected branch.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -342,6 +369,7 @@
                         response.data.forEach(function(item){
                             u.appointments.push(item);
                         });
+                        u.initAgenda();
                     });
             },
             groupedItems:function(status){
@@ -475,6 +503,7 @@
                     .then(function (response) {
                         u.calling = response.data.calling;
                         u.$store.commit('updateServing',response.data.serving);
+                        u.initAgenda();
                     });
             },
             refreshList(){
@@ -486,6 +515,30 @@
                         return true;
                 }
                 return false;
+            },
+            initAgenda(){
+                let u = this;
+
+                if(this.technicians.length > 0 && this.operating_schedule)
+                setTimeout(()=>{
+                    $('#calendar').fullCalendar("destroy");
+                    $('#calendar').fullCalendar({
+                        defaultView: 'agendaDay',
+                        groupByResource: true,
+                        header: false,
+                        allDaySlot: false,
+                        timeFormat:'hh:mm A',
+                        defaultDate:moment(u.c),
+                        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+                        minTime:this.operating_schedule.start,
+                        maxTime:this.operating_schedule.end,
+                        resources: this.mappedTechnicians,
+                        events: this.mappedAppointments,
+                        eventClick: function(event) {
+                            u.viewAppointment(event.id)
+                        },
+                    });
+                }, 1000);
             }
         },
         mounted:function(){
@@ -607,6 +660,70 @@
             },
             date(){
                 return this.$store.state.queuing_date;
+            },
+            mappedTechnicians(){
+                let array = this.technicians.map((item)=>{
+                    return { id: item.id, title: item.name}
+                });
+                array.push({ id: 0, title: "Unassigned"});
+                return array;
+            },
+            mappedAppointments(){
+                return this.appointments.map((item)=>{
+                    return {
+                        resourceId:item.technician_id,
+                        start:item.transaction_datetime,
+                        end:function(){
+                           for(var x=item.items.length - 1; x >= 0;x--){
+                               if(item.item_status !== 'cancelled' && item.item_status !== 'expired')
+                                   return item.items[x].book_end_time;
+                           }
+                        }(),
+                        id:item.id,
+                        backgroundColor:function(){
+                            if(item.transaction_status === 'completed')
+                                return "#0ed3c5";
+                            else if(item.transaction_status === 'reserved')
+                                return "#306fe0";
+
+                            return "#ed4852";
+                        }(),
+                        title: function() {
+                            var array = [];
+                            item.items.forEach((i)=>{
+                                if((i.item_status !== 'cancelled' && i.item_status !== 'expired') || item.transaction_status === 'cancelled'  || item.transaction_status === 'expired')
+                                    array.push(i.item_name);
+                            });
+
+                            return array.join(", ");
+                        }(),
+                        borderColor:"blue",
+                    }
+                });
+            },
+            operating_schedule(){
+                if(this.branch !== undefined && this.c !==""){
+
+                    for(var x=0;x<this.branch.schedules.length;x++){
+                        var e = this.branch.schedules[x];
+
+                        if( Number(moment(e.date_start).format("X") <= Number(moment(this.c).format("X")) ) &&
+                            Number(moment(e.date_end).format("X") >= Number(moment(this.c).format("X"))) ){
+
+                            if(e.schedule_type === 'closed')
+                                return false;
+                            else if(e.schedule_type === 'custom')
+                                return e.schedule_data[Number(moment(this.c).format("e"))];
+                        }
+                    }
+
+
+                    for(var x=0;x<this.branch.schedules.length;x++){
+                        if(this.branch.schedules[x].schedule_type === 'regular')
+                            return this.branch.schedules[x].schedule_data[Number(moment(this.c).format("e"))];
+                    }
+                }
+                return false;
             }
         },
         watch:{
@@ -614,6 +731,12 @@
                 if(this.branch !== null){
                     this.getAppointments();
                     this.refresh();
+
+                    let u =this;
+                    axios.get('/api/technician/getBranchTechnicians/' + this.branch.value + '/' + this.c)
+                        .then(function (response) {
+                            u.$store.commit('updateQueuingTechnicians',response.data);
+                        });
                 }
             },
             date:function(){
@@ -629,7 +752,16 @@
     }
 </script>
 <style>
-    .queuing .portlet td{
-        font-size:12px !important;
+    .portlet.calendar .fc-event .fc-content{
+        padding:2px !important;
+    }
+    .portlet.calendar.light .fc-button{
+        top:0px;
+    }
+    .fc-state-hover{
+        border-bottom: 0px !important;
+    }
+    .fc-time, .fc-title{
+        font-size:11px !important;
     }
 </style>

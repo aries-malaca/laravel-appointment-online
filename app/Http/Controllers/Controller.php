@@ -342,37 +342,37 @@ class Controller extends BaseController{
         $user = User::where('id',$user_id)->get()->first();
         if(isset($user['id'])){
             $d = json_decode($user['user_data']);
-            if(in_array('email', $d->notifications) && $send_mail) {
-                if(isset($data['body']) && isset($data['title'])){
+            if(isset( $d->notifications))
+                if(in_array('email', $d->notifications) && $send_mail)
+                    if(isset($data['body']) && isset($data['title'])){
 
-                    $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
-                                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
+                        $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
+                                            "to" => [["email" => $user['email'], "name" => $user['username']]]);
 
-                    switch($type){
-                        case 'appointment':
-                            $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
-                                            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
-                                            ->where('transactions.id', $data['unique_id'])
-                                            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
-                                                'transactions.*')
-                                            ->get()->first();
-                            $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
+                        switch($type){
+                            case 'appointment':
+                                $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                                                ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                                ->where('transactions.id', $data['unique_id'])
+                                                ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                                    'transactions.*')
+                                                ->get()->first();
+                                $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
 
-                            if($data['title'] == 'Expired Appointment') {
-                                $template = 'email.appointment_expired_client';
-                            }
-                            elseif($data['title'] == 'Appointment Complete')
-                                $template = 'email.appointment_completed';
+                                if($data['title'] == 'Expired Appointment') {
+                                    $template = 'email.appointment_expired_client';
+                                }
+                                elseif($data['title'] == 'Appointment Complete')
+                                    $template = 'email.appointment_completed';
 
-                            $data = ["user"=>$user, "appointment"=> $appointment]; //override data
+                                $data = ["user"=>$user, "appointment"=> $appointment]; //override data
 
-                            if(isset($template))
-                                $this->sendMail($template, $data, $headers);
-                        break;
-                        // other types
+                                if(isset($template))
+                                    $this->sendMail($template, $data, $headers);
+                            break;
+                            // other types
+                        }
                     }
-                }
-            }
         }
     }
 

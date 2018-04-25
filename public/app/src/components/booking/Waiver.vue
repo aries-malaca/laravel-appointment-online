@@ -102,17 +102,18 @@
             }
         },
         mounted:function(){
-            if(this.the_waiver !== undefined){
+            if(this.the_waiver !== undefined)
                 this.waiver = this.the_waiver;
-            }
-            else{
+            else
                 this.getWaiverQuestions();
-            }
+
             let u = this;
 
-
-
             var wrapper = document.getElementById("signature-pad");
+
+            if(wrapper === null)
+                return false;
+
             var canvas = wrapper.querySelector("canvas");
             var signaturePad = new SignaturePad(canvas, {
                 // It's Necessary to use an opaque color when saving image as JPEG;

@@ -108,7 +108,7 @@ var reg = new Vue({
                             if(msg.length>3)
                                 msg.splice(3, msg.length);
 
-                            toastr.error(msg);
+                            toastr.error(msg.join("<br/> "));
                         }
                     }
                     $btn.button('reset');

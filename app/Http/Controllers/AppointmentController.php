@@ -51,29 +51,28 @@ class AppointmentController extends Controller{
             $appointment->technician_id = $request->input('technician') !== null ? $request->input('technician')['value']:0;
             $appointment->save();
 
-            foreach($request->input('services') as $key=>$value){
-                $item = new TransactionItem;
-                $item->transaction_id = $appointment->id;
-                $item->item_id = $value['id'];
-                $item->item_type = 'service';
-                $item->amount = $value['price'];
-                $item->quantity = 1;
-                $item->book_start_time = date('Y-m-d H:i:s', strtotime($value['start']));
-                $item->book_end_time = date('Y-m-d H:i:s', strtotime($value['end']));
-                $item->item_status = 'reserved';
-                $item->item_data = '{}';
+            foreach($request->input('services') as $key => $value){
+                $item                   = new TransactionItem;
+                $item->transaction_id   = $appointment->id;
+                $item->item_id          = $value['id'];
+                $item->item_type        = 'service';
+                $item->amount           = $value['price'];
+                $item->quantity         = 1;
+                $item->book_start_time  = date('Y-m-d H:i:s', strtotime($value['start']));
+                $item->book_end_time    = date('Y-m-d H:i:s', strtotime($value['end']));
+                $item->item_status      = 'reserved';
+                $item->item_data        = '{}';
                 $item->save();
             }
-
             foreach($request->input('products') as $key=>$value){
-                $item = new TransactionItem;
-                $item->transaction_id = $appointment->id;
-                $item->item_id      = $value['id'];
-                $item->item_type    = 'product';
-                $item->amount       = $value['price'];
-                $item->quantity     = $value['quantity'];
-                $item->item_status  = 'reserved';
-                $item->item_data    = '{}';
+                $item                   = new TransactionItem;
+                $item->transaction_id   = $appointment->id;
+                $item->item_id          = $value['id'];
+                $item->item_type        = 'product';
+                $item->amount           = $value['price'];
+                $item->quantity         = $value['quantity'];
+                $item->item_status      = 'reserved';
+                $item->item_data        = '{}';
                 $item->save();
             }
 
@@ -243,7 +242,8 @@ class AppointmentController extends Controller{
                     "images"=>[],
         ] , true  );
 
-        return response()->json(["result"=>"success"]);
+       
+        return response()->json(["result"=>"success"],400);
     }
 
     public function cancelAppointment(Request $request){

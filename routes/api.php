@@ -255,7 +255,7 @@ Route::post('/mobile/reviews/reviewTransaction', 'MobileApiController@reviewTran
 Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentReview');
 
 Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
-Route::get('/mobile/getAllChatMessage', 'MobileApiController@getAllChatMessage');
+Route::post('/mobile/getAllChatMessage', 'MobileApiController@getAllChatMessage');
 Route::post('/mobile/getChatMessageByThread','MobileApiController@getChatMessageByThread');
 
 Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Message;
 use App\MessageThread;
+use App\User;
 use DB;
 use Validator;
 
@@ -19,6 +20,7 @@ class MessageController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 
+            $is_client = $api["user"]["is_client"];
             $thread = Message::whereIn('sender_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->get()->first();
@@ -33,20 +35,32 @@ class MessageController extends Controller{
                 $thread->created_by_id = $api['user']['id'];
                 $thread->participant_ids = json_encode([$request->input('recipient_id')]);
                 $thread->save();
-
                 $thread_id = $thread->id;
             }
 
-
-
-            $message = new Message;
-            $message->body = $request->input('body');
-            $message->title = $request->input('title');
-            $message->sender_id = $api['user']['id'];
-            $message->recipient_id = $request->input('recipient_id');
-            $message->message_data = '{}';
+            $message                    = new Message;
+            $message->body              = $request->input('body');
+            $message->title             = $request->input('title');
+            $message->sender_id         = $api['user']['id'];
+            $message->recipient_id      = $request->input('recipient_id');
+            $message->message_data      = '{}';
             $message->message_thread_id = $thread_id;
             $message->save();
+            // $arrayDeviceData            = array();
+
+            if($is_client != 1){
+                $client_id              = $request->input('recipient_id');
+                $query                  = User::where("id",$client_id)->get()->first();
+                $arrayDeviceData        = json_decode($query->device_data,true);
+                $array                  = array();
+                foreach ($arrayDeviceData as $key => $value) {
+                    $devicetype         = $value["type"];
+                    $unique_device_id   = $value["unique_device_id"];
+                    $this->sendChatNotification($devicetype,$unique_device_id,$thread_id,"chat",$client_id);
+                    // break;
+                }
+                  return response()->json(["result"    =>"success"]);
+            }    
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
@@ -112,7 +126,7 @@ class MessageController extends Controller{
                             ->update(['read_at'=>date('Y-m-d H:i:s')]);
            
 
-            return response()->json(["result"=>"success","thread_id"=>$thread]);
+            return response()->json(["result"=>"success","thread_id"=>(int)$thread]);
         }
         return response()->json($api, $api["status_code"]);
     }

@@ -24,6 +24,8 @@ use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use App\Notification;
 use App\Jobs\SendEmailJob;
+use App\Libraries\NotificationHub;
+use App\Libraries\Notification_Azure;
 
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -125,7 +127,7 @@ class Controller extends BaseController{
             ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
             ->get()->toArray();
         foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data'], true);
+            $items[$key]['item_data'] = json_decode($value['item_data']);
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
@@ -332,11 +334,27 @@ class Controller extends BaseController{
     }
 
     function createNotification($type, $user_id, $data, $send_mail = false){
+
+        $objectData   = json_encode($data);
         $notification = new Notification;
         $notification->notification_type = $type;
-        $notification->notification_data = json_encode($data);
+        $notification->notification_data = $objectData;
         $notification->user_id = $user_id;
         $notification->save();
+
+        $obj                    = json_decode($objectData);
+        $unique_id              = $obj->unique_id;
+        $query                  = User::where("id",$user_id)->get()->first();
+        $arrayDeviceData        = json_decode($query->device_data,true);
+        $array                  = array();
+
+        foreach ($arrayDeviceData as $key => $value) {
+            $devicetype         = $value["type"];
+            $unique_device_id   = $value["unique_device_id"];
+            $this->sendPushNotification($devicetype,$unique_device_id,$unique_id,"appointment",$user_id);
+            // break;
+        }    
+
         Curl::to(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $user_id)->get();
 
         $user = User::where('id',$user_id)->get()->first();
@@ -361,8 +379,9 @@ class Controller extends BaseController{
                             if($data['title'] == 'Expired Appointment') {
                                 $template = 'email.appointment_expired_client';
                             }
-                            elseif($data['title'] == 'Appointment Complete')
+                            elseif($data['title'] == 'Appointment Complete'){
                                 $template = 'email.appointment_completed';
+                            }
 
                             $data = ["user"=>$user, "appointment"=> $appointment]; //override data
 
@@ -376,17 +395,39 @@ class Controller extends BaseController{
         }
     }
 
-    // public function sendPushNotification(Request $request){
-    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
+    public function sendPushNotification($devicetype,$device_id,$unique_id,$notification_type,$user_id){
+        $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
 
-    //     //android
-    //     $message        = '{"data":{"user_id":57427,"unique_id":1,"notification_type":"notification"}}';
-    //     $notification   = new Notification_Azure("gcm", $message);
-    //     $hub->sendNotification($notification, null);    
+        //android
+        if($devicetype == "Android"){
+             $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"appointment"}}';
+            $notification   = new Notification_Azure("gcm", $message);
+            $hub->sendNotification($notification, "64a1dc2c");  
+        }
+        // //ios
+        if($devicetype == "IOS"){
+            $alert = '{"aps":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"notification"}}';
+            $notification = new Notification_Azure("apple", $alert);
+            $hub->sendNotification($notification, null);
+        }
+    }
 
-    //     // //ios
-    //     // $alert = '{"aps":{"alert":"Hello from PHP!"}}';
-    //     // $notification = new Notification_Azure("apple", $alert);
-    //     // $hub->sendNotification($notification, null);
-    // }
+      public function sendChatNotification($devicetype,$device_id,$thread_id,$notification_type,$user_id){
+        $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
+
+        //android
+        if($devicetype == "Android"){
+             $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$thread_id.'","notification_type":"chat"}}';
+            $notification   = new Notification_Azure("gcm", $message);
+            $hub->sendNotification($notification, $device_id);  
+        }
+        // //ios
+        if($devicetype == "IOS"){
+            $alert = '{"aps":{"user_id":'.$user_id.',"unique_id":1,"notification_type":"notification"}}';
+            $notification = new Notification_Azure("apple", $alert);
+            $hub->sendNotification($notification, $device_id);
+        }
+    }
+
+
 }

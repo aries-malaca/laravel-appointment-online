@@ -130,6 +130,13 @@
                 toggle:false,
                 calendar_view:false,
                 client:{},
+                t:'',
+                summary:{
+                    pending:[],
+                    completed:[],
+                    cancelled:[],
+                    expired:[],
+                }
             }
         },
         methods:{
@@ -187,6 +194,38 @@
                 this.$store.commit('appointments/updateViewingID', id);
                 $("#appointment-modal").modal("show");
             },
+            refreshSummary(){
+                var object = {
+                    pending:[],
+                    completed:[],
+                    cancelled:[],
+                    expired:[],
+                };
+                let u = this;
+                if(this.calendar_view.options !== undefined)
+                    this.calendar_view.options.events.filter((item)=>{
+                        if(u.calendar_view.name==='month')
+                            return (moment(item.start).format("MM") === moment(u.calendar_view.start).format("MM"));
+                        else if(u.calendar_view.name==='agendaThreeDays'){
+                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).format("YYYY-MM-DD")) ||
+                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).add(1,"days").format("YYYY-MM-DD")) ||
+                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).add(2, "days").format("YYYY-MM-DD"));
+                        }
+                        else if(u.calendar_view.name==='agendaOneDay')
+                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).format("YYYY-MM-DD"));
+                    }).forEach((event)=>{
+                        if(event.transaction_status === 'reserved')
+                            object.pending.push(event);
+                        else if(event.transaction_status === 'completed')
+                            object.completed.push(event);
+                        else if(event.transaction_status === 'cancelled')
+                            object.cancelled.push(event);
+                        else if(event.transaction_status === 'expired')
+                            object.expired.push(event);
+                    });
+
+                this.summary = object;
+            },
             initCalendar(view){
                 let u = this;
                 setTimeout(()=>{
@@ -242,7 +281,9 @@
             };
             setInterval(()=>{
                 u.calendar_view = $("#calendar").fullCalendar('getView');
-            });
+                u.t = $("#calendar").fullCalendar('getView').title;
+                u.refreshSummary();
+            },1000);
         },
         computed:{
             branchIds(){
@@ -327,27 +368,6 @@
                     }
                 });
             },
-            summary(){
-                var object = {
-                    pending:[],
-                    completed:[],
-                    cancelled:[],
-                    expired:[]
-                };
-
-                this.calendar_view.options.events.forEach((event)=>{
-                    if(event.transaction_status === 'reserved')
-                        object.pending.push(event);
-                    else if(event.transaction_status === 'completed')
-                        object.completed.push(event);
-                    else if(event.transaction_status === 'cancelled')
-                        object.cancelled.push(event);
-                    else if(event.transaction_status === 'expired')
-                        object.expired.push(event);
-                });
-
-                return object;
-            }
         },
         watch:{
             'user':function(){

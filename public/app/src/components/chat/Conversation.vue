@@ -106,10 +106,10 @@
                 let $btn = $("#btn");
                 $btn.button('loading');
                 axios.post('/api/message/sendMessage?token=' + u.token, {body:this.newMessage.body,recipient_id:this.partner.id})
-                    .then(function () {
+                    .then(function (response) {
                         u.newMessage.body = '';
                         u.getMessages(true);
-                        u.$socket.emit('newMessage', u.partner.id, u.user.id);
+                        u.$socket.emit('newMessage', u.partner.id, u.user.id, response.data.thread_id);
                         $btn.button('reset');
                     })
                     .catch(function (error) {

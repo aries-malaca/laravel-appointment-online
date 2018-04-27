@@ -127,7 +127,7 @@ class Controller extends BaseController{
             ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
             ->get()->toArray();
         foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data']);
+            $items[$key]['item_data'] = json_decode($value['item_data'],true);
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
@@ -150,7 +150,6 @@ class Controller extends BaseController{
                 $items[$key]['item_info']['size']    = $product->product_size;
                 $items[$key]['item_info']['variant'] = $product->product_variant;
                 $items[$key]['item_image']           = $product_image;
-
             }
         }
         return $items;
@@ -395,7 +394,6 @@ class Controller extends BaseController{
     }
 
     public function sendPushNotification($devicetype,$device_id,$unique_id,$notification_type,$user_id){
-       
         $queryConfig        = Config::where("config_name","GET_PUSH_NOTIFICATION")->get()->first();
         $objectValue        = json_decode($queryConfig->config_value);
         $full_shared_access = $objectValue->connection_string_full_access;

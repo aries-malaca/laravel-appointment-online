@@ -54,7 +54,6 @@ class MessageController extends Controller{
                 $arrayDeviceData        = json_decode($query->device_data,true);
 
                 foreach ($arrayDeviceData as $key => $value) {
-
                     if(isset($value["unique_device_id"])){
                         $devicetype         = $value["type"];
                         $unique_device_id   = $value["unique_device_id"];

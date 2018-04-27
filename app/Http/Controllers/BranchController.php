@@ -362,6 +362,7 @@ class BranchController extends Controller{
             $schedule->date_start = $request->input('schedule_type')==='closed'?$request->input('date_start').' '.$request->input('time_start') :$request->input('date_start');
             $schedule->date_end = $request->input('schedule_type')==='closed'?$request->input('date_end').' '.$request->input('time_end') :$request->input('date_end');
             $schedule->schedule_type = $request->input('schedule_type');
+            $schedule->schedule_data = json_encode($request->input('schedule_data'));
             $schedule->save();
             return response()->json(["result"=>"success"],200);
         }

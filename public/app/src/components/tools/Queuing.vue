@@ -61,7 +61,7 @@
                             </a>
                         </li>
                         <li class="">
-                            <a href="#statistics" @click="initAgenda" data-toggle="tab" aria-expanded="false"> Full Day View
+                            <a href="#statistics" @click="getAppointments" data-toggle="tab" aria-expanded="false"> Full Day View
                                 <span class="badge badge-info"> New! </span>
                             </a>
                         </li>
@@ -369,7 +369,7 @@
                         response.data.forEach(function(item){
                             u.appointments.push(item);
                         });
-                        u.renderEvents();
+                        u.initAgenda();
                     });
             },
             groupedItems:function(status){
@@ -503,7 +503,7 @@
                     .then(function (response) {
                         u.calling = response.data.calling;
                         u.$store.commit('updateServing',response.data.serving);
-                        u.renderEvents();
+                        u.initAgenda();
                     });
             },
             refreshList(){
@@ -521,6 +521,7 @@
 
                 if(this.technicians.length > 0 && this.operating_schedule)
                 setTimeout(()=>{
+                    $('#calendar').fullCalendar("destroy");
                     $('#calendar').fullCalendar({
                         defaultView: 'agendaDay',
                         groupByResource: true,
@@ -529,7 +530,7 @@
                         timeFormat:'hh:mm A',
                         defaultDate:moment(u.c),
                         schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-                        minTime:this.operating_schedule.start,
+                        minTime:moment().subtract(1, "hours").format("HH:00"),
                         maxTime:this.operating_schedule.end,
                         resources: this.mappedTechnicians,
                         events: this.mappedAppointments,
@@ -538,10 +539,6 @@
                         },
                     });
                 }, 1000);
-            },
-            renderEvents(){
-                $('#calendar').fullCalendar('removeEvents');
-                $('#calendar').fullCalendar('renderEvents', this.mappedAppointments);
             }
         },
         mounted:function(){
@@ -732,9 +729,6 @@
         watch:{
             branch:function(){
                 if(this.branch !== null){
-                    this.getAppointments();
-                    this.refresh();
-
                     let u =this;
                     axios.get('/api/technician/getBranchTechnicians/' + this.branch.value + '/' + this.c)
                         .then(function (response) {
@@ -747,9 +741,12 @@
             },
             b(){
                 this.$store.commit('updateQueuingBranch', this.b);
+                this.getAppointments();
+                this.refresh();
             },
             c(){
                 this.$store.commit('updateQueuingDate', this.c);
+                this.refresh();
             }
         }
     }
@@ -768,6 +765,6 @@
         font-size:11px !important;
     }
     .fc-time-grid-container{
-        height: 300px !important;
+        height: fit-content !important;
     }
 </style>

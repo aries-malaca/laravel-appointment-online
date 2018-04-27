@@ -12,17 +12,16 @@
         <td class="container">
             <div class="content">
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Premier Loyalty Card Application</span>
                 <table class="main">
                     <!-- START MAIN CONTENT AREA -->
+
                     <tr>
                         <td class="wrapper">
                             @include('email.layouts.logo')
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <p>Hi {{  $user['first_name'] }},</p>
-
+                                        <p>Dear {{ delegation($user) }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
                                         @if(!$result)
                                             <p>Thank you for your application.</p>
                                             <p>
@@ -34,7 +33,6 @@
                                             <p>Keep on waxing.</p>
                                         @else
                                             <p>Congratulations!</p>
-
                                             <p>
                                                 We're very happy to inform you that you are qualified to avail our Premier Loyalty Card.
                                                 You will be entitled to get 10% off on all our services in any of our branches nationwide.
@@ -44,13 +42,10 @@
                                                 the status of your application by viewing the PLC Application tool found in your Lay Bare access.
                                                 <br/>
                                             </p>
-
                                             <p>Thank you and Keep on waxing!</p>
                                         @endif
-
                                         <p>Sincerely,</p>
-
-                                        <p><b>Lay Bare Waxing Salon</b></p>
+                                        <p>Lay Bare Waxing Salon</p>
                                     </td>
                                 </tr>
                             </table>

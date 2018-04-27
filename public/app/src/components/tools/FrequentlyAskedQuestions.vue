@@ -1,39 +1,41 @@
 <template>
-    <div class="portlet light">
-        <div class="portlet-title">
-            <div class="caption">
-                <i class="icon-puzzle font-grey-gallery"></i>
-                <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
-                <button v-if="user.is_client !== 1" class="btn btn-info" @click="showAddModal"> Add FAQ </button>
-            </div>
-        </div>
-        <div class="portlet-body">
-            <div class="mt-element-list">
-                <div class="mt-list-head list-news font-white bg-blue">
-                    <div class="list-head-title-container">
-                        <h3 class="list-title">Frequently Asked Questions</h3>
-                    </div>
+    <div>
+        <div class="portlet light" v-if="user.is_client === 1 || gate(user, 'faqs', 'view')">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-puzzle font-grey-gallery"></i>
+                    <span class="caption-subject bold font-grey-gallery uppercase"> {{ title }} </span>
+                    <button v-if="user.is_client !== 1 || gate(user, 'faqs', 'add')" class="btn btn-info" @click="showAddModal"> Add FAQ </button>
                 </div>
-                <div>
-                    <div class="panel-group accordion" id="accordion1" style="max-height:360px;overflow-y:scroll">
-                        <div class="panel panel-default" v-for="faq,key in faqs.questions">
-                            <div class="panel-heading">
-                                <h4 class="panel-title">
-                                    <a class="accordion-toggle collapsed" data-parent="#accordion1" data-toggle="collapse"
-                                            v-bind:href="'#collapse_'+faq.id" aria-expanded="false">
-                                        <span>{{ faq.question }}</span>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div v-bind:id="'collapse_'+faq.id" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
-                                <div class="panel-body">
-                                    <p v-html="faq.answer"></p>
-                                    <div class="row" v-if="user.is_client !== 1">
-                                        <div class="col-md-12">
-                                            <button class="btn btn-warning btn-sm" @click="moveFAQ(1, faq)">Move Up</button>
-                                            <button class="btn btn-warning btn-sm" @click="moveFAQ(0, faq)">Move Down</button>
-                                            <button class="btn btn-info btn-sm" @click="editFAQ(faq)">Edit</button>
-                                            <button class="btn btn-danger btn-sm" @click="deleteFAQ(faq)">Delete</button>
+            </div>
+            <div class="portlet-body">
+                <div class="mt-element-list">
+                    <div class="mt-list-head list-news font-white bg-blue">
+                        <div class="list-head-title-container">
+                            <h3 class="list-title">Frequently Asked Questions</h3>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="panel-group accordion" id="accordion1" style="max-height:360px;overflow-y:scroll">
+                            <div class="panel panel-default" v-for="faq,key in faqs.questions">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a class="accordion-toggle collapsed" data-parent="#accordion1" data-toggle="collapse"
+                                           v-bind:href="'#collapse_'+faq.id" aria-expanded="false">
+                                            <span>{{ faq.question }}</span>
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div v-bind:id="'collapse_'+faq.id" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                    <div class="panel-body">
+                                        <p v-html="faq.answer"></p>
+                                        <div class="row" v-if="user.is_client !== 1 && gate(user, 'faqs', 'update')">
+                                            <div class="col-md-12">
+                                                <button class="btn btn-warning btn-sm" @click="moveFAQ(1, faq)">Move Up</button>
+                                                <button class="btn btn-warning btn-sm" @click="moveFAQ(0, faq)">Move Down</button>
+                                                <button class="btn btn-info btn-sm" @click="editFAQ(faq)">Edit</button>
+                                                <button class="btn btn-danger btn-sm" @click="deleteFAQ(faq)">Delete</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -43,6 +45,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
 
         <div class="modal fade" id="add-faq-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
@@ -77,8 +80,10 @@
 </template>
 
 <script>
+    import UnauthorizedError from '../errors/UnauthorizedError.vue';
     export default {
         name: 'FAQs',
+        components:{ UnauthorizedError },
         data: function(){
             return {
                 title: 'FAQs',

@@ -49,9 +49,6 @@
                                 </div>
                                 <div class="col-md-7">
                                     <transactions-summary :transactions="transactions" v-if="transactions"></transactions-summary>
-                                    <div class="alert alert-warning" v-else>
-                                        No transactions found in your account. <a class="btn btn-info btn-xs" href="#/transactions">Go to Transactions Page</a>
-                                    </div>
 
                                     <img style="display:block; margin:auto;" v-bind:src="'../../images/app/plc_'+ user.gender +'.png'">
                                     <div style="display:block; text-align:center;" v-if="user.gender === 'female'">For Her</div>
@@ -172,6 +169,7 @@
         mounted:function(){
             this.$store.commit('updateTitle', 'Premier Loyalty Card');
             this.getBranches();
+            this.getPLC();
         },
         watch:{
           'user':function(){

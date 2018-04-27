@@ -106,6 +106,7 @@
             u.$store.dispatch('products/fetchProducts');
             u.$store.dispatch('technicians/fetchTechnicians');
 
+
             u.$options.sockets.destroyToken = function(data){
                 if(data.user_id === u.user.id && u.token === data.token){
                     alert("You session has been ended by other device using your account.");
@@ -136,6 +137,8 @@
                     if(this.user.id !== undefined) {
                         if (this.user.user_data.prompt_change_password === 1)
                             window.location.href = '../../#/profile';
+
+                        this.$store.commit('updateTransactions', this.user.transaction_data);
                     }
                 }
             }

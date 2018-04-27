@@ -37,12 +37,18 @@
                                     <img class="img img-responsive" v-bind:src="'../../images/ids/'+ newRequest.valid_id_url" alt="">
                                 </div>
                             </div>
-                            <div class="col-md-6"></div>
+                            <div class="col-md-6" v-if="newRequest.plc_review_request_data !== undefined">
+                                <div class="form-group">
+                                    <label>BOSS ID:</label>
+                                    <input class="form-control" v-model="newRequest.plc_review_request_data.boss_id" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                        <button class="btn btn-success" @click="completeRequest($event)">Mark as Completed</button>
+                        <button class="btn btn-success" @click="processRequest($event, 'approved')">Approve</button>
+                        <button class="btn btn-danger" @click="processRequest($event, 'denied')">Deny</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -85,11 +91,17 @@
                         XHRCatcher(error);
                     });
             },
-            completeRequest:function(event){
+            processRequest:function(event, action){
+                if(!confirm("Are you sure you want to take this action? Client will be notified and will receive " +
+                        "transaction summary via email."))
+                    return false;
+
+                this.newRequest.status = action;
+
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');
-                axios({url:'/api/premier/completeRequest?token='+u.token, method:'post', data:this.newRequest})
+                axios({url:'/api/premier/processRequest?token='+u.token, method:'post', data:this.newRequest})
                     .then(function () {
                         u.getRequests();
                         toastr.success("Successfully updated.");
@@ -103,6 +115,8 @@
                     });
             },
             viewRequest:function(request){
+                if(!this.gate(user, 'plc_request', 'process'))
+                    return false;
                 this.newRequest = {
                     id:request.id,
                     message:request.message,
@@ -111,6 +125,9 @@
                     valid_id_url:request.valid_id_url,
                     status:request.status,
                     status_html:request.status_html,
+                    plc_review_request_data:{
+                        boss_id: request.plc_review_request_data.boss_id
+                    },
                 }
                 $("#review-modal").modal("show");
             }

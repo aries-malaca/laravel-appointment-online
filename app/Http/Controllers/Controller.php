@@ -24,6 +24,8 @@ use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use App\Notification;
 use App\Jobs\SendEmailJob;
+use App\Libraries\NotificationHub;
+use App\Libraries\Notification_Azure;
 
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -125,7 +127,7 @@ class Controller extends BaseController{
             ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
             ->get()->toArray();
         foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data']);
+            $items[$key]['item_data'] = json_decode($value['item_data'],true);
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
@@ -148,7 +150,6 @@ class Controller extends BaseController{
                 $items[$key]['item_info']['size']    = $product->product_size;
                 $items[$key]['item_info']['variant'] = $product->product_variant;
                 $items[$key]['item_image']           = $product_image;
-
             }
         }
         return $items;
@@ -332,61 +333,108 @@ class Controller extends BaseController{
     }
 
     function createNotification($type, $user_id, $data, $send_mail = false){
+
+        $objectData   = json_encode($data);
         $notification = new Notification;
         $notification->notification_type = $type;
-        $notification->notification_data = json_encode($data);
+        $notification->notification_data = $objectData;
         $notification->user_id = $user_id;
         $notification->save();
+
+        $obj                    = json_decode($objectData);
+        $unique_id              = $obj->unique_id;
+        $query                  = User::where("id",$user_id)->get()->first();
+        $arrayDeviceData        = json_decode($query->device_data,true);
+        $array                  = array();
+
+        foreach ($arrayDeviceData as $key => $value) {
+            $devicetype         = $value["type"];
+            $unique_device_id   = $value["unique_device_id"];
+            $this->sendPushNotification($devicetype,$unique_device_id,$unique_id,"appointment",$user_id);
+            // break;
+        }    
+
         Curl::to(env('AZURE_WEBHOOKS_URL') . '/refreshNotifications/'. $user_id)->get();
 
         $user = User::where('id',$user_id)->get()->first();
         if(isset($user['id'])){
             $d = json_decode($user['user_data']);
-            if(in_array('email', $d->notifications) && $send_mail) {
-                if(isset($data['body']) && isset($data['title'])){
+            if(isset( $d->notifications))
+                if(in_array('email', $d->notifications) && $send_mail)
+                    if(isset($data['body']) && isset($data['title'])){
 
-                    $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
-                                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
+                        $headers = array("subject" => env("APP_NAME") .' - ' . $data['title'],
+                                            "to" => [["email" => $user['email'], "name" => $user['username']]]);
 
-                    switch($type){
-                        case 'appointment':
-                            $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
-                                            ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
-                                            ->where('transactions.id', $data['unique_id'])
-                                            ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
-                                                'transactions.*')
-                                            ->get()->first();
-                            $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
+                        switch($type){
+                            case 'appointment':
+                                $appointment = Transaction::leftJoin('branches', 'transactions.branch_id', '=', 'branches.id')
+                                                ->leftJoin('technicians', 'transactions.technician_id', '=', 'technicians.id')
+                                                ->where('transactions.id', $data['unique_id'])
+                                                ->select('branch_name', 'technicians.first_name as technician_first_name', 'technicians.last_name as technician_last_name',
+                                                    'transactions.*')
+                                                ->get()->first();
+                                $appointment['items'] = $this->getAppointmentItems($data['unique_id']);
 
-                            if($data['title'] == 'Expired Appointment') {
-                                $template = 'email.appointment_expired_client';
-                            }
-                            elseif($data['title'] == 'Appointment Complete')
-                                $template = 'email.appointment_completed';
+                                if($data['title'] == 'Expired Appointment') {
+                                    $template = 'email.appointment_expired_client';
+                                }
+                                elseif($data['title'] == 'Appointment Complete')
+                                    $template = 'email.appointment_completed';
 
-                            $data = ["user"=>$user, "appointment"=> $appointment]; //override data
+                                $data = ["user"=>$user, "appointment"=> $appointment]; //override data
 
-                            if(isset($template))
-                                $this->sendMail($template, $data, $headers);
-                        break;
-                        // other types
+                                if(isset($template))
+                                    $this->sendMail($template, $data, $headers);
+                            break;
+                            // other types
+                        }
                     }
-                }
-            }
         }
     }
 
-    // public function sendPushNotification(Request $request){
-    //     $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
+    public function sendPushNotification($devicetype,$device_id,$unique_id,$notification_type,$user_id){
+        $queryConfig        = Config::where("config_name","GET_PUSH_NOTIFICATION")->get()->first();
+        $objectValue        = json_decode($queryConfig->config_value);
+        $full_shared_access = $objectValue->connection_string_full_access;
+        $shared_access      = $objectValue->connection_string;
+        $hub_name           = $objectValue->hub_name;
 
-    //     //android
-    //     $message        = '{"data":{"user_id":57427,"unique_id":1,"notification_type":"notification"}}';
-    //     $notification   = new Notification_Azure("gcm", $message);
-    //     $hub->sendNotification($notification, null);    
+        $hub                = new NotificationHub($full_shared_access, $hub_name);
+        //android
+        if($devicetype == "Android"){
+             $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"appointment"}}';
+            $notification   = new Notification_Azure("gcm", $message);
+            $hub->sendNotification($notification, $device_id);  
+        }
+        // //ios
+        if($devicetype == "IOS"){
+            $alert = '{"aps":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"notification"}}';
+            $notification = new Notification_Azure("apple", $alert);
+            $hub->sendNotification($notification, $device_id);
+        }
+    }
 
-    //     // //ios
-    //     // $alert = '{"aps":{"alert":"Hello from PHP!"}}';
-    //     // $notification = new Notification_Azure("apple", $alert);
-    //     // $hub->sendNotification($notification, null);
-    // }
+      public function sendChatNotification($devicetype,$device_id,$thread_id,$notification_type,$user_id){
+        
+        $queryConfig        = Config::where("config_name","GET_PUSH_NOTIFICATION")->get()->first();
+        $objectValue        = json_decode($queryConfig->config_value);
+        $full_shared_access = $objectValue->connection_string_full_access;
+        $shared_access      = $objectValue->connection_string;
+        $hub_name           = $objectValue->hub_name;
+
+        $hub                = new NotificationHub($full_shared_access, $hub_name);
+        //android
+        if($devicetype == "Android"){
+             $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$thread_id.'","notification_type":"chat"}}';
+            $notification   = new Notification_Azure("gcm", $message);
+            $hub->sendNotification($notification, $device_id);  
+        }
+        // //ios
+        if($devicetype == "IOS"){
+            $alert = '{"aps":{"user_id":'.$user_id.',"unique_id":1,"notification_type":"notification"}}';
+            $notification = new Notification_Azure("apple", $alert);
+            $hub->sendNotification($notification, $device_id);
+        }
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Message;
 use App\MessageThread;
+use App\User;
 use DB;
 use Validator;
 
@@ -19,6 +20,7 @@ class MessageController extends Controller{
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 
+            $is_client = $api["user"]["is_client"];
             $thread = Message::whereIn('sender_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->get()->first();
@@ -33,21 +35,35 @@ class MessageController extends Controller{
                 $thread->created_by_id = $api['user']['id'];
                 $thread->participant_ids = json_encode([$request->input('recipient_id')]);
                 $thread->save();
-
                 $thread_id = $thread->id;
             }
 
-
-
-            $message = new Message;
-            $message->body = $request->input('body');
-            $message->title = $request->input('title');
-            $message->sender_id = $api['user']['id'];
-            $message->recipient_id = $request->input('recipient_id');
-            $message->message_data = '{}';
+            $message                    = new Message;
+            $message->body              = $request->input('body');
+            $message->title             = $request->input('title');
+            $message->sender_id         = $api['user']['id'];
+            $message->recipient_id      = $request->input('recipient_id');
+            $message->message_data      = '{}';
             $message->message_thread_id = $thread_id;
             $message->save();
-            return response()->json(["result"=>"success"]);
+            // $arrayDeviceData            = array();
+
+            if($is_client != 1){
+                $client_id              = $request->input('recipient_id');
+                $query                  = User::where("id",$client_id)->get()->first();
+                $arrayDeviceData        = json_decode($query->device_data,true);
+
+                foreach ($arrayDeviceData as $key => $value) {
+
+                    if(isset($value["unique_device_id"])){
+                        $devicetype         = $value["type"];
+                        $unique_device_id   = $value["unique_device_id"];
+                        $this->sendChatNotification($devicetype,$unique_device_id,$thread_id,"chat",$client_id);
+                    }
+                    // break;
+                }
+            }    
+            return response()->json(["result"=>"success", "thread_id"=> $message->message_thread_id]);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -103,16 +119,14 @@ class MessageController extends Controller{
     function seenMessages(Request $request){
         $api = $this->authenticateAPI();
         $sender_id  = $request->input('sender_id');
-        $thread     = $request->input('thread_id');
         if($api['result'] === 'success') {
             
-            $querySeen =  Message::where('sender_id',$sender_id)
-                            ->where('message_thread_id', $thread)
+             Message::where('sender_id',$sender_id)
                             ->where('recipient_id',  $api['user']['id'])
                             ->update(['read_at'=>date('Y-m-d H:i:s')]);
-           
 
-            return response()->json(["result"=>"success","thread_id"=>$thread]);
+
+            return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -136,7 +150,7 @@ class MessageController extends Controller{
                 ->leftJoin('user_levels', 'users.level', '=','user_levels.id')
                 ->where('sender_id', $request->segment(4))
                 ->where('recipient_id', $api['user']['id'])
-                ->where('is_read', 0)
+                ->whereNotNull('read_at')
                 ->select( 'body as message','first_name', 'last_name', 'users.id', 'user_picture', 'level_name','is_client')
                 ->orderBy('messages.created_at', 'DESC')
                 ->get()->first());

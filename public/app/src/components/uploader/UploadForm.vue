@@ -5,7 +5,7 @@
                 <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
                     <img :src="placeholder_image" alt="" /> </div>
                 <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;"> </div>
-                <div>
+                <div v-if="disabled !== true">
                     <span class="btn default btn-file">
                         <span class="fileinput-new"> Select image </span>
                         <span class="fileinput-exists"> Change </span>
@@ -21,7 +21,7 @@
 <script>
     export default {
         name: 'UploadForm',
-        props:['category','param_url','placeholder_image','form_id','input_id'],
+        props:['category','param_url','placeholder_image','form_id','input_id','disabled'],
         methods:{
             uploadPicture:function(){
                 let u = this;

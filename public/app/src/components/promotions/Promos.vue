@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane active" id="promos">
-        <button type="button" class="btn green-meadow" @click="showAddPromoModal">New Promo</button>
+        <button type="button" v-if="gate(user, 'promos', 'add')" class="btn green-meadow" @click="showAddPromoModal">New Promo</button>
         <br/><br/>
         <data-table :columns="promotionTable.columns" :rows="promotions" :paginate="true"
                     :onClick="promotionTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
@@ -18,19 +18,19 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Title</label>
-                                    <input type="text" v-model="newPromotion.title" class="form-control"/>
+                                    <input type="text" :disabled="!gate(user, 'promos', 'update')" v-model="newPromotion.title" class="form-control"/>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6" v-if="newPromotion.type != 'display'">
                                         <div class="form-group">
                                             <label>Date Start</label>
-                                            <input type="date" v-model="newPromotion.date_start" class="form-control"/>
+                                            <input type="date" :disabled="!gate(user, 'promos', 'update')" v-model="newPromotion.date_start" class="form-control"/>
                                         </div>
                                     </div>
                                     <div class="col-md-6" v-if="newPromotion.type != 'display'">
                                         <div class="form-group">
                                             <label>Date End</label>
-                                            <input type="date" v-model="newPromotion.date_end" class="form-control"/>
+                                            <input type="date" :disabled="!gate(user, 'promos', 'update')" v-model="newPromotion.date_end" class="form-control"/>
                                         </div>
                                     </div>
                                 </div>
@@ -38,7 +38,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Branches</label>
-                                            <vue-select multiple v-model="newPromotion.branches" :options="branch_selection"></vue-select>
+                                            <vue-select :disabled="!gate(user, 'promos', 'update')" multiple v-model="newPromotion.branches" :options="branch_selection"></vue-select>
                                         </div>
                                     </div>
                                 </div>
@@ -46,7 +46,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label>Type</label>
-                                    <select class="form-control" v-model="newPromotion.type">
+                                    <select class="form-control" :disabled="!gate(user, 'promos', 'update')" v-model="newPromotion.type">
                                         <option value="display">Display</option>
                                         <option value="promo">Promo</option>
                                     </select>
@@ -56,20 +56,21 @@
                                 <label>Picture</label>
                                 <upload-form :token="token" input_id="promo_file" form_id="promo_form" category="promotion"
                                              :placeholder_image="'images/promotions/'+newPromotion.promo_picture"
+                                             :disabled="!gate(user, 'promos', 'update')"
                                              :param_url="'promo_id='+newPromotion.id" @emit_host="getPromos" />
                             </div>
                         </div>
                         <div class="row" v-if="newPromotion.type != 'display'">
                             <div class="col-md-12">
                                 <label>Description</label>
-                                <div name="summernote" id="summernote_1"></div>
+                                <div name="summernote" id="summernote_1" :disabled="!gate(user, 'promos', 'update')"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <h3>
                                     Promo Contents
-                                    <button class="btn btn-info" @click="addPromoContent">+</button>
+                                    <button class="btn btn-info" @click="addPromoContent" v-if="gate(user, 'promos', 'update')">+</button>
                                 </h3>
                                 <table class="table table-responsive table-hover table-stripped table-bordered">
                                     <thead>
@@ -82,11 +83,11 @@
                                     <tbody>
                                     <tr v-for="d,key in newPromotion.promo_data">
                                         <td style="width:30px">
-                                            <button class="btn btn-danger btn-xs" @click="deletePromoContent(key)">X</button>
+                                            <button class="btn btn-danger btn-xs" v-if="gate(user, 'promos', 'update')" @click="deletePromoContent(key)">X</button>
                                         </td>
                                         <td style="width:160px" v-if="newPromotion.promo_data[key] !== null">
                                             <select v-model="newPromotion.promo_data[key].promo_type"
-                                                    class="form-control">
+                                                    class="form-control" v-if="!gate(user, 'promos', 'update')">
                                                 <option value="net_discount">Net Discount</option>
                                                 <option value="free_services">Free Services</option>
                                             </select>
@@ -97,7 +98,8 @@
                                                     <div class="form-group"
                                                             v-if="newPromotion.promo_data[key].promo_type == 'net_discount'">
                                                         <label>Discount Type</label>
-                                                        <select v-model="newPromotion.promo_data[key].discount_type" class="form-control">
+                                                        <select v-model="newPromotion.promo_data[key].discount_type"
+                                                                v-if="!gate(user, 'promos', 'update')" class="form-control">
                                                             <option value="percent">Percent</option>
                                                             <option value="amount">Amount</option>
                                                         </select>
@@ -105,11 +107,12 @@
                                                     <div class="form-group"
                                                             v-if="newPromotion.promo_data[key].promo_type == 'net_discount'">
                                                         <label>Discount</label>
-                                                        <input type="number" class="form-control" v-model="newPromotion.promo_data[key].discount" />
+                                                        <input type="number" v-if="!gate(user, 'promos', 'update')" class="form-control" v-model="newPromotion.promo_data[key].discount" />
                                                     </div>
                                                     <div class="form-group">
                                                         <label>Qualifier Type</label>
-                                                        <select v-model="newPromotion.promo_data[key].qualifier_operator" class="form-control">
+                                                        <select v-model="newPromotion.promo_data[key].qualifier_operator"
+                                                                v-if="!gate(user, 'promos', 'update')" class="form-control">
                                                             <option value="OR">OR</option>
                                                             <option value="AND">AND</option>
                                                         </select>
@@ -118,7 +121,7 @@
                                                 <div class="col-md-9">
                                                     <div class="form-group" v-if="newPromotion.promo_data[key].promo_type == 'free_services'">
                                                         <label>Services</label>
-                                                        <vue-select multiple v-model="newPromotion.promo_data[key].service_ids" :options="service_selection" />
+                                                        <vue-select multiple v-if="!gate(user, 'promos', 'update')" v-model="newPromotion.promo_data[key].service_ids" :options="service_selection" />
                                                     </div>
                                                     <h4>Qualifiers</h4>
                                                     <table class="table table-hover table-striped table-bordered">
@@ -138,9 +141,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div v-if="gate(user, 'promos', 'update')">
+                            <button type="button" v-if="newPromotion.id==0" @click="addPromo($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                            <button type="button" v-else @click="updatePromo($event)" data-loading-text="Updating..." class="btn green">Save</button>
+                        </div>
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
-                        <button type="button" v-if="newPromotion.id==0" @click="addPromo($event)" data-loading-text="Saving..." class="btn green">Save</button>
-                        <button type="button" v-else @click="updatePromo($event)" data-loading-text="Updating..." class="btn green">Save</button>
                     </div>
                 </div>
             </div>

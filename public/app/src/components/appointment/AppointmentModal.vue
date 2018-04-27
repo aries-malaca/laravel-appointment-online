@@ -45,8 +45,7 @@
                                     <tr>
                                         <td> Branch: </td>
                                         <td>
-                                            <a target="_blank" v-if="user.is_client===0" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
-                                            <span v-else> {{ appointment.branch_name }} </span>
+                                            <a target="_blank" v-bind:href="'/#/branches/'+appointment.branch_id"> {{ appointment.branch_name }} </a>
                                         </td>
                                     </tr>
                                     <tr>
@@ -109,7 +108,7 @@
                                                 <td>
                                                     <span :title="'By ' + service.item_data.cancel_by_name +', ' + moment(service.item_data.cancel_datetime).format('MM/DD/YYYY hh:mm A')"
                                                           class="badge badge-danger" v-if="service.item_status==='cancelled'"> Reason: {{ service.item_data.cancel_reason }} </span>
-                                                    <button v-if="service.item_status==='reserved'" @click="showCancelItemModal(service)" class="btn btn-danger btn-xs">Cancel</button>
+                                                    <button v-if="service.item_status==='reserved' && gate(user, 'appointments','update')" @click="showCancelItemModal(service)" class="btn btn-danger btn-xs">Cancel</button>
                                                 </td>
                                             </tr>
                                             </tbody>
@@ -142,7 +141,7 @@
                                                     <span class="badge badge-danger" v-else>{{ product.item_status }}</span>
                                                 </td>
                                                 <td>
-                                                    <button v-if="product.item_status==='reserved'" @click="showCancelItemModal(product)" class="btn btn-danger btn-xs">Cancel</button>
+                                                    <button v-if="product.item_status==='reserved' && gate(user, 'appointments','update')" @click="showCancelItemModal(product)" class="btn btn-danger btn-xs">Cancel</button>
                                                 </td>
                                             </tr>
                                             </tbody>
@@ -263,7 +262,7 @@
                         </div>
                     </div>
                     <div class="modal-footer" v-if="appointment.waiver_data !== undefined">
-                        <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved'" class="pull-left btn btn-danger">Cancel Appointment</button>
+                        <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved' && gate(user, 'appointments','update')" class="pull-left btn btn-danger">Cancel Appointment</button>
                         <a target="_blank" v-show="appointment.waiver_data.questions !== undefined" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
                         <button type="button" @click="closeModal()" class="btn dark btn-outline">Close</button>
                     </div>

@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane active" id="branches">
-        <button type="button" @click="showAddBranchModal" class="btn green-meadow">
+        <button type="button" @click="showAddBranchModal" v-if="gate(user, 'branches','add')" class="btn green-meadow">
             New Branch
         </button>
         <br/><br/>

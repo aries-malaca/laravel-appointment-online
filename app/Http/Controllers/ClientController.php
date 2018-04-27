@@ -149,8 +149,9 @@ class ClientController extends Controller{
                                 ->where("user_data", "LIKE", '%"boss_id":"'. $request->input('user_data')['boss_id'] .'"%')->count();
                 if ($checker > 0)
                     return response()->json(['result'=>'failed','error'=>["BOSS ID (Transaction account) already been taken."]], 400);
-            }
 
+
+            }
 
             $client = User::find($request->input('id'));
             $client->first_name = $request->input('first_name');

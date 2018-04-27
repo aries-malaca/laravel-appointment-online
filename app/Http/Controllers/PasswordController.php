@@ -42,7 +42,7 @@ class PasswordController extends Controller{
             $headers = array("subject"=>env("APP_NAME"). ' - Password Reset',
                 "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]
             );
-            $this->sendMail('email.reset_password', $content_data, $headers);
+            $this->sendMail('email.password_reset', $content_data, $headers);
 
             return response()->json(["result"=>"success"]);
         }
@@ -67,7 +67,7 @@ class PasswordController extends Controller{
 
                     $headers = array("subject"=>env("APP_NAME"). ' - Temporary Password',
                                      "to"=> [["email"=>$user['email'], "name"=> $user['first_name']]]);
-                    $this->sendMail('email.temporary_password', ["user"=>$user, "temporary_password"=>$temporary_password], $headers);
+                    $this->sendMail('email.password_temporary', ["user"=>$user, "temporary_password"=>$temporary_password], $headers);
 
                     $user_data['reset_password_expiration'] = 0;
                     User::where('id', $user['id'])->update(['user_data'=>json_encode($user_data)]);

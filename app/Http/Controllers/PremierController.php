@@ -99,7 +99,7 @@ class PremierController extends Controller{
                     return response()->json(["result" => 'failed', "error" => $premier->remarks], 400);
             }
 
-            return response()->json(["result" => "failed", "error" => "Couldn't fetch BOSS Transactions. Please try after a few moment."], 400);
+            return response()->json(["result" => "failed", "error" => "Couldn't fetch Transaction records. Please request for account review in order us to link your transaction records to your account.."], 400);
         }
         return response()->json($api, $api["status_code"]);
     }
@@ -128,10 +128,10 @@ class PremierController extends Controller{
     }
 
     function evaluatePremier($email){
-        $url = Config::where('config_name', 'FETCH_BOSS_TRANSACTIONS')->get()->first();
+        $user = User::where('email', $email)->get()->first();
 
-        if(isset($url['id'])){
-            $transactions = json_decode(file_get_contents($url->config_value . $email), true);
+        if(isset($user['id'])){
+            $transactions = json_decode($user['transaction_data'], true);
             $total = 0;
             $minimum = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
 
@@ -142,7 +142,6 @@ class PremierController extends Controller{
                 $total += $value['net_amount'];
             return ($total >= $minimum ? $total:false);
         }
-
         return false;
     }
 

@@ -152,7 +152,7 @@ Route::post('/premier/exportExcel', 'PremierController@exportExcel');
 Route::get('/premier/getRequests', 'PremierReviewController@getRequests');
 Route::get('/premier/getAllRequests', 'PremierReviewController@getAllRequests');
 Route::post('/premier/deleteRequest', 'PremierReviewController@deleteRequest');
-Route::post('/premier/completeRequest', 'PremierReviewController@completeRequest');
+Route::post('/premier/processRequest', 'PremierReviewController@processRequest');
 
 Route::get('/stats/getAdminStats', 'StatsController@getAdminStats');
 
@@ -255,7 +255,7 @@ Route::post('/mobile/reviews/reviewTransaction', 'MobileApiController@reviewTran
 Route::get('/mobile/getAppointmentReview', 'MobileApiController@getAppointmentReview');
 
 Route::get('/mobile/getChatMessage/{recipientID}/{offset}/{latestlastChatID}/{previouslastID}/{ifLatest}', 'MobileApiController@getChatMessage');
-Route::get('/mobile/getAllChatMessage', 'MobileApiController@getAllChatMessage');
+Route::post('/mobile/getAllChatMessage', 'MobileApiController@getAllChatMessage');
 Route::post('/mobile/getChatMessageByThread','MobileApiController@getChatMessageByThread');
 
 Route::post('/mobile/sendChatMessage', 'MobileApiController@sendChatMessage');

@@ -3,7 +3,6 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Email Verification</title>
     @include('email.layouts.head')
 </head>
 <body class="">
@@ -13,7 +12,6 @@
         <td class="container">
             <div class="content">
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader">Premier Loyalty Card Application</span>
                 <table class="main">
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
@@ -22,18 +20,13 @@
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td>
-                                        <p>Hi {{  $user['first_name'] }},</p>
-
+                                        <p>Dear {{ delegation($user) }} {{ $user['first_name'] }} {{ $user['last_name'] }},</p>
+                                        <p>Thank you for completing the Premier Loyalty Card on-line application.</p>
                                         <p>
-                                        Thank you for completing the Premier Loyalty Card on-line application.
+                                            This is to formally acknowledge receipt of your application dated {{ date('m/d/Y')  }} , with the following information:
                                         </p>
 
-                                        <p>
-                                            This is to formally acknowledge receipt of your application dated
-                                            <b> {{ date('m/d/Y') }} </b>, with the following information:
-                                        </p>
-
-                                        <table>
+                                        <table class="datatable">
                                             <tr>
                                                 <td>First Name:</td>
                                                 <td>{{ $user['first_name']  }}</td>
@@ -64,23 +57,11 @@
                                             </tr>
                                         </table>
                                         <br/>
-
-                                        <p>
-                                            Our Customer Service team will be reviewing your application details and
-                                            shall notify you via email if you have reached the minimum required
-                                            accumulated service total to qualify or not.
-                                        </p>
-
-                                        <p>
-                                            We appreciate your time and effort, and your continued patronage of Lay
-                                            Bare Waxing Salon.
-                                        </p>
-
+                                        <p>Our Customer Service team will be reviewing your application details and shall notify you via email if you have reached the minimum required accumulated service total to qualify or not.</p>
+                                        <p>We appreciate your time and effort, and your continued patronage of Lay Bare Waxing Salon.</p>
                                         <p>Keep on waxing.</p>
-
                                         <p>Sincerely,</p>
-
-                                        <p>Thank you!</p>
+                                        <p>Lay Bare Waxing Salon</p>
                                     </td>
                                 </tr>
                             </table>

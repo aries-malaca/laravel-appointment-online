@@ -100,7 +100,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <h4>Item Selection</h4>
+                                        <h4>Select Category</h4>
                                         <select class="form-control large" v-model="show_item_type">
                                             <option value="services">Services</option>
                                             <option value="products">Products</option>
@@ -142,7 +142,7 @@
                                             <tr>
                                                 <th style="width:20px"></th>
                                                 <th>Service</th>
-                                                <th style="width:110px">Service Time</th>
+                                                <th style="width:110px">Appointment Time</th>
                                                 <th style="width:100px">Amount</th>
                                             </tr>
                                         </thead>
@@ -348,7 +348,7 @@
 
                 }
                 else if(currentPage === 1){
-                    if(this.newTransaction.services.length === 0){
+                    if(this.newTransaction.services.length === 0 && this.user.is_client === 1){
                         toastr.error("Please add at least one service to proceed.");
                         return false;
                     }
@@ -411,8 +411,7 @@
                 if(this.disable_saving)
                     return false;
 
-                if(!confirm("Confirm appointment booking at " + this.newTransaction.branch.label +
-                        " ("+ this.newTransaction.services[0].start + ")?"))
+                if(!confirm("Confirm appointment booking?"))
                     return false;
 
                 let u = this;
@@ -461,10 +460,14 @@
                     });
             },
             isConflicted:function(newData, oldData){
+                if(oldData.transaction_status !== 'reserved')
+                    return false;
+
                 let a = Number(moment(newData.start).format("X"));
                 let b = Number(moment(newData.end).format("X"));
                 let c = Number(moment(oldData.book_start_time).format("X"));
                 let d = Number(moment(oldData.book_end_time).format("X"));
+
                 return ((c<=a && d<=b &&d>=a) ||  (b<=d && c<=b &&a>=c) || (c<=b && a<=c) || (a<=d && c<= a));
             }
         },
@@ -531,8 +534,8 @@
                     var operating_end = Number(moment(today+" "+this.branch_operating_schedule.end).format("X"));
                     var hits = 0;
 
-                    if((Number(s_start - moment().format("X"))) < (allowance*60))
-                        return "Service time start must be " + (allowance/60) + ' hours after the current time.';
+                    if((Number(s_start - moment().format("X"))) < (allowance*60) && this.user.is_client === 1)
+                        return "Appointment Time start must be " + (allowance/60) + ' hours after the current time.';
 
 
                     if(s_start <  operating_start || s_start > operating_end || (operating_end + (60 * extension) )  < s_end )
@@ -558,7 +561,10 @@
                         if(this.isConflicted(this.newTransaction.services[x], this.filtered_queue[y])){
                             hits++;
                             if(this.newTransaction.branch.rooms < hits)
-                                return "No room available for the time for service #" + (x+1);
+                                return "No room available for the time of service #" + (x+1);
+
+                            if(this.technician_selection.length < hits)
+                                return "No technician available for the time of service #" + (x+1);
                         }
                         if(this.isConflicted(this.newTransaction.services[x], this.filtered_queue[y])
                                 && this.newTransaction.client.value === this.filtered_queue[y].client_id){
@@ -670,9 +676,6 @@
             },
             branch_operating_schedule:function(){
                 if(this.newTransaction.branch !== undefined && this.newTransaction.transaction_date !==""){
-                    var tt =  this.newTransaction.transaction_time;
-
-
                     if(this.newTransaction.services.length>0){
                         var f = this.newTransaction.services[0].start;
 

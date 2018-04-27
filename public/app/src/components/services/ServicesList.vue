@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane active" id="services">
-        <button type="button" @click="showAddServiceModal" class="btn green-meadow">New Service</button>
+        <button type="button" v-if="gate(user, 'services', 'add')" @click="showAddServiceModal" class="btn green-meadow">New Service</button>
         <br/><br/>
         <data-table :columns="serviceTable.columns" :rows="services" :onClick="serviceTable.rowClicked"
                     :paginate="true" styleClass="table table-bordered table-hover table-striped" />
@@ -151,6 +151,9 @@
                 $("#add-service-modal").modal("show");
             },
             viewService:function(service){
+                if(!this.gate(user, 'services', 'update'))
+                    return false;
+
                 this.newService = {
                     id:service.id,
                     search_id:service.id,
@@ -215,6 +218,9 @@
             },
             configs(){
                 return this.$store.state.configs;
+            },
+            user(){
+                return this.$store.state.user;
             }
         }
     }

@@ -1,6 +1,6 @@
 <template>
     <div class="clients">
-        <div class="portlet light" v-show="view=='list'" v-if="user.is_client !== 1">
+        <div class="portlet light" v-show="view=='list'" v-if="user.is_client !== 1 && gate(user, 'clients', 'view')">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>

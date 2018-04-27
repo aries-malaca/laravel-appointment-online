@@ -273,9 +273,9 @@ class AppointmentController extends Controller{
                                         ->get();
 
             foreach($items as $i=>$value){
-                $item = TransactionItem::find($value['id']);
+                $item       = TransactionItem::find($value['id']);
 
-                $item_data = json_decode($item->item_data,true);
+                $item_data  = json_decode($item->item_data);
 
                 if($item->item_type === 'service'){
                     $item_data['cancel_reason'] = $request->input('reason')!=='other' ? $request->input('reason'): $request->input('reason_text');

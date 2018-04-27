@@ -127,7 +127,7 @@ class Controller extends BaseController{
             ->select('transaction_items.*','transactions.serve_time', 'transactions.complete_time')
             ->get()->toArray();
         foreach($items as $key=>$value){
-            $items[$key]['item_data'] = json_decode($value['item_data'],true);
+            $items[$key]['item_data'] = json_decode($value['item_data']);
             if($value['item_type'] === 'service'){
                 $service = Service::find($value['item_id']);
                 $service_name = $service->service_type_id !== 0 ? ServiceType::find($service->service_type_id)->service_name:ServicePackage::find($service->service_package_id)->package_name;
@@ -395,25 +395,37 @@ class Controller extends BaseController{
     }
 
     public function sendPushNotification($devicetype,$device_id,$unique_id,$notification_type,$user_id){
-        $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
+       
+        $queryConfig        = Config::where("config_name","GET_PUSH_NOTIFICATION")->get()->first();
+        $objectValue        = json_decode($queryConfig->config_value);
+        $full_shared_access = $objectValue->connection_string_full_access;
+        $shared_access      = $objectValue->connection_string;
+        $hub_name           = $objectValue->hub_name;
 
+        $hub                = new NotificationHub($full_shared_access, $hub_name);
         //android
         if($devicetype == "Android"){
              $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"appointment"}}';
             $notification   = new Notification_Azure("gcm", $message);
-            $hub->sendNotification($notification, "64a1dc2c");  
+            $hub->sendNotification($notification, $device_id);  
         }
         // //ios
         if($devicetype == "IOS"){
             $alert = '{"aps":{"user_id":'.$user_id.',"unique_id":"'.$unique_id.'","notification_type":"notification"}}';
             $notification = new Notification_Azure("apple", $alert);
-            $hub->sendNotification($notification, null);
+            $hub->sendNotification($notification, $device_id);
         }
     }
 
       public function sendChatNotification($devicetype,$device_id,$thread_id,$notification_type,$user_id){
-        $hub   = new NotificationHub("Endpoint=sb://laybarenotifnamespace.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=kzEkLjz8LR8zlgorOAh4/QJrAAci/x1leu7evDZOPto=", "LayBareNotificationHub");
+        
+        $queryConfig        = Config::where("config_name","GET_PUSH_NOTIFICATION")->get()->first();
+        $objectValue        = json_decode($queryConfig->config_value);
+        $full_shared_access = $objectValue->connection_string_full_access;
+        $shared_access      = $objectValue->connection_string;
+        $hub_name           = $objectValue->hub_name;
 
+        $hub                = new NotificationHub($full_shared_access, $hub_name);
         //android
         if($devicetype == "Android"){
              $message        = '{"data":{"user_id":'.$user_id.',"unique_id":"'.$thread_id.'","notification_type":"chat"}}';

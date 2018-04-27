@@ -278,7 +278,7 @@ class MobileApiController extends Controller{
         $device_info        =  $request->input('device_info');
         $unique_device_id   =  $request->input('unique_device_id');
 
-        // $objectTransactions     = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$username);   
+        $objectTransactions     = file_get_contents("https://api.lay-bare.com/transactions/getTotals/".$username);   
         //attempt to login the system
         $userQuery = User::where('email', $request['email'])->get()->first();
         if(isset($userQuery['id'])){
@@ -309,8 +309,8 @@ class MobileApiController extends Controller{
                         ->orderBy('created_at', 'DESC')->get()->first();
 
                     $objectTransactions = array();
-                    $objectTransactions["total_price"]       = 0;
-                    $objectTransactions["total_discount"]    = 0;
+                    // $objectTransactions["total_price"]       = 0;
+                    // $objectTransactions["total_discount"]    = 0;
                     $objectTransactions["minimum_amount"]    = $minimum_amount;
                     $objectTransactions["premier"]           = $premiers;
                     $objectTransactions = json_encode($objectTransactions);
@@ -542,7 +542,7 @@ class MobileApiController extends Controller{
         $device_name        = $request->input('addDeviceName');
         $facebook_id        = $request->input('addFBID');
         $imageURL           = $request->input('addImageUrl');
-        
+            
     
         $user 			    = new User;
         $user->first_name 	= $request->input('addFname');
@@ -1026,51 +1026,7 @@ class MobileApiController extends Controller{
         }
     }
 
-
     //chat messaging
-    public function getChatMessage(Request $request){
-        
-        $recipientID        = $request->segment(4);
-        $offset             = $request->segment(5);
-        $latestlastChatID   = $request->segment(6);
-        $previouslastChatID = $request->segment(7);
-        $ifLatest           = $request->segment(8);
-        $limit              = 20;
-        $api                = $this->authenticateAPI();
-        $response           = array();
-        $lastActivity       = $this->getLastTimeActivity($recipientID);    
-        if($api['result'] === 'success'){
-        
-            $clientID                   = $api["user"]["id"];
-            if($ifLatest == "true"){
-                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
-                                            ->whereIn('sender_id', [$recipientID, $clientID])
-                                            ->where("id",">",$latestlastChatID)
-                                            ->orderBy('created_at')
-                                            ->get()->toArray();
-                $ifLatest = "true";                            
-            }
-            else {
-                $queryGetChatMessage    =  Message::whereIn('recipient_id', [$recipientID, $clientID])
-                                            ->whereIn('sender_id', [$recipientID, $clientID])
-                                            ->where("id","<",$previouslastChatID)
-                                            ->limit($limit)->offset($offset)
-                                            ->orderBy('created_at')
-                                            ->get()->toArray();
-                 $ifLatest = "false";                     
-            }                  
-            $response["offset"]         = $offset + count($queryGetChatMessage);
-            $response["getMessage"]     = $queryGetChatMessage;        
-            $response["ifLatest"]       = $ifLatest === 'true'? true: false;
-            $response["lastActivity"]   = $lastActivity;  
-            return response()->json($response);                               
-        }
-        else{
-            return response()->json($api, $api["status_code"]);
-        }
-
-    }
-
     public function getAllChatMessage(Request $request){
         
         $api                = $this->authenticateAPI();
@@ -1080,19 +1036,20 @@ class MobileApiController extends Controller{
         $arrayThread        = $request->input("thread_id");
         $arrayLast          = $request->input("last_id");
 
-        $responseThread      = array();
-        $responseMessage     = array();
-        $objectResponse      = array();
-        $arrayMessage        = array();
+        
+        $responseThread     = array();
+        $responseMessage    = array();
+        $objectResponse     = array();
+        $arrayMessage       = array();
 
         if($api['result'] === 'success'){
             
             $clientID      = $api["user"]["id"];
             $getThreadID   = $this->getThreadID($clientID,$arrayThread,$arrayLast);
-            
-            $arrayThread   = $getThreadID["arrayThread"];
-            $arrayLast     = $getThreadID["arrayLastMessage"];
-            
+            $arrayThread   = $getThreadID["threadArray"];
+            $arrayLast     = $getThreadID["lastMessageArray"];
+
+                     
             foreach ($arrayThread as $key => $value) {
 
                 $thread_id      = $value;
@@ -1115,47 +1072,34 @@ class MobileApiController extends Controller{
 
                     $arrayMessage  =   Message::where("message_thread_id",$value)
                                             ->where("id",">",$latest_id)
-                                            ->orderBy("created_at")
+                                            ->limit($limit)
+                                            ->orderBy("id","desc")
                                             ->get()->toArray();
 
                     $responseMessage[]          = $arrayMessage;  
                     $threadQuery["thread_name"] = $thread_name;
                     $threadQuery["messages"]    = $arrayMessage;
                     $responseThread[]           = $threadQuery;
-
                 }
-
             }
-
             $objectResponse["allMessage"]    = $responseThread;
             return response()->json($objectResponse); 
         }
         else{
             return response()->json($api, $api["status_code"]);
         }
+
     }
 
-
-
-    public function checkIfHasLatestMessage($thread_id,$latest_id){
-        $queryChat = Message::where("message_thread_id",$thread_id)
-                                ->where("id",">",$latest_id)
-                                ->get()->toArray();
-        if(count($queryChat) > 0){
-            return true;
-        }
-        return false;                        
-    }
-
-    public function getChatMessageByThread(Request $request){
+     public function getChatMessageByThread(Request $request){
         $api                = $this->authenticateAPI();
         $response           = array();
-        $offset             = 0;
         $limit              = 20;
-        
         $thread_id          = $request->input("thread_id");
         $latest_id          = (int)$request->input("latest_id");
+        $prev_last_id       = (int)$request->input("prev_last_id");
         $offset             = $request->input("offset");
+        $msg_status         = $request->input("msg_status");
 
         $responseArray = array();
         if($api['result'] === 'success'){
@@ -1163,10 +1107,10 @@ class MobileApiController extends Controller{
             $thread_name    = "";
             $threadQuery    = MessageThread::where("id",$thread_id)
                                 ->get()->first();
-        
+            
             if(isset($threadQuery)){
                 
-                if($latest_id > 0){
+                if($msg_status == "latest"){
                      $messageQuery =  Message::where("message_thread_id",$thread_id)
                                 ->where("id",">",$latest_id)
                                 ->orderBy("created_at","desc")
@@ -1174,9 +1118,10 @@ class MobileApiController extends Controller{
                 }
                 else{
                    $messageQuery =  Message::where("message_thread_id",$thread_id)
+                                ->where("id","<",$prev_last_id)
+                                ->limit($limit)
                                 ->get()->toArray();
                 }
-               
                 $participants   = json_decode($threadQuery["participant_ids"],true);
                 foreach ($participants as $k => $val) {
                     if($k == count($participants) - 1) {
@@ -1197,6 +1142,15 @@ class MobileApiController extends Controller{
     }
 
 
+    public function checkIfHasLatestMessage($thread_id,$latest_id){
+        $queryChat = Message::where("message_thread_id",$thread_id)
+                                ->where("id",">",$latest_id)
+                                ->get()->toArray();
+        if(count($queryChat) > 0){
+            return true;
+        }
+        return false;                        
+    }
 
     function getThreadID($clientID,$arrayThread,$arrayLastMessage){
 
@@ -1210,13 +1164,15 @@ class MobileApiController extends Controller{
                                 ->groupBy("message_thread_id")
                                 ->orderBy("messages.created_at","desc")
                                 ->get()->toArray();
-        foreach ($messageQuery as $key => $value) {
-            $thread_id          = $value["thread_id"];
-            $arrayThread[]      = $thread_id;
-            $arrayLastMessage[] = 0;
-        }                        
-        $response["arrayThread"]        = $arrayThread;
-        $response["arrayLastMessage"]   = $arrayLastMessage;
+        if (count($messageQuery) > 0) {
+           foreach ($messageQuery as $key => $value) {
+                $thread_id          = $value["thread_id"];
+                $arrayThread[]      = $thread_id;
+                $arrayLastMessage[] = 0;
+            }                        
+        }
+        $response["threadArray"]        = $arrayThread;
+        $response["lastMessageArray"]   = $arrayLastMessage;
         return $response;                        
     }
 

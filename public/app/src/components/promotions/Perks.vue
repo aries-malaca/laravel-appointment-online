@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane" id="perks">
-        <button type="button" class="btn green-meadow" @click="showAddPerkModal">New Perk</button>
+        <button type="button" class="btn green-meadow" v-if="gate(user, 'perks', 'add')" @click="showAddPerkModal">New Perk</button>
         <br/><br/>
         <div class="row">
             <div v-for="perk in perks" :class="perk.perk_data.classname" >
@@ -110,6 +110,9 @@
             },
 
             viewPerk:function(perk){
+                if(!this.gate(user, 'perks', 'add'))
+                    return false;
+
                 this.newPerk = {
                     id:perk.id,
                     perk_name:perk.perk_name,
@@ -164,7 +167,10 @@
         computed:{
             token(){
                 return this.$store.state.token;
-            }
+            },
+            user(){
+                return this.$store.state.user;
+            },
         }
     }
 </script>

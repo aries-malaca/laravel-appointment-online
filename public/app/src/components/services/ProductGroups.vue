@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane" id="product-groups">
-        <button type="button" @click="showAddProductGroupModal" class="btn green-meadow">New Product Group</button>
+        <button type="button" v-if="gate(user, 'products', 'add')" @click="showAddProductGroupModal" class="btn green-meadow">New Product Group</button>
         <br/><br/>
         <data-table :columns="productGroupTable.columns" :rows="groups" :paginate="true"
                     :onClick="productGroupTable.rowClicked" styleClass="table table-bordered table-hover table-striped"/>
@@ -138,6 +138,9 @@
                 });
             },
             viewProductGroup:function(product){
+                if(!this.gate(user, 'products', 'update'))
+                    return false;
+
                 this.newProductGroup = {
                     id:product.id,
                     product_group_name:product.product_group_name,
@@ -161,6 +164,9 @@
             },
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             }
         }
     }

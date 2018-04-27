@@ -11,7 +11,7 @@
                         <a href="#branches" data-toggle="tab">Branches</a>
                     </li>
                     <li>
-                        <a href="#clusters" data-toggle="tab">Clusters</a>
+                        <a v-if="gate(user, 'clusters','view')"  href="#clusters" data-toggle="tab">Clusters</a>
                     </li>
                 </ul>
             </div>

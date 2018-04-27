@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane" id="service-packages">
-        <button type="button" @click="showAddServicePackageModal" class="btn green-meadow">New Package</button>
+        <button type="button" v-if="gate(user, 'services', 'add')" @click="showAddServicePackageModal" class="btn green-meadow">New Package</button>
         <br/><br/>
         <data-table :columns="servicePackageTable.columns" :onClick="servicePackageTable.rowClicked"
                     :rows="packages"  styleClass="table table-bordered table-hover table-striped" />
@@ -71,6 +71,9 @@
                 $("#add-service-package-modal").modal("show");
             },
             viewServicePackage:function(service_package){
+                if(!this.gate(user, 'services', 'update'))
+                    return false;
+
                 this.newServicePackage = {
                     id:service_package.id,
                     package_name:service_package.package_name,
@@ -151,6 +154,9 @@
             packages(){
                 return this.$store.state.services.packages;
             },
+            user(){
+                return this.$store.state.user;
+            }
         }
     }
 </script>

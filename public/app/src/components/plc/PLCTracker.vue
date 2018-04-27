@@ -1,6 +1,6 @@
 <template>
     <div id="plc-tracker">
-        <div class="portlet light" v-if="user.is_client !== 1">
+        <div class="portlet light" v-if="user.is_client !== 1 && gate(user, 'plc_tracker', 'view')">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -10,7 +10,7 @@
                     <li class="active">
                         <a href="#tracker" data-toggle="tab">Tracker</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'plc_request', 'view')">
                         <a href="#requests" data-toggle="tab">Requests</a>
                     </li>
                 </ul>
@@ -27,7 +27,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-9">
+                            <div class="col-md-9" v-if="gate(user, 'plc_tracker', 'process')">
                                 <label><br><br></label>
                                 <button v-if="plc[filter].length > 0" class="btn btn-lg btn-warning" @click="selectAll(true)">Select</button>
                                 <button class="btn btn-lg purple" v-if="selected.length>0" @click="selectAll(false)">Deselect</button>
@@ -218,7 +218,9 @@
                 let u = this;
                 axios.get('/api/premier/getPremiers/all/'+status)
                     .then(function (response) {
-                        u.plc[status] = response.data;
+                        u.plc[status] = response.data.filter((item)=>{
+                            return (u.user.user_data.branches.indexOf(item.branch_id)  !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
+                        });
                         for(var x=0;x<u.plc[status].length;x++){
                             u.plc[status][x].checked = false;
                             u.plc[status][x].checked_html = '<input type="checkbox" class="checkbox"/>';

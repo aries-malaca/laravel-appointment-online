@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane active" id="technicians-list">
-        <button type="button" @click="showAddModal" class="btn green-meadow">Add Technician</button>
+        <button type="button" @click="showAddModal" v-if="gate(user, 'technicians','add')" class="btn green-meadow">Add Technician</button>
         <br/><br/>
         <data-table
             :columns="technicianTable.columns"

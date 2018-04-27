@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane" id="service-types">
-        <button type="button" @click="showAddServiceTypeModal" class="btn green-meadow">New Service Type</button>
+        <button type="button" v-if="gate(user, 'services', 'add')" @click="showAddServiceTypeModal" class="btn green-meadow">New Service Type</button>
         <br/><br/>
         <data-table :columns="serviceTypeTable.columns" :rows="types" :paginate="true"
                     :onClick="serviceTypeTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
@@ -143,6 +143,9 @@
                 });
             },
             viewServiceType:function(service_type){
+                if(!this.gate(user, 'services', 'update'))
+                    return false;
+
                 let u = this;
 
                 this.newServiceType = {
@@ -201,6 +204,9 @@
             },
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             }
         }
     }

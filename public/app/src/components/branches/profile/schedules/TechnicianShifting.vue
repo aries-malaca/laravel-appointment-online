@@ -7,7 +7,7 @@
             </div>
         </div>
         <div v-else>
-            <button @click="showAddModal" class="btn btn-info btn-sm">Add</button>
+            <button @click="showAddModal" v-if="gate(user, 'branch_schedules','add')" class="btn btn-info btn-sm">Add</button>
             <br/>
             <br/>
             <div style="overflow-x:scroll">
@@ -32,8 +32,8 @@
                             <td :style="'color:'+ shift.shift_color ">{{ shift.shift_color.toUpperCase() }}</td>
                             <td v-for="t in shift.shift_data">{{ t }}</td>
                             <td>
-                                <button class="btn btn-info btn-block" @click="viewShift(shift)">Edit</button>
-                                <button class="btn btn-danger btn-block" @click="deleteTechnicianShift(shift)">Delete</button>
+                                <button v-if="gate(user, 'branch_schedules','update')" class="btn btn-info btn-block" @click="viewShift(shift)">Edit</button>
+                                <button v-if="gate(user, 'branch_schedules','update')" class="btn btn-danger btn-block" @click="deleteTechnicianShift(shift)">Delete</button>
                             </td>
                         </tr>
                     </tbody>
@@ -231,6 +231,9 @@
             },
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             },
         }
     }

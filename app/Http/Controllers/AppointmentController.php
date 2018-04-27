@@ -193,8 +193,7 @@ class AppointmentController extends Controller{
 
 
         if($request->input('branches') !== null)
-            if(!in_array(0, explode( ",",$request->input('branches'))))
-                $appointments = $appointments->whereIn('branch_id', explode( ",",$request->input('branches')));
+            $appointments = $appointments->whereIn('branch_id', explode( ",",$request->input('branches')));
 
         $appointments = $appointments->orderBy('transaction_datetime','desc')
                                     ->get()->toArray();

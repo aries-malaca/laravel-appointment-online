@@ -35,14 +35,15 @@
                         {{ moment("2000-01-01 " + time.start).format("hh:mm A") }} - {{ moment("2000-01-01 " + time.end).format("hh:mm A")}}
                     </td>
                     <td>
-                        <button class="btn btn-info btn-sm" @click="editSchedule(regular_schedule)">Edit</button>
+                        <button class="btn btn-info btn-sm" v-if="gate(user, 'branch_schedules','update')" @click="editSchedule(regular_schedule)">Edit</button>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <h4>Custom Schedules <button @click="showAddScheduleModal" class="btn btn-info btn-sm">Add</button></h4>
+        <h4>Custom Schedules <button @click="showAddScheduleModal" class="btn btn-info btn-sm"
+                     v-if="gate(user, 'branch_schedules','add')">Add</button></h4>
         <div style="overflow-x:scroll">
             <table class="table table-responsive table-hover table-bordered table-stripped" v-if="custom_schedules">
                 <thead>
@@ -80,8 +81,8 @@
                             </div>
                         </td>
                         <td>
-                            <button class="btn btn-info btn-sm btn-block" @click="editSchedule(schedule)">Edit</button>
-                            <button class="btn btn-danger btn-sm btn-block" @click="deleteBranchSchedule(schedule)">Delete</button>
+                            <button v-if="gate(user, 'branch_schedules','update')" class="btn btn-info btn-sm btn-block" @click="editSchedule(schedule)">Edit</button>
+                            <button v-if="gate(user, 'branch_schedules','update')" class="btn btn-danger btn-sm btn-block" @click="deleteBranchSchedule(schedule)">Delete</button>
                         </td>
                     </tr>
                     <tr v-show="newSchedule.schedule_type==='custom' && currently_editing===newSchedule.id">
@@ -346,6 +347,9 @@
             },
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             },
             branch(){
                 return this.$store.state.branches.viewing_branch;

@@ -9,7 +9,7 @@
                     </p>
                 </div>
                 <div v-else>
-                    <div class="row">
+                    <div class="row" v-if="gate(user, 'technician_schedules', 'add')">
                         <div class="col-md-12">
                             <h4>Set Single Schedule</h4>
                             <div>
@@ -120,9 +120,11 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" v-if="setRegularSchedule.id!==0" @click="deleteSchedule(setRegularSchedule)" data-loading-text="Saving..." class="btn pull-left red">Delete</button>
-                                            <button type="button" v-if="setRegularSchedule.id===0" @click="addRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
-                                            <button type="button" v-else @click="updateRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                                            <div v-if="gate(user, 'technician_schedules', 'update')">
+                                                <button type="button" v-if="setRegularSchedule.id!==0" @click="deleteSchedule(setRegularSchedule)" data-loading-text="Saving..." class="btn pull-left red">Delete</button>
+                                                <button type="button" v-if="setRegularSchedule.id===0" @click="addRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                                                <button type="button" v-else @click="updateRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                                            </div>
                                             <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
                                         </div>
                                     </div>
@@ -270,13 +272,13 @@
                                 timeFormat: 'hh:mm A',
                                 schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
                                 droppable: true, // this allows things
-                                eventClick: function(event) {
+                                eventClick: u.gate(u.user, 'technician_schedules', 'update')?function(event) {
                                     if(event.event.schedule_type === 'RANGE')
                                         u.editRegularSchedule(event.event);
                                     else{
                                         u.editSingleSchedule(event);
                                     }
-                                },
+                                }:null,
                                 drop:function(date,event){
                                     let shift_id = Number(event.target.dataset.shift_id);
                                     let branch_id = Number(event.target.dataset.branch_id);
@@ -400,6 +402,9 @@
             },
             technician(){
                 return this.$store.state.technicians.viewing_technician;
+            },
+            user(){
+                return this.$store.state.user;
             },
             branches(){
                 let u = this;

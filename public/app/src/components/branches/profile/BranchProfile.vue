@@ -21,7 +21,7 @@
                     <li>
                         <a href="#transactions" data-toggle="tab">Transactions</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'branch_schedules','view')">
                         <a href="#schedules" data-toggle="tab">Schedules</a>
                     </li>
                     <li>
@@ -88,7 +88,7 @@
                                 </table>
                                 <!--end row-->
 
-                                <div v-if="with_back">
+                                <div v-if="with_back && gate(user, 'branches','update')">
                                     <button class="btn btn-info" @click="editBranch(branch)">Edit Branch</button>
                                     <button class="btn btn-success" @click="addPicture">Add Photo</button>
                                 </div>
@@ -98,7 +98,7 @@
                                         <ul class="list-unstyled profile-nav" style="margin-top:5px">
                                             <li>
                                                 <img v-bind:src="'images/branches/'+ pic" class="img-responsive pic-bordered" alt="" />
-                                                <div v-if="with_back">
+                                                <div v-if="with_back && gate(user, 'branches','update')">
                                                     <a @click="showUploadModal(key)" class="profile-edit"> <i class="fa fa-pencil"></i> </a>
                                                     <a @click="removePicture(key,pic)" style="margin-top:30px" class="profile-edit"> <i class="fa fa-close"></i> </a>
                                                 </div>

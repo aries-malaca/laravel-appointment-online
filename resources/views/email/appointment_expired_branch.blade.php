@@ -36,11 +36,9 @@
                                                 <td>{{ date('m/d/Y', strtotime($value['transaction_datetime'])) }}</td>
                                                 <td>
                                                     @foreach($value['items'] as $key => $item)
-                                                        @if($item['item_type'] == 'service')
-                                                            <span> {{ $item['item_name'] }}</span>
-                                                            @if(($key+1)< sizeof($value['items']))
-                                                                <span>, </span>
-                                                            @endif
+                                                        <span> {{ $item['item_name'] }}</span>
+                                                        @if(($key+1)< sizeof($value['items']))
+                                                            <span>, </span>
                                                         @endif
                                                     @endforeach
                                                 </td>

@@ -367,6 +367,10 @@
                     .then(function (response) {
                         u.appointments = [];
                         response.data.forEach(function(item){
+                            if(item.item_type === 'product'){
+                                item.book_start_time = moment().format("YYYY-MM-DD hh:mm:ss");
+                                item.book_end_time = moment().format("YYYY-MM-DD hh:mm:ss");
+                            }
                             u.appointments.push(item);
                         });
                         u.initAgenda();

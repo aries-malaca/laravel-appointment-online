@@ -40,11 +40,9 @@
                                                 <td>Service(s): </td>
                                                 <td>
                                                     @foreach($appointment['items'] as $key => $item)
-                                                        @if($item['item_type'] == 'service')
-                                                            <span> {{ $item['item_name'] }}</span>
-                                                            @if(($key+1)< sizeof($appointment['items']))
-                                                                <span>, </span>
-                                                            @endif
+                                                        <span> {{ $item['item_name'] }}</span>
+                                                        @if(($key+1)< sizeof($appointment['items']))
+                                                            <span>, </span>
                                                         @endif
                                                     @endforeach
                                                 </td>

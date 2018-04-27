@@ -275,7 +275,7 @@ class AppointmentController extends Controller{
             foreach($items as $i=>$value){
                 $item       = TransactionItem::find($value['id']);
 
-                $item_data  = json_decode($item->item_data);
+                $item_data  = json_decode($item->item_data,true);
 
                 if($item->item_type === 'service'){
                     $item_data['cancel_reason'] = $request->input('reason')!=='other' ? $request->input('reason'): $request->input('reason_text');
@@ -393,12 +393,13 @@ class AppointmentController extends Controller{
     function expireAppointments(){
         $items = TransactionItem::leftJoin('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
                                     ->where('item_status', 'reserved')
-                                    ->select('transaction_items.*','client_id')
+                                    ->select('transaction_items.*','client_id', 'transaction_datetime')
                                     ->get()->toArray();
         $ids = [];
 
         foreach($items as $key=>$value){
-            if(strtotime($value['book_start_time']) < strtotime(date('Y-m-d')) && $value['book_start_time'] != null){
+            if((strtotime($value['book_start_time']) < strtotime(date('Y-m-d')) && $value['book_start_time'] != null) ||
+                (strtotime($value['transaction_datetime']) < strtotime(date('Y-m-d'))) ){
                 TransactionItem::where('id', $value['id'])->update(["item_status" => 'expired']);
                 if(!in_array($value['transaction_id'], $ids))
                     $ids[] = $value['transaction_id'];
@@ -439,6 +440,7 @@ class AppointmentController extends Controller{
                 $data = ["branch"=>$branch, "appointments"=> $transactions]; //override data
                 $headers = array("subject" => env("APP_NAME") .' - '. 'Expired Branch Appointments',
                     "to" => [["email" => $branch['branch_email'], "name" => $branch['branch_name']]]);
+
                 $this->sendMail('email.appointment_expired_branch', $data, $headers);
             }
         }

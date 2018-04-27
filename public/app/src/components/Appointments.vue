@@ -288,10 +288,19 @@
         computed:{
             branchIds(){
                 var a = [];
+                var b = [];
 
                 this.branches.forEach((item)=>{
                     a.push(item.value);
                 });
+
+                this.branch_selection.forEach((item)=>{
+                    a.push(item.value);
+                });
+
+                if(a.indexOf(0) !== -1)
+                    return b;
+
                 return a;
             },
             branch_selection(){
@@ -304,7 +313,7 @@
                 });
 
                 return a.filter((branch)=>{
-                    return (u.user.user_data.branches.indexOf(branch.id)  !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
+                    return (u.user.user_data.branches.indexOf(branch.value) !== -1 || u.user.user_data.branches.indexOf(0) !== -1)
                 });
             },
             user(){
@@ -391,7 +400,7 @@
 </script>
 <style>
     .portlet.calendar .fc-event .fc-content{
-        padding:2px !important;
+        padding:0px !important;
     }
     .portlet.calendar.light .fc-button{
         top:0px;

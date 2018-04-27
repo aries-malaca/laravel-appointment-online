@@ -1,6 +1,6 @@
 <template>
     <div class="technicians">
-        <div class="portlet light" v-show="view === false"  v-if="user.is_client !== 1">
+        <div class="portlet light" v-show="view === false"  v-if="user.is_client !== 1 && gate(user, 'technicians','view')">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -12,7 +12,7 @@
                     <li class="active">
                         <a href="#technicians-list" data-toggle="tab">Technicians List</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'technician_schedules','view')">
                         <a href="#scheduling" data-toggle="tab">Scheduling</a>
                     </li>
                 </ul>

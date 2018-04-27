@@ -1,6 +1,6 @@
 <template>
     <div class="tab-pane" id="products">
-        <button type="button" @click="showAddProductModal" class="btn green-meadow">New Product</button>
+        <button type="button" v-if="gate(user, 'products', 'add')" @click="showAddProductModal" class="btn green-meadow">New Product</button>
         <br/><br/>
         <data-table :columns="productTable.columns" :rows="products" :paginate="true"
                     :onClick="productTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
@@ -164,6 +164,9 @@
                 });
             },
             viewProduct:function(product){
+                if(!this.gate(user, 'products', 'update'))
+                    return false;
+
                 this.newProduct = {
                     id:product.id,
                     search_id:product.id,
@@ -185,6 +188,9 @@
             },
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             }
         }
     }

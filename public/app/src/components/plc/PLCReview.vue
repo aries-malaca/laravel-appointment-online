@@ -115,6 +115,8 @@
                     });
             },
             viewRequest:function(request){
+                if(!this.gate(user, 'plc_request', 'process'))
+                    return false;
                 this.newRequest = {
                     id:request.id,
                     message:request.message,

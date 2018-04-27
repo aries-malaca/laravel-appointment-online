@@ -1,6 +1,6 @@
 <template>
     <div class="queuing">
-        <div class="portlet light" v-if="user.is_client !== 1">
+        <div class="portlet light" v-if="user.is_client !== 1 && gate(user, 'queuing','view')">
             <div class="portlet-title">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -33,7 +33,7 @@
                     <div class="col-md-4">
                         <div class="row" v-if="branch !== null">
                             <div class="col-md-6">
-                                <button @click="toggle = !toggle"
+                                <button @click="toggle = !toggle" v-if="gate(user, 'appointments','add')"
                                         type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
                             <div class="col-md-6">
@@ -119,13 +119,13 @@
                                         </td>
                                         <td style="width:10%;">
                                             <div v-if="serving_clients.indexOf(app.client.client_id) === -1">
-                                                <button class="btn btn-success btn-xs btn-block" v-if="calling_clients.indexOf(app.client.client_id) === -1" @click="emitCall(app.client.client_id)">Call</button>
+                                                <button class="btn btn-success btn-xs btn-block" v-if="calling_clients.indexOf(app.client.client_id) === -1 && gate(user, 'appointments','serve')" @click="emitCall(app.client.client_id)">Call</button>
                                                 <button class="btn btn-warning btn-xs btn-block" v-else @click="emitUnCall(app.client.client_id)">UnCall</button>
                                             </div>
                                             <div>
-                                                <button class="btn purple btn-xs btn-block" @click="showConfirmTechnicianModal(app)" v-if="calling_clients.indexOf(app.client.client_id) !== -1 && serving_appointments.indexOf(app.id)===-1">Serve</button>
-                                                <button class="btn btn-warning btn-xs btn-block" @click="emitUnServe(app)" v-if="isOnServe(app)">UnServe</button>
-                                                <button class="btn btn-success btn-xs btn-block" @click="viewAppointment(onServeID(app))"  v-if="isOnServe(app)">Complete</button>
+                                                <button class="btn purple btn-xs btn-block" @click="showConfirmTechnicianModal(app)" v-if="calling_clients.indexOf(app.client.client_id) !== -1 && serving_appointments.indexOf(app.id)===-1 && gate(user, 'appointments','serve')">Serve</button>
+                                                <button class="btn btn-warning btn-xs btn-block" @click="emitUnServe(app)" v-if="isOnServe(app) && gate(user, 'appointments','serve')">UnServe</button>
+                                                <button class="btn btn-success btn-xs btn-block" @click="viewAppointment(onServeID(app))"  v-if="isOnServe(app) && gate(user, 'appointments','complete')">Complete</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -744,20 +744,24 @@
                 this.getAppointments();
             },
             b(){
-                this.$store.commit('updateQueuingBranch', this.b);
-                this.getAppointments();
-                this.refresh();
+                if(this.b !== null) {
+                    this.$store.commit('updateQueuingBranch', this.b);
+                    this.getAppointments();
+                    this.refresh();
+                }
             },
             c(){
-                this.$store.commit('updateQueuingDate', this.c);
-                this.refresh();
+                if(this.c !== null){
+                    this.$store.commit('updateQueuingDate', this.c);
+                    this.refresh();
+                }
             }
         }
     }
 </script>
 <style>
     .portlet.calendar .fc-event .fc-content{
-        padding:2px !important;
+        padding:0px !important;
     }
     .portlet.calendar.light .fc-button{
         top:0px;

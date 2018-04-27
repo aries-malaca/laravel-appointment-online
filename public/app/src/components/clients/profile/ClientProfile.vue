@@ -132,7 +132,7 @@
                                     <ul class="list-unstyled profile-nav">
                                         <li>
                                             <img v-bind:src="'images/users/'+client.user_picture" style="border-radius:10px !important;width:180px" class="img-responsive pic-bordered" alt="" />
-                                            <a data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
+                                            <a v-if="gate(user, 'clients','update')" data-toggle="modal" @click="showUploadModal" class="profile-edit"> Change </a>
                                         </li>
                                     </ul>
                                     <ul class="ver-inline-menu tabbable margin-bottom-10">
@@ -141,7 +141,7 @@
                                                 <i class="fa fa-cog"></i> Personal Info </a>
                                             <span class="after"> </span>
                                         </li>
-                                        <li>
+                                        <li v-if="gate(user, 'clients','update')">
                                             <a data-toggle="tab" href="#account-settings">
                                                 <i class="fa fa-eye"></i> Settings </a>
                                         </li>
@@ -154,19 +154,19 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label class="control-label">First Name</label>
-                                                        <input type="text" placeholder="Diane" v-model="newClient.first_name" class="form-control" />
+                                                        <input type="text" :disabled="!gate(user, 'clients','update')" v-model="newClient.first_name" class="form-control" />
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label class="control-label">Middle Name</label>
-                                                        <input type="text" v-model="newClient.middle_name" class="form-control" />
+                                                        <input type="text" :disabled="!gate(user, 'clients','update')" v-model="newClient.middle_name" class="form-control" />
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label class="control-label">Last Name</label>
-                                                        <input type="text" placeholder="Garcia" v-model="newClient.last_name" class="form-control" />
+                                                        <input type="text" :disabled="!gate(user, 'clients','update')" v-model="newClient.last_name" class="form-control" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -174,14 +174,14 @@
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label class="control-label">Birth Date</label>
-                                                        <input type="date" class="form-control" v-model="newClient.birth_date"/>
+                                                        <input type="date" :disabled="!gate(user, 'clients','update')" class="form-control" v-model="newClient.birth_date"/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-9">
                                                     <div class="form-group">
                                                         <label class="control-label">Address</label>
                                                         <input type="text" v-model="newClient.user_address" id="autocomplete2" placeholder="Enter your address"
-                                                               @focus="locate" class="form-control" />
+                                                               @focus="locate" class="form-control" :disabled="!gate(user, 'clients','update')" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -189,19 +189,19 @@
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label class="control-label">Mobile</label>
-                                                        <input type="text" class="form-control" v-model="newClient.user_mobile">
+                                                        <input type="text" :disabled="!gate(user, 'clients','update')" class="form-control" v-model="newClient.user_mobile">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3" v-if="newClient.user_data !== undefined">
                                                     <div class="form-group">
                                                         <label class="control-label">BOSS ID</label>
-                                                        <input type="text" class="form-control" v-model="newClient.user_data.boss_id"/>
+                                                        <input type="text" :disabled="!gate(user, 'clients','update')" class="form-control" v-model="newClient.user_data.boss_id"/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6" v-if="newClient.home_branch !== undefined ">
                                                     <div class="form-group">
                                                         <label class="control-label">Home Branch</label>
-                                                        <vue-select v-model="newClient.home_branch" :options="branch_selection"></vue-select>
+                                                        <vue-select :disabled="!gate(user, 'clients','update')" v-model="newClient.home_branch" :options="branch_selection"></vue-select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -210,13 +210,13 @@
                                                     <div class="form-group">
                                                         <label>Notifications</label>
                                                         <div>
-                                                            <input type="checkbox" id="_email" value="email" v-model="newClient.user_data.notifications" />
+                                                            <input type="checkbox" id="_email" :disabled="!gate(user, 'clients','update')" value="email" v-model="newClient.user_data.notifications" />
                                                             <label for="_email">Email</label>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="button" @click="updateInfo($event)" data-loading-text="Updating..." class="btn green">Save changes</button>
+                                            <button type="button" @click="updateInfo($event)" data-loading-text="Updating..." class="btn green"  v-if="gate(user, 'clients','update')">Save changes</button>
                                         </div>
                                         <div id="account-settings" class="tab-pane">
                                             <div class="row">
@@ -485,6 +485,9 @@
             },
             configs(){
                 return this.$store.state.configs;
+            },
+            user(){
+                return this.$store.state.user;
             },
             branches(){
                 return this.$store.getters['branches/activeBranches'];

@@ -14,7 +14,7 @@
                         <a href="#info" @click="tab=1" data-toggle="tab">Technician Info</a>
                     </li>
                     <li>
-                        <a href="#schedules" @click="tab=2" data-toggle="tab">Schedules</a>
+                        <a href="#schedules" @click="tab=2" v-if="gate(user, 'technician_schedules', 'view')" data-toggle="tab">Schedules</a>
                     </li>
                     <li>
                         <a href="#reviews" @click="tab=3" data-toggle="tab">Reviews</a>
@@ -74,7 +74,8 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                        <button type="button" v-if="newTechnician.cluster_data.ems_supported !== true" @click="showEditModal" class="btn green-meadow">Edit Info</button>
+                                        <button type="button" v-if="newTechnician.cluster_data.ems_supported !== true && gate(user, 'technicians', 'update')"
+                                                @click="showEditModal" class="btn green-meadow">Edit Info</button>
                                         <button type="button" v-else @click="updateFromEMS($event)" class="btn btn-info">Update from EMS</button>
                                     </div>
                                     <div class="col-md-4">

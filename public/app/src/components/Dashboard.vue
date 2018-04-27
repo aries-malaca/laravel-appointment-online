@@ -6,6 +6,7 @@
                 <div v-if="user.level_data !== undefined">
                     <customer-service-dashboard v-if="user.level_data.dashboard === 'CustomerServiceDashboard'" />
                     <admin-dashboard v-if="user.level_data.dashboard === 'AdminDashboard'" />
+                    <branch-supervisor-dashboard v-if="user.level_data.dashboard === 'BranchSupervisorDashboard'" />
                 </div>
             </div>
         </div>
@@ -16,10 +17,11 @@
     import ClientDashboard from "./dashboards/ClientDashboard.vue";
     import CustomerServiceDashboard from "./dashboards/CustomerServiceDashboard.vue";
     import AdminDashboard from "./dashboards/AdminDashboard.vue";
+    import BranchSupervisorDashboard from "./dashboards/BranchSupervisorDashboard.vue";
 
     export default {
         name: 'Dashboard',
-        components:{ClientDashboard, CustomerServiceDashboard, AdminDashboard},
+        components:{ClientDashboard, CustomerServiceDashboard, AdminDashboard, BranchSupervisorDashboard},
         computed:{
             user(){
                 return this.$store.state.user;

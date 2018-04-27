@@ -1,25 +1,25 @@
 <template>
     <div class="services">
-        <div class="portlet light" v-if="user.is_client !== 1">
+        <div class="portlet light" v-if="user.is_client !== 1 && (gate(user, 'products', 'view') || gate(user, 'services', 'view'))">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
                     <span class="caption-subject bold font-grey-gallery uppercase"> Services & Products </span>
                 </div>
                 <ul class="nav nav-tabs">
-                    <li class="active">
+                    <li>
                         <a href="#services" data-toggle="tab">Services</a>
                     </li>
-                    <li>
-                        <a href="#service-types" data-toggle="tab">Service Types</a>
+                    <li v-if="gate(user, 'services', 'view')">
+                        <a href="#service-types" data-toggle="tab" >Service Types</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'services', 'view')">
                         <a href="#service-packages" data-toggle="tab">Service Packages</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'products', 'view')">
                         <a href="#products" data-toggle="tab">Products</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'products', 'view')">
                         <a href="#product-groups" data-toggle="tab">Product Groups</a>
                     </li>
                 </ul>
@@ -60,7 +60,7 @@
         computed:{
             user(){
                 return this.$store.state.user;
-            },
+            }
         }
     }
 </script>

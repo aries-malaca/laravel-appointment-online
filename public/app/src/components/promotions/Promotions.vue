@@ -1,6 +1,6 @@
 <template>
     <div class="calendar">
-        <div class="portlet light">
+        <div class="portlet light" v-if="gate(user, 'promos', 'view')">
             <div class="portlet-title tabbable-line">
                 <div class="caption">
                     <i class="icon-puzzle font-grey-gallery"></i>
@@ -10,13 +10,13 @@
                     <li class="active">
                         <a href="#promos" data-toggle="tab">Promos</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'perks', 'view')">
                         <a href="#perks" data-toggle="tab">Perks</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'surveys', 'view')">
                         <a href="#surveys" data-toggle="tab">Surveys</a>
                     </li>
-                    <li>
+                    <li v-if="gate(user, 'campaign_manager', 'view')">
                         <a href="#campaign-manager" data-toggle="tab">Campaign Manager</a>
                     </li>
                 </ul>
@@ -30,6 +30,7 @@
                 </div>
             </div>
         </div>
+        <unauthorized-error v-else></unauthorized-error>
     </div>
 </template>
 
@@ -37,10 +38,11 @@
     import Promos from './Promos.vue';
     import Perks from './Perks.vue';
     import CampaignManager from './campaign/CampaignManager.vue';
+    import UnauthorizedError from '../errors/UnauthorizedError.vue';
 
     export default {
         name: 'Promotions',
-        components:{ Promos, Perks, CampaignManager },
+        components:{ Promos, Perks, CampaignManager, UnauthorizedError },
         data: function(){
             return {
                 title: 'Promotions',

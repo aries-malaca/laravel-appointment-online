@@ -22,7 +22,6 @@ new Vue({
                     $btn.dataset.loadingText = 'Redirecting...';
                 },
                 error:function(error){
-                    console.log(error);
                     if(error.status === 400){
                         toastr.error("An error occurs, " + error.responseJSON.error);
                         if(error.responseJSON.attempts !== undefined)
@@ -69,6 +68,9 @@ function checkLoginState(){
                         setTimeout(function(){
                             window.location.href = '../../register?accessToken='+response.authResponse.accessToken+'&fbid=' + user.id;
                         },2000);
+                    }
+                    else if(error.status === 400){
+                        toastr.warning(error.responseJSON.message);
                     }
                 },
             });

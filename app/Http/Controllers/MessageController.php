@@ -52,10 +52,13 @@ class MessageController extends Controller{
                 $client_id              = $request->input('recipient_id');
                 $query                  = User::where("id",$client_id)->get()->first();
                 $arrayDeviceData        = json_decode($query->device_data,true);
+
                 foreach ($arrayDeviceData as $key => $value) {
-                    $devicetype         = $value["type"];
-                    $unique_device_id   = $value["unique_device_id"];
-                    $this->sendChatNotification($devicetype,$unique_device_id,$thread_id,"chat",$client_id);
+                    if(isset($value["unique_device_id"])){
+                        $devicetype         = $value["type"];
+                        $unique_device_id   = $value["unique_device_id"];
+                        $this->sendChatNotification($devicetype,$unique_device_id,$thread_id,"chat",$client_id);
+                    }
                     // break;
                 }
             }    

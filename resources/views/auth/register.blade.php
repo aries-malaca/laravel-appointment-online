@@ -243,7 +243,7 @@
                     </div>
                 </div>
             </div>
-            <div class="g-recaptcha" data-sitekey="6LcF8VIUAAAAAE3HYBPHTGx2X_yA0iSeHsv2zXyl"></div><br/><br/>
+            <div class="g-recaptcha" data-sitekey="6LciXVYUAAAAAIX2r2_jEZMFlsTmwE_CLB_IMcBm"></div><br/><br/>
             <div class="form-actions">
                 <div style="margin-bottom: 5px">
                     <a href="#terms-modal" data-toggle="modal"><i class="fa fa-info-circle"></i> Read Terms and Conditions</a>

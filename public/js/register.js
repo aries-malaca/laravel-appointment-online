@@ -85,7 +85,7 @@ var reg = new Vue({
             $btn.button('loading');
             let u = this;
             this.newUser.captcha_response = $("#g-recaptcha-response").val();
-            this.newUser.captcha_secret = '6LcF8VIUAAAAAINfHkEFTD76JBSS_D0JJL6F5enS';
+            this.newUser.captcha_secret = '6LciXVYUAAAAAFLQhrsNbCNU2OCygvAAxMUT3Pqf';
             $.ajax({
                 url: '../../auth/register',
                 method: 'POST',

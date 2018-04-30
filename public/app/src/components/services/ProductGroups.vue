@@ -4,7 +4,7 @@
         <br/><br/>
         <data-table :columns="productGroupTable.columns" :rows="groups" :paginate="true"
                     :onClick="productGroupTable.rowClicked" styleClass="table table-bordered table-hover table-striped"/>
-        <div class="modal fade" id="add-product-group-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-product-group-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

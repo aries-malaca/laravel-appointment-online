@@ -51,7 +51,7 @@
                                             </tr>
                                             <tr>
                                                 <td>Reason of Cancellation: </td>
-                                                <td> {{ $appointment['items'][0]['item_data']['cancel_reason'] }} </td>
+                                                <td> {{ $appointment['items'][0]['item_data']->cancel_reason }} </td>
                                             </tr>
                                         </table>
                                         <br/>

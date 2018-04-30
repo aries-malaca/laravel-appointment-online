@@ -10,6 +10,7 @@ use App\BranchCluster;
 use DB;
 use DateTime;
 use Validator;
+use Storage;
 use Curl;
 
 class TechnicianController extends Controller{
@@ -475,6 +476,35 @@ class TechnicianController extends Controller{
         }
 
         return false;
+    }
+
+    function importTechnicians(){
+        $technicians = json_decode(Storage::get('imports/technicians.json'));
+
+        foreach($technicians as $key => $value){
+            $technician = new Technician;
+            $technician->first_name = $value->first_name;
+            $technician->last_name = $value->last_name;
+            $technician->middle_name = $value->middle_name;
+            $technician->cluster_id = 0;
+            $technician->employee_id = $key+1;
+            $technician->technician_status = $value->status;
+            $technician->is_active = $value->is_active==1?1:0;
+            $technician->technician_picture = 'no photo female.jpg';
+            $technician->technician_data = json_encode(
+                [
+                    "address"=>$value->address,
+                    "mobile"=>$value->techcontact,
+                    "gender"=>"female",
+                    "email"=>null,
+                    "birth_date"=>null,
+                    "hired_date"=>date('Y-m-d',strtotime($value->certified_date)),
+                    "position_name"=>"Wax Technician",
+                    "civil_status"=>null,
+                ]
+            );
+            $technician->save();
+        }
     }
 
 }

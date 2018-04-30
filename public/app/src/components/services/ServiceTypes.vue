@@ -5,7 +5,7 @@
         <data-table :columns="serviceTypeTable.columns" :rows="types" :paginate="true"
                     :onClick="serviceTypeTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
 
-        <div class="modal fade" id="add-service-type-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-service-type-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

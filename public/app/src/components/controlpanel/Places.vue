@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="add-region-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-region-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">

@@ -24,6 +24,8 @@
                         <select v-model="newSchedule.schedule_data[key].end">
                             <option v-for="t in times" v-bind:value="t.value">{{ t.label }}</option>
                         </select>
+
+                        <button class="btn btn-xs" v-if="key>0" @click="copyLast('newSchedule',key)">Copy Last</button>
                     </td>
                     <td>
                         <button class="btn btn-warning btn-sm btn-block" @click="currently_editing=undefined">Cancel</button>
@@ -144,7 +146,7 @@
             Custom schedules and closed schedules always overrides the regular schedule.
         </div>
 
-        <div class="modal fade" id="add-schedule-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-schedule-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -230,6 +232,10 @@
             }
         },
         methods:{
+            copyLast(schedule,key){
+                this[schedule].schedule_data[key].start = this[schedule].schedule_data[key-1].start;
+                this[schedule].schedule_data[key].end = this[schedule].schedule_data[key-1].end;
+            },
             showAddScheduleModal:function(){
                 this.newSchedule = {
                     id:0,

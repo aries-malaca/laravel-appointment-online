@@ -66,7 +66,8 @@
                         <label class="control-label visible-ie8 visible-ie9">First Name</label>
                         <div class="input-icon">
                             <i class="fa fa-font"></i>
-                            <input @change="onBlur" :disabled="newUser.from_facebook" v-model="newUser.first_name" class="form-control placeholder-no-fix" type="text" placeholder="First Name"/>
+                            <input @change="onBlur" :disabled="newUser.from_facebook || newUser.boss_id !== null" v-model="newUser.first_name"
+                                   class="form-control placeholder-no-fix" type="text" placeholder="First Name"/>
                         </div>
                     </div>
                 </div>
@@ -75,7 +76,8 @@
                         <label class="control-label visible-ie8 visible-ie9">Middle Name</label>
                         <div class="input-icon">
                             <i class="fa fa-font"></i>
-                            <input @change="onBlur" v-model="newUser.middle_name" class="form-control placeholder-no-fix" type="text" placeholder="Middle Name"/>
+                            <input @change="onBlur" v-model="newUser.middle_name" :disabled="newUser.boss_id !== null"
+                                   class="form-control placeholder-no-fix" type="text" placeholder="Middle Name"/>
                         </div>
                     </div>
                 </div>
@@ -86,7 +88,8 @@
                         <label class="control-label visible-ie8 visible-ie9">Last Name</label>
                         <div class="input-icon">
                             <i class="fa fa-font"></i>
-                            <input @change="onBlur" :disabled="newUser.from_facebook" v-model="newUser.last_name" class="form-control placeholder-no-fix" type="text" placeholder="Last Name"/>
+                            <input @change="onBlur" :disabled="newUser.from_facebook || newUser.boss_id !== null"
+                                   v-model="newUser.last_name" class="form-control placeholder-no-fix" type="text" placeholder="Last Name"/>
                         </div>
                     </div>
                 </div>
@@ -105,7 +108,8 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="control-label">Birth Date</label>
-                        <input @change="onBlur" v-model="newUser.birth_date" class="form-control placeholder-no-fix" type="date" />
+                        <input @change="onBlur" v-model="newUser.birth_date" :disabled="newUser.boss_id !== null"
+                               class="form-control placeholder-no-fix" type="date" />
                     </div>
                 </div>
                 <div class="col-sm-6">
@@ -181,14 +185,15 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control" disabled v-model="newUser.boss_id"/>
                                     <span class="input-group-btn">
-                                        <button class="btn blue btn-lg" @click="removeBossID" type="button" title="Remove">
+                                        <button class="btn blue btn-lg" @click="removeBossID" type="button" title="Clear BOSS ID">
                                             <i class="fa fa-refresh"></i>
                                         </button>
                                     </span>
                                 </div>
-
-
-
+                                <br/>
+                                <div class="alert alert-info">
+                                    <small>You can only change your First Name, Last Name and Birthday if you clear your BOSS ID.</small>
+                                </div>
                             </div>
                         </div>
                         <div class="clearfix"><br></div>
@@ -243,7 +248,7 @@
                     </div>
                 </div>
             </div>
-            <div class="g-recaptcha" data-sitekey="6LcF8VIUAAAAAE3HYBPHTGx2X_yA0iSeHsv2zXyl"></div><br/><br/>
+            <div class="g-recaptcha" data-sitekey="6LciXVYUAAAAAIX2r2_jEZMFlsTmwE_CLB_IMcBm"></div><br/><br/>
             <div class="form-actions">
                 <div style="margin-bottom: 5px">
                     <a href="#terms-modal" data-toggle="modal"><i class="fa fa-info-circle"></i> Read Terms and Conditions</a>

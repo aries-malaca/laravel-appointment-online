@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" id="premier-review-modal" tabindex="1">
+    <div data-backdrop="static" class="modal fade" id="premier-review-modal" tabindex="1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -17,42 +17,51 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="send-request">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <label>Message:</label>
-                                    <textarea v-model="message" rows="3" class="form-control"></textarea>
+                            <div v-if="!hasPending">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Message:</label>
+                                        <textarea v-model="message" rows="3" class="form-control"></textarea>
+                                    </div>
                                 </div>
-                            </div>
-                            <br/>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>Attachment: (In JPG, JPEG, PNG format)</label>
-                                        <small>Please provide your Valid ID</small>
-                                        <div id="croppie"></div>
-                                        <div id="upload-wrapper">
-                                            <div class="fileinput fileinput-new" data-provides="fileinput">
-                                                <div class="input-group">
-                                                    <div class="form-control uneditable-input" data-trigger="fileinput">
-                                                        <i class="fa fa-file fileinput-exists"></i>&nbsp;
-                                                        <span class="fileinput-filename"> </span>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Attachment: (In JPG, JPEG, PNG format)</label>
+                                            <small>Please provide your Valid ID</small>
+                                            <div id="croppie"></div>
+                                            <div id="upload-wrapper">
+                                                <div class="fileinput fileinput-new" data-provides="fileinput">
+                                                    <div class="input-group">
+                                                        <div class="form-control uneditable-input" data-trigger="fileinput">
+                                                            <i class="fa fa-file fileinput-exists"></i>&nbsp;
+                                                            <span class="fileinput-filename"> </span>
+                                                        </div>
+                                                        <span class="input-group-addon btn default btn-file">
+                                                        <span class="fileinput-new"> Add Attachment </span>
+                                                        <span class="fileinput-exists"> Change </span>
+                                                        <input type="file" name="file" id="input_id" @change="setupUploader($event)">
+                                                    </span>
                                                     </div>
-                                                    <span class="input-group-addon btn default btn-file">
-                                                <span class="fileinput-new"> Add Attachment </span>
-                                                <span class="fileinput-exists"> Change </span>
-                                                <input type="file" name="file" id="input_id" @change="setupUploader($event)">
-                                            </span>
                                                 </div>
                                             </div>
                                         </div>
+                                        <button type="button" class="btn btn-success" v-if="croppie!==null" @click="sendRequest($event)">Send Request</button>
                                     </div>
-                                    <button type="button" class="btn btn-success" v-if="croppie!==null" @click="sendRequest($event)">Send Request</button>
                                 </div>
+                            </div>
+                            <div class="alert alert-info" v-else>
+                                <b>Notice:</b>
+                                <p>
+                                    You already have pending request for account review/merging. You'll be notified via email once
+                                    your account has been merged.
+                                </p>
                             </div>
                         </div>
                         <div class="tab-pane" id="request-history">
                             <div class="panel-group accordion" id="accordion3">
-                                <div v-bind:class=" request.status=='completed'?'panel panel-success':'panel panel-warning'" v-for="request,key in requests">
+                                <div v-bind:class=" request.status==='completed'?'panel panel-success':'panel panel-warning'" v-for="request,key in requests">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
                                             <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse"
@@ -63,9 +72,50 @@
                                     </div>
                                     <div v-bind:id="'collapse_'+key" class="panel-collapse collapse" aria-expanded="false">
                                         <div class="panel-body">
-                                            <div class="row">
+                                            <div class="row" v-if="request.valid_id_url !== null">
                                                 <div class="col-md-12">
                                                     <img class="img img-responsive" v-bind:src="'../../images/ids/'+request.valid_id_url" alt="image" />
+                                                </div>
+                                            </div>
+                                            <div class="row" v-else>
+                                                <div class="col-md-12">
+                                                    <table class="table table-condensed">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>BOSS ID</th>
+                                                            <th>Birth Date</th>
+                                                            <th>Last Branch</th>
+                                                            <th>Service</th>
+                                                            <th>Visited</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr v-for="account in request.plc_review_request_data">
+                                                            <td>{{ account.custom_client_id }}</td>
+                                                            <td>{{ account.birthdate }}</td>
+                                                            <td>
+                                                                <span v-if="account.last_transaction">
+                                                                    {{ account.last_transaction.branch }}
+                                                                </span>
+                                                                <span v-else>N/A</span>
+                                                            </td>
+                                                            <td>
+                                                                <span v-if="account.last_transaction">
+                                                                    <span v-if="account.last_transaction.services.length>0">
+                                                                        {{ account.last_transaction.services[0].item_name }}
+                                                                    </span>
+                                                                </span>
+                                                                <span v-else>N/A</span>
+                                                            </td>
+                                                            <td>
+                                                                <span v-if="account.last_transaction">
+                                                                    {{ account.last_transaction.date }}
+                                                                </span>
+                                                                <span v-else>N/A</span>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -90,7 +140,7 @@
                                                         </tr>
                                                         </tbody>
                                                     </table>
-                                                    <button class="btn btn-danger" @click="deleteRequest(request)">Delete</button>
+                                                    <button class="btn btn-danger" v-if="request.valid_id_url !== null" @click="deleteRequest(request)">Delete</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -120,6 +170,13 @@
                 croppie:null,
                 image:null,
                 requests:[]
+            }
+        },
+        computed:{
+            hasPending(){
+                return this.requests.filter((item)=>{
+                    return item.status === 'pending';
+                }).length > 0;
             }
         },
         methods:{

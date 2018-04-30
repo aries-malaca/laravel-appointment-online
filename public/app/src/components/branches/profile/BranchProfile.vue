@@ -84,6 +84,13 @@
                                         <td> Welcome Message: </td>
                                         <td> {{ branch.welcome_message }}</td>
                                     </tr>
+                                    <tr>
+                                        <td> Status: </td>
+                                        <td>
+                                            <span class="badge badge-success" v-if="branch.is_active === 1">Active</span>
+                                            <span class="badge badge-danger" v-else>Inactive</span>
+                                        </td>
+                                    </tr>
                                     </tbody>
                                 </table>
                                 <!--end row-->

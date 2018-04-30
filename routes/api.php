@@ -53,6 +53,7 @@ Route::post('/client/filterClients', 'ClientController@filterClients');
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 
+Route::get('/branch/importBranches', 'BranchController@importBranches');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');
@@ -131,6 +132,7 @@ Route::post('/schedule/addTechnicianShift', 'BranchController@addTechnicianShift
 Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicianShift');
 
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
+Route::get('/technician/importTechnicians', 'TechnicianController@importTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
 Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');

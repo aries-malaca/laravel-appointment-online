@@ -136,6 +136,7 @@ class BranchController extends Controller{
             $branch->id = $request->input('search_id');
             $branch->branch_classification = $request->input('branch_classification');
             $branch->region_id = $request->input('region_id');
+            $branch->is_active = $request->input('is_active');
             $branch->city_id = $request->input('city_id');
             $branch->branch_address = $request->input('branch_address');
             $branch->cluster_id = $request->input('cluster_id');
@@ -214,6 +215,7 @@ class BranchController extends Controller{
             $branch->branch_address = $request->input('branch_address');
             $branch->cluster_id = $request->input('cluster_id');
             $branch->rooms_count = $request->input('rooms_count');
+            $branch->is_active = $request->input('is_active');
             $branch->payment_methods = $request->input('payment_methods');
             $branch->branch_email = $request->input('branch_email');
             $branch->branch_contact = $request->input('branch_contact');
@@ -513,5 +515,60 @@ class BranchController extends Controller{
             return response()->json(["result"=>"success"],200);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function importBranches(){
+        $branches = json_decode(Storage::get('imports/branches.json'));
+
+        foreach($branches as $key => $value){
+            $branch = Branch::find($value->boss_id);
+            if(!isset($branch->id)){
+                $branch = new Branch;
+                $branch->branch_name = $value->name;
+                $branch->branch_code = $value->branch_code;
+                $branch->id = $value->boss_id;
+                $branch->branch_classification = $value->ownership == 1 ? 'company-owned':'franchised';
+                $branch->region_id = $value->region_id;
+                $branch->city_id = $value->city_id;
+                $branch->branch_address = $value->address;
+                $branch->cluster_id = $value->ownership == 1 ? 1: 0;
+                $branch->rooms_count = $value->rooms;
+                $branch->payment_methods = $value->payment_method;
+                $branch->branch_email = $value->email;
+                $branch->branch_contact = $value->phone_fax;
+                $branch->branch_contact_person = $value->contact_person;
+                $branch->social_media_accounts = $value->fb == ''? '[null,null]': json_encode([$value->fb,'']) ;
+                $x = explode(",", $value->map_string);
+                $branch->map_coordinates = $value->map_string == ""? '{"lat":14,"long":5}': json_encode(["lat"=>(float)$x[0],"long"=>(float)$x[1]]);
+                $branch->branch_pictures = json_encode(array());
+                $branch->kiosk_data = json_encode(array());
+                $branch->directions = $value->address;
+                $branch->welcome_message = $value->address;
+                $branch->branch_data = json_encode(["ems_id"=>$value->ems_id, "type"=>null, "extension_minutes"=>0]);
+                $branch->opening_date = $value->opening_date == ''? date('Y-m-d'):date('Y-m-d',strtotime($value->opening_date));
+                $branch->is_active = $value->is_active=='Y'?0:1;
+                $branch->save();
+            }
+
+            $i = BranchSchedule::find($value->boss_id);
+
+            if(!isset($i)){
+                $schedule = new BranchSchedule;
+                $schedule->branch_id = $value->boss_id;
+                $schedule->date_start = date('Y-m-d');
+                $schedule->date_end = date('Y-m-d');
+                $schedule->schedule_data = json_encode(array(
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"]
+                ));
+                $schedule->schedule_type= 'regular';
+                $schedule->save();
+            }
+        }
     }
 }

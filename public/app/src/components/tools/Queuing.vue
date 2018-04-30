@@ -254,7 +254,7 @@
         <booking-modal :toggle="toggle" @get_appointments="getAppointments" :lock_branch="true" :queued="queued"
                :default_branch="branch" :default_client="null" :lock_client="false" />
 
-        <div class="modal fade" id="confirm-technician-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="confirm-technician-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -503,12 +503,13 @@
             },
             refresh(){
                 let u = this;
-                axios.get('https://lbo-express.azurewebsites.net/api/queuing/' + u.branch.value)
-                    .then(function (response) {
-                        u.calling = response.data.calling;
-                        u.$store.commit('updateServing',response.data.serving);
-                        u.initAgenda();
-                    });
+                if(u.branch !== null)
+                    axios.get('https://lbo-express.azurewebsites.net/api/queuing/' + u.branch.value)
+                        .then(function (response) {
+                            u.calling = response.data.calling;
+                            u.$store.commit('updateServing',response.data.serving);
+                            u.initAgenda();
+                        });
             },
             refreshList(){
               this.getAppointments();

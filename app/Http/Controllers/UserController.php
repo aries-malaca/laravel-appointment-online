@@ -75,9 +75,9 @@ class UserController extends Controller{
             $find = $find[0];
             $attempts++;
             if($attempts >= 5){
-                $this->sendMail('failed_login',
-                    ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "delegation"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'Mr.':'Ms.')]],
-                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]
+                $this->sendMail('email.failed_login',
+                    ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "gender"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'male':'')]],
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>[["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]]
                 );
                 $attempts = 0;
             }

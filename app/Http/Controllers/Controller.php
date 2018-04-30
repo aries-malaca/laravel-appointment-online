@@ -7,6 +7,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Config;
+use App\Branch;
 use App\Service;
 use App\ServiceType;
 use App\ServicePackage;
@@ -227,7 +228,12 @@ class Controller extends BaseController{
                     "home_branch"=>10,
                     "notifications"=>["email"]
                 ));
-            else
+            else{
+                $bbb  = Branch::find($boss_data['branch_id']);
+                if(!isset($bbb->id))
+                    $boss_data['branch_id'] = null;
+
+            }
                 $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
                     "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
                     "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),

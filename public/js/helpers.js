@@ -20,14 +20,19 @@ var XHRCatcher = function(error){
     if(typeof(e) === 'object')
         e = response_data.join("<br/> ");
 
-    toastr.error(e);
+
+
 
     if(typeof(response_data) !== 'object'){
         if(response_data.search('token') !== -1 ){
             $.removeCookie('login_cookie');
             window.location.href='/../../login';
+            return false;
         }
     }
+
+    toastr.error(e);
+
 };
 
 

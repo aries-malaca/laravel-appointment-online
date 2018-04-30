@@ -137,6 +137,7 @@
                     .catch(function (error) {
                         XHRCatcher(error);
                         $btn.button('reset');
+                        u.getPLC();
                     });
             },
             getPLC:function(){

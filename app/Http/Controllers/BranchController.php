@@ -535,9 +535,9 @@ class BranchController extends Controller{
                 $branch->branch_email = $value->email;
                 $branch->branch_contact = $value->phone_fax;
                 $branch->branch_contact_person = $value->contact_person;
-                $branch->social_media_accounts = $value->fb == ''? json_encode([$value->fb,'']):'[null,null]' ;
+                $branch->social_media_accounts = $value->fb == ''? '[null,null]': json_encode([$value->fb,'']) ;
                 $x = explode(",", $value->map_string);
-                $branch->map_coordinates = $value->map_string == ""? '{"lat":14,"long":5}': json_encode(["lat"=>$x[0],"long"=>$x[1]]);
+                $branch->map_coordinates = $value->map_string == ""? '{"lat":14,"long":5}': json_encode(["lat"=>(float)$x[0],"long"=>(float)$x[1]]);
                 $branch->branch_pictures = json_encode(array());
                 $branch->kiosk_data = json_encode(array());
                 $branch->directions = $value->address;

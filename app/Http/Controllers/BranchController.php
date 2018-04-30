@@ -514,4 +514,39 @@ class BranchController extends Controller{
         }
         return response()->json($api, $api["status_code"]);
     }
+
+    function importBranches(){
+        $branches = json_decode(Storage::get('imports/branches.json'));
+
+        foreach($branches as $key => $value){
+            $branch = Branch::find($value->boss_id);
+            if(!isset($branch->id)){
+                $branch = new Branch;
+                $branch->branch_name = $value->name;
+                $branch->branch_code = $value->branch_code;
+                $branch->id = $value->boss_id;
+                $branch->branch_classification = $value->ownership == 1 ? 'company-owned':'franchised';
+                $branch->region_id = $value->region_id;
+                $branch->city_id = $value->city_id;
+                $branch->branch_address = $value->address;
+                $branch->cluster_id = 0;
+                $branch->rooms_count = $value->rooms;
+                $branch->payment_methods = $value->payment_method;
+                $branch->branch_email = $value->email;
+                $branch->branch_contact = $value->phone_fax;
+                $branch->branch_contact_person = $value->contact_person;
+                $branch->social_media_accounts = $value->fb == ''? json_encode([$value->fb,'']):'[null,null]' ;
+                $x = explode(",", $value->map_string);
+                $branch->map_coordinates = $value->map_string == ""? '{"lat":14,"long":5}': json_encode(["lat"=>$x[0],"long"=>$x[1]]);
+                $branch->branch_pictures = json_encode(array());
+                $branch->kiosk_data = json_encode(array());
+                $branch->directions = $value->address;
+                $branch->welcome_message = $value->address;
+                $branch->branch_data = json_encode(["ems_id"=>$value->ems_id, "type"=>null, "extension_minutes"=>0]);
+                $branch->opening_date = $value->opening_date == ''? date('Y-m-d'):date('Y-m-d',strtotime($value->opening_date));
+                $branch->is_active = $value->is_active=='Y'?0:1;
+                $branch->save();
+            }
+        }
+    }
 }

@@ -33,6 +33,7 @@ use Curl;
 use DB;
 use Mail;
 use JWTAuth;
+use App\Jobs\SendReviewRequestJob;
 
 class MobileApiController extends Controller{
 
@@ -590,7 +591,7 @@ class MobileApiController extends Controller{
         $device_name        = $request->input('addDeviceName');
         $facebook_id        = $request->input('addFBID');
         $imageURL           = $request->input('addImageUrl');
-            
+        $boss_id            = $request->input('addBossID');    
     
         $user 			    = new User;
         $user->first_name 	= $request->input('addFname');
@@ -619,11 +620,19 @@ class MobileApiController extends Controller{
         if($facebook_id == "" || $facebook_id == null){
             $user->user_picture = 'no photo ' . $gender.'.jpg';
             $user->user_data    = json_encode(array(
-                                        "home_branch"    =>  $branch,
-                                        "premier_status" => 0
+                                        "home_branch"    => $branch,
+                                        "premier_status" => 0,
+                                        "boss_id"        => $boss_id
                                         ));
             $user->device_data  = '[]';
             $user->save();
+
+            if(sizeof($request->input('addBossArray'))>0){
+                SendReviewRequestJob::dispatch(["user"=>$user, "accounts"=>$request->input('addBossArray')])->delay(now()->addSeconds(2));
+            }
+            $user = User::where('id', $user->id)->get()->first();
+            $this->dispatchVerification($user, $request->input('addPassword'));
+
             return response()->json([
                                 "result"        =>"success", 
                                 "isFacebook"    =>  false
@@ -636,6 +645,7 @@ class MobileApiController extends Controller{
                                         "home_branch"    => $branch,
                                         "premier_status" => 0,
                                         "facebook_id"    => $facebook_id,
+                                        "boss_id"        => $boss_id,
                                         ));
 
             $user->save();
@@ -650,6 +660,13 @@ class MobileApiController extends Controller{
             $user     = User::find($clientID);
             $user->user_picture = $filename;   
             $user->save();
+
+            if(sizeof($request->input('addBossArray'))>0){
+                SendReviewRequestJob::dispatch(["user"=>$user, "accounts"=>$request->input('addBossArray')])->delay(now()->addSeconds(2));
+            }
+            
+            $user = User::where('id', $user->id)->get()->first();
+            $this->dispatchVerification($user, $request->input('addPassword'));
 
             $array_response         = array( 
                             "result"        =>  "success",

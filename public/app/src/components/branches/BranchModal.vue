@@ -173,6 +173,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label">Status</label>
+                                        <select v-model="newBranch.is_active" class="form-control">
+                                            <option :value="1">Active</option>
+                                            <option :value="0">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-5">
                             <h4>Branch Kiosks <button class="btn btn-info" @click="addKioskItem">+</button></h4>
@@ -231,6 +242,7 @@
                     branch_code:'',
                     region_id:0,
                     city_id:0,
+                    is_active:1,
                     branch_address:'',
                     branch_email:'',
                     branch_contact:'',

@@ -136,6 +136,7 @@ class BranchController extends Controller{
             $branch->id = $request->input('search_id');
             $branch->branch_classification = $request->input('branch_classification');
             $branch->region_id = $request->input('region_id');
+            $branch->is_active = $request->input('is_active');
             $branch->city_id = $request->input('city_id');
             $branch->branch_address = $request->input('branch_address');
             $branch->cluster_id = $request->input('cluster_id');
@@ -214,6 +215,7 @@ class BranchController extends Controller{
             $branch->branch_address = $request->input('branch_address');
             $branch->cluster_id = $request->input('cluster_id');
             $branch->rooms_count = $request->input('rooms_count');
+            $branch->is_active = $request->input('is_active');
             $branch->payment_methods = $request->input('payment_methods');
             $branch->branch_email = $request->input('branch_email');
             $branch->branch_contact = $request->input('branch_contact');

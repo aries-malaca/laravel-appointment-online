@@ -206,7 +206,7 @@
         </div>
         <template-manager :templates="templates" @refresh_host="getTemplates"></template-manager>
         <contact-manager :contacts="contacts" @refresh_host="getContacts"></contact-manager>
-        <div class="modal fade" id="filter-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="filter-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-full">
                 <div class="modal-content">
                     <div class="modal-header">

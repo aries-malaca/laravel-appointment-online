@@ -5,7 +5,7 @@
         <data-table :columns="productTable.columns" :rows="products" :paginate="true"
                     :onClick="productTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
 
-        <div class="modal fade" id="add-product-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-product-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

@@ -51,7 +51,7 @@
         </div>
         <unauthorized-error v-else></unauthorized-error>
 
-        <div class="modal fade" id="launch-excel-modal" tabindex="1">
+        <div data-backdrop="static" class="modal fade" id="launch-excel-modal" tabindex="1">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">

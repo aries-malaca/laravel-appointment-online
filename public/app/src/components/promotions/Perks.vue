@@ -8,7 +8,7 @@
                      style="margin-bottom:25px; cursor: pointer;" @click="viewPerk(perk)">
             </div>
         </div>
-        <div class="modal fade" id="add-perk-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-perk-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-md">
                 <div class="modal-content">
                     <div class="modal-header">

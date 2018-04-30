@@ -5,7 +5,7 @@
         <data-table :columns="clusterTable.columns" :rows="clusters" :paginate="true"
                     :onClick="clusterTable.rowClicked" styleClass="table table-bordered table-hover table-striped" />
 
-        <div class="modal fade" id="add-cluster-modal" tabindex="-1" role="basic" aria-hidden="true">
+        <div data-backdrop="static" class="modal fade" id="add-cluster-modal" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">

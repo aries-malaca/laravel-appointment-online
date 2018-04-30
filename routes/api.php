@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 */
 //token validator API
 Route::get('/user/getUser', 'UserController@getUser');
+Route::get('/user/importUsers', 'UserController@importUsers');
 Route::get('/user/getUsers', 'UserController@getUsers');
 
 Route::post('/user/addUser', 'UserController@addUser');
@@ -134,7 +135,7 @@ Route::post('/schedule/deleteTechnicianShift', 'BranchController@deleteTechnicia
 Route::get('/technician/getTechnicians', 'TechnicianController@getTechnicians');
 Route::get('/technician/importTechnicians', 'TechnicianController@importTechnicians');
 Route::get('/technician/getTechnician/{id}', 'TechnicianController@getTechnician');
-Route::get('/technician/fetchEMSTechnicians', 'TechnicianController@fetchEMSTechnicians');
+Route::get('/technician/fetchEMSTechnicians/{cluser_id}', 'TechnicianController@fetchEMSTechnicians');
 Route::get('/technician/getBranchTechnicians/{branch}/{date}', 'TechnicianController@getBranchTechnicians');
 Route::post('/technician/addTechnician', 'TechnicianController@addTechnician');
 Route::post('/technician/updateTechnician', 'TechnicianController@updateTechnician');

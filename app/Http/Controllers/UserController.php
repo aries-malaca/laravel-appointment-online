@@ -15,6 +15,7 @@ use Hash;
 use Facebook\Facebook;
 use Mail;
 use Curl;
+use Storage;
 use DB;
 
 class UserController extends Controller{
@@ -605,5 +606,9 @@ class UserController extends Controller{
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function importUsers(){
+
     }
 }

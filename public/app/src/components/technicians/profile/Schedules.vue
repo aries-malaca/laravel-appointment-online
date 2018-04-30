@@ -1,7 +1,7 @@
 <template>
     <div class="tab-pane" id="schedules">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-3" v-if="technician.cluster_data !== null && technician.cluster_data !== undefined">
                 <div class="note note-success" v-if="technician.cluster_data.ems_supported===true">
                     <h4 class="block">EMS Employee</h4>
                     <p>
@@ -183,6 +183,12 @@
                             <!-- /.modal -->
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="col-md-3" v-else>
+                <div class="alert alert-warning">
+                    <b>Notice:</b>
+                    <p>Please select cluster for technician.</p>
                 </div>
             </div>
             <div class="col-md-9">

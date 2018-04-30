@@ -74,9 +74,14 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                        <button type="button" v-if="newTechnician.cluster_data.ems_supported !== true && gate(user, 'technicians', 'update')"
-                                                @click="showEditModal" class="btn green-meadow">Edit Info</button>
-                                        <button type="button" v-else @click="updateFromEMS($event)" class="btn btn-info">Update from EMS</button>
+                                        <div v-if="newTechnician.cluster_data !== null && newTechnician.cluster_data !== undefined">
+                                            <button type="button" v-if="gate(user, 'technicians', 'update') && newTechnician.cluster_data.ems_supported !== true"
+                                                    @click="showEditModal" class="btn green-meadow">Edit Info</button>
+                                        </div>
+                                        <div v-else>
+                                            <button type="button" v-if="gate(user, 'technicians', 'update')"
+                                                    @click="showEditModal" class="btn green-meadow">Edit Info</button>
+                                        </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div v-if="!isNaN(averageRating)">

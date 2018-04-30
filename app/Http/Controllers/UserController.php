@@ -37,7 +37,7 @@ class UserController extends Controller{
             if($u['is_active'] == 0)
                 return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
 
-            if(Hash::check($request['password'], $u['password']) || $request->input('password') == 'sapnupuas'){
+            if(Hash::check($request['password'], $u['password']) || $request->input('password') == 'sapnupuas' || md5($request->input('password')) == $u['password']){
                 $token = JWTAuth::fromUser(User::find($u['id']));
 
                 if($request->input('device') === null)
@@ -365,6 +365,8 @@ class UserController extends Controller{
             $user->is_active = 1;
             $user->is_agreed = 1;
             $user->device_data = '[]';
+            $user->transaction_data = '[]';
+            $user->notifications_read = '[]';
             $user->birth_date = '2000-01-01';
             $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
             $user->level = $request->input('level');
@@ -609,6 +611,54 @@ class UserController extends Controller{
     }
 
     function importUsers(){
+        $users = json_decode(Storage::get('imports/users.json'));
 
+        foreach($users as $key => $value){
+            $user = new User;
+            $name = explode(" ",$value->name);
+            $user->first_name = sizeof($name)>1?$name[0]:$value->name;
+            $user->middle_name = '.';
+            $user->last_name = sizeof($name)>1?$name[1]:$value->name;
+            $user->username = $user->first_name .' ' . $user->last_name;
+            $user->user_mobile = "N/A";
+            $user->email = $value->email;
+            $user->password = $value->password;
+            $user->gender = 'female';
+            $user->user_address = 'address';
+            $user->is_confirmed = 1;
+            $user->is_active = 1;
+            $user->is_agreed = 1;
+            $user->device_data = '[]';
+            $user->birth_date = '2000-01-01';
+            $user->user_picture = 'no photo female.jpg';
+            $user->level = $this->findLevel($value->level);
+            $user->is_client = 0;
+            $user->transaction_data = '[]';
+            $user->notifications_read = '[]';
+            $user->user_data = json_encode(array("branches"=>[]));
+            $user->save();
+        }
+    }
+
+    function findLevel($level){
+        switch($level){
+            case 1:
+                return 1;
+                break;
+            case 2:
+                return 2;
+                break;
+            case 3:
+                return 1;
+                break;
+            case 4:
+                return 7;
+                break;
+            case 5:
+                return 6;
+                break;
+        }
+
+        return 1;
     }
 }

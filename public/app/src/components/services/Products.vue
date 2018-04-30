@@ -164,7 +164,7 @@
                 });
             },
             viewProduct:function(product){
-                if(!this.gate(user, 'products', 'update'))
+                if(!this.gate(this.user, 'products', 'update'))
                     return false;
 
                 this.newProduct = {

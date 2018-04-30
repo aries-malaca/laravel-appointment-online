@@ -98,11 +98,11 @@
                         <span class="name">@{{ item.client_name }}</span>
                     </div>
                     <div class="col-xs-5">
-                                <span class="details">
-                                    ID: @{{ item.transaction.id }} <br/>
-                                    Tech: @{{ item.technician_name }}<br/>
-                                    Time: @{{ item.transaction_time }}
-                                </span>
+                        <span class="details">
+                            ID: @{{ item.transaction.id }} <br/>
+                            Tech: @{{ item.technician_name }}<br/>
+                            Time: @{{ item.transaction_time }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -120,11 +120,11 @@
                         <span class="name">@{{ item.client_name }}</span>
                     </div>
                     <div class="col-xs-5" >
-                                <span class="details">
-                                    ID: @{{ item.transaction.id }} <br/>
-                                    Tech: @{{ item.technician_name }}<br/>
-                                    Time: @{{ item.transaction_time }}
-                                </span>
+                        <span class="details">
+                            ID: @{{ item.transaction.id }} <br/>
+                            Tech: @{{ item.technician_name }}<br/>
+                            Time: @{{ item.transaction_time }}
+                        </span>
                     </div>
                 </div>
             </div>

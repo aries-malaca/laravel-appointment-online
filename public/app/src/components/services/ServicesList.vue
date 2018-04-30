@@ -151,7 +151,7 @@
                 $("#add-service-modal").modal("show");
             },
             viewService:function(service){
-                if(!this.gate(user, 'services', 'update'))
+                if(!this.gate(this.user, 'services', 'update'))
                     return false;
 
                 this.newService = {

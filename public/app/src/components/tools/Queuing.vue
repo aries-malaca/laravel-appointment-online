@@ -36,7 +36,7 @@
                                 <button @click="toggle = !toggle" v-if="gate(user, 'appointments','add')"
                                         type="button" class="btn btn-info btn-block">Add Appointment</button>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" v-if="moment().format('YYYY-MM-DD') === moment(c).format('YYYY-MM-DD')">
                                 <a v-bind:href="'../../queuing/web/' + branch.value" target="_blank" class="btn btn-warning btn-block">Queuing Screen</a>
                             </div>
                         </div>
@@ -720,7 +720,6 @@
                                 return e.schedule_data[Number(moment(this.c).format("e"))];
                         }
                     }
-
 
                     for(var x=0;x<this.branch.schedules.length;x++){
                         if(this.branch.schedules[x].schedule_type === 'regular')

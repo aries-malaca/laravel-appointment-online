@@ -307,7 +307,7 @@ class UserController extends Controller{
         }
 
         if(!isset($fb_user['email']))
-            return response()->json(["result"=>'failed', "message"=>"Email Is required, please remove Laybare Online in your Facebook's App and Websites Settings and try again. Make sure you checked the email field."], 400);
+            return response()->json(["result"=>'failed', "message"=>"Email Is required, please remove Laybare Online in your Facebook's App and Websites Settings and try again. Make sure you checked the email field"], 400);
 
         if($result = $this->selfMigrateClient($fb_user['email'])){
             if($request->input('device') === null)

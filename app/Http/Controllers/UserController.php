@@ -619,7 +619,7 @@ class UserController extends Controller{
             $user->first_name = sizeof($name)>1?$name[0]:$value->name;
             $user->middle_name = '.';
             $user->last_name = sizeof($name)>1?$name[1]:$value->name;
-            $user->username = $user->first_name .' ' . $user->last_name;
+            $user->username = $value->name;
             $user->user_mobile = "N/A";
             $user->email = $value->email;
             $user->password = $value->password;

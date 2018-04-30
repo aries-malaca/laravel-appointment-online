@@ -58,6 +58,7 @@ class UserController extends Controller{
             return response()->json(["result"=>"failed","error"=>"Incorrect Password", "attempts"=> $attempts ],400);
         }
 
+        //self-migrate
         $find = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE cusemail='". $request->input('email') ."'");
 
         if($result = $this->selfMigrateClient($request->input('email'), $request->input('password'))){

@@ -264,7 +264,7 @@ Route::get('/mobile/getAllNotifications/{latest_id}', 'MobileApiController@getAl
 Route::get('/mobile/getPromotion/{promo_id}', 'MobileApiController@getPromotion');
 Route::post('/mobile/sendPushNotification', 'MobileApiController@sendPushNotification');
 Route::post('/mobile/setNotificationAsSeen', 'MobileApiController@setNotificationAsSeen');
-
+Route::get('/mobile/createChatThread', 'MobileApiController@createChatThread');
 //queuing(short version)
 Route::get('/kiosk/getQueue/{branch_id}', 'KioskController@getTodaysQueue');
 

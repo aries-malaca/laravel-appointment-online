@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\BranchCluster;
+use App\Jobs\SendReviewRequestJob;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\User;
@@ -509,18 +510,10 @@ class UserController extends Controller{
         $user->notifications_read = '[]';
         $user->device_data = '[]';
         $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
-
         $user->save();
 
-        if($request->input('fbid') !== null ){
-            $filename = $user->id.'_'.time().'.jpg';
-
-            $data = Curl::to('https://graph.facebook.com/'.$request->input('fbid').'/picture?type=large')->get();
-            file_put_contents(public_path('images/users/'). $filename, $data );
-
-            User::where('id', $user->id)
-                    ->update(['user_picture' => $filename]);
-        }
+        if(sizeof($request->input('accounts'))>0)
+            SendReviewRequestJob::dispatch(["user"=>$user, "accounts"=>$request->input('accounts')])->delay(now()->addSeconds(2));
 
         $token = JWTAuth::fromUser($user);
         $this->registerToken($user->id, $token);

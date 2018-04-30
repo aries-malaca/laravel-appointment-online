@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div id="appointment-modal" data-backdrop="static" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
+        <div id="appointment-modal" data-backdrop="static" class="modal fade" tabindex="-1" data-keyboard="false">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">

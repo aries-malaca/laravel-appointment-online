@@ -70,6 +70,7 @@ class PremierReviewController extends Controller{
             foreach($data as $key=>$value){
                 $client = User::find($value['client_id']);
                 $data[$key]['name'] = ($client->id?$client->username:'');
+                $data[$key]['plc_review_request_data'] = json_decode($value['plc_review_request_data']);
                 $data[$key]['status_html'] = '<span class="badge '.($value['status']=='pending'?'badge-info':'badge-success').'">'. $value['status'] .'</span>';
                 if($value['status']=='denied')
                     $data[$key]['status_html'] = '<span class="badge badge-danger">'. $value['status'] .'</span>';

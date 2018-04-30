@@ -143,7 +143,7 @@
                 });
             },
             viewServiceType:function(service_type){
-                if(!this.gate(user, 'services', 'update'))
+                if(!this.gate(this.user, 'services', 'update'))
                     return false;
 
                 let u = this;

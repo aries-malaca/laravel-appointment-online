@@ -110,7 +110,7 @@
             },
 
             viewPerk:function(perk){
-                if(!this.gate(user, 'perks', 'add'))
+                if(!this.gate(this.user, 'perks', 'add'))
                     return false;
 
                 this.newPerk = {

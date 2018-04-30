@@ -1,19 +1,19 @@
-/*var socket = io.connect('https://lbo-express.azurewebsites.net');
+var socket = io.connect('https://lbo-express.azurewebsites.net');
 
 socket.on('refreshAppointments', function(data){
-    if(Number(document.getElementById("branch_id").value) == data.branch_id){
+    if(Number(document.getElementById("branch_id").value) === data.branch_id){
         vue_queuing.getAppointments();
     }
 });
 
 socket.on('callClient', function(data){
-    if(Number(document.getElementById("branch_id").value) == data.branch_id) {
+    if(Number(document.getElementById("branch_id").value) === data.branch_id) {
         if(data.action === 'call')
             new Audio('../../../audio/bell.ogg').play();
 
         vue_queuing.refresh();
     }
-});*/
+});
 // the instance should be accessible by other objects...
 var vue_queuing = new Vue({
     //inside the element with id main, vue_queing data, and methods will be accessible.
@@ -35,27 +35,25 @@ var vue_queuing = new Vue({
             if(this.branch === null)
                 return false;
 
-            let u = this;
-            let url = '../../api/appointment/getAppointments/queue/'+ this.branch_id +'/queue';
-
-            axios.get(url)
-                .then(function (response) {
-                    u.appointments = [];
-                    response.data.forEach(function(item){
-                        u.appointments.push(item);
-                    });
+            var u = this;
+            var url = '../../api/appointment/getAppointments/queue/'+ this.branch_id +'/queue';
+            $.get(url, function(data){
+                u.appointments = [];
+                data.forEach(function(item){
+                    u.appointments.push(item);
                 });
+            });
         },
         refresh:function(){
-            let u = this;
-            axios.get('https://lbo-express.azurewebsites.net/api/queuing/' +this.branch_id)
-                .then(function (response) {
-                    u.calling = response.data.calling;
-                    u.serving = response.data.serving;
-                });
+            var u = this;
+
+            $.get('https://lbo-express.azurewebsites.net/api/queuing/' +this.branch_id, function(data){
+                u.calling = data.calling;
+                u.serving = data.serving;
+            });
         },
         nextImage:function(){
-            let u = this;
+            var u = this;
             this.show = false;
             setTimeout(function(){
                 if(u.current_image===u.limit)
@@ -67,11 +65,16 @@ var vue_queuing = new Vue({
             },100);
         },
         getStatus:function(item){
-            let find_s = this.serving.find(function(i){
-                return item.client_id === i.client_id;
+            var find_s = undefined;
+            var find_c = undefined;
+
+            this.serving.forEach(function(i){
+                if(item.client_id === i.client_id)
+                    find_s = i;
             });
-            let find_c = this.calling.find(function(i){
-                return item.client_id === i.client_id;
+            this.calling.forEach(function(i){
+                if(item.client_id === i.client_id)
+                    find_c = i;
             });
 
             if(find_s !== undefined)
@@ -89,10 +92,10 @@ var vue_queuing = new Vue({
     },
     computed:{
         clients:function(){
-            let u = this;
+            var u = this;
             var clients = [];
             for(var x=0;x<this.appointments.length;x++){
-                if(!this.exists(clients, this.appointments[x]))
+                if(!this.exists(clients, this.appointments[x]) && this.appointments[x].transaction_status !== 'cancelled')
                     clients.push({
                         client_name: this.appointments[x].client_shortname,
                         transaction: this.appointments[x].items[0],
@@ -116,7 +119,7 @@ var vue_queuing = new Vue({
         },
     },
     mounted:function(){
-        let u = this;
+        var u = this;
         setInterval(function () {
             u.current_time = moment().format("MM/DD/YYYY hh:mm:ss A");
         },1000);
@@ -126,9 +129,5 @@ var vue_queuing = new Vue({
         },10000);
 
         this.getAppointments();
-        setInterval(function(){
-            u.getAppointments();
-            u.refresh();
-        }, 2000);
     }
 });

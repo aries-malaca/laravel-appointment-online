@@ -122,10 +122,10 @@
                                         <div class="modal-footer">
                                             <div v-if="gate(user, 'technician_schedules', 'update')">
                                                 <button type="button" v-if="setRegularSchedule.id!==0" @click="deleteSchedule(setRegularSchedule)" data-loading-text="Saving..." class="btn pull-left red">Delete</button>
-                                                <button type="button" v-if="setRegularSchedule.id===0" @click="addRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
-                                                <button type="button" v-else @click="updateRegularSchedule($event)" data-loading-text="Saving..." class="btn green">Save</button>
+                                                <button type="button" v-if="setRegularSchedule.id===0" @click="addRegularSchedule($event)" data-loading-text="Saving..." class="btn green pull-right">Save</button>
+                                                <button type="button" v-else @click="updateRegularSchedule($event)" data-loading-text="Saving..." class="btn green pull-right">Save</button>
                                             </div>
-                                            <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn dark btn-outline pull-right" data-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                     <!-- /.modal-content -->
@@ -172,8 +172,8 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" v-if="setSingleSchedule.id!==0" @click="deleteSchedule(setSingleSchedule)" data-loading-text="Saving..." class="btn pull-left red">Delete</button>
-                                            <button type="button" @click="saveSingleSchedule()" data-loading-text="Saving..." class="btn green">Save</button>
-                                            <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
+                                            <button type="button" @click="saveSingleSchedule()" data-loading-text="Saving..." class="btn pull-right green">Save</button>
+                                            <button type="button" class="btn dark btn-outline pull-right" data-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                     <!-- /.modal-content -->

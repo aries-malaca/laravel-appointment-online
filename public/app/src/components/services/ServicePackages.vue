@@ -71,7 +71,7 @@
                 $("#add-service-package-modal").modal("show");
             },
             viewServicePackage:function(service_package){
-                if(!this.gate(user, 'services', 'update'))
+                if(!this.gate(this.user, 'services', 'update'))
                     return false;
 
                 this.newServicePackage = {

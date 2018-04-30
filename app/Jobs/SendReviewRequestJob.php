@@ -32,7 +32,6 @@ class SendReviewRequestJob implements ShouldQueue
     {
         $rs = new PlcReviewRequest;
         $rs->client_id = $this->data['user']->id;
-        $rs->valid_id_url = null;
         $rs->status = 'pending';
         $rs->plc_review_request_data = json_encode($this->data['accounts']);
         $rs->message = 'Auto generated for merging.';

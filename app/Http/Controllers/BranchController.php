@@ -529,7 +529,7 @@ class BranchController extends Controller{
                 $branch->region_id = $value->region_id;
                 $branch->city_id = $value->city_id;
                 $branch->branch_address = $value->address;
-                $branch->cluster_id = 0;
+                $branch->cluster_id = $value->ownership == 1 ? 1: 0;
                 $branch->rooms_count = $value->rooms;
                 $branch->payment_methods = $value->payment_method;
                 $branch->branch_email = $value->email;

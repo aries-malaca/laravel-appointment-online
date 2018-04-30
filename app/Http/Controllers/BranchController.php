@@ -549,6 +549,26 @@ class BranchController extends Controller{
                 $branch->is_active = $value->is_active=='Y'?0:1;
                 $branch->save();
             }
+
+            $i = BranchSchedule::find($value->boss_id);
+
+            if(!isset($i)){
+                $schedule = new BranchSchedule;
+                $schedule->branch_id = $value->boss_id;
+                $schedule->date_start = date('Y-m-d');
+                $schedule->date_end = date('Y-m-d');
+                $schedule->schedule_data = json_encode(array(
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"],
+                    ["start"=>"09:00","end"=>"20:00"]
+                ));
+                $schedule->schedule_type= 'regular';
+                $schedule->save();
+            }
         }
     }
 }

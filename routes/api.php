@@ -56,6 +56,7 @@ Route::post('/client/filterClients', 'ClientController@filterClients');
 //resend Email Confirmation API
 Route::get('/user/sendConfirmation', 'UserController@sendConfirmation');
 
+Route::get('/branch/importBranches', 'BranchController@importBranches');
 Route::get('/branch/getBranches/{flag}', 'BranchController@getBranches');
 Route::get('/branch/getBranches', 'BranchController@getBranches');
 Route::get('/branch/getBranch/{id}', 'BranchController@getBranch');

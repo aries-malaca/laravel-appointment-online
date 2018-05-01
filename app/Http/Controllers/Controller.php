@@ -7,6 +7,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use App\Config;
+use App\Branch;
 use App\Service;
 use App\ServiceType;
 use App\ServicePackage;
@@ -227,7 +228,12 @@ class Controller extends BaseController{
                     "home_branch"=>10,
                     "notifications"=>["email"]
                 ));
-            else
+            else{
+                $bbb  = Branch::find($boss_data['branch_id']);
+                if(!isset($bbb->id))
+                    $boss_data['branch_id'] = null;
+
+            }
                 $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
                     "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
                     "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
@@ -306,6 +312,19 @@ class Controller extends BaseController{
             "attachments"=>$attachments
         ];
         SendEmailJob::dispatch($data)->delay(now()->addSeconds(2));
+    }
+
+    function dispatchVerification($user, $raw_password = null){
+        $generated = md5(rand(1, 600));
+        $user_data = json_decode($user['user_data'], true);
+        $user_data['verify_key'] = $generated;
+        $user_data['verify_expiration'] = time() + 300;
+        User::where('id', $user['id'])
+            ->update(['user_data' => json_encode($user_data)]);
+
+        $headers = array("subject" => env("APP_NAME"). ' | Signup Verification',
+            "to" => [["email" => $user['email'], "name" => $user['username']]]);
+        $this->sendMail('email.account_verification', ["user" => $user, "generated" => $generated,"raw_password"=>$raw_password], $headers);
     }
 
     function sendSMS($message, $mobile, $title, $api, $shortcode){

@@ -172,6 +172,21 @@
                     $btn.button('reset');
                 });
             },
+            addRegion:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/region/addRegion?token=' + this.token, 'post', this.newRegion, function(){
+                    u.getRegions();
+                    toastr.success("Region updated added.");
+                    $btn.button('reset');
+                    $("#add-region-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
             updateCity:function(){
                 let u = this;
                 let $btn = $(event.target);
@@ -187,6 +202,22 @@
                     $btn.button('reset');
                 });
             },
+            updateCity:function(){
+                let u = this;
+                let $btn = $(event.target);
+                $btn.button('loading');
+
+                this.makeRequest('/api/city/addCity?token=' + this.token, 'post', this.newCity, function(){
+                    u.getCities();
+                    toastr.success("City updated added.");
+                    $btn.button('reset');
+                    $("#add-city-modal").modal('hide');
+                },function(error){
+                    XHRCatcher(error);
+                    $btn.button('reset');
+                });
+            },
+
             showAddCityModal:function(){
                 this.newCity = {
                     id:0,

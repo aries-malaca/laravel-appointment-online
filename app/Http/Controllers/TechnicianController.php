@@ -255,8 +255,6 @@ class TechnicianController extends Controller{
                 'cluster_id'=>'required|not_in:0|numeric',
                 'employee_id'=>'required|max:255|unique:technicians,employee_id',
                 'technician_data.gender'=>'required|in:male,female',
-                'technician_data.birth_date'=>'required',
-                'technician_data.civil_status'=>'required|in:single,married',
             ]);
             if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
@@ -288,8 +286,6 @@ class TechnicianController extends Controller{
                 'cluster_id'=>'required|not_in:0|numeric',
                 'employee_id'=>'required|max:255|unique:technicians,employee_id,' . $request->input('id'),
                 'technician_data.gender'=>'required|in:male,female',
-                'technician_data.birth_date'=>'required',
-                'technician_data.civil_status'=>'required|in:single,married',
             ]);
             if ($validator->fails())
                 return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);

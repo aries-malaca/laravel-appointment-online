@@ -8,6 +8,86 @@ use Validator;
 use DB;
 
 class ClientController extends Controller{
+
+    function searchAdvancedClients(Request $request){
+        $find = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE 1 = 1 " . ($request->input('email') !== null? "AND cusemail LIKE '%". $request->input('email') ."%'":"") . ($request->input('birth_date') !== null ? " AND cusbday LIKE '". $request->input('birth_date') ."%'":"") . ($request->input('first_name') !== null ? " AND cusfname LIKE '%". $request->input('first_name') ."%'":"") .($request->input('last_name') !== null ? " AND cuslname LIKE '%". $request->input('last_name') ."%'":"") ."LIMIT 10");
+
+        $final = array();
+        foreach($find as $key=>$value){
+            $f = User::where('email', $value->cusemail)->get()->first();
+
+            if(!isset($f))
+                $final[] = $value;
+        }
+        return response()->json($final);
+    }
+
+    function migrateClient(Request $request){
+        $validator = Validator::make($request->all(), [
+            'cusfname' => 'required|max:255',
+            'cuslname' => 'required|max:255',
+            'cusemail' => 'required|email|unique:users,email',
+            'cusbday' => 'required|date_format:Y-m-d|before_or_equal:'. date('Y-m-d', strtotime("-13 years")),
+        ],[
+            'cusemail.unique' => 'Client already in the database',
+            'cusbday.date_format'    => 'Birth Date must be mm/dd/yyyy format',
+            'cusbday.before_or_equal' => 'Must be at least 13 years old to register'
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
+
+
+        $password = $this->generateNewPassword();
+        $boss_data = $this->getBossClient($request->input('cusemail'));
+
+        $user = new User;
+        $user->email = $request->input('cusemail');
+        $user->password = bcrypt($password);
+        $user->first_name = ($request->input('cusfname') != '') ? $request->input('cusfname') : $boss_data['firstname'];
+        $user->middle_name = ($request->input('cusmname') != '') ? $request->input('cusmname') : $boss_data['middlename'];
+        $user->last_name = ($request->input('cuslname')!= '') ? $request->input('cuslname') : $boss_data['lastname'];
+        $user->username = $user->first_name .' ' . $user->last_name;
+        $user->birth_date = date('Y-m-d',strtotime($request->input('cusbday')));
+        $user->user_mobile = $request->input('cusmob');
+        $user->gender = ($boss_data['gender']=='m') ? 'male':'female';
+        $user->level = 0;
+        if($boss_data === false)
+            $user->user_data = json_encode(array("premier_status"=>0,
+                "premier_branch"=>0,
+                "home_branch"=>10,
+                "notifications"=>["email"]
+            ));
+        else{
+            $bbb  = Branch::find($boss_data['branch_id']);
+            if(!isset($bbb->id))
+                $boss_data['branch_id'] = null;
+
+        }
+        $user->user_data = json_encode(array("premier_status"=>($boss_data['premier'] != null ? $boss_data['premier']:0),
+            "premier_branch"=>($boss_data['premier_branch'] != null ? $boss_data['premier_branch']:0),
+            "home_branch"=>($boss_data['branch_id']!=null ? $boss_data['branch_id']:10 ),
+            "boss_id"=>$boss_data['custom_client_id'],
+            "notifications"=>["email"]
+        ));
+        $user->device_data = '[]';
+        $user->last_activity = date('Y-m-d H:i');
+        $user->last_login = date('Y-m-d H:i');
+        $user->is_confirmed = ($request->input('confirmed') == 'Confirmed') ? 1:0;
+        $user->is_active = 1;
+        $user->is_client = 1;
+        $user->transaction_data = '[]';
+        $user->notifications_read = '[]';
+        $user->is_agreed = ($request->input('confirmed')=='Confirmed'?1:0);
+        $user->user_picture = 'no photo '. ($boss_data['gender']=='m' ? 'male':'female') .'.jpg';
+        $user->save();
+
+        $user = User::where('id', $user->id)->get()->first();
+        $this->dispatchVerification($user, $password);
+
+        return response()->json(["result"=>"success"]);
+    }
+
     public function searchClients(Request $request){
 
         $keyword = $request->input('keyword');

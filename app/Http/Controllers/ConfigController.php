@@ -11,6 +11,9 @@ class ConfigController extends Controller{
     public function getTerms(){
         return response()->json(Config::find(3)->config_value);
     }
+     public function getConsent(){
+        return response()->json(Config::find(29)->config_value);
+    }
 
     public function getConfigs(){
         return response()->json(Config::get()->toArray());

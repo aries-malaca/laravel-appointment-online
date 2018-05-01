@@ -1173,14 +1173,18 @@ class MobileApiController extends Controller{
             $recipientName  = $objectConfig->customer_service_name;
             $clientID       = $api["user"]["id"];
             $is_client      = $api["user"]["is_client"];
-
+            $arrayThread    = array();
             // return response()->json(["recipientID"=>$recipientID,"clientID"=>$clientID]);
-            $thread =  MessageThread::where(function($thread) use ($clientID,$recipientID){
-                                    $thread->whereIn('created_by_id', [$clientID , $recipientID])
-                                                 ->orWhereIn('participant_ids',[$clientID , $recipientID]);
+            $thread =   Message::where(function($thread) use ($clientID){
+                                    $thread->whereIn("sender_id",[$clientID])
+                                                 ->orWhere('recipient_id',$clientID);
                                     })
-                            ->get()->first();
-            
+                                ->whereNotIn('message_thread_id', $arrayThread)
+                                ->select("message_thread_id as thread_id")
+                                ->groupBy("message_thread_id")
+                                ->orderBy("messages.created_at","desc")
+                                ->get()->first();
+                        
             if(isset($thread['id'])){
                 $thread_id                    = $thread['id'];
                 $updateThread                 = MessageThread::find($thread_id);
@@ -1195,14 +1199,16 @@ class MobileApiController extends Controller{
                 $thread_id = $thread->id;
             }
              return response()->json([
-                        "result"=>"success",
-                        "thread_name" => $recipientName,
-                        "thread_id"=>$thread_id,
-                        "recipientID"=>$recipientID,
-                        "thread"=>$thread]);
+                        "result"        => "success",
+                        "thread_name"   => $recipientName,
+                        "thread_id"     => $thread_id,
+                        "recipientID"   => $recipientID,
+                        "thread"        => $thread]);
          }
         return response()->json($api, $api["status_code"]);
     }
+
+    
 
 
 

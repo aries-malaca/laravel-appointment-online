@@ -108,7 +108,7 @@
                                                 <td>
                                                     <span :title="'By ' + service.item_data.cancel_by_name +', ' + moment(service.item_data.cancel_datetime).format('MM/DD/YYYY hh:mm A')"
                                                           class="badge badge-danger" v-if="service.item_status==='cancelled'"> Reason: {{ service.item_data.cancel_reason }} </span>
-                                                    <button v-if="service.item_status==='reserved' && gate(user, 'appointments','update')" @click="showCancelItemModal(service)" class="btn btn-danger btn-xs">Cancel</button>
+                                                    <button v-if="service.item_status==='reserved' && (gate(user, 'appointments','update') || user.is_client === 1)" @click="showCancelItemModal(service)" class="btn btn-danger btn-xs">Cancel</button>
                                                 </td>
                                             </tr>
                                             </tbody>

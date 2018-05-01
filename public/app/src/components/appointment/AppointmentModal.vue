@@ -141,7 +141,7 @@
                                                     <span class="badge badge-danger" v-else>{{ product.item_status }}</span>
                                                 </td>
                                                 <td>
-                                                    <button v-if="product.item_status==='reserved' && gate(user, 'appointments','update')" @click="showCancelItemModal(product)" class="btn btn-danger btn-xs">Cancel</button>
+                                                    <button v-if="product.item_status==='reserved' && (gate(user, 'appointments','update') || user.is_client === 1)" @click="showCancelItemModal(product)" class="btn btn-danger btn-xs">Cancel</button>
                                                 </td>
                                             </tr>
                                             </tbody>
@@ -262,7 +262,7 @@
                         </div>
                     </div>
                     <div class="modal-footer" v-if="appointment.waiver_data !== undefined">
-                        <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved' && gate(user, 'appointments','update')" class="pull-left btn btn-danger">Cancel Appointment</button>
+                        <button type="button" @click="showCancelItemModal(cancel_multiple)" v-if="appointment.transaction_status === 'reserved' && (gate(user, 'appointments','update') || user.is_client === 1)" class="pull-left btn btn-danger">Cancel Appointment</button>
                         <a target="_blank" v-show="appointment.waiver_data.questions !== undefined" v-bind:href="'../../waiver/' + appointment.id +'?token='+ token" class="pull-left btn btn-success">View Waiver</a>
                         <button type="button" @click="closeModal()" class="btn dark btn-outline">Close</button>
                     </div>

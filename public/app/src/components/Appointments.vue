@@ -291,7 +291,7 @@
                 var b = [];
 
                 this.branches.forEach((item)=>{
-                    a.push(item.value);
+                    b.push(item.value);
                 });
 
                 this.branch_selection.forEach((item)=>{
@@ -299,9 +299,9 @@
                 });
 
                 if(a.indexOf(0) !== -1)
-                    return b;
+                    return a;
 
-                return a;
+                return b
             },
             branch_selection(){
                 let u = this;

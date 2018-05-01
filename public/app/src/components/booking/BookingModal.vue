@@ -18,8 +18,15 @@
                                 <div class="col-md-4">
                                     <div class="form-group" v-if="!lock_client">
                                         <h4>Select Client:</h4>
-                                        <vue-select :debounce="250" :on-search="searchClients" :options="client_selection"
-                                                    placeholder="Search for Client..." v-model="newTransaction.client" />
+
+                                        <div class="input-group">
+                                            <span class="input-group-btn">
+                                                <a target="_blank" href="/#/clients" type="button" class="btn blue"><i class="fa fa-users"></i></a>
+                                            </span>
+                                            <vue-select :debounce="250" :on-search="searchClients" :options="client_selection"
+                                                placeholder="Search for Client..." v-model="newTransaction.client" />
+                                        </div>
+
                                     </div>
                                     <div class="form-group" v-else>
                                         <h4>Client:</h4>
@@ -624,14 +631,14 @@
                     return products;
 
                 for(var x=0;x<this.products.length;x++){
-
-                    if(this.newTransaction.branch.products.indexOf(this.products[x].id) !== -1)
-                        products.push({ label: this.products[x].name,
-                                        value: this.products[x].id,
-                                        price: this.products[x].product_price,
-                                        picture: this.products[x].product_picture,
-                                        description: this.products[x].product_description
-                        });
+                    if(this.newTransaction.branch.products !== null && this.newTransaction.branch.products !== undefined)
+                        if(this.newTransaction.branch.products.indexOf(this.products[x].id) !== -1)
+                            products.push({ label: this.products[x].name,
+                                            value: this.products[x].id,
+                                            price: this.products[x].product_price,
+                                            picture: this.products[x].product_picture,
+                                            description: this.products[x].product_description
+                            });
                 }
                 return products;
             },
@@ -642,21 +649,22 @@
                     return services;
 
                 for(var x=0;x<this.services.length;x++){
-                    if(this.newTransaction.branch.services.indexOf(this.services[x].id) !== -1)
-                        if(this.newTransaction.client !== null){
-                            if(this.services[x].service_gender === this.newTransaction.client.gender){
-                                var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
-                                services.push({ label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
-                                    value: this.services[x].id,
-                                    price: this.services[x].service_price,
-                                    minutes: this.services[x].service_minutes,
-                                    picture: this.services[x].service_picture,
-                                    description: this.services[x].service_description,
-                                    service_type_data: this.services[x].service_type_data,
-                                    service_type_id: this.services[x].service_type_id
-                                });
+                    if(this.newTransaction.branch.services !== null && this.newTransaction.branch.services !== undefined)
+                        if(this.newTransaction.branch.services.indexOf(this.services[x].id) !== -1)
+                            if(this.newTransaction.client !== null){
+                                if(this.services[x].service_gender === this.newTransaction.client.gender){
+                                    var name = this.services[x].service_type_id !== 0 ?  this.services[x].service_name: this.services[x].package_name
+                                    services.push({ label: name + ' ' + this.newTransaction.client.gender.toUpperCase(),
+                                        value: this.services[x].id,
+                                        price: this.services[x].service_price,
+                                        minutes: this.services[x].service_minutes,
+                                        picture: this.services[x].service_picture,
+                                        description: this.services[x].service_description,
+                                        service_type_data: this.services[x].service_type_data,
+                                        service_type_id: this.services[x].service_type_id
+                                    });
+                                }
                             }
-                        }
                 }
                 return services;
             },

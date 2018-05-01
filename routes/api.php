@@ -42,6 +42,8 @@ Route::get('/audits/getAudits/{id}', 'AuditController@getAudits');
 Route::post('/user/fbLogin', 'UserController@fbLogin');
 
 //clients
+Route::post('/client/searchAdvancedClients', 'ClientController@searchAdvancedClients');
+Route::post('/client/migrateClient', 'ClientController@migrateClient');
 Route::get('/client/searchClients', 'ClientController@searchClients');
 Route::get('/client/getClient/{id}', 'ClientController@getClient');
 Route::post('/client/updateInfo', 'ClientController@updateInfo');

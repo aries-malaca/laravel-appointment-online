@@ -212,19 +212,6 @@ class UserController extends Controller{
         return response()->json(["result"=>"failed"]);
     }
 
-    function dispatchVerification($user, $raw_password = null){
-        $generated = md5(rand(1, 600));
-        $user_data = json_decode($user['user_data'], true);
-        $user_data['verify_key'] = $generated;
-        $user_data['verify_expiration'] = time() + 300;
-        User::where('id', $user['id'])
-            ->update(['user_data' => json_encode($user_data)]);
-
-        $headers = array("subject" => env("APP_NAME"). ' | Signup Verification',
-                        "to" => [["email" => $user['email'], "name" => $user['username']]]);
-        $this->sendMail('email.account_verification', ["user" => $user, "generated" => $generated,"raw_password"=>$raw_password], $headers);
-    }
-
     public function changePassword(Request $request){
         $api = $this->authenticateAPI();
 

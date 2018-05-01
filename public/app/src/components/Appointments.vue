@@ -205,14 +205,14 @@
                 if(this.calendar_view.options !== undefined)
                     this.calendar_view.options.events.filter((item)=>{
                         if(u.calendar_view.name==='month')
-                            return (moment(item.start).format("MM") === moment(u.calendar_view.start._d).format("MM"));
+                            return (moment(item.start).format("MM") === moment(u.calendar_view.start).format("MM"));
                         else if(u.calendar_view.name==='agendaThreeDays'){
-                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start._d).format("YYYY-MM-DD")) ||
-                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start._d).add(1,"days").format("YYYY-MM-DD")) ||
-                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start._d).add(2, "days").format("YYYY-MM-DD"));
+                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).format("YYYY-MM-DD")) ||
+                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).add(1,"days").format("YYYY-MM-DD")) ||
+                                (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).add(2, "days").format("YYYY-MM-DD"));
                         }
                         else if(u.calendar_view.name==='agendaOneDay')
-                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start._d).format("YYYY-MM-DD"));
+                            return (moment(item.start).format("YYYY-MM-DD") === moment(u.calendar_view.start).format("YYYY-MM-DD"));
                     }).forEach((event)=>{
                         if(event.transaction_status === 'reserved')
                             object.pending.push(event);
@@ -291,17 +291,17 @@
                 var b = [];
 
                 this.branches.forEach((item)=>{
-                    b.push(item.value);
-                });
-
-                this.branch_selection.forEach((item)=>{
                     a.push(item.value);
                 });
 
-                if(a.indexOf(0) !== -1)
-                    return a;
+                this.branch_selection.forEach((item)=>{
+                    b.push(item.value);
+                });
 
-                return b
+                if(a.indexOf(0) !== -1)
+                    return b;
+
+                return a;
             },
             branch_selection(){
                 let u = this;

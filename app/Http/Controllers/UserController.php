@@ -557,7 +557,7 @@ class UserController extends Controller{
             foreach($tokens as $key=>$value){
                 if(JWTAuth::getToken() == $value['token']) {
                     $tokens[$key]['geolocation'] = $request->input('geolocation');
-                    $tokens[$key]['geolocation'] = $request->input('geolocation');
+                    $tokens[$key]['coordinates'] = $request->input('coordinates');
                 }
             }
 

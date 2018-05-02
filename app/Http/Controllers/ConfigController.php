@@ -9,10 +9,12 @@ use Artisan;
 
 class ConfigController extends Controller{
     public function getTerms(){
-        return response()->json(Config::find(3)->config_value);
+        $queryTerms = Config::find(3);
+        return $queryTerms->config_value;
     }
      public function getConsent(){
-        return response()->json(Config::find(29)->config_value);
+        $queryConsent = Config::find(29);
+        return $queryConsent->config_value;
     }
 
     public function getConfigs(){

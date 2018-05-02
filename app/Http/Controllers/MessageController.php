@@ -25,7 +25,7 @@ class MessageController extends Controller{
                             ->whereIn('recipient_id', [$api['user']['id'], $request->input('recipient_id')])
                             ->get()->first();
             if(isset($thread['id'])){
-                $thread_id = $thread['message_thread_id'];
+                $thread_id                   = $thread['message_thread_id'];
                 $updateThread                 = MessageThread::find($thread_id);
                 $updateThread->updated_at     = date("Y-m-d H:i:s");
                 $updateThread->save();

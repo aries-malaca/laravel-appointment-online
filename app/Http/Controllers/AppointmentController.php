@@ -191,10 +191,11 @@ class AppointmentController extends Controller{
                 $appointments = $appointments->where('transaction_datetime', 'LIKE',$request->segment(6) .'%');
         }
 
+        if($request->input('branches') !== null) {
+            $appointments = $appointments->whereIn('branch_id', explode(",", $request->input('branches')))
+                                            ->where('transaction_datetime', '>', date('Y-m-d', strtotime("-1 month")));
 
-        if($request->input('branches') !== null)
-            $appointments = $appointments->whereIn('branch_id', explode( ",",$request->input('branches')));
-
+        }
         $appointments = $appointments->orderBy('transaction_datetime','desc')
                                     ->get()->toArray();
 
@@ -203,7 +204,6 @@ class AppointmentController extends Controller{
             $client = User::find($value['client_id']);
             $technician = Technician::find($value['technician_id']);
             $appointments[$key]['branch_name'] = isset($branch)?$branch->branch_name:'N/A';
-
             $appointments[$key]['client_name'] = $client->username;
             $appointments[$key]['client_shortname'] = explode(" ",$client->first_name)[0];
             $appointments[$key]['client_contact'] = $client->user_mobile;

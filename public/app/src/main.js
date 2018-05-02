@@ -10,7 +10,7 @@ Vue.config.devtools = true;
 import {mixins} from './mixins';
 
 //frontend configurations
-let client_socket = 'https://lbo-express.azurewebsites.net';
+let client_socket = 'https://socket.lay-bare.com';
 //end frontend configurations
 
 Vue.use(VueSocketIO, client_socket);

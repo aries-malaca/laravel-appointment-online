@@ -639,11 +639,16 @@
                     u.acknowledgement_connection = true;
                     u.signing_finished = false;
 
+
+                    if(u.t !== undefined)
+                        u.t = undefined;
+
                     u.t = setInterval(function(){
                         u.acknowledgement_timer --;
-                        if(u.acknowledgement_timer === 0)
+                        if(u.acknowledgement_timer === 0){
+                            u.t = undefined;
                             u.cancelSigning();
-
+                        }
                     },1000);
                 }
             };

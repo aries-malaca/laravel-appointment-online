@@ -458,11 +458,12 @@
                     });
             },
             emitServe:function(){
+                this.$socket.emit('serveClient', this.selected_client.client.client_id, this.branch.value, this.selected_appointment_id);
                 let u = this;
                 axios({url:'/api/appointment/serveAppointment?token=' + this.token, method:'post', data:{id:this.selected_appointment_id, technician_id:this.selected_technician}})
                     .then(function () {
-                        u.$socket.emit('serveClient', u.selected_client.client.client_id, u.branch.value, u.selected_appointment_id);
                         u.$socket.emit('refreshAppointments', u.branch.value);
+                        u.$store.commit('addServing',{appointment_id:u.selected_appointment_id, branch_id:u.branch.value, client_id:u.selected_client.client.client_id, status:'serving', time_added:moment().format("X")});
                         $("#confirm-technician-modal").modal("hide");
                     })
                     .catch(function (error) {
@@ -482,12 +483,14 @@
                         return true;
                     }
                 });
+                u.$socket.emit('unserveClient', u.branch.value, client_id);
+                u.$store.commit('removeServing',transaction_id);
 
                 if(find !== undefined){
                     axios({url:'/api/appointment/unServeAppointment?token=' + this.token, method:'post', data:{id:transaction_id}})
                         .then(function () {
-                            u.$socket.emit('unserveClient', u.branch.value, client_id);
                             u.$socket.emit('refreshAppointments', u.branch.value);
+                            u.$socket.emit('unserveClient', u.branch.value, client_id);
                         })
                         .catch(function (error) {
                             XHRCatcher(error);
@@ -504,7 +507,7 @@
             refresh(){
                 let u = this;
                 if(u.branch !== null)
-                    axios.get('https://lbo-express.azurewebsites.net/api/queuing/' + u.branch.value)
+                    axios.get('https://socket.lay-bare.com/api/queuing/' + u.branch.value)
                         .then(function (response) {
                             u.calling = response.data.calling;
                             u.$store.commit('updateServing',response.data.serving);

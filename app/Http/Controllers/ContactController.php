@@ -7,6 +7,7 @@ use App\UserLevel;
 use Excel;
 use Validator;
 use DB;
+use App\Message;
 
 class ContactController extends Controller{
     function getContacts(){
@@ -124,7 +125,20 @@ class ContactController extends Controller{
                     $d = json_decode($level->level_data);
 
                     if($d->dashboard != 'CustomerServiceDashboard')
-                        $where = ' AND is_client=0 ';
+                        $where = ' AND is_client=0';
+                    else{
+                        $ids = Message::where('recipient_id', $api['user']['id'])
+                                        ->get()->pluck('sender_id')->toArray();
+
+                        $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client,
+                                  ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online
+                                  FROM users AS a 
+                                  LEFT JOIN user_levels AS b ON a.level=b.id 
+                                  WHERE a.id IN (". implode(",", $ids) .") OR is_client = 0
+                                  ORDER BY is_online DESC, first_name");
+
+                        return response()->json($data);
+                    }
                 }
             }
 
@@ -134,6 +148,7 @@ class ContactController extends Controller{
                                   LEFT JOIN user_levels AS b ON a.level=b.id 
                                   WHERE 1=1 ". $where . " AND a.id <> ". $api['user']['id'] ."
                                   ORDER BY is_online DESC, first_name");
+
             foreach($data as $key=>$v) {
                 $data[$key]->level_data = json_decode($v->level_data);
                 $data[$key]->user_data = json_decode($v->user_data);

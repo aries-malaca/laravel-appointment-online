@@ -202,7 +202,7 @@
                     $btn.button('reset');
                 });
             },
-            updateCity:function(){
+            addCity:function(){
                 let u = this;
                 let $btn = $(event.target);
                 $btn.button('loading');

@@ -58,15 +58,15 @@
                             </p>
                         </div>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>First Name</label>
                                 <input type="text" v-model="advanced.first_name" class="form-control"/>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Last Name</label>
                                 <input type="text" v-model="advanced.last_name" class="form-control"/>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Email</label>
                                 <input type="text" v-model="advanced.email" class="form-control"/>
                             </div>

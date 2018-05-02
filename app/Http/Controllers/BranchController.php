@@ -550,9 +550,9 @@ class BranchController extends Controller{
                 $branch->save();
             }
 
-            $i = BranchSchedule::find($value->boss_id);
+            $i = BranchSchedule::where('branch_id',$value->boss_id)->get()->first();
 
-            if(!isset($i)){
+            if(!isset($i['id'])){
                 $schedule = new BranchSchedule;
                 $schedule->branch_id = $value->boss_id;
                 $schedule->date_start = date('Y-m-d');

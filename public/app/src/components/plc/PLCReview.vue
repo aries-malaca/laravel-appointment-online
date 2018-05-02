@@ -163,9 +163,7 @@
                     valid_id_url:request.valid_id_url,
                     status:request.status,
                     status_html:request.status_html,
-                    plc_review_request_data:{
-                        boss_id: request.plc_review_request_data.boss_id
-                    },
+                    plc_review_request_data:request.plc_review_request_data.boss_id
                 }
                 $("#review-modal").modal("show");
             }

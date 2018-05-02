@@ -23,7 +23,7 @@
                                             <span class="input-group-btn">
                                                 <a target="_blank" href="/#/clients" type="button" class="btn blue"><i class="fa fa-users"></i></a>
                                             </span>
-                                            <vue-select :debounce="250" :on-search="searchClients" :options="client_selection"
+                                            <vue-select :on-search="searchClients" :options="client_selection"
                                                 placeholder="Search for Client..." v-model="newTransaction.client" />
                                         </div>
 

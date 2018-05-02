@@ -94,7 +94,8 @@ class ClientController extends Controller{
         if($keyword == '')
             return response()->json(["result"=>"failed","error"=>"Please Enter Keyword."], 400);
 
-        $clients = User::where('is_client', 1);
+        $clients = User::leftJoin('user_levels', 'users.level', 'user_levels.id')
+                ->where('is_client', 1);
         $clients = $clients->where(function($query) use ($keyword){
             $query->where('first_name', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('middle_name', 'LIKE', '%' . $keyword . '%')
@@ -104,6 +105,7 @@ class ClientController extends Controller{
                     ->orWhere('user_mobile', 'LIKE', '%' . $keyword . '%');
         });
         $clients = $clients
+                    ->select('users.*','level_name','level_data')
                     ->orderBy('first_name')
                     ->take(30)
                     ->get()->toArray();

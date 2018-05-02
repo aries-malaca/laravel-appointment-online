@@ -128,14 +128,13 @@ class ContactController extends Controller{
                         $where = ' AND is_client=0';
                     else{
                         $ids = Message::where('recipient_id', $api['user']['id'])
+                                        ->where('is_closed', '0')
                                         ->get()->pluck('sender_id')->toArray();
 
-                        $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client,
-                                  ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online
-                                  FROM users AS a 
-                                  LEFT JOIN user_levels AS b ON a.level=b.id 
-                                  WHERE a.id IN (". implode(",", $ids) .") OR is_client = 0
-                                  ORDER BY is_online DESC, first_name");
+                        if(sizeof($ids) > 0)
+                            $where = "a.id IN (". implode(",", $ids) .") OR";
+
+                        $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client, ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online FROM users AS a  LEFT JOIN user_levels AS b ON a.level=b.id  WHERE " . $where . " is_client = 0 ORDER BY is_online DESC, first_name");
 
                         return response()->json($data);
                     }

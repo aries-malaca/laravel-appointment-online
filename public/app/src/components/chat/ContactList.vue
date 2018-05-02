@@ -2,8 +2,8 @@
     <div style="background-color:#f2f6f9;padding-top:5px;">
         <div class="input-group" style="margin:5px;width: 98%;" v-if="user.is_client === 0" v-show="partner === false">
             <div class="input-icon">
-                <i class="fa fa-search"></i>
-                <input type="text" class="form-control" v-model="keyword" autocomplete="false" placeholder="Search ..."/>
+                <vue-select :on-search="searchClients" :options="client_selection"
+                            placeholder="Search for Client..." v-model="selected_client" />
             </div>
         </div>
         <div class="page-quick-sidebar-chat-users" data-rail-color="#e8fec7" v-show="partner === false"
@@ -45,16 +45,38 @@
     </div>
 </template>
 <script>
+    import VueSelect from 'vue-select';
     export default{
         name:'ContactList',
+        components:{ VueSelect },
         data:function(){
             return{
                 keyword:'',
+                selected_client:null,
+                remote_clients:[]
             }
         },
         methods:{
             showConversation(item){
                 this.$store.commit('messages/updatePartner', item);
+            },
+            searchClients:function(keyword,loading){
+                loading(true);
+                let u = this;
+                axios.get('/api/client/searchClients', {params:{keyword:keyword}})
+                    .then(function (response) {
+                        u.remote_clients = [];
+                        response.data.forEach(function(item){
+                            u.remote_clients.push(item);
+                        });
+                        loading(false);
+                    });
+            },
+        },
+        watch: {
+            selected_client(){
+                if(this.selected_client.id !== undefined)
+                    this.$store.commit('messages/updatePartner', this.selected_client)
             }
         },
         computed:{
@@ -83,6 +105,25 @@
                     }).length;
                     return item;
                 });
+            },
+            client_selection:function(){
+                var remote_clients=[];
+                for(var x=0;x<this.remote_clients.length;x++){
+                    remote_clients.push({  label:this.remote_clients[x].username,
+                        id:this.remote_clients[x].id,
+                        first_name:this.remote_clients[x].first_name,
+                        last_name:this.remote_clients[x].last_name,
+                        username:this.remote_clients[x].username,
+                        is_client:this.remote_clients[x].is_client,
+                        last_activity:this.remote_clients[x].last_activity,
+                        level_data:this.remote_clients[x].level_data,
+                        level_name:this.remote_clients[x].level_name,
+                        unread:this.remote_clients[x].unread,
+                        user_data:this.remote_clients[x].user_data,
+                        user_picture:this.remote_clients[x].user_picture,
+                    });
+                }
+                return remote_clients;
             },
             clients(){
                 let u = this;

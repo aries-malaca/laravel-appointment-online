@@ -31,21 +31,21 @@
                                                <th>Technician</th>
                                             </tr>
                                             @foreach($appointments as $key=>$value)
-                                            <tr>
-                                                <td>{{ $value['client_first_name'] }} {{ $value['client_last_name'] }}</td>
-                                                <td>{{ date('m/d/Y', strtotime($value['transaction_datetime'])) }}</td>
-                                                <td>
-                                                    @foreach($value['items'] as $key => $item)
-                                                        <span> {{ $item['item_name'] }}</span>
-                                                        @if(($key+1)< sizeof($value['items']))
-                                                            <span>, </span>
-                                                        @endif
-                                                    @endforeach
-                                                </td>
-                                                <td>
-                                                    {{ $value['technician_first_name'] }} {{ $value['technician_last_name'] }}
-                                                </td>
-                                            </tr>
+                                                <tr>
+                                                    <td>{{ $value['client_first_name'] }} {{ $value['client_last_name'] }}</td>
+                                                    <td>{{ date('m/d/Y', strtotime($value['transaction_datetime'])) }}</td>
+                                                    <td>
+                                                        @foreach($value['items'] as $key => $item)
+                                                            <span> {{ $item['item_name'] }}</span>
+                                                            @if(($key+1)< sizeof($value['items']))
+                                                                <span>, </span>
+                                                            @endif
+                                                        @endforeach
+                                                    </td>
+                                                    <td>
+                                                        {{ $value['technician_first_name'] }} {{ $value['technician_last_name'] }}
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </table>
                                         <br/>

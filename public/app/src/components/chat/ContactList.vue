@@ -3,7 +3,7 @@
         <div class="input-group" style="margin:5px;width: 98%;" v-if="user.is_client === 0" v-show="partner === false">
             <div class="input-icon">
                 <i class="fa fa-search"></i>
-                <input type="text" class="form-control" v-model="keyword" placeholder="Search ..."/>
+                <input type="text" class="form-control" v-model="keyword" autocomplete="false" placeholder="Search ..."/>
             </div>
         </div>
 

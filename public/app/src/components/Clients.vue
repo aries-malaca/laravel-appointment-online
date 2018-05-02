@@ -70,10 +70,6 @@
                                 <label>Email</label>
                                 <input type="text" v-model="advanced.email" class="form-control"/>
                             </div>
-                            <div class="col-md-3">
-                                <label>Birth Date</label>
-                                <input type="date" v-model="advanced.birth_date" class="form-control"/>
-                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-3">
@@ -130,7 +126,6 @@
                     first_name:'',
                     last_name:'',
                     email:'',
-                    birth_date:'2000-01-01',
                 },
                 clients:[],
                 clientTable:{

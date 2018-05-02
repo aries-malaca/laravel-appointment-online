@@ -93,6 +93,18 @@ export const store = new Vuex.Store({
         },
         updateServing(state, serving){
             state.serving = serving;
-        }
+        },
+        addServing(state, data){
+            state.serving.push(data);
+        },
+        removeServing(state, id){
+            var s =[];
+            state.serving.forEach((item)=>{
+                if(id !== item.appointment_id){
+                    s.push(item);
+                }
+            });
+            state.serving = s;
+        },
     }
 });

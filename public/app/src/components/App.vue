@@ -29,7 +29,7 @@
         <!-- END CONTAINER -->
         <!-- BEGIN FOOTER -->
         <div class="page-footer" style="z-index:1000">
-            <div class="page-footer-inner"> 2017 &copy; Lay-Bare Online </div>
+            <div class="page-footer-inner"> {{ moment().format("YYYY") }} &copy; Lay-Bare Online </div>
             <div class="scroll-to-top">
                 <i class="icon-arrow-up"></i>
             </div>

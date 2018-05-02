@@ -83,7 +83,7 @@
                         </div>
                     </div>
                     <div class="modal-footer" v-if="newRequest.client_id !== undefined">
-                        <a target="_blank" :href="'#/clients' + newRequest.client_id" class="btn btn-info pull-left" >View Client</a>
+                        <a target="_blank" :href="'#/clients/' + newRequest.client_id" class="btn btn-info pull-left" >View Client</a>
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
                         <button class="btn btn-success" @click="processRequest($event, 'approved')">Approve</button>
                         <button class="btn btn-danger" @click="processRequest($event, 'denied')">Deny</button>

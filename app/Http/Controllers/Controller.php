@@ -211,6 +211,11 @@ class Controller extends BaseController{
 
         if(isset($client->cusid)){
             $boss_data = $this->getBossClient($email);
+
+            $checking = User::where('email', $email)->get()->first();
+            if(isset($checking['id']))
+                return false;
+
             $user = new User;
             $user->email = $email;
             $user->password = bcrypt($password);

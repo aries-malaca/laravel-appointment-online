@@ -10,7 +10,7 @@ use DB;
 class ClientController extends Controller{
 
     function searchAdvancedClients(Request $request){
-        $find = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE 1 = 1 " . ($request->input('email') !== null? "AND cusemail LIKE '%". $request->input('email') ."%'":"") . ($request->input('birth_date') !== null ? " AND cusbday LIKE '". $request->input('birth_date') ."%'":"") . ($request->input('first_name') !== null ? " AND cusfname LIKE '%". $request->input('first_name') ."%'":"") .($request->input('last_name') !== null ? " AND cuslname LIKE '%". $request->input('last_name') ."%'":"") ."LIMIT 10");
+        $find = DB::connection('old_mysql')->select("SELECT * FROM clients WHERE 1 = 1 " . ($request->input('email') !== null? "AND cusemail LIKE '%". $request->input('email') ."%'":"") . ($request->input('first_name') !== null ? " AND cusfname LIKE '%". $request->input('first_name') ."%'":"") .($request->input('last_name') !== null ? " AND cuslname LIKE '%". $request->input('last_name') ."%'":"") ."LIMIT 10");
 
         $final = array();
         foreach($find as $key=>$value){
@@ -105,6 +105,7 @@ class ClientController extends Controller{
         });
         $clients = $clients
                     ->orderBy('first_name')
+                    ->take(30)
                     ->get()->toArray();
         foreach($clients as $key=>$value){
             $clients[$key]['user_data'] = json_decode($value['user_data']);

@@ -90,7 +90,7 @@
                         geocoder.geocode({'location': { lat: position.coords.latitude, lng: position.coords.longitude}},
                             function(results, status) {
                                 if (status === 'OK' && results.lat === undefined) {
-                                    axios({url:'/api/user/saveLocation?token=' + context.state.token, method:'post', data:{ geolocation:results, coordinates: { lat: position.coords.latitude, lng: position.coords.longitude} }})
+                                    axios({url:'/api/user/saveLocation?token=' + u.token, method:'post', data:{ geolocation:results, coordinates: { lat: position.coords.latitude, lng: position.coords.longitude} }})
                                         .then(function () {
                                             u.$store.dispatch('fetchAuthenticatedUser');
                                         });
@@ -117,7 +117,7 @@
 
                     u.show_map = true;
                     u.initializeMarkers();
-                },3000);
+                },4000);
             },
             initializeMarkers:function(){
                 this.clearMarkers();

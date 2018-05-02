@@ -139,9 +139,6 @@
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
                     return false;
 
-                if(this.transactions !== false && this.client.is_client === 1)
-                    return false;
-
                 if(this.client.transaction_data.length > 0){
                     var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email + '?size='+ this.client.transaction_data.length ;
                 }

@@ -134,7 +134,7 @@ class ContactController extends Controller{
                         if(sizeof($ids) > 0)
                             $where = "a.id IN (". implode(",", $ids) .") OR";
 
-                        $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client, ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online FROM users AS a  LEFT JOIN user_levels AS b ON a.level=b.id  WHERE " . $where . " is_client = 0 ORDER BY is_online DESC, first_name");
+                        $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client, ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 600) . "') ) as is_online FROM users AS a  LEFT JOIN user_levels AS b ON a.level=b.id  WHERE " . $where . " is_client = 0 ORDER BY is_online DESC, first_name");
 
                         return response()->json($data);
                     }
@@ -142,7 +142,7 @@ class ContactController extends Controller{
             }
 
             $data = DB::select("SELECT username, level_data, user_data, first_name, last_activity, last_name, a.id as id, user_picture, level_name, is_client,
-                                  ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 300) . "') ) as is_online
+                                  ( (a.last_activity) > ('" . date('Y-m-d H:i:s', time() - 600) . "') ) as is_online
                                   FROM users AS a 
                                   LEFT JOIN user_levels AS b ON a.level=b.id 
                                   WHERE 1=1 ". $where . " AND a.id <> ". $api['user']['id'] ."

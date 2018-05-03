@@ -82,7 +82,7 @@
         methods:{
             getServiceTypes(){
                 this.$store.dispatch('services/fetchTypes');
-                this.$socket.emit('refreshModel', 'services');
+                this.$store.dispatch('services/fetchServices');
                 $("#add-service-type-modal").modal("hide");
             },
             makeRequest:function(url, method, data, success_callback, error_callback){
@@ -117,7 +117,7 @@
 
                 this.makeRequest('/api/service/addServiceType?token=' + this.token, 'post', this.newServiceType, function(){
                     u.$store.dispatch('services/fetchTypes');
-                    u.$socket.emit('refreshModel', 'services');
+                    u.$store.dispatch('services/fetchServices');
                     toastr.success("Service Type added successfully.");
                     $btn.button('reset');
                     $("#add-service-type-modal").modal('hide');
@@ -133,7 +133,7 @@
 
                 this.makeRequest('/api/service/updateServiceType?token=' + this.token, 'post', this.newServiceType, function(){
                     u.$store.dispatch('services/fetchTypes');
-                    u.$socket.emit('refreshModel', 'services');
+                    u.$store.dispatch('services/fetchServices');
                     toastr.success("Service Type updated successfully.");
                     $btn.button('reset');
                     $("#add-service-type-modal").modal('hide');

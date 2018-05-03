@@ -382,7 +382,7 @@
                     toastr.success("Branch added successfully.");
                     $btn.button('reset');
                     $("#add-branch-modal").modal('hide');
-                    u.$socket.emit('refreshModel', 'branches');
+                    u.$store.dispatch('branches/fetchBranches');
                 },function(error){
                     XHRCatcher(error);
                     $btn.button('reset');
@@ -396,7 +396,7 @@
                 this.makeRequest('/api/branch/updateBranch?token=' + this.token, 'post', this.newBranch, function(){
                     toastr.success("Branch updated successfully.");
                     $btn.button('reset');
-                    u.$socket.emit('refreshModel', 'branches');
+                    u.$store.dispatch('branches/fetchBranches');
                     u.$emit('refreshBranch');
                     $("#add-branch-modal").modal('hide');
                 },function(error){

@@ -96,28 +96,8 @@
 
                                         </div>
                                         <!--end col-md-8-->
-                                        <div class="col-md-4" v-if="transactions !== false">
-                                            <div class="portlet sale-summary">
-                                                <div class="portlet-title">
-                                                    <div class="caption font-red sbold"> Transaction Summary </div>
-                                                </div>
-                                                <div class="portlet-body">
-                                                    <ul class="list-unstyled">
-                                                        <li>
-                                                            <span class="sale-info"> PRODUCTS AVAILED </span>
-                                                            <span class="sale-num"> {{ products_availed_total }} </span>
-                                                        </li>
-                                                        <li>
-                                                            <span class="sale-info"> SERVICES AVAILED </span>
-                                                            <span class="sale-num"> {{ services_availed_total }} </span>
-                                                        </li>
-                                                        <li>
-                                                            <span class="sale-info"> TOTAL SALES </span>
-                                                            <span class="sale-num"> {{ products_availed_total+services_availed_total }} </span>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
+                                        <div class="col-md-4">
+
                                         </div>
                                         <!--end col-md-4-->
                                     </div>

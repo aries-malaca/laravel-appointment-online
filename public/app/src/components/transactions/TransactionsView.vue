@@ -14,6 +14,7 @@
                         <div class="mt-list-head list-news font-white bg-blue">
                             <div class="list-head-title-container">
                                 <h3 class="list-title">Transaction History</h3>
+                                <button class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button>
                             </div>
                         </div>
                         <div v-if="client.transaction_data.length>0">
@@ -139,9 +140,8 @@
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
                     return false;
 
-                if(this.client.transaction_data.length > 0){
-                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email + '?size='+ this.client.transaction_data.length ;
-                }
+                if(this.client.transaction_data.length > 0)
+                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
                 else
                     var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email;
 

@@ -89,24 +89,28 @@ class ClientController extends Controller{
     }
 
     public function searchClients(Request $request){
+        $imploded = explode(" ", $request->input('keyword'));
 
-        $keyword = $request->input('keyword');
-        if($keyword == '')
+        if($request->input('keyword') == '')
             return response()->json(["result"=>"failed","error"=>"Please Enter Keyword."], 400);
 
-        $clients = User::where('is_client', 1);
-        $clients = $clients->where(function($query) use ($keyword){
-            $query->where('first_name', 'LIKE', '%' . $keyword . '%')
+        $clients = User::leftJoin('user_levels', 'users.level', 'user_levels.id')
+                ->where('is_client', 1);
+        foreach($imploded as $keyword){
+            $clients = $clients->where(function($query) use ($keyword){
+                $query->where('first_name', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('middle_name', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('last_name', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('email', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('user_address', 'LIKE', '%' . $keyword . '%')
                     ->orWhere('user_mobile', 'LIKE', '%' . $keyword . '%');
-        });
-        $clients = $clients
-                    ->orderBy('first_name')
-                    ->take(30)
-                    ->get()->toArray();
+            });
+        }
+
+        $clients = $clients->select('users.*','level_name','level_data')
+                        ->orderBy('first_name')
+                        ->take(30)
+                        ->get()->toArray();
         foreach($clients as $key=>$value){
             $clients[$key]['user_data'] = json_decode($value['user_data']);
             $clients[$key]['picture_html_big'] = '<img class="img img-thumbnail" style="width:100px" src="images/users/'. $value['user_picture'] .'" />';

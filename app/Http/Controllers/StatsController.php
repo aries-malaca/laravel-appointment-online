@@ -23,7 +23,8 @@ class StatsController extends Controller{
                                         ->where('is_client', 1)
                                         ->count(),
                   "login"=>User::where('last_activity', 'LIKE', date('Y-m-d'.'%'))
-                                        ->count()
+                                ->where('is_client', 0)
+                                ->count()
                 )
         );
     }

@@ -560,13 +560,15 @@
 
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){
-                if(data.branch_id === u.branch.value)
-                    u.getAppointments();
+                if(u.branch !== null)
+                    if(data.branch_id === u.branch.value)
+                        u.getAppointments();
             };
             this.$options.sockets.callClient = function(data){
-                if(data.branch_id===u.branch.value){
-                    u.refresh();
-                }
+                if(u.branch !== null)
+                    if(data.branch_id===u.branch.value){
+                        u.refresh();
+                    }
             };
 
             if(this.b !== null && this.c !== null){

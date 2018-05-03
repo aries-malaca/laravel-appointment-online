@@ -79,7 +79,7 @@
         methods:{
             getProductGroups(){
                 this.$store.dispatch('products/fetchGroups');
-                this.$socket.emit('refreshModel', 'products');
+                this.$store.dispatch('products/fetchProducts');
                 $("#add-product-group-modal").modal("hide");
             },
             showAddProductGroupModal:function(){
@@ -112,7 +112,6 @@
 
                 this.makeRequest('/api/product/addProductGroup?token=' + this.token, 'post', this.newProductGroup, function(){
                     u.$store.dispatch('products/fetchGroups');
-                    u.$socket.emit('refreshModel', 'products');
                     toastr.success("Product Group added successfully.");
                     $btn.button('reset');
                     $("#add-product-group-modal").modal('hide');
@@ -128,7 +127,7 @@
 
                 this.makeRequest('/api/product/updateProductGroup?token=' + this.token, 'post', this.newProductGroup, function(){
                     u.$store.dispatch('products/fetchGroups');
-                    u.$socket.emit('refreshModel', 'products');
+                    u.$store.dispatch('products/fetchProducts');
                     toastr.success("Product Group updated successfully.");
                     $btn.button('reset');
                     $("#add-product-group-modal").modal('hide');

@@ -172,7 +172,6 @@
                 $btn.button('loading');
                 this.makeRequest('/api/service/addService?token=' + this.token, 'post', this.newService, function(){
                     u.$store.dispatch('services/fetchServices');
-                    u.$socket.emit('refreshModel', 'services');
                     toastr.success("Service added successfully.");
                     $btn.button('reset');
                     $("#add-service-modal").modal("hide");
@@ -188,7 +187,6 @@
 
                 this.makeRequest('/api/service/updateService?token=' + this.token, 'post', this.newService, function(){
                     u.$store.dispatch('services/fetchServices');
-                    u.$socket.emit('refreshModel', 'services');
                     toastr.success("Service updated successfully.");
                     $btn.button('reset');
                     $("#add-service-modal").modal("hide");

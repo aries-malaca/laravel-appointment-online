@@ -9,7 +9,7 @@
         />
 
         <div data-backdrop="static" class="modal fade" id="review-modal" tabindex="1">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
@@ -20,24 +20,61 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Message:</label>
-                                    <textarea rows="2" class="form-control" v-model="newRequest.message" disabled></textarea>
+                                    <textarea rows="3" class="form-control" v-model="newRequest.message" disabled></textarea>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Remarks:</label>
-                                    <textarea class="form-control" v-model="newRequest.remarks"></textarea>
+                                    <textarea class="form-control" rows="3" v-model="newRequest.remarks"></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
+                            <div class="col-md-8">
+                                <div class="form-group" v-if="newRequest.valid_id_url !== null">
                                     <label>Attachment:</label>
-                                    <img class="img img-responsive" v-bind:src="'../../images/ids/'+ newRequest.valid_id_url" alt="">
+                                    <img class="img img-responsive" v-bind:src="'../../images/ids/'+ newRequest.valid_id_url" alt="" style="max-height:500px;">
                                 </div>
+                                <table class="table table-condensed" v-else>
+                                    <thead>
+                                    <tr>
+                                        <th>BOSS ID</th>
+                                        <th>Birth Date</th>
+                                        <th>Last Branch</th>
+                                        <th>Service</th>
+                                        <th>Visited</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="account in newRequest.plc_review_request_data.transactions">
+                                        <td>{{ account.custom_client_id }}</td>
+                                        <td>{{ account.birthdate }}</td>
+                                        <td>
+                                            <span v-if="account.last_transaction">
+                                                {{ account.last_transaction.branch }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="account.last_transaction">
+                                                <span v-if="account.last_transaction.services.length>0">
+                                                    {{ account.last_transaction.services[0].item_name }}
+                                                </span>
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="account.last_transaction">
+                                                {{ account.last_transaction.date }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="col-md-6" v-if="newRequest.plc_review_request_data !== undefined">
+                            <div class="col-md-4" v-if="newRequest.plc_review_request_data !== undefined">
                                 <div class="form-group">
                                     <label>BOSS ID:</label>
                                     <input class="form-control" v-model="newRequest.plc_review_request_data.boss_id" />
@@ -45,7 +82,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" v-if="newRequest.client_id !== undefined">
+                        <a target="_blank" :href="'#/clients/' + newRequest.client_id" class="btn btn-info pull-left" >View Client</a>
                         <button type="button" class="btn dark btn-outline" data-dismiss="modal">Close</button>
                         <button class="btn btn-success" @click="processRequest($event, 'approved')">Approve</button>
                         <button class="btn btn-danger" @click="processRequest($event, 'denied')">Deny</button>
@@ -126,9 +164,10 @@
                     status:request.status,
                     status_html:request.status_html,
                     plc_review_request_data:{
-                        boss_id: request.plc_review_request_data.boss_id
-                    },
-                }
+                        boss_id:request.plc_review_request_data.boss_id,
+                        transactions:request.plc_review_request_data.transactions
+                    }
+                };
                 $("#review-modal").modal("show");
             }
         },

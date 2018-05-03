@@ -138,7 +138,6 @@
 
                 this.makeRequest('/api/product/addProduct?token=' + this.token, 'post', this.newProduct, function(){
                     u.$store.dispatch('products/fetchProducts');
-                    u.$socket.emit('refreshModel', 'products');
                     toastr.success("Product added successfully.");
                     $btn.button('reset');
                     $("#add-product-modal").modal('hide');
@@ -154,7 +153,6 @@
 
                 this.makeRequest('/api/product/updateProduct?token=' + this.token, 'post', this.newProduct, function(){
                     u.$store.dispatch('products/fetchProducts');
-                    u.$socket.emit('refreshModel', 'products');
                     toastr.success("Product updated successfully.");
                     $btn.button('reset');
                     $("#add-product-modal").modal('hide');

@@ -90,7 +90,7 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr v-for="account in request.plc_review_request_data">
+                                                        <tr v-for="account in request.plc_review_request_data.transactions">
                                                             <td>{{ account.custom_client_id }}</td>
                                                             <td>{{ account.birthdate }}</td>
                                                             <td>

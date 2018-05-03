@@ -95,7 +95,7 @@
 
                 this.makeRequest('/api/service/addServicePackage?token=' + this.token, 'post', this.newServicePackage, function(){
                     u.$store.dispatch('services/fetchPackages');
-                    u.$socket.emit('refreshModel', 'services');
+                    u.$store.dispatch('services/fetchServices');
                     toastr.success("Service Package added successfully.");
                     $btn.button('reset');
                     $("#add-service-package-modal").modal('hide');
@@ -111,7 +111,7 @@
 
                 this.makeRequest('/api/service/updateServicePackage?token=' + this.token, 'post', this.newServicePackage, function(){
                     u.$store.dispatch('services/fetchPackages');
-                    u.$socket.emit('refreshModel', 'services');
+                    u.$store.dispatch('services/fetchServices');
                     toastr.success("Service Package updated successfully.");
                     $btn.button('reset');
                     $("#add-service-package-modal").modal('hide');

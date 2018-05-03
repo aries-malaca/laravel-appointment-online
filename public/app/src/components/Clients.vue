@@ -13,11 +13,11 @@
                         <div class="form-horizontal">
                             <div class="form-group">
                                 <div class="row">
-                                    <label class="control-label col-md-3">Search</label>
+                                    <label class="control-label col-md-2">Search</label>
                                     <div class="col-md-6">
                                         <input type="text" class="form-control" @keypress="listenKey($event)" v-model="search.keyword" />
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <button type="button" id="btn-search" class="btn-success btn btn-md" @click="searchClients($event)">Search</button>
                                         <button type="button" class="btn-info btn btn-md" data-toggle="modal" href="#advanced-modal">Advanced Search</button>
                                     </div>

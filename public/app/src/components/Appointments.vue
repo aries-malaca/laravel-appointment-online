@@ -136,7 +136,9 @@
                     completed:[],
                     cancelled:[],
                     expired:[],
-                }
+                },
+                ajaxToken1:undefined,
+                ajaxToken2:undefined,
             }
         },
         methods:{
@@ -152,18 +154,27 @@
                 if(this.user.is_client !== 1)
                     url = '/api/appointment/getAppointments/all/all/active?branches=' + this.branchIds;
 
-                axios.get(url)
-                    .then(function(response) {
-                        var appointments = [];
-                        response.data.forEach(function(item){
-                            if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
-                                return false;
+                if(this.ajaxToken1 !== undefined){
+                    this.ajaxToken1();
+                    this.ajaxToken1 = undefined;
+                }
 
-                            appointments.push(item);
-                        });
+                axios.get(url, {
+                    cancelToken: new axios.CancelToken(function executor(c) {
+                        u.ajaxToken1 = c;
+                    })
+                })
+                .then(function(response) {
+                    var appointments = [];
+                    response.data.forEach(function(item){
+                        if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
+                            return false;
 
-                        u.$store.commit('appointments/updateActiveAppointments', appointments);
+                        appointments.push(item);
                     });
+
+                    u.$store.commit('appointments/updateActiveAppointments', appointments);
+                });
             },
             getAppointmentHistory:function(){
                 let u = this;
@@ -173,17 +184,27 @@
                 if(this.user.is_client !== 1)
                     url = '/api/appointment/getAppointments/all/all/inactive?branches=' + this.branchIds;
 
-                axios.get(url)
-                    .then(function (response) {
-                        var appointments = [];
-                        response.data.forEach(function(item){
-                            if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
-                                return false;
 
-                            appointments.push(item);
-                        });
-                        u.$store.commit('appointments/updateAppointmentHistory', appointments);
+                if(this.ajaxToken2 !== undefined){
+                    this.ajaxToken2();
+                    this.ajaxToken2 = undefined;
+                }
+
+                axios.get(url, {
+                    cancelToken: new axios.CancelToken(function executor(c) {
+                        u.ajaxToken2 = c;
+                    })
+                })
+                .then(function (response) {
+                    var appointments = [];
+                    response.data.forEach(function(item){
+                        if(u.user.is_client !== 1 && (u.user.user_data.branches.indexOf(item.branch_id) === -1 && u.user.user_data.branches.indexOf(0) === -1 ))
+                            return false;
+
+                        appointments.push(item);
                     });
+                    u.$store.commit('appointments/updateAppointmentHistory', appointments);
+                });
             },
             refreshList(){
                 this.getAppointments();
@@ -274,7 +295,7 @@
 
             let u = this;
             this.$options.sockets.refreshAppointments = function(data){
-                if(data.client_id !== u.user.id && u.user.is_client ===1)
+                if((data.client_id !== u.user.id && u.user.is_client ===1) || u.user.is_client === 0)
                     return false;
                 u.getAppointments();
                 u.getAppointmentHistory();

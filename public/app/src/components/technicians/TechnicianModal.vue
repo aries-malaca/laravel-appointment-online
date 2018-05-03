@@ -162,8 +162,8 @@
                 this.makeRequest('/api/technician/addTechnician?token=' + this.token, 'post', this.newTechnician, function(){
                     toastr.success("Technician added successfully.");
                     $btn.button('reset');
+                    u.$store.dispatch('technicians/fetchTechnicians');
                     $("#add-technician-modal").modal('hide');
-                    u.$socket.emit('refreshModel', 'technicians');
                 },function(error){
                     XHRCatcher(error);
                     $btn.button('reset');
@@ -177,7 +177,7 @@
                 this.makeRequest('/api/technician/updateTechnician?token=' + this.token, 'post', this.newTechnician, function(){
                     toastr.success("Technician updated successfully.");
                     $btn.button('reset');
-                    u.$socket.emit('refreshModel', 'technicians');
+                    u.$store.dispatch('technicians/fetchTechnicians');
                     u.$emit('refreshTechnician');
                     $("#add-technician-modal").modal('hide');
                 },function(error){

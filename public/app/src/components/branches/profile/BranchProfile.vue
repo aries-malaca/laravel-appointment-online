@@ -231,7 +231,7 @@
                 this.$store.commit('branches/updateViewingBranch', false);
             },
             refreshBranch:function(){
-                this.$socket.emit('refreshModel', 'branches');
+                this.$store.dispatch('branches/fetchBranches');
                 this.getBranch();
             },
             refreshList(){

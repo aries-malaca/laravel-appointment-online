@@ -105,7 +105,7 @@
             u.$store.dispatch('branches/fetchBranches');
             u.$store.dispatch('products/fetchProducts');
             u.$store.dispatch('technicians/fetchTechnicians');
-
+            u.$store.dispatch('branches/fetchClusters');
 
             u.$options.sockets.destroyToken = function(data){
                 if(data.user_id === u.user.id && u.token === data.token){

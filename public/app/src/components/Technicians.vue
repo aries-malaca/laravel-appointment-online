@@ -45,6 +45,7 @@
         mounted:function(){
             this.$store.commit('updateTitle', 'Technicians');
             this.$store.commit('technicians/updateViewingTechnician', false);
+            
             this.$store.dispatch('technicians/fetchTechnicians');
         },
         computed:{

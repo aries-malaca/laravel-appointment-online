@@ -195,9 +195,6 @@
                     });
             },
         },
-        mounted(){
-            this.$store.dispatch('branches/fetchClusters');
-        },
         computed:{
             token(){
                 return this.$store.state.token;

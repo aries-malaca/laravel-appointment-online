@@ -140,7 +140,7 @@
                     return false;
 
                 if(this.client.transaction_data.length > 0){
-                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email + '?size='+ this.client.transaction_data.length ;
+                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
                 }
                 else
                     var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email;

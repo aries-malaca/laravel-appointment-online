@@ -9,6 +9,7 @@ use DB;
 use Validator;
 
 class MessageController extends Controller{
+
     function sendMessage(Request $request){
         $validator = Validator::make($request->all(), [
             'body' => 'required',

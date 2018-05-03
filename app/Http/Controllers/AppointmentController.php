@@ -433,7 +433,7 @@ class AppointmentController extends Controller{
                             ->get()->toArray();
             if(!empty($transactions)){
                 foreach($transactions as $k=>$v)
-                    $transactions[$key]['items'] = $this->getAppointmentItems($v['id']);
+                    $transactions[$k]['items'] = $this->getAppointmentItems($v['id']);
 
                 $branch = Branch::where('id', $value)->get()->first();
                 $data = ["branch"=>$branch, "appointments"=> $transactions]; //override data

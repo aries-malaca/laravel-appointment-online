@@ -135,8 +135,9 @@
                 number = Number(number);
                 return number.toLocaleString(undefined, {minimumFractionDigits: 2,maximumFractionDigits:2}) // "1,234.57"
             },
-            getBossTransactions:function(){
-                let u = this;
+            getBossTransactions:function(){	
+		setTimeout(()=>{
+		let u = this;
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
                     return false;
 
@@ -164,6 +165,7 @@
                         u.is_loading = false;
                         XHRCatcher(error);
                     });
+		}, 2000);
             }
         },
         computed:{

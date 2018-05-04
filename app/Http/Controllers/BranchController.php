@@ -100,7 +100,7 @@ class BranchController extends Controller{
 
         foreach($users as $user){
             $d = json_decode($user['user_data'])->branches;
-            if((in_array($request->segment(4), $d) OR in_array(0, $d)) AND sizeof($d== 1) )
+            if((in_array($request->segment(4), $d) OR in_array(0, $d)) AND sizeof($d) == 1)
                 return response()->json($user);
         }
         return response()->json(false);

@@ -18,7 +18,6 @@
             Go to your browser's settings to fix this and refresh the page.
         </div>
     </noscript>
-
     <div id="fb-root"></div>
     <script>(function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
@@ -62,7 +61,7 @@
                 <div class="login-options" style="padding-bottom: 20px; padding-left:18%">
                     <fb:login-button
                             scope="public_profile,email"
-                            onlogin="checkLoginState(); checkLoginState();"
+                            onlogin="checkLoginState();"
                             data-button-type="continue_with"
                             data-size="large">
                     </fb:login-button>

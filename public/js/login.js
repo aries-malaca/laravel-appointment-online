@@ -51,7 +51,8 @@ new Vue({
 });
 
 function checkLoginState(){
-        if(response.status === 'connected'){
+    FB.getLoginStatus(function(response) {
+        if(response.status == 'connected'){
             $.ajax({
                 url: '../../api/user/fbLogin',
                 method: 'POST',

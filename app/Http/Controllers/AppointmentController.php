@@ -352,15 +352,12 @@ class AppointmentController extends Controller{
         $items = TransactionItem::where('transaction_id', $id)
                                 ->pluck('item_status')->toArray();
         $has_reserved = false;
-        $all_reserved = true;
         foreach($items as $item){
             if($item === 'reserved')
                 $has_reserved = true;
-            else
-                $all_reserved = false;
         }
 
-        if($all_reserved && $status ==='expired')
+        if($status ==='expired')
             Transaction::where('id', $id)->update(["transaction_status" => 'expired']);
 
         if(!$has_reserved)

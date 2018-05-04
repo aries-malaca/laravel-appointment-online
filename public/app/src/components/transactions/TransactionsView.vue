@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="row" v-if="client.transaction_data.length === 0 && is_loading">
+        <div class="row" v-if="is_loading">
             <div class="col-md-12">
                 <div class="alert alert alert-info">
                     <h3>Loading transactions data, please wait...</h3>
@@ -13,8 +13,8 @@
                     <div class="mt-element-list">
                         <div class="mt-list-head list-news font-white bg-blue">
                             <div class="list-head-title-container">
-                                <h3 class="list-title">Transaction History</h3>
-                                <button class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button>
+                                <h3 class="list-title">Transaction History <button class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button></h3>
+                    
                             </div>
                         </div>
                         <div v-if="client.transaction_data.length>0">
@@ -135,15 +135,13 @@
                 number = Number(number);
                 return number.toLocaleString(undefined, {minimumFractionDigits: 2,maximumFractionDigits:2}) // "1,234.57"
             },
-            getBossTransactions:function(){
-                let u = this;
+            getBossTransactions:function(){	
+		setTimeout(()=>{
+		let u = this;
                 if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
                     return false;
 
-                if(this.client.transaction_data.length > 0)
-                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
-                else
-                    var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email;
+                var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
 
                 if(this.client.user_data.boss_id !== null && this.client.user_data.boss_id !== undefined)
                     link = link + "?boss_id=" + this.client.user_data.boss_id;
@@ -167,6 +165,7 @@
                         u.is_loading = false;
                         XHRCatcher(error);
                     });
+		}, 2000);
             }
         },
         computed:{

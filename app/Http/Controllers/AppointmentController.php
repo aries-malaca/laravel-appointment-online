@@ -28,6 +28,9 @@ class AppointmentController extends Controller{
         if ($validator->fails())
             return response()->json(['result'=>'failed','error'=>$validator->errors()->all()], 400);
 
+	if(empty($request->input('products')) && empty($request->input('services')))
+		return response()->json(['result'=>'failed','error'=>"Service or Product required to book and appointment."], 400);
+
         $api = $this->authenticateAPI();
         if($api['result'] === 'success') {
 

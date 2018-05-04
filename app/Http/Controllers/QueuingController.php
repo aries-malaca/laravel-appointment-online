@@ -29,6 +29,8 @@ class QueuingController extends Controller{
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric|not_in:0',
             'technician_id' => 'required|numeric|not_in:0'
+        ],[
+            'technician_id.not_in'    => 'Technician is required.'
         ]);
 
         if ($validator->fails())

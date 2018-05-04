@@ -929,7 +929,7 @@ class MobileApiController extends Controller{
             $client_id      = $api['user']['id'];
             $email          = $api['user']['email'];
 
-            $transactions   = file_get_contents("https://api.lay-bare.com/transactions/getTotals/".$email);
+            $transactions   = file_get_contents("https://boss.lay-bare.com/laybare-online/client-total.php?email=".$email);
             $minimum = Config::where('config_name', 'PLC_MINIMUM_TRANSACTIONS_AMOUNT')->get()->first();
             if(isset($minimum['id'])){
                 $minimum = $minimum->config_value;
@@ -938,11 +938,11 @@ class MobileApiController extends Controller{
             $premiers = PremierLoyaltyCard::where('client_id','=', $client_id)
                         ->select("id","reference_no","status","remarks","application_type")
                         ->orderBy('created_at', 'DESC')->get()->first();
-                            
+
             $object_result                      = json_decode($transactions,true);
             $object_result["minimum_amount"]    = (double)$minimum;
             if(isset($premiers["id"])){
-                $object_result["premier"]       = $premiers;
+                $object_result["premier"]           = $premiers;
             }
             return response()->json($object_result);
         }
@@ -1130,22 +1130,22 @@ class MobileApiController extends Controller{
 
                 $thread_id      = $value;
                 $latest_id      = $arrayLastID[$key];
-                $responseMessage[] = array("check"=>$this->checkIfHasLatestMessage($thread_id,$latest_id));
+               
                 if($this->checkIfHasLatestMessage($thread_id,$latest_id) == true){
 
-                    $threadQuery        = MessageThread::where("id",$thread_id)->get()->first();
+                    $threadQuery    = MessageThread::where("id",$thread_id)->get()->first();
+
                     $created_by_id      = $threadQuery["created_by_id"];
                     $thread_name        = "";
                     $participant_ids    = json_decode($threadQuery["participant_ids"],true);
-
+                    
                     foreach ($participant_ids as $row => $value1) {
                         if($row == count($participant_ids) - 1) {
                             $thread_name.=$this->getThreadName($value1,$created_by_id,$clientID);   
                         }
                         else{
-                            $thread_name.=$this->getThreadName($value1,$created_by_id,$clientID).", ";
+                            $thread_name.=$this->getThreadName($value1,$created_by_id,$clientID).", ";   
                         }
-
                     }
                    
                     $arrayMessage  =   Message::where("message_thread_id",$value)
@@ -1153,13 +1153,13 @@ class MobileApiController extends Controller{
                                             ->limit($limit)
                                             ->orderBy("id","desc")
                                             ->get()->toArray();
-
                     $responseMessage[]           = $arrayMessage;  
                     $threadQuery["thread_name"]  = $thread_name;
                     $threadQuery["messages"]     = $arrayMessage;
                     $responseThread[]            = $threadQuery;
                 }
             }
+
             $objectResponse["allMessage"]    = $responseThread;
             return response()->json($objectResponse); 
         }
@@ -1168,10 +1168,6 @@ class MobileApiController extends Controller{
         }
 
     }
-
-
-
-
 
      public function getChatMessageByThread(Request $request){
         $api                = $this->authenticateAPI();
@@ -1202,7 +1198,7 @@ class MobileApiController extends Controller{
                    $messageQuery =  Message::where("message_thread_id",$thread_id)
                                 ->where("id","<",$prev_last_id)
                                 ->limit($limit)
-                                ->offset($offset)
+                                ->orderBy("id","desc")
                                 ->get()->toArray();
                 }
                 $participants   = json_decode($threadQuery["participant_ids"],true);

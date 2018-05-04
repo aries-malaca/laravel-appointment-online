@@ -134,16 +134,12 @@
                                     </div>
                                 </div>
                                 <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll;min-height:385px">
-                                    <div class="mt-element-list">
-                                        <div class="mt-list-head list-news font-white bg-blue" style="padding:10px; !important; text-align:left;">
-                                            <div class="list-head-title-container">
-                                                <h4 class="list-title">
-                                                    Service/Product List
-                                                    <span class="pull-right">{{ newTransaction.branch.label }}, {{ moment(newTransaction.transaction_date).format("MM/DD/YYYY") }}</span>
-                                                </h4>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <h4 class="list-title">
+                                        <strong>
+                                            Service/Product List
+                                            <span class="pull-right">{{ newTransaction.branch.label }}, {{ moment(newTransaction.transaction_date).format("MM/DD/YYYY") }}</span>
+                                        </strong>
+                                    </h4>
                                     <table class="table-responsive table table-hover table-bordered" v-if="newTransaction.services.length>0">
                                         <thead>
                                             <tr>

@@ -1528,7 +1528,9 @@ class MobileApiController extends Controller{
         $data           = Promotion:: where("id",$promotion_id)->where("is_active",1)->get()->first();
         if (isset($data)) {
             $user                       = User::find($data['posted_by_id']);
-            $username                   = isset($user->id)?$user->first_name .' ' . $user->last_name:'';
+            $clientID                   = $user->id;
+            // $username                   = isset($user->id)?$user->first_name .' ' . $user->last_name:'';
+            $username                   = $this->getThreadName($clientID,0,0);
             $data['branches']           = json_decode($data['branches']);
             $data['posted_by_name']     = $username;
             $data['promotions_data']    = json_decode($data['promotions_data']);

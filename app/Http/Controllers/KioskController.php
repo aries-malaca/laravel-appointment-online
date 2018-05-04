@@ -305,7 +305,7 @@ class KioskController extends Controller{
                             ->where('first_name', 'LIKE','%'.$first_name.'%')
                             ->where('last_name', 'LIKE','%'.$last_name.'%')
                             ->where('level',"=","0")
-                            ->where("birth_date",$bday." 00:00:00")
+                            ->where("birth_date",$bday)
                             ->get()
                             ->toArray();
         }
@@ -314,7 +314,7 @@ class KioskController extends Controller{
                             ->where('first_name', 'LIKE','%'.$first_name.'%')
                             ->where('last_name', 'LIKE','%'.$last_name.'%')
                             ->where('level',"=","0")
-                            ->where("birth_date",$bday." 00:00:00")
+                            ->where("birth_date",$bday)
                             ->where("user_mobile",$contact)
                             ->where("email",$email)
                             ->get()
@@ -393,7 +393,7 @@ class KioskController extends Controller{
                     $user->device_data  = '[]';
                     $user->transactions_data    = '[]';
                     $user->notifications_read    = '[]';
-                    $user->birth_date   = $bday." 00:00:00";
+                    $user->birth_date   = $bday;
                     $user->user_picture = 'no photo ' . $boss_gender.'.jpg';
                     $user->level        = 0;
                     $user->user_data    = json_encode(array(

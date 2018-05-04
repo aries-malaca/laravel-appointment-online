@@ -12,6 +12,13 @@
     </head>
     <!-- END HEAD -->
     <body class="login">
+    <noscript>
+        <div class="alert alert-warning"><strong>Javascript is Disabled</strong>
+            <br/>
+            Go to your browser's settings to fix this and refresh the page.
+        </div>
+    </noscript>
+
     <div id="fb-root"></div>
     <script>(function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
@@ -55,7 +62,7 @@
                 <div class="login-options" style="padding-bottom: 20px; padding-left:18%">
                     <fb:login-button
                             scope="public_profile,email"
-                            onlogin="checkLoginState();"
+                            onlogin="checkLoginState(); checkLoginState();"
                             data-button-type="continue_with"
                             data-size="large">
                     </fb:login-button>
@@ -68,6 +75,7 @@
             </div>
             <!-- END LOGIN FORM -->
         </div>
+
         @include('layouts.javascripts')
     </body>
     <script type="text/javascript" src="../../js/jquery-cookie.js"></script>

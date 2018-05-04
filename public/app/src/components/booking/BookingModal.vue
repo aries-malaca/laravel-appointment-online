@@ -18,7 +18,6 @@
                                 <div class="col-md-4">
                                     <div class="form-group" v-if="!lock_client">
                                         <h4>Select Client:</h4>
-
                                         <div class="input-group">
                                             <span class="input-group-btn">
                                                 <a target="_blank" href="/#/clients" type="button" class="btn blue"><i class="fa fa-users"></i></a>
@@ -26,7 +25,6 @@
                                             <vue-select :on-search="searchClients" :options="client_selection"
                                                 placeholder="Search for Client..." v-model="newTransaction.client" />
                                         </div>
-
                                     </div>
                                     <div class="form-group" v-else>
                                         <h4>Client:</h4>
@@ -132,16 +130,18 @@
                                                    :picture="service.picture"
                                                    :description="service.description"
                                                 />
-                                        <button class="btn btn-success btn-lg btn-block" @click="addItem()"> ADD TO LIST</button>
+                                        <button class="btn btn-success btn-lg btn-block" @click="addItem()"> ADD TO LIST <i class="fa fa-chevron-right"></i> </button>
                                     </div>
                                 </div>
-                                <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll;min-height:400px">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            Branch: {{ newTransaction.branch.label }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            Date: {{ moment(newTransaction.transaction_date).format("MM/DD/YYYY") }}
+                                <div class="col-md-8" v-if="newTransaction.products !== undefined" style="overflow-x:scroll;min-height:385px">
+                                    <div class="mt-element-list">
+                                        <div class="mt-list-head list-news font-white bg-blue" style="padding:10px; !important; text-align:left;">
+                                            <div class="list-head-title-container">
+                                                <h4 class="list-title">
+                                                    Service/Product List
+                                                    <span class="pull-right">{{ newTransaction.branch.label }}, {{ moment(newTransaction.transaction_date).format("MM/DD/YYYY") }}</span>
+                                                </h4>
+                                            </div>
                                         </div>
                                     </div>
                                     <table class="table-responsive table table-hover table-bordered" v-if="newTransaction.services.length>0">
@@ -149,7 +149,7 @@
                                             <tr>
                                                 <th style="width:20px"></th>
                                                 <th>Service</th>
-                                                <th style="width:110px">Appointment Time</th>
+                                                <th style="width:150px">Appointment Time</th>
                                                 <th style="width:100px">Amount</th>
                                             </tr>
                                         </thead>
@@ -205,6 +205,10 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    <div class="alert alert-info" v-if="newTransaction.products.length === 0 && newTransaction.services.length === 0">
+                                        Service/Product List is empty.
+                                    </div>
+
                                     <div v-if="booking_warning !== false" class="alert alert-danger">
                                         {{ booking_warning }}
                                     </div>
@@ -357,6 +361,11 @@
                 else if(currentPage === 1){
                     if(this.newTransaction.services.length === 0 && this.user.is_client === 1){
                         toastr.error("Please add at least one service to proceed.");
+                        return false;
+                    }
+
+                    if(this.newTransaction.services.length === 0 && this.newTransaction.products.length === 0 && this.user.is_client === 1){
+                        toastr.error("Please add at least one service/product to proceed.");
                         return false;
                     }
 

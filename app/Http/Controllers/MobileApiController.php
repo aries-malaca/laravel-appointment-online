@@ -1166,10 +1166,11 @@ class MobileApiController extends Controller{
         else{
             return response()->json($api, $api["status_code"]);
         }
-
     }
 
-     public function getChatMessageByThread(Request $request){
+
+    public function getChatMessageByThread(Request $request){
+
         $api                = $this->authenticateAPI();
         $response           = array();
         $limit              = 20;
@@ -1274,11 +1275,19 @@ class MobileApiController extends Controller{
         return false;                        
     }
 
+    // public function getUserIDofBranch(Request $request){
+    //     $branch_id = $request->input("branch_id");
+    //     $response  = array();
+    //     $queryUser = User::
+    // }
+
     public function getSingleThreadID(Request $request){
         
         $api                = $this->authenticateAPI();
-        $recipientID        = 57429;
-        $thread_name        = "Customer Service";
+        $recipientID        = $request->input("user_id");
+        // 57429;
+        $thread_name        = $request->input("user_name");
+        // "Customer Service";
         $arrayResponse      = array();
 
         if($api['result'] === 'success'){

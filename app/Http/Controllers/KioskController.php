@@ -325,7 +325,7 @@ class KioskController extends Controller{
               $arrayClientResult[] = array(
                            "clientid"           => "",
                             "cusid"             => $value->id,
-                            "client_user_id"    => 73,
+                            "client_user_id"    => $value->id,
                             "full_name"         => $value->username,
                             "client_gender"     => $value->gender,
                             "client_bdate"      => $value->birth_date,

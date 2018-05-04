@@ -458,7 +458,8 @@
                     });
             },
             emitServe:function(){
-                this.$socket.emit('serveClient', this.selected_client.client.client_id, this.branch.value, this.selected_appointment_id);
+		if(this.selected_technician !== 0)
+                	this.$socket.emit('serveClient', this.selected_client.client.client_id, this.branch.value, this.selected_appointment_id);
                 let u = this;
                 axios({url:'/api/appointment/serveAppointment?token=' + this.token, method:'post', data:{id:this.selected_appointment_id, technician_id:this.selected_technician}})
                     .then(function () {

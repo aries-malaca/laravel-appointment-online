@@ -152,7 +152,10 @@
                 var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/active';
 
                 if(this.user.is_client !== 1)
-                    url = '/api/appointment/getAppointments/all/all/active?branches=' + this.branchIds;
+                    if(this.branchIds.length > 0)
+                        url = '/api/appointment/getAppointments/all/all/active?branches=' + this.branchIds;
+                    else
+                        return false;
 
                 if(this.ajaxToken1 !== undefined){
                     this.ajaxToken1();
@@ -182,8 +185,10 @@
                 var url = '/api/appointment/getAppointments/client/'+ this.user.id +'/inactive';
 
                 if(this.user.is_client !== 1)
-                    url = '/api/appointment/getAppointments/all/all/inactive?branches=' + this.branchIds;
-
+                    if(this.branchIds.length > 0)
+                        url = '/api/appointment/getAppointments/all/all/inactive?branches=' + this.branchIds;
+                    else
+                        return false;
 
                 if(this.ajaxToken2 !== undefined){
                     this.ajaxToken2();
@@ -308,6 +313,8 @@
         },
         computed:{
             branchIds(){
+                if(this.user.is_client === 1)
+                    return [];
                 var a = [];
                 var b = [];
 

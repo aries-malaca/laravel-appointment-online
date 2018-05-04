@@ -84,6 +84,7 @@
             },
             branches(){
                 return this.$store.state.branches.branches.map(function(item){
+                    item.cluster_name = item.cluster_name !== null ? item.cluster_name: 'N/A';
                     item.branch_classification_html =
                         item.branch_classification==='franchised'?'<span class="badge badge-info">Franchised</span>':'<span class="badge badge-success">Co-owned</span>';
                     return item;

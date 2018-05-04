@@ -32,7 +32,7 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label>Cluster</label>
-                                <select v-model="newTechnician.cluster_id" class="form-control">
+                                <select v-model="newTechnician.cluster_id" class="form-control" :disabled="user.level !== 1">
                                     <option v-for="cluster in clusters" :value="cluster.id">{{ cluster.cluster_name }}</option>
                                 </select>
                             </div>
@@ -198,6 +198,9 @@
         computed:{
             token(){
                 return this.$store.state.token;
+            },
+            user(){
+                return this.$store.state.user;
             },
             clusters(){
                 return this.$store.state.branches.clusters.filter((item)=>{

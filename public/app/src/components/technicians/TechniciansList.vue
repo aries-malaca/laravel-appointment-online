@@ -48,12 +48,25 @@
             user(){
                 return this.$store.state.user;
             },
+            cluster_ids(){
+                let u = this;
+                var ids = [];
+                this.$store.state.branches.branches.filter((item)=>{
+                    return u.user.user_data.branches.indexOf(item.id) !== -1;
+                }).forEach((item)=>{
+                    if(item.cluster_id !== 0)
+                        ids.push(item.cluster_id);
+                });
+
+                return ids;
+            },
             technicians(){
                 let u = this;
                 return this.$store.state.technicians.technicians.map((technician)=>{
                     technician.picture_html = '<img class="img-circle" style="height:35px" src="images/technicians/'+ technician.technician_picture +'" />';
                     technician.name = technician.first_name + ' ' + technician.last_name;
                     technician.branch_name = technician.branch ?  technician.branch.branch_name : 'N/A';
+                    technician.cluster_name = technician.cluster_name !== null ?  technician.cluster_name : 'N/A';
 
                     return technician;
                 }).filter((item)=>{
@@ -61,8 +74,7 @@
                         return true;
 
                     if(u.user.user_data.branches !== undefined)
-                        if(item.branch)
-                            return (u.user.user_data.branches.indexOf(item.branch.id) !== -1 || u.user.user_data.branches.indexOf(0) !== -1);
+                        return (u.user.user_data.branches.indexOf(0) !== -1 || u.cluster_ids.indexOf(item.cluster_id) !== -1);
 
                     return false;
                 });

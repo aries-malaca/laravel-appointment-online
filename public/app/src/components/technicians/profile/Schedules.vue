@@ -258,6 +258,7 @@
                 axios.post('/api/technician/addSingleSchedule?token=' + u.token, data)
                     .then(function () {
                         u.getSchedule();
+                        u.$store.dispatch('technicians/fetchTechnicians');
                         toastr.success("Schedule successfully added.");
                     })
                     .catch(function (error) {
@@ -330,6 +331,7 @@
                         u.getSchedule();
                         $btn.button('reset');
                         $("#add-schedule-modal").modal("hide");
+                        u.$store.dispatch('technicians/fetchTechnicians');
                         toastr.success("Schedule successfully added.");
                     })
                     .catch(function (error) {
@@ -346,6 +348,7 @@
                         u.getSchedule();
                         $btn.button('reset');
                         $("#add-schedule-modal").modal("hide");
+                        u.$store.dispatch('technicians/fetchTechnicians');
                         toastr.success("Schedule successfully updated.");
                     })
                     .catch(function (error) {
@@ -366,6 +369,7 @@
                         $btn.button('reset');
                         $("#add-schedule-modal").modal("hide");
                         $("#single-schedule-modal").modal("hide");
+                        u.$store.dispatch('technicians/fetchTechnicians');
                         toastr.success("Schedule successfully deleted.");
                     })
                     .catch(function (error) {

@@ -177,7 +177,7 @@
         padding-bottom: 50px;
     }
     .wizard__body__step{
-        padding:  16px;
+        padding:  20px;
     }
     .wizard__arrow{
         position:  absolute;

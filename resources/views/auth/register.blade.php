@@ -47,6 +47,12 @@
 </head>
 <!-- END HEAD -->
 <body class="login">
+<noscript>
+    <div class="alert alert-warning"><strong>Javascript is Disabled</strong>
+        <br/>
+        Go to your browser's settings to fix this and refresh the page.
+    </div>
+</noscript>
 <!-- BEGIN LOGO -->
 <div class="logo">
     <a href="../../home">

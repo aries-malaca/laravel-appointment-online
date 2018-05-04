@@ -40,6 +40,12 @@
     <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo page-md page-footer-fixed page-sidebar-fixed">
         <div id="app">
         </div>
+        <noscript>
+            <div class="alert alert-warning"><strong>Javascript is Disabled</strong>
+                <br/>
+                Go to your browser's settings to fix this and refresh the page.
+            </div>
+        </noscript>
     </body>
 
     <!--[if lt IE 9]>

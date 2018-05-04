@@ -219,6 +219,13 @@
             configs(){
                 return this.$store.state.configs;
             },
+            mappedClients(){
+                this.clients.map((item)=>{
+                    item.user_address = item.user_address !== null ? item.user_address:'N/A';
+                    item.user_mobile = item.user_mobile !== null ? item.user_mobile:'N/A';
+                    return item;
+                });
+            }
         }
     }
 </script>

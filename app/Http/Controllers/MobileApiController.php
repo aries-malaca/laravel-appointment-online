@@ -738,7 +738,7 @@ class MobileApiController extends Controller{
         }
         return response()->json([
                             "result" => "failed",
-                            "error"  => "No email address AND birthdate exist"
+                            "error"  => "Email Address and Birthday doesn’t match any record."
 
                         ],400);
     }
@@ -1231,26 +1231,29 @@ class MobileApiController extends Controller{
             $paramID = $user_id;
         }
         $queryUser  = User::where("id",$paramID)
-                        ->select("first_name","last_name","level")
+                        ->select("first_name","last_name","level","user_data")
                         ->get()->first();
                      
         $level      = $queryUser["level"];
         $userName   = $queryUser["first_name"]." ".$queryUser["last_name"];  
-        
-        $user_data  = json_decode($queryUser["branches"]);  
-
+        $user_data  = $queryUser["user_data"];  
+        $branchArray= json_decode($user_data,true); 
         $getLevel   = UserLevel::where("id",$level)->select("level_name")->get()->first();
         
-
         if ($level === 2) {
-           if (count($user_data) > 0) {
-                foreach ($user_data as $key => $value) {
+           if (count($branchArray) > 0) {
+                foreach ($branchArray as $key => $value) {
                     if($value == 0){
                         $userName   = "Branch Supervisor";
                     }
                     else{
-                        $branchObject = Branch::where("id",$value);
-                        $userName = $branchObject->branch_name; 
+                        $branchObject = Branch::where("id",$value)->get()->first();
+                        if (isset($branchObject)) {
+                            $userName     = $branchObject->branch_name; 
+                        }
+                        else{
+                            $userName     = "Branch Supervisor";
+                        }
                     }
                     break;
                 }
@@ -1284,31 +1287,51 @@ class MobileApiController extends Controller{
     public function getSingleThreadID(Request $request){
         
         $api                = $this->authenticateAPI();
-        $recipientID        = $request->input("user_id");
-        // 57429;
-        $thread_name        = $request->input("user_name");
+        // $recipientID        = $request->input("user_id");
+        // // 57429;
+        // $thread_name        = $request->input("user_name");
         // "Customer Service";
+        $recipientID        = $request->segment(4);
+        $thread_name        = $request->input(5);
+        $thread_id          = $request->input(6);
+        $last_id            = $request->input(7);
         $arrayResponse      = array();
+        $queryThread        = array();
 
         if($api['result'] === 'success'){
             $clientID = $api["user"]["id"];
-            $messageQuery =  Message::where(function($messageQuery) use ($clientID,$recipientID){
-                                    $messageQuery->whereIn("sender_id",[$clientID,$recipientID])
-                                                 ->orWhere('recipient_id',$clientID);
-                                    })
-                                ->select("message_thread_id as thread_id")
-                                ->groupBy("message_thread_id")
-                                ->orderBy("messages.created_at","desc")
-                                ->get()->first();
-            if(isset($messageQuery)) {
-                $arrayResponse["thread_id"]     = $messageQuery["thread_id"];
-                $arrayResponse["thread_name"]   = $thread_name;
-                $arrayResponse["recipientID"]   = $recipientID;
-                return response()->json($arrayResponse);       
-            }     
-            $arrayResponse["thread_id"]     = 0;
-            $arrayResponse["thread_name"]   = $thread_name;
-            $arrayResponse["recipientID"]   = $recipientID;             
+
+            $messageThreadQuery =  Message::whereIn('recipient_id', [$clientID, $recipientID])
+                            ->whereIn('sender_id', [$clientID, $recipientID])
+                            ->where(function($messageThreadQuery) use($recipientID){
+                                $messageThreadQuery->orWhereNull('deleted_to_id');
+                                $messageThreadQuery->orWhere('deleted_to_id', '=', $recipientID);
+                            })
+                            ->select("message_thread_id as thread_id")
+                            ->orderBy("messages.created_at","desc")
+                            ->get()->first();
+
+            if (isset($messageThreadQuery)) {
+                $thread_id    = $messageThreadQuery->thread_id;
+                $queryThread  = MessageThread::where("id",$thread_id)->get()->first();
+                $queryMessage = Message::where("message_thread_id",$thread_id)
+                                ->limit(20)
+                                ->orderBy("id","desc")
+                                ->get()->toArray();
+                $queryThread["messages"] = $queryMessage;
+
+            }                
+
+            return response()->json($queryThread);                       
+            // if(isset($messageQuery)) {
+            //     $arrayResponse["thread_id"]     = $messageQuery["thread_id"];
+            //     $arrayResponse["thread_name"]   = $thread_name;
+            //     $arrayResponse["recipientID"]   = $recipientID;
+            //     return response()->json($arrayResponse);       
+            // }     
+            // $arrayResponse["thread_id"]     = 0;
+            // $arrayResponse["thread_name"]   = $thread_name;
+            // $arrayResponse["recipientID"]   = $recipientID;             
             return response()->json($arrayResponse);                     
         }
         return response()->json($api, $api["status_code"]);

@@ -269,7 +269,7 @@ Route::get('/mobile/getPromotion/{promo_id}', 'MobileApiController@getPromotion'
 Route::post('/mobile/sendPushNotification', 'MobileApiController@sendPushNotification');
 Route::post('/mobile/setNotificationAsSeen', 'MobileApiController@setNotificationAsSeen');
 Route::post('/mobile/deleteThread', 'MobileApiController@deleteThread');
-Route::post('/mobile/getSingleThreadID', 'MobileApiController@getSingleThreadID');
+Route::get('/mobile/getSingleThreadID/{recipientID}/{userNAME}/{thread_id}/{lastID}', 'MobileApiController@getSingleThreadID');
 Route::get('/config/getConsent', 'ConfigController@getConsent');
 
 

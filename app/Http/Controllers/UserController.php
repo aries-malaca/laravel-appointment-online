@@ -504,7 +504,7 @@ class UserController extends Controller{
         $user->user_picture = 'no photo ' . $request->input('gender').'.jpg';
         $user->save();
 
-        if(sizeof($request->input('accounts'))>0)
+        if(sizeof($request->input('accounts'))>1)
             SendReviewRequestJob::dispatch(["user"=>$user, "accounts"=>$request->input('accounts')])->delay(now()->addSeconds(2));
 
         $token = JWTAuth::fromUser($user);

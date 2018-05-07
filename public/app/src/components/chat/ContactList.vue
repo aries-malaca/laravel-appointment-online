@@ -2,8 +2,10 @@
     <div style="background-color:#f2f6f9;padding-top:5px;">
         <div class="input-group" style="margin:5px;width: 98%;" v-if="user.is_client === 0" v-show="partner === false">
             <div class="input-icon">
+                <form autocomplete="off">
                 <vue-select :on-search="searchClients" :options="client_selection"
                             placeholder="Search for Client..." v-model="selected_client" />
+                </form>
             </div>
         </div>
         <div class="page-quick-sidebar-chat-users" data-rail-color="#e8fec7" v-show="partner === false"

@@ -283,6 +283,7 @@ class TechnicianController extends Controller{
             $validator = Validator::make($request->all(), [
                 'first_name'=>'required|max:255',
                 'last_name'=>'required|max:255',
+                'is_active'=>'required|in:1,0',
                 'cluster_id'=>'required|not_in:0|numeric',
                 'employee_id'=>'required|max:255|unique:technicians,employee_id,' . $request->input('id'),
                 'technician_data.gender'=>'required|in:male,female',
@@ -297,7 +298,7 @@ class TechnicianController extends Controller{
             $technician->cluster_id = $request->input('cluster_id');
             $technician->employee_id = $request->input('employee_id');
             $technician->technician_status = $request->input('technician_status');
-            $technician->is_active = 1;
+            $technician->is_active = $request->input('is_active');;
             $technician->technician_picture = 'no photo ' . $request->input('technician_data')['gender'] . '.jpg';
             $technician->technician_data = json_encode($request->input('technician_data'));
             $technician->save();

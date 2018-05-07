@@ -40,8 +40,10 @@
                     {{ partner.first_name }} is typing a message...
                 </div>
                 <div class="input-group">
+                    <form autocomplete="off">
                     <input type="text" id="txt" class="form-control" @keypress="keyPress($event)" v-model="newMessage.body"
                            placeholder="Type a message here...">
+                    </form>
                     <div class="input-group-btn">
                         <button type="button" id="btn" class="btn green" @click="sendMessage" data-loading-text="Sending...">
                             <i class="fa fa-send"></i>

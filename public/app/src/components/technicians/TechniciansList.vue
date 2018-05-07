@@ -73,7 +73,7 @@
                     if(u.user.level === 1)
                         return true;
 
-                    if(u.user.user_data.branches !== undefined)
+                    if(u.user.user_data.branches !== undefined && item.is_active)
                         return (u.user.user_data.branches.indexOf(0) !== -1 || u.cluster_ids.indexOf(item.cluster_id) !== -1);
 
                     return false;

@@ -1,19 +1,15 @@
 <template>
     <div>
-        <div class="row" v-if="is_loading">
-            <div class="col-md-12">
-                <div class="alert alert alert-info">
-                    <h3>Loading transactions data, please wait...</h3>
-                </div>
-            </div>
+        <div class="alert alert alert-info" v-if="is_loading">
+            <h4>Refreshing transactions data, please wait...</h4>
         </div>
-        <div v-else>
+        <div>
             <div class="row">
                 <div class="col-md-8">
                     <div class="mt-element-list">
                         <div class="mt-list-head list-news font-white bg-blue">
                             <div class="list-head-title-container">
-                                <h3 class="list-title">Transaction History <button class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button></h3>
+                                <h3 class="list-title">Transaction History <button v-if="!is_loading" class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button></h3>
                             </div>
                         </div>
                         <div v-if="client.transaction_data.length>0">

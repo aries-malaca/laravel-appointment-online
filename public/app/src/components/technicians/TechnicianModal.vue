@@ -1,57 +1,41 @@
 <template>
     <div data-backdrop="static" class="modal fade" id="add-technician-modal" tabindex="-1" role="basic" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" v-if="operation==='add'">Add Technician</h4>
-                    <h4 class="modal-title" v-else>Add Technician</h4>
+                    <h4 class="modal-title" v-else>Edit Technician</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>First Name</label>
                                 <input type="text" class="form-control" v-model="newTechnician.first_name"/>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Middle Name</label>
                                 <input type="text" class="form-control" v-model="newTechnician.middle_name"/>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Last Name</label>
                                 <input type="text" class="form-control" v-model="newTechnician.last_name"/>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label>Cluster</label>
-                                <select v-model="newTechnician.cluster_id" class="form-control" :disabled="user.level !== 1">
-                                    <option v-for="cluster in clusters" :value="cluster.id">{{ cluster.cluster_name }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Employee ID</label>
                                 <input type="text" class="form-control" v-model="newTechnician.employee_id"/>
                             </div>
                         </div>
                     </div>
-                    <div class="row" v-if="newTechnician.technician_data !== undefined">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Mobile</label>
-                                <input type="text" class="form-control" v-model="newTechnician.technician_data.mobile"/>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Gender</label>
                                 <select v-model="newTechnician.technician_data.gender" class="form-control">
@@ -59,29 +43,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Birth Date</label>
-                                <input type="date" class="form-control" v-model="newTechnician.technician_data.birth_date"/>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" v-if="newTechnician.technician_data !== undefined">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="text" class="form-control" v-model="newTechnician.technician_data.email"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Address</label>
-                                <textarea v-model="newTechnician.technician_data.address" class="form-control" rows="2"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" v-if="newTechnician.technician_data !== undefined">
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Civil Status</label>
                                 <select v-model="newTechnician.technician_data.civil_status" class="form-control">
@@ -90,16 +52,67 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label>Position</label>
                                 <input type="text" class="form-control" v-model="newTechnician.technician_data.position_name"/>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Cluster</label>
+                                <select v-model="newTechnician.cluster_id" class="form-control" :disabled="user.level !== 1">
+                                    <option v-for="cluster in clusters" :value="cluster.id">{{ cluster.cluster_name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" v-if="newTechnician.technician_data !== undefined">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Mobile</label>
+                                <input type="text" class="form-control" v-model="newTechnician.technician_data.mobile"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Birth Date</label>
+                                <input type="date" class="form-control" v-model="newTechnician.technician_data.birth_date"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" class="form-control" v-model="newTechnician.technician_data.email"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Date Hired</label>
                                 <input type="date" class="form-control" v-model="newTechnician.technician_data.hired_date"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" v-if="newTechnician.technician_data !== undefined">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea v-model="newTechnician.technician_data.address" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <textarea v-model="newTechnician.technician_status" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Active Status</label>
+                                <select v-model="newTechnician.is_active" class="form-control">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
                             </div>
                         </div>
                     </div>

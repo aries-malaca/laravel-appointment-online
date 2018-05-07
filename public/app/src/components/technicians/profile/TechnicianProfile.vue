@@ -66,11 +66,24 @@
                                                 </tr>
                                                 <tr>
                                                     <td> Cluster: </td>
-                                                    <td> {{ newTechnician.cluster_name }} </td>
+                                                    <td v-if="newTechnician.cluster_name !== null"> {{ newTechnician.cluster_name }} </td>
+                                                    <td v-else>
+                                                        <span class="badge badge-warning">Note: Please set cluster of technician.</span>
+                                                    </td>
                                                 </tr>
-                                                <tr v-if="newTechnician.branch">
+                                                <tr v-if="newTechnician.is_active === 1">
                                                     <td> Current Branch: </td>
-                                                    <td> {{ newTechnician.branch.branch_name }} </td>
+                                                    <td v-if="newTechnician.branch"> {{ newTechnician.branch.branch_name }} </td>
+                                                    <td v-else>
+                                                        <span class="badge badge-warning">Note: Please set schedule of technician.</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> Status: </td>
+                                                    <td>
+                                                        <span class="badge badge-success" v-if="newTechnician.is_active === 1">Active</span>
+                                                        <span class="badge badge-danger" v-else>Inactive</span>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -87,12 +100,12 @@
                                         <div v-if="!isNaN(averageRating)">
                                             <h4>Technician Rating</h4>
                                             <star-rating :item-size="30"
-                                                         inactive-color="#e4eadb"
-                                                         active-color="#67d21e"
-                                                         :read-only="true"
-                                                         :increment="0.1"
-                                                         text-class="starer"
-                                                         v-model="averageRating"/>
+                                                 inactive-color="#e4eadb"
+                                                 active-color="#67d21e"
+                                                 :read-only="true"
+                                                 :increment="0.1"
+                                                 text-class="starer"
+                                                 v-model="averageRating"/>
                                         </div>
                                     </div>
                                     <!--end col-md-4-->

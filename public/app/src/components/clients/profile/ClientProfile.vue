@@ -65,6 +65,10 @@
 
                                             <table class="table table-hover table-light">
                                                 <tbody>
+                                                <tr>
+                                                    <td> LBO ID: </td>
+                                                    <td> {{ client.id }} </td>
+                                                </tr>
                                                 <tr v-if="client.last_login !== null">
                                                     <td> Last Login: </td>
                                                     <td> {{ moment(client.last_login).fromNow() }} </td>
@@ -166,11 +170,20 @@
                                                         <input type="date" :disabled="!gate(user, 'clients','update')" class="form-control" v-model="newClient.birth_date"/>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-9">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label class="control-label">Gender</label>
+                                                        <select class="form-control" v-model="newClient.gender">
+                                                            <option value="female">Female</option>
+                                                            <option value="male">Male</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label class="control-label">Address</label>
-                                                        <input type="text" v-model="newClient.user_address" id="autocomplete2" placeholder="Enter your address"
-                                                               @focus="locate" class="form-control" :disabled="!gate(user, 'clients','update')" />
+                                                        <textarea v-model="newClient.user_address" id="autocomplete2" placeholder="Enter your address"
+                                                               @focus="locate" class="form-control" :disabled="!gate(user, 'clients','update')"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -214,7 +227,9 @@
                                                     <div class="input-group">
                                                         <div class="input-icon">
                                                             <i class="fa fa-lock fa-fw"></i>
-                                                            <input class="form-control" type="password" v-model="newClient.password" placeholder="password" />
+                                                            <form autocomplete="off">
+                                                                <input class="form-control" type="password" v-model="newClient.password"/>
+                                                            </form>
                                                         </div>
                                                         <span class="input-group-btn">
                                                         <button class="btn btn-success" @click="changePassword($event)" data-loading-text="Updating..." type="button">Save Changes</button>
@@ -308,6 +323,7 @@
         methods:{
             back:function(){
                 this.$emit('back');
+                this.client = {};
             },
             getData:function(url, field){
                 let u = this;
@@ -328,6 +344,7 @@
                                 middle_name:response.data.middle_name,
                                 last_name:response.data.last_name,
                                 birth_date:moment(response.data.birth_date).format("YYYY-MM-DD"),
+                                gender: response.data.gender,
                                 user_address: response.data.user_address,
                                 user_mobile: response.data.user_mobile,
                                 home_branch:response.data.home_branch,

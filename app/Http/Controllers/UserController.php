@@ -198,11 +198,16 @@ class UserController extends Controller{
         return response()->json($api, $api["status_code"]);
     }
 
-    public function sendConfirmation(){
+    public function sendConfirmation(Request $request){
         $api = $this->authenticateAPI();
 
         if($api['result'] === 'success'){
-            $user = User::where('email', $api['user']['email'])->get()->first();
+
+            if($api['user']['is_client']==1)
+                $user = User::where('email', $api['user']['email'])->get()->first();
+            elseif($api['user']['is_client']==0 && $request->input('client_id') !== null)
+                $user = User::where('id', $request->input('client_id'))->get()->first();
+
             if(isset($user['id'])) {
                 $this->dispatchVerification($user);
                 return response()->json(["result" => "success"]);

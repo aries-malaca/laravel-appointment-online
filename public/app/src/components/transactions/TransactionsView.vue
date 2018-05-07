@@ -14,7 +14,6 @@
                         <div class="mt-list-head list-news font-white bg-blue">
                             <div class="list-head-title-container">
                                 <h3 class="list-title">Transaction History <button class="btn btn-success btn-md pull-right" @click="getBossTransactions">Refresh</button></h3>
-                    
                             </div>
                         </div>
                         <div v-if="client.transaction_data.length>0">
@@ -136,36 +135,35 @@
                 return number.toLocaleString(undefined, {minimumFractionDigits: 2,maximumFractionDigits:2}) // "1,234.57"
             },
             getBossTransactions:function(){	
-		setTimeout(()=>{
-		let u = this;
-                if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
-                    return false;
+                setTimeout(()=>{
+                let u = this;
+                        if(this.configs.FETCH_BOSS_TRANSACTIONS === undefined && this.client.is_client === 1)
+                            return false;
 
-                var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
+                        var link = this.configs.FETCH_BOSS_TRANSACTIONS + this.client.email ;
 
-                if(this.client.user_data.boss_id !== null && this.client.user_data.boss_id !== undefined)
-                    link = link + "?boss_id=" + this.client.user_data.boss_id;
+                        if(this.client.user_data.boss_id !== null && this.client.user_data.boss_id !== undefined)
+                            link = link + "?boss_id=" + this.client.user_data.boss_id;
 
-                this.is_loading = true;
-                axios.get(link)
-                    .then(function (response) {
-                        if(response.data)
-                            axios.post('/api/client/updateTransactionData?token=' + u.token, {id:u.client.id, data:response.data})
-                                .then(function () {
+                        this.is_loading = true;
+                        axios.get(link)
+                            .then(function (response) {
+                                if(response.data)
+                                    axios.post('/api/client/updateTransactionData?token=' + u.token, {id:u.client.id, data:response.data})
+                                        .then(function () {
+                                            u.$emit('refreshClient');
+                                            u.is_loading = false;
+                                        });
+                                else{
                                     u.$emit('refreshClient');
                                     u.is_loading = false;
-                                })
-                                .catch(function (error) {
-                                    XHRCatcher(error);
-                                });
-                        else
-                            u.$emit('refreshClient');
-                    })
-                    .catch(function (error) {
-                        u.is_loading = false;
-                        XHRCatcher(error);
-                    });
-		}, 2000);
+                                }
+                            })
+                            .catch(function (error) {
+                                u.is_loading = false;
+                                XHRCatcher(error);
+                            });
+                }, 300);
             }
         },
         computed:{

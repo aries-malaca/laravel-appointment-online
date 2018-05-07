@@ -27,7 +27,7 @@
                         <div v-if="clients.length>0">
                             <data-table
                                     :columns="clientTable.columns"
-                                    :rows="clients"
+                                    :rows="mappedClients"
                                     :paginate="true"
                                     :onClick="clientTable.rowClicked"
                                     styleClass="table table-bordered table-hover table-striped"
@@ -130,7 +130,8 @@
                 clients:[],
                 clientTable:{
                     columns: [
-                        { label: 'Name', field: 'name', filterable: true, html:true },
+                        { label: 'BOSS ID', field: 'boss_id', filterable: true },
+                        { label: 'Name', field: 'name', filterable: true },
                         { label: 'Address', field: 'user_address', filterable: true },
                         { label: 'Mobile', field: 'user_mobile', filterable: true },
                         { label: 'Email', field: 'email', filterable: true },
@@ -220,9 +221,10 @@
                 return this.$store.state.configs;
             },
             mappedClients(){
-                this.clients.map((item)=>{
+                return this.clients.map((item)=>{
                     item.user_address = item.user_address !== null ? item.user_address:'N/A';
                     item.user_mobile = item.user_mobile !== null ? item.user_mobile:'N/A';
+                    item.boss_id = (item.user_data.boss_id !== null && item.user_data.boss_id !== undefined) ? item.user_data.boss_id:'N/A';
                     return item;
                 });
             }

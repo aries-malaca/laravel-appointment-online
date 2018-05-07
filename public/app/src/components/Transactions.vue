@@ -14,7 +14,7 @@
             </div>
             <div class="portlet-body">
                 <transactions-view :client="user" v-if="user.is_confirmed === 1"></transactions-view>
-                <verify-account-alert v-else></verify-account-alert>
+                <verify-account-alert v-else @resend="resend"></verify-account-alert>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
@@ -32,6 +32,12 @@
         data: function(){
             return {
                 title: 'Transactions',
+                has_sent:false
+            }
+        },
+        methods:{
+            resend(){
+                this.has_sent = true;
             }
         },
         mounted:function(){

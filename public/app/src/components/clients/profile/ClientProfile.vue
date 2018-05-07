@@ -91,9 +91,18 @@
                                                         <span v-else> (Not Available)</span>
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <td> Account Confirmed: </td>
+                                                    <td>
+                                                        <span class="badge badge-success" v-if="client.is_confirmed === 1">YES</span>
+                                                        <div v-else>
+                                                            <span class="badge badge-danger">NO</span>
+                                                            <button v-if="gate(user, 'clients','update') && !resent" @click="resendConfirmation($event)" class="btn btn-info btn-xs">Resend Verification</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                                 </tbody>
                                             </table>
-
                                         </div>
                                         <!--end col-md-8-->
                                         <div class="col-md-4">
@@ -270,7 +279,6 @@
             </div>
         </div>
         <appointment-modal @refresh_list="refreshList"></appointment-modal>
-
         <loading v-if="newClient.first_name===undefined && show"></loading>
     </div>
 </template>
@@ -293,7 +301,8 @@
                 newClient:{},
                 active_appointments:[],
                 appointment_history:[],
-                transactions:[]
+                transactions:[],
+                resent:false
             }
         },
         methods:{
@@ -417,6 +426,23 @@
                         response.data.forEach(function(item){
                             u.appointment_history.push(item);
                         });
+                    });
+            },
+            resendConfirmation:function(event){
+                var $btn = $(event.target);
+                $btn.button('loading');
+                let u = this;
+                axios.get('/api/user/sendConfirmation?token=' + this.token+'&client_id=' + this.id)
+                    .then(function (response) {
+                        if(response.data.result === 'success'){
+                            $btn.button('reset');
+                            toastr.success("Email sent to client.");
+                            u.resent = true;
+                        }
+                    })
+                    .catch(function (error) {
+                        $btn.button('reset');
+                        XHRCatcher(error);
                     });
             }
         },

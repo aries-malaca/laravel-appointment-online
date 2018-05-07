@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                <verify-account-alert v-else></verify-account-alert>
+                <verify-account-alert v-else @resend="resend"></verify-account-alert>
             </div>
         </div>
         <unauthorized-error v-else></unauthorized-error>
@@ -104,10 +104,14 @@
                         { label: 'Date Applied', field: 'date_applied', filterable: true },
                         { label: 'Status', field: 'status', filterable: true },
                     ]
-                }
+                },
+                has_sent:false
             }
         },
         methods:{
+            resend(){
+                this.has_sent = true;
+            },
             getBranches:function(){
                 let u = this;
                 axios.get('/api/branch/getBranches/active')

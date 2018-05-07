@@ -115,7 +115,9 @@ var vue_queuing = new Vue({
                     return -1;
                 if (nameA > nameB)
                     return 1;
-            }).slice(0, 6);
+            }).sort((a, b)=>{
+                    return ( Number(moment(a.transaction_datetime).format("X")) > Number(moment(b.transaction_datetime).format("X")) ? 1: -1);
+                }).slice(0, 6);
         },
     },
     mounted:function(){

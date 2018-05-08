@@ -20,9 +20,6 @@
                         <a href="#places" data-toggle="tab">Places</a>
                     </li>
                     <li>
-                        <a href="#database" data-toggle="tab">Database</a>
-                    </li>
-                    <li>
                         <a href="#logs" data-toggle="tab">Logs</a>
                     </li>
                 </ul>
@@ -33,7 +30,7 @@
                     <levels></levels>
                     <places></places>
                     <users></users>
-                    <database></database>
+                    <logs></logs>
                 </div>
             </div>
         </div>
@@ -48,12 +45,12 @@
     import Places from './controlpanel/Places.vue';
     import Levels from './controlpanel/Levels.vue';
     import Users from './controlpanel/Users.vue';
-    import Database from './controlpanel/Database.vue';
+    import Logs from './controlpanel/Logs.vue';
     import UnauthorizedError from './errors/UnauthorizedError.vue';
 
     export default {
         name: 'ControlPanel',
-        components:{ VueSelect, DataTable, Places, Levels, Users, Settings, Database, UnauthorizedError},
+        components:{ VueSelect, DataTable, Places, Levels, Users, Settings, Logs, UnauthorizedError},
         data: function(){
             return {
                 title: 'Control Panel',
